@@ -10,6 +10,11 @@ Status legend: `done` = proved/sorry-free · `in_progress` = actively being form
 `scoped` = discharge route designed, not started · `open` = route not yet pinned.
 Difficulty: `★` mechanical/short · `★★` real but bounded · `★★★` genuine hard analytic core.
 
+**Phased campaign plan (2026-07 review synthesis)**: [`completion-plan-2026-07.md`](completion-plan-2026-07.md)
+— T² assembly (Phase 0), upstream hypercontractivity check, cylinder OS0–OS3/OS4, ℝ² headline
+restatement + uniqueness keystone, with milestones M0–M6. This index stays the per-axiom source
+of truth; the plan sequences the axiom rows into a work order.
+
 ## ⚠ Cross-cutting coherence (read first) — [`planning/coherence-analysis.md`]
 
 The 17 axioms are individually sound but **do not currently assemble into "an *interacting* φ⁴₂
