@@ -21,6 +21,7 @@ the measure family through exactly **four per-cutoff facts**; everything else is
 |---|---|---|---|
 | F1 | per-N exp-moment bound `torusInteractingMeasure_exponentialMomentBound_cutoff` | `TorusInteractingOS.lean:2133` | OS0, OS1 (via the limit exp-moment bound `:2312`) |
 | F2 | per-N CF translation invariance `torusInteractingMeasure_gf_latticeTranslation_invariant` | `:364` | OS2 translation (via `torusInteractingLimit_translation_invariant :1611`) |
+| F5 | per-N uniform second moment `torus_interacting_second_moment_continuous` | `:418` | OS2 translation (GF equicontinuity `gf_sub_norm_le_seminorm :1242` — moving-argument evaluation in the round-off step) |
 | F3 | per-N CF swap invariance `torusInteractingMeasure_gf_swap_invariant` | `:1785` | OS2 D4 |
 | F4 | per-N CF time-reflection invariance `torusInteractingMeasure_gf_timeReflection_invariant` | `:1953` | OS2 D4 |
 
@@ -44,6 +45,15 @@ Generic in `ν : ℕ → Measure (Configuration (TorusTestFunction L))` (probabi
    + MCT); replace `hK_bound f (φ n + 1)` by `hexp f n`.
    ⚠ Quantifier hygiene: `C` in `hexp` must be bound **before** `(f, n)` — same shape as the g=1
    cutoff bound, which has `C` before `(f, N)`. Do not weaken to `∀ f n, ∃ C`.
+   ⚠ Revision 2026-07-12 (agent-caught): theorems 1, 4, 6 additionally need `hφ : StrictMono φ`
+   (`torus_propagator_convergence` composes with `hφ.tendsto_atTop`; a constant `φ` falsifies the
+   unstrengthened statement). Theorem 4 additionally needs the **F5** hypothesis `hmom`
+   (`∃ C > 0, ∀ f n, Integrable ((·) f ^ 2) (ν n) ∧ ∫ (ω f)² ∂(ν n) ≤ C · torusEmbeddedTwoPoint L (φ n+1) mass hmass f f`),
+   because `gf_sub_norm_le_seminorm :1242` (GF equicontinuity, used at the moving argument
+   `T_{w_n} f`) consumes the per-family uniform second moment — weak convergence alone is
+   insufficient. F5-coupling ports via `density_transfer_bound_coupling` +
+   `latticeFourthMoment_sqrt_le` + `torus_interacting_abs_pow_integrable_coupling`
+   (all in `TorusCouplingLimit.lean` / `CouplingMeasure.lean`).
 2. `torusOS0_of_expMomentBound (μ) (hK : <limit bound>) : TorusOS0_Analyticity L μ` — body =
    `:2502–2606` with `torusInteracting_exponentialMomentBound … ` replaced by `hK`.
 3. `torusOS1_of_expMomentBound` — body = `:2623–…` likewise.
