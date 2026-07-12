@@ -204,6 +204,10 @@ at most); rows updated in `INDEX.md`; torus+cylinder headlines in the golden cer
 
 ## Phase 3 — Cylinder OS4 (mass gap / clustering)  *(parallel to 2b–2e; research-flavored)*
 
+*(3.1/3.2 refined 2026-07-12 by [`cyl-2a-volume-scaling-addendum.md`](cyl-2a-volume-scaling-addendum.md):
+the gap axioms are stated at FIXED `Ns` — a shrinking-volume limit; split into 17a fixed-`Ls`
+(no regime hypothesis, compact-resolvent route) + 17b volume-uniform (weak coupling, FSS/keystone
+track). Follow the addendum's 3.1'-3.4' sequencing.)*
 - [ ] **3.1 Regime restriction first.** Restate `spectral_gap_uniform`
   (`TransferMatrix/SpectralGap.lean:89`) and `spectral_gap_lower_bound` (`:100`) under an
   explicit weak-coupling/single-phase hypothesis (both are **false at criticality** —
