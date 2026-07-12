@@ -227,7 +227,9 @@ at most); rows updated in `INDEX.md`; torus+cylinder headlines in the golden cer
 
 ## Phase 4 — ℝ² (infinite volume), honestly stated  *(gate all ℝ² analytic spend on 4.1)*
 
-- [ ] **4.1 Headline restatement (blocking).** Replace the δ₀-satisfiable
+- [ ] **4.1 Headline restatement (blocking).** *(Design DONE 2026-07-12 — decision spec with
+  pinned statements at [`r2-honest-headline-spec.md`](r2-honest-headline-spec.md); implementation
+  ~1–2 days, mostly mechanical, sequence after Phase 0 merges.)* Replace the δ₀-satisfiable
   `pphi2_existence` with a conjoined, regime-scoped target:
   `∀ P even deg ≥ 4 …, IsWeakCoupling P mass → ∃ μ, SatisfiesFullOS μ ∧ TorusIsNondegenerate-analog ∧ u₄ ≠ 0`,
   where μ is required to be the weak limit of the **constructed** lattice family
