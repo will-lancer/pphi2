@@ -270,3 +270,27 @@ axioms, though not false — the small-`Lt`/coarse-`a` cases are true but unprov
   C1) → `C_low(Ls, m, κ, τ, m₀)·Var_free(P_low G)`;
 - reassemble: `Var_free(P_low G) + Var_free(P_high G) = Var_free(G)` (S4 additivity);
   `C := 2·max(C_high, C_low)`. All constants depend only on `(P, mass, Ls, τ)`.
+
+## C4 LANDED (2026-07-13) — Stage C master theorem
+
+`asymInteractingVariance_le_freeVariance_lattice_thresholded`
+(`Pphi2/AsymTorus/AsymVarianceAssembly.lean`), exactly the thresholded shape above with
+`τ := 1`, `κ := min mass (4/Ls)`, `L₀ := 2 + 2/m₀`, `a₀ := min a₁ (min (Ls/2) (1/m₀))`
+(`m₀, a₁` from S2 via the sharp uniform B-I corollary), `C := 2·max(C_high, C_low)`,
+`C_high = 1 + m²/κ²`,
+`C_low = C_B5b·(κ²+m²)·(16/(m₀m²L₀) + 8/(m₀m) + 4C_rem/m² + 4C_rem/(m₀m))`.
+The a-ledger crux was closed exactly as pinned: `1−e^{−x} ≥ x/2` on `[0,1]` (via
+`1+x ≤ eˣ` ⟹ `e^{−x} ≤ (1+x)⁻¹ ≤ 1−x/2`), giving `2/(1−γ) ≤ 4/(m₀a)`; the remainder
+damping `Lt·γ^(Nt−⌈1/a⌉) ≤ 2/m₀` via `⌈1/a⌉·a ≤ 1+1/m₀ = L₀/2` and the crude `y ≤ e^y`.
+**Mechanical refactor performed (flagged by the C3 agent):** the instance-level `∃ C_rem`
+of `…_le_fixedLs_sharp` was hoisted before the lattice quantifier as
+`asymSliceFamily_pathMeasure_second_moment_le_fixedLs_sharp_uniform`
+(AsymSliceFamilySusceptibility.lean; `C_rem = C₁ + C₂` from the two τ-form bridge axioms).
+Kernel footprint of the master theorem (`#print axioms`): `[propext, Classical.choice,
+Quot.sound]` + `{fss_infrared_quadratic, asymTransferGap_uniform_fixedLs,
+asymFinitePeriodicBridge_diagonal_bound, asymFinitePeriodicBridge_remainder_bound_uniform,
+groundVariance_le_freeCovariance}` — the B3/measure-factorization/GNS chain contributes NO
+additional axioms. No new axioms, no sorries; counts unchanged (30 raw / 0 sorries).
+Next (per the C4 design): migrate Piece-5 / Layer-C consumers to the eventual-form wiring,
+then delete or restate the over-broad
+`asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`.

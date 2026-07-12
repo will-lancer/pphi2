@@ -242,6 +242,15 @@ assembly input `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`.
 `AXIOM_AUDIT.md`. They had no proof-term consumers; the corrected coupled-limit
 statement is recorded in `planning/cyl-2a-volume-scaling-addendum.md`.)
 
+**2026-07-13 (B2 Stage C landed):** the thresholded master theorem
+`asymInteractingVariance_le_freeVariance_lattice_thresholded`
+(`Pphi2/AsymTorus/AsymVarianceAssembly.lean`) is proved — at fixed `Ls` there are
+`C, L₀, a₀ > 0` with `Var_int(G) ≤ C·Var_free(G)` for all lattices with `Ns·a = Ls`,
+`a ≤ a₀`, `Nt·a ≥ L₀`. Kernel footprint: Mathlib trio + exactly
+{`fss_infrared_quadratic`, `asymTransferGap_uniform_fixedLs`,
+`asymFinitePeriodicBridge_diagonal_bound`, `asymFinitePeriodicBridge_remainder_bound_uniform`,
+`groundVariance_le_freeCovariance`}. No new axioms; counts unchanged.
+
 Detailed axiom/sorry inventory lives in the single sources of truth:
 [`planning/INDEX.md`](planning/INDEX.md) (per-axiom master status machine for the remaining axioms),
 [`docs/AXIOM_STATUS.md`](docs/AXIOM_STATUS.md) (axiom inventory), [`BRANCHES.md`](BRANCHES.md) (which

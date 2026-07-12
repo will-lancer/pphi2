@@ -27,7 +27,12 @@ B2 route-(a) axioms `fss_infrared_quadratic` (S1, AXIOM_AUDIT.md 2026-07-12 S1 e
 **2026-07-12: `spectral_gap_uniform` and `spectral_gap_lower_bound` were REMOVED as false**
 (fixed-`Ns` shrinking-volume regime; wrong-counterterm double-well closes the gap — see
 `AXIOM_AUDIT.md` 2026-07-12 and `planning/cyl-2a-volume-scaling-addendum.md`; they had no
-proof-term consumers). The 24 real break down as **22 architectural** (enumerated by OS-program cluster in
+proof-term consumers). **2026-07-13 (B2 Stage C): the thresholded master theorem
+`asymInteractingVariance_le_freeVariance_lattice_thresholded`
+(`Pphi2/AsymTorus/AsymVarianceAssembly.lean`) landed** — kernel footprint = trio +
+{`fss_infrared_quadratic`, `asymTransferGap_uniform_fixedLs`,
+`asymFinitePeriodicBridge_diagonal_bound`, `asymFinitePeriodicBridge_remainder_bound_uniform`,
+`groundVariance_le_freeCovariance`}; no new axioms, counts unchanged (30 raw, 0 sorries). The 24 real break down as **22 architectural** (enumerated by OS-program cluster in
 [`planning/INDEX.md`](planning/INDEX.md), the master status machine) and **2 private
 scaffolding** (`asymTorusInteracting_exponentialMomentBound` in `AsymTorusOS.lean`,
 `gaussian_rp_cov_perfect_square` in `OS3_RP_Lattice.lean`). The seven new architectural axioms

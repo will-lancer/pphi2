@@ -106,6 +106,7 @@ import Pphi2.AsymTorus.AsymSpatialConstant
 import Pphi2.AsymTorus.AsymBandFreeComparison
 import Pphi2.AsymTorus.AsymLowModeBand
 import Pphi2.AsymTorus.AsymSliceFamilySusceptibility
+import Pphi2.AsymTorus.AsymVarianceAssembly
 import Pphi2.IRLimit.CylinderEmbedding
 import Pphi2.IRLimit.GreenFunctionComparison
 import Pphi2.IRLimit.UniformExponentialMoment

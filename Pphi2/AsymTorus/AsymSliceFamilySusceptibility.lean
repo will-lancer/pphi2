@@ -1251,6 +1251,93 @@ theorem asymSliceFamily_pathMeasure_second_moment_le_fixedLs_sharp
   exact asymSliceFamily_pathMeasure_second_moment_le_sharp (Nt := Nt) (Ns := Ns)
     P a mass ha hmass Ls hLs τ hτ hLsa hLta hγ0 hγ1 (hgap Nt Ns a ha hLsa haa) g hInt
 
+/-- **Hole B-I at the S2 gap, sharp τ-form with the remainder constant hoisted (Stage C
+task C4).**  Same content as `asymSliceFamily_pathMeasure_second_moment_le_fixedLs_sharp`,
+but the remainder constant `C_rem = C₁ + C₂` (from the two τ-form bridge axioms, which are
+a-uniform at fixed `(Ls, τ)`) is extracted BEFORE the lattice quantifier, so a single
+`C_rem` serves all admissible `(Nt, Ns, a, g)`.  This is the form consumed by the Stage-C
+master assembly, whose headline constant must be instance-free. -/
+theorem asymSliceFamily_pathMeasure_second_moment_le_fixedLs_sharp_uniform
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (Ls : ℝ) (hLs : 0 < Ls) (τ : ℝ) (hτ : 0 < τ) :
+    ∃ m₀ : ℝ, 0 < m₀ ∧ ∃ a₀ : ℝ, 0 < a₀ ∧ ∃ C_rem : ℝ, 0 ≤ C_rem ∧
+    ∀ (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
+      (Ns : ℝ) * a = Ls → a ≤ a₀ → 2 * τ ≤ (Nt : ℝ) * a →
+      ∀ (g : ZMod Nt → SpatialField Ns),
+        (∀ t : ZMod Nt, Integrable (fun ψ => (asymSliceObsLinear (g t) ψ) ^ 2 *
+            ((asymGroundVector Nt Ns P a mass ha hmass) ψ) ^ 2)
+          (volume : Measure (SpatialField Ns))) →
+          ∫ ψ : ZMod Nt → SpatialField Ns, (asymSliceFamilyLinear g ψ) ^ 2
+              ∂((asymTransferSystem (Nt := Nt) (Ns := Ns)
+                  P a mass ha hmass).pathMeasure Nt) ≤
+            ((2 / (1 - Real.exp (-(m₀ * a)))) +
+                C_rem * Nt * Real.exp (-(m₀ * a)) ^ (Nt - Nat.ceil (τ / a))) *
+              groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g := by
+  obtain ⟨m₀, hm₀, a₀, ha₀, hgap⟩ := asymTransferGap_uniform_fixedLs P mass hmass Ls hLs
+  obtain ⟨C₁, hC₁, hDiagAx⟩ :=
+    asymFinitePeriodicBridge_diagonal_bound P mass hmass Ls hLs τ hτ
+  obtain ⟨C₂, hC₂, hResAx⟩ :=
+    asymFinitePeriodicBridge_remainder_bound_uniform P mass hmass Ls hLs τ hτ
+  refine ⟨m₀, hm₀, a₀, ha₀, C₁ + C₂, add_nonneg hC₁ hC₂, ?_⟩
+  intro Nt Ns _ _ a ha hLsa haa hLta g hInt
+  have hγ0 : (0:ℝ) ≤ Real.exp (-(m₀ * a)) := (Real.exp_pos _).le
+  have hγ1 : Real.exp (-(m₀ * a)) < 1 := by
+    have h1 : Real.exp (-(m₀ * a)) < Real.exp 0 :=
+      Real.exp_lt_exp.mpr (by nlinarith)
+    simpa using h1
+  have hnorm := hgap Nt Ns a ha hLsa haa
+  set γ : ℝ := Real.exp (-(m₀ * a)) with hγ_def
+  have hgsv : ∀ t : ZMod Nt,
+      0 ≤ groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) := by
+    intro t
+    exact integral_nonneg fun ψ => by positivity
+  set S := groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g with hS
+  have hS_nonneg : 0 ≤ S :=
+    Finset.sum_nonneg fun t _ => hgsv t
+  have hgsv_le : ∀ t : ZMod Nt,
+      groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) ≤ S := by
+    intro t
+    exact Finset.single_le_sum (fun t _ => hgsv t) (Finset.mem_univ t)
+  have hγpow : (0:ℝ) ≤ γ ^ (Nt - Nat.ceil (τ / a)) := pow_nonneg hγ0 _
+  refine le_trans (asymSliceFamily_pathMeasure_second_moment_le_pairwise (Nt := Nt)
+    (Ns := Ns) P a mass ha hmass hγ0 hγ1 hnorm g hInt (C₁ * S)
+    (fun t t' => C₂ * Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+        P a mass ha hmass (g t)) *
+      Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t')))
+    (fun t t' => mul_nonneg (mul_nonneg hC₂ (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _))
+    (γ ^ (Nt - Nat.ceil (τ / a))) hγpow ?_ ?_) ?_
+  · intro K hK t
+    refine le_trans (hDiagAx Nt Ns a ha hLsa hLta hγ0 hγ1 hnorm g K hK t) ?_
+    have h1 := hgsv t
+    have h2 := hgsv_le t
+    nlinarith [mul_nonneg (mul_nonneg hC₁ hγpow) (sub_nonneg.mpr h2)]
+  · intro K hK t t' d hd hdlt
+    exact hResAx Nt Ns a ha hLsa hLta hγ0 hγ1 hnorm g K hK t t' d hd hdlt
+  · -- Cauchy–Schwarz collapse of the double sum: Σ_{t,t'} r ≤ C₂·Nt·S.
+    have hrs : (∑ t : ZMod Nt, ∑ t' : ZMod Nt,
+        C₂ * Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+            P a mass ha hmass (g t)) *
+          Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+            P a mass ha hmass (g t'))) ≤ C₂ * ((Nt : ℝ) * S) :=
+      sum_sum_mul_sqrt_le Nt C₂ hC₂
+        (fun t => groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t)) hgsv
+    have h2 : (∑ t : ZMod Nt, ∑ t' : ZMod Nt,
+        C₂ * Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+            P a mass ha hmass (g t)) *
+          Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+            P a mass ha hmass (g t'))) * γ ^ (Nt - Nat.ceil (τ / a)) ≤
+        C₂ * ((Nt : ℝ) * S) * γ ^ (Nt - Nat.ceil (τ / a)) :=
+      mul_le_mul_of_nonneg_right hrs hγpow
+    calc (2 / (1 - γ)) * S + (C₁ * S * Nt) * γ ^ (Nt - Nat.ceil (τ / a)) +
+          (∑ t : ZMod Nt, ∑ t' : ZMod Nt,
+            C₂ * Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+                P a mass ha hmass (g t)) *
+              Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+                P a mass ha hmass (g t'))) * γ ^ (Nt - Nat.ceil (τ / a))
+        ≤ (2 / (1 - γ)) * S + (C₁ * S * Nt) * γ ^ (Nt - Nat.ceil (τ / a)) +
+          C₂ * ((Nt : ℝ) * S) * γ ^ (Nt - Nat.ceil (τ / a)) := by linarith
+      _ = ((2 / (1 - γ)) + (C₁ + C₂) * Nt * γ ^ (Nt - Nat.ceil (τ / a))) * S := by ring
+
 end Pphi2
 
 end
