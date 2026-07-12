@@ -137,4 +137,28 @@ invariance):
    The zero/band split needs the spatially-constant-mode set characterization (the
    `k_s = 0` column) — the one S4 deliverable deliberately skipped (zero-mode
    identification); scope it as the first task of arc 4.
+
+### Arc-4 staging (2026-07-12, evening)
+
+**Stage A — spatially-constant characterization (no new axioms, dispatched):** new file
+`AsymSpatialConstant.lean` with (A1) `sliceAvgProj` (spatial average per time slice, linear),
+(A2) commutation with `massOperatorAsym` (from `massOperatorAsym_translation_commute` —
+`sliceAvgProj` is the average of spatial shifts), (A3) discrete spatial Poincaré:
+`sliceAvgProj v = 0 → ⟨v, A v⟩ ≥ (spatialGap + mass²)·‖v‖²` with
+`spatialGap Ns a := (4/a²)·sin(π/Ns)²` (per-slice 1D DFT), (A4) the punchline —
+eigenvectors with `λ_k < mass² + spatialGap` are spatially constant (quadratic-form
+squeeze via A2+A3: `(λ_k − m² − g_s)·‖(1−Π)e_k‖² ≥ 0`), (A5) `asymModeProj` of a
+sub-`spatialGap` mode set is slice-constant, plus (A6) the a-uniformity
+`Ns·a = Ls → spatialGap ≥ (16/π²)·(π/Ls)²`-type bound (the `sin x ≥ (2/π)x` trick) for the
+κ selection.
+
+**Stage B — interacting band bound (consumes S2; S2 lands here):** Pieces 2–3 of the Route-A
+blueprint (finite-K time-family susceptibility estimate + K→∞ DCT), applied to slice-constant
+fields, + B5b; plus the band-limited free comparison with the vetted `Ls(κ²+m²)/(m·m₀)`
+ledger. S2 (`asymTransferGap_uniform_fixedLs`) enters the build here with its consumer.
+
+**Stage C — stitching:** the 3-way split (`G_high` via the landed high-branch theorem with
+`S_high = {k : m² + κ² ≤ λ_k}`, complement = band/zero which is slice-constant by Stage A
+when `κ² < spatialGap`), `3·max(C_high, C_band)`, Piece-5 assembly → the B2 axiom becomes a
+theorem.
 5. Clustering axioms 14/15 ride the same trace bridge afterward (`cyl-2a-spectral-gap.md`).
