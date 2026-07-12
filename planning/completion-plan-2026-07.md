@@ -153,7 +153,9 @@ deliberately retained as vetted GJ inputs — decide at 2.4).
 
 ### 2b. Layer A — Newman/Lee–Yang MGF domination (★★★, not started; the schedule risk)
 
-- [ ] **2b.1** Scope the `lee-yang` repo deliverable: Lee–Yang property for the lattice P(φ)₂
+- [x] **2b.1** *(DONE 2026-07-12 — [`layer-a-lee-yang-scoping.md`](layer-a-lee-yang-scoping.md):
+  polynomial/Asano side already complete in `lee-yang`; recommended inequality-first restructure
+  avoids Hadamard/Hurwitz; A1–A4 breakdown ~4–7 wk.)* Scope the `lee-yang` repo deliverable: Lee–Yang property for the lattice P(φ)₂
   (ferromagnetic, even P) → Newman's Gaussian domination of the MGF
   (`asymInteracting_mgf_gaussianDominated`, `AsymExpMomentDischarge.lean:127`, K = 2 form).
   Refs: Newman 1975; GJ Ch. 18–19; vetting record in AXIOM_AUDIT (the `∃C·σ²` exponent form is
