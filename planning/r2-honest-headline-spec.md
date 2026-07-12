@@ -19,8 +19,14 @@ mapped: 3 destructure touch-ups, producers 1–4 break (intended).
 The δ₀ proof dies by D1. Replace with:
 ```lean
 /-- Existence of the infinite-volume P(φ)₂ continuum limit (OPEN in this repo).
-    Reference: Guerra–Rosen–Simon (Ann. Math. 101, 1975) §II–IV (monotone/GKS infinite-volume
-    limit of Schwinger functions, all couplings); Glimm–Jaffe Ch. 11; Simon *P(φ)₂* §II.
+    Reference: Fröhlich, Adv. Math. 23 (1976) (tightness/compactness existence, arbitrary
+    semibounded even P, all couplings); Y.M. Park, J. Math. Phys. 18 (1977) (lattice
+    approximants: volume- and spacing-uniform moment bounds via lattice Nelson symmetry /
+    checkerboard, lattice→continuum); Glimm–Jaffe Ch. 11.
+    ⚠ NOT Guerra–Rosen–Simon: GKS/FKG monotonicity routes need the Griffiths–Simon
+    ferromagnetic class and are KNOWN to fail for general even deg ≥ 6 multi-well P
+    (Ellis–Monroe–Newman, CMP 46 (1976)); the tightness route covers the full
+    InteractionPolynomial class.
     Strategy: the repo's own route is Route B′/A — cylinder IR limit (Lt→∞) then Ls→∞ per
     docs/cylinder-master-plan.md; keystone 18's cluster expansion gives it with uniqueness at
     weak coupling. Until then this is the single existence input for the ℝ² headline. -/
@@ -28,13 +34,24 @@ axiom pphi2_limit_exists (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < m
     ∃ (μ : Measure (Configuration (ContinuumTestFunction 2))),
       IsProbabilityMeasure μ ∧ IsPphi2Limit μ P mass
 ```
-Rationale: existence (unlike gap/uniqueness) is literature-true at ALL couplings (GRS), so a
-Standard-rated textbook axiom is admissible under the project's axiom rules; the alternative
+Rationale: existence (unlike gap/uniqueness) is literature-true at ALL couplings via
+tightness (Fröhlich 1976 + Park 1977 — vet record below), so a Standard-rated textbook axiom
+is admissible under the project's axiom rules; the alternative
 (headline in conditional `∀ μ, IsPphi2Limit μ → …` form only) hides the existence debt instead
 of labeling it. The conditional form already exists as `continuumLimit_satisfies_fullOS` and
 stays. **Kernel footprint of `pphi2_existence` grows 4 → 5 axioms — that is the honest count.**
 Add the axiom to `AXIOM_AUDIT.md` + `planning/INDEX.md` (new row; Rating: Standard, Sources: LP)
 and vet the statement per the axiom protocol before commit.
+
+**D2 vet record (Gemini 3.1-pro, 2026-07-12) — PASSED with citation correction.** (a) type/
+shape/quantifiers confirmed (existential subsequence inside the predicate = the right
+Prokhorov statement; δ₀ loophole eradicated); (b) strength: GRS/monotonicity does NOT cover
+general even deg ≥ 6 P (Ellis–Monroe–Newman) — replaced by the Fröhlich/Park tightness route,
+which does, at all couplings; (c) non-vacuous; (d) the needed volume+spacing-uniform lattice
+moment bounds are literature-true (Park 1977, lattice Nelson symmetry/checkerboard), not
+folklore. Confirmed caveat: existence at all couplings is safe; any LIMIT-measure gap/
+clustering/uniqueness claim at all couplings would be over-general (D3's business). Rating:
+**Standard / GR, LP**.
 
 ### D3 — Regime-restrict the false-at-criticality axioms NOW; defer conjoining to keystone 18
 Split the refactor that `weak-coupling-uniqueness.md` ("do WITH the discharge") bundles:
