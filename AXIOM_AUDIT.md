@@ -45,6 +45,20 @@
 * **Count note**: +1 raw/+1 real → 28 raw / 26 real (status.md header + README counter
   updated in the same commit).
 
+## 2026-07-13 — Asym exponential clustering PROVED (2-axiom footprint)
+
+* **`asymSliceObsTrunc_exponential_clustering_fixedLs`**
+  (`Pphi2/AsymTorus/AsymClustering.lean`, `050236a`): at fixed `Ls`, connected two-point of
+  truncated slice observables decays in PHYSICAL distance at the a-uniform rate `m₀` (two-arc
+  periodic form + `e^{−m₀(Lt−τ)}` residual tail), with the `√gSV·√gSV'` envelope. Kernel
+  footprint (independently re-verified): trio + **only**
+  `{asymTransferGap_uniform_fixedLs, asymFinitePeriodicBridge_remainder_bound_uniform}` —
+  the GNS packaged-remainder path was bypassed (`finitePeriodicBridgeResidual` is definitional,
+  so `|conn| ≤ envelope + residual` is `unfold; ring`; Piece 1 + C2 close the envelope legs).
+* This is the honest asym replacement for the removed `clustering_uniform` and the dormant
+  square axioms 14/15 (which remain true-but-dead-branch at fixed `(Ns,a)`), and the direct
+  lattice input for the eventual cylinder OS4 transfer.
+
 ## 2026-07-13 — B2 STAGE C COMPLETE: the thresholded variance bound is a THEOREM on 5 vetted axioms
 
 * **`asymInteractingVariance_le_freeVariance_lattice_thresholded`**
