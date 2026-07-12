@@ -94,6 +94,9 @@ clustering, gating OS4). Master campaign doc: [`docs/cylinder-master-plan.md`].
   `|k_t| ≳ m_gap` ⊕ gap band `|k_t| ≲ m_gap`) or operator Poisson-kernel resummation; either
   needs a temporal DFT layer. Pieces 1–5 + B5b + GNS bridge remain valid as the low-frequency
   branch. Owner decision needed before further B2 assembly code.
+  **2026-07-12 S1 landed:** axiom `fss_infrared_quadratic` (`AsymTorus/AsymInfraredBound.lean`,
+  vetted, = S1 of [`planning/b2-route-a-statements.md`]) + its proved high-branch consumer
+  `asymHighModes_variance_le_freeVariance` — the FSS high-`k` branch of the B2 mode split.
   SUPERSEDED: [`docs/transfer-instantiation-plan.md`] (banner), the older 6-brick HS-Cauchy-Schwarz
   plan in `docs/B4B5-design.md` (eliminated by Route A — op-norm ≤ HS-norm is the wrong direction).
 

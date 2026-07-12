@@ -2,6 +2,32 @@
 
 **Last updated**: 2026-07-12.
 
+## 2026-07-12 — S1 `fss_infrared_quadratic` introduced (B2 route (a))
+
+* **New axiom** `fss_infrared_quadratic` (`Pphi2/AsymTorus/AsymInfraredBound.lean`): the
+  Fröhlich–Simon–Spencer infrared bound / Gaussian domination in **integrated quadratic
+  form** — on the zero-mode complement (`∑ x, h x = 0`) the interacting second moment is
+  dominated by the massless free quadratic form `(a²)⁻¹·Σ_k (λ_k − m²)⁻¹·c_k(h)²`,
+  uniformly in `(a, Nt, Ns)` and at all couplings. This is §S1 of
+  `planning/b2-route-a-statements.md` (the B2 route (a) statement package), entered with
+  the coordinator-pinned statement verbatim.
+* **Vetted statement**: Gemini 3.1-pro, 2026-07-12 — constant `c₀ = 1` is EXACT in this GJ
+  normalization (kinetic action `½⟨φ,(−Δ_unscaled)φ⟩`, β = ½; mass and Wick terms live in
+  the single-site factor and never enter the denominator). See the §S1 vet record in
+  `planning/b2-route-a-statements.md` and `audit/vetting/fss_infrared_quadratic.md`.
+* **Consumer (proved, same file)**: `asymHighModes_variance_le_freeVariance` — the
+  high-branch comparison `Var_int(P_S G) ≤ (1 + m²/κ²)·Var_free(P_S G)` for mode sets `S`
+  with `m² + κ² ≤ λ_k`, via the proved zero-mode-complement lemma
+  `sum_asymModeProj_eq_zero` (constants are `m²`-eigenvectors; nonconstant eigenvectors
+  sum to zero by self-adjointness).
+* **Rating**: Standard. **Sources**: GR (Gemini 3.1-pro 2026-07-12), LP
+  (Fröhlich–Simon–Spencer, Comm. Math. Phys. 50 (1976) 79–95; Simon *P(φ)₂*; Glimm–Jaffe).
+  Discharge route: lattice RP over the kinetic bonds → Gaussian domination
+  `Z[h] ≤ Z[0]·exp(½⟨h,(−Δ)⁻¹h⟩)` → `t²`-expansion at the Z₂-even measure (shares the
+  Griffiths–Simon machinery with Layer A).
+* **Count note**: +1 raw/+1 real on this branch; full count reconciliation deferred until
+  PR #60 merges (the removal branch changes the same counters).
+
 ## 2026-07-12 — ⚠⚠ `spectral_gap_uniform` + `spectral_gap_lower_bound` are FALSE as stated
 
 * **Finding (hand computation + Gemini 3.1-pro verification + consumer trace, 2026-07-12):**
