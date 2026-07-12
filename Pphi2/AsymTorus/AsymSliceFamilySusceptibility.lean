@@ -893,17 +893,19 @@ axiom asymFinitePeriodicBridge_remainder_bound_uniform
     {γ : ℝ} (hγ0 : 0 ≤ γ) (hγ1 : γ < 1)
     (hnorm : ∀ v : L2SpatialField Ns,
       ⟪asymGroundVector Nt Ns P a mass ha hmass, v⟫ = 0 →
-        ‖asymTransferNormalized Nt Ns P a mass ha hmass v‖ ≤ γ * ‖v‖)
-    (g : ZMod Nt → SpatialField Ns) :
+        ‖asymTransferNormalized Nt Ns P a mass ha hmass v‖ ≤ γ * ‖v‖) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (K : ℝ) (hK : 0 < K), ∀ t t' d : ZMod Nt, 0 < d.val → d.val < Nt →
+      ∀ (g : ZMod Nt → SpatialField Ns) (K : ℝ) (hK : 0 < K),
+        ∀ t t' d : ZMod Nt, 0 < d.val → d.val < Nt →
         finitePeriodicBridgeResidual
             (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
             (asymSliceObsTruncContract (Ns := Ns) (g t) hK)
             (asymSliceObsTruncContract (Ns := Ns) (g t') hK)
             (asymGappedTransfer Nt Ns P a mass ha hmass γ hγ0 hγ1 hnorm)
             γ Nt d ≤
-          C * γ ^ Nt
+          C * Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t)) *
+            Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t')) *
+            γ ^ Nt
 
 /-- **Axiom (finite-periodic diagonal ground dominance, K-uniform).**  The
 single-slice path marginal has density `Z⁻¹·kPow(Nt−1)(x,x)` rather than
@@ -914,15 +916,14 @@ axiom asymFinitePeriodicBridge_diagonal_bound
     {γ : ℝ} (_hγ0 : 0 ≤ γ) (_hγ1 : γ < 1)
     (_hnorm : ∀ v : L2SpatialField Ns,
       ⟪asymGroundVector Nt Ns P a mass ha hmass, v⟫ = 0 →
-        ‖asymTransferNormalized Nt Ns P a mass ha hmass v‖ ≤ γ * ‖v‖)
-    (g : ZMod Nt → SpatialField Ns) :
+        ‖asymTransferNormalized Nt Ns P a mass ha hmass v‖ ≤ γ * ‖v‖) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (K : ℝ), 0 < K → ∀ t : ZMod Nt,
+      ∀ (g : ZMod Nt → SpatialField Ns) (K : ℝ), 0 < K → ∀ t : ZMod Nt,
         ∫ ψ : ZMod Nt → SpatialField Ns, (asymSliceObsTrunc (g t) K (ψ t)) ^ 2
             ∂((asymTransferSystem (Nt := Nt) (Ns := Ns)
                 P a mass ha hmass).pathMeasure Nt) ≤
-          groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) +
-            C * γ ^ Nt
+          (1 + C * γ ^ Nt) *
+            groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t)
 
 /-- **Hole B-I, hypothesis-free form.**  The slice-family susceptibility bound
 with the finite-volume inputs supplied by the two K-uniform axioms above:
@@ -942,16 +943,50 @@ theorem asymSliceFamily_pathMeasure_second_moment_le'
           ∂((asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt) ≤
         (2 / (1 - γ)) * groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g +
           (C_diag * Nt + C_off * Nt ^ 2) * γ ^ Nt := by
-  obtain ⟨C_diag, _hCd, hDiag⟩ :=
+  obtain ⟨C₁, hC₁, hDiagAx⟩ :=
     asymFinitePeriodicBridge_diagonal_bound (Nt := Nt) (Ns := Ns)
-      P a mass ha hmass hγ0 hγ1 hnorm g
-  obtain ⟨C_off, hCo, hRes⟩ :=
+      P a mass ha hmass hγ0 hγ1 hnorm
+  obtain ⟨C₂, hC₂, hResAx⟩ :=
     asymFinitePeriodicBridge_remainder_bound_uniform (Nt := Nt) (Ns := Ns)
-      P a mass ha hmass hγ0 hγ1 hnorm g
-  exact ⟨C_diag, C_off, hCo,
+      P a mass ha hmass hγ0 hγ1 hnorm
+  have hgsv : ∀ t : ZMod Nt,
+      0 ≤ groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) := by
+    intro t
+    exact integral_nonneg fun ψ => by positivity
+  set S := groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g with hS
+  have hS_nonneg : 0 ≤ S :=
+    Finset.sum_nonneg fun t _ => hgsv t
+  have hgsv_le : ∀ t : ZMod Nt,
+      groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) ≤ S := by
+    intro t
+    exact Finset.single_le_sum (fun t _ => hgsv t) (Finset.mem_univ t)
+  have hγpow : (0:ℝ) ≤ γ ^ Nt := pow_nonneg hγ0 _
+  refine ⟨C₁ * S, C₂ * S, mul_nonneg hC₂ hS_nonneg,
     asymSliceFamily_pathMeasure_second_moment_le (Nt := Nt) (Ns := Ns)
-      P a mass ha hmass hγ0 hγ1 hnorm g hInt C_diag C_off hCo
-      (fun K hK => hDiag K hK) (fun K hK => hRes K hK)⟩
+      P a mass ha hmass hγ0 hγ1 hnorm g hInt (C₁ * S) (C₂ * S)
+      (mul_nonneg hC₂ hS_nonneg) ?_ ?_⟩
+  · intro K hK t
+    refine le_trans (hDiagAx g K hK t) ?_
+    have h1 := hgsv t
+    have h2 := hgsv_le t
+    nlinarith [mul_nonneg hC₁ hγpow]
+  · intro K hK t t' d hd hdlt
+    refine le_trans (hResAx g K hK t t' d hd hdlt) ?_
+    have h1 := hgsv t
+    have h2 := hgsv t'
+    have hsq : Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+          P a mass ha hmass (g t)) *
+        Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+          P a mass ha hmass (g t')) ≤ S := by
+      have hs1 := Real.sq_sqrt h1
+      have hs2 := Real.sq_sqrt h2
+      have hle1 := hgsv_le t
+      have hle2 := hgsv_le t'
+      nlinarith [sq_nonneg (Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+          P a mass ha hmass (g t)) -
+        Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+          P a mass ha hmass (g t')))]
+    nlinarith [mul_nonneg (mul_nonneg hC₂ hγpow) (sub_nonneg.mpr hsq)]
 
 /-- **Hole B-I at the S2 gap, hypothesis-free.**  Combines
 `asymTransferGap_uniform_fixedLs` with the K-uniform finite-periodic axioms:
