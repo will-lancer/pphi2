@@ -431,24 +431,24 @@ theorem asymSliceFamilyTrunc_pathMeasure_second_moment_le
     (g : ZMod Nt → SpatialField Ns)
     (hInt : ∀ t : ZMod Nt, Integrable (fun ψ => (asymSliceObsLinear (g t) ψ) ^ 2 *
         ((asymGroundVector Nt Ns P a mass ha hmass) ψ) ^ 2) ν)
-    (C_diag C_off : ℝ) (hCoff : 0 ≤ C_off)
+    (C_diag C_off : ℝ) (hCoff : 0 ≤ C_off) (R : ℝ) (hR : 0 ≤ R)
     {K : ℝ} (hK : 0 < K)
     (hDiag : ∀ t : ZMod Nt,
       ∫ ψ : ZMod Nt → SpatialField Ns, (asymSliceObsTrunc (g t) K (ψ t)) ^ 2
           ∂((asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt) ≤
         groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) +
-          C_diag * γ ^ Nt)
+          C_diag * R)
     (hRes : ∀ t t' d : ZMod Nt, 0 < d.val → d.val < Nt →
       finitePeriodicBridgeResidual
           (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
           (asymSliceObsTruncContract (Ns := Ns) (g t) hK)
           (asymSliceObsTruncContract (Ns := Ns) (g t') hK)
           (asymGappedTransfer Nt Ns P a mass ha hmass γ hγ0 hγ1 hnorm) γ Nt d ≤
-        C_off * γ ^ Nt) :
+        C_off * R) :
     ∫ ψ : ZMod Nt → SpatialField Ns, (asymSliceFamilyTrunc g K ψ) ^ 2
         ∂((asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt) ≤
       (2 / (1 - γ)) * groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g +
-        (C_diag * Nt + C_off * Nt ^ 2) * γ ^ Nt := by
+        (C_diag * Nt + C_off * Nt ^ 2) * R := by
   classical
   set μ := (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt
     with hμdef
@@ -461,7 +461,7 @@ theorem asymSliceFamilyTrunc_pathMeasure_second_moment_le
   set w : ZMod Nt → ℝ := fun s => γ ^ s.val + γ ^ (Nt - s.val) with hwdef
   set gsv : ZMod Nt → ℝ :=
     fun t => groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) with hgsvdef
-  have hγNt : (0 : ℝ) ≤ γ ^ Nt := pow_nonneg hγ0 _
+  have hγNt : (0 : ℝ) ≤ R := hR
   have hw_nonneg : ∀ s, 0 ≤ w s := fun s =>
     add_nonneg (pow_nonneg hγ0 _) (pow_nonneg hγ0 _)
   have hb_nonneg : ∀ t, 0 ≤ b t := fun t => sq_nonneg _
@@ -519,7 +519,7 @@ theorem asymSliceFamilyTrunc_pathMeasure_second_moment_le
   have hoff : ∀ t t' : ZMod Nt, t' ≠ t →
       pathConnectedTwoPoint (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
           (A t) (A t') Nt (t' - t) ≤
-        (1 / 2) * (b t + b t') * w (t' - t) + C_off * γ ^ Nt := by
+        (1 / 2) * (b t + b t') * w (t' - t) + C_off * R := by
     intro t t' hne
     have hd0 : (t' - t : ZMod Nt) ≠ 0 := sub_ne_zero.mpr hne
     have hdval : 0 < (t' - t : ZMod Nt).val :=
@@ -548,12 +548,12 @@ theorem asymSliceFamilyTrunc_pathMeasure_second_moment_le
     have habs : |pathConnectedTwoPoint
         (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
         (A t) (A t') Nt (t' - t)| ≤
-        (1 / 2) * (b t + b t') * w (t' - t) + C_off * γ ^ Nt := by
+        (1 / 2) * (b t + b t') * w (t' - t) + C_off * R := by
       have h1 : |pathConnectedTwoPoint
           (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
           (A t) (A t') Nt (t' - t)| ≤
           ‖G.vacuumPerp ((A t).M G.vacuum)‖ * ‖G.vacuumPerp ((A t').M G.vacuum)‖ *
-            w (t' - t) + C_off * γ ^ Nt := by
+            w (t' - t) + C_off * R := by
         rw [hresid, henv] at hres
         linarith
       refine h1.trans ?_
@@ -564,7 +564,7 @@ theorem asymSliceFamilyTrunc_pathMeasure_second_moment_le
   set I : ZMod Nt → ZMod Nt → ℝ := fun t t' =>
     ∫ ψ, asymSliceObsTrunc (g t) K (ψ t) * asymSliceObsTrunc (g t') K (ψ t') ∂μ
     with hIdef
-  have hIdiag : ∀ t : ZMod Nt, I t t ≤ gsv t + C_diag * γ ^ Nt := by
+  have hIdiag : ∀ t : ZMod Nt, I t t ≤ gsv t + C_diag * R := by
     intro t
     have heq : I t t = ∫ ψ, (asymSliceObsTrunc (g t) K (ψ t)) ^ 2 ∂μ := by
       simp only [hIdef]
@@ -575,7 +575,7 @@ theorem asymSliceFamilyTrunc_pathMeasure_second_moment_le
     rw [heq]
     exact hDiag t
   have hIoff : ∀ t : ZMod Nt, ∀ t' ∈ Finset.univ.erase t,
-      I t t' ≤ (1 / 2) * (b t + b t') * w (t' - t) + C_off * γ ^ Nt := by
+      I t t' ≤ (1 / 2) * (b t + b t') * w (t' - t) + C_off * R := by
     intro t t' ht'
     have hne : t' ≠ t := Finset.ne_of_mem_erase ht'
     simp only [hIdef]
@@ -674,30 +674,30 @@ theorem asymSliceFamilyTrunc_pathMeasure_second_moment_le
     _ = ∑ t : ZMod Nt, (I t t + ∑ t' ∈ Finset.univ.erase t, I t t') := by
         refine Finset.sum_congr rfl fun t _ => ?_
         exact (Finset.add_sum_erase Finset.univ (I t) (Finset.mem_univ t)).symm
-    _ ≤ ∑ t : ZMod Nt, ((gsv t + C_diag * γ ^ Nt) +
+    _ ≤ ∑ t : ZMod Nt, ((gsv t + C_diag * R) +
           ∑ t' ∈ Finset.univ.erase t,
-            ((1 / 2) * (b t + b t') * w (t' - t) + C_off * γ ^ Nt)) := by
+            ((1 / 2) * (b t + b t') * w (t' - t) + C_off * R)) := by
         refine Finset.sum_le_sum fun t _ => ?_
         exact add_le_add (hIdiag t) (Finset.sum_le_sum (fun t' ht' =>
           le_trans (hIoff t t' ht') (by
-            have : (0:ℝ) ≤ C_off * γ ^ Nt := mul_nonneg hCoff hγNt
+            have : (0:ℝ) ≤ C_off * R := mul_nonneg hCoff hγNt
             linarith)))
-    _ = (∑ t : ZMod Nt, gsv t) + (Nt : ℝ) * (C_diag * γ ^ Nt) +
+    _ = (∑ t : ZMod Nt, gsv t) + (Nt : ℝ) * (C_diag * R) +
           (∑ t : ZMod Nt, ∑ t' ∈ Finset.univ.erase t,
             (1 / 2) * (b t + b t') * w (t' - t)) +
-          (Nt : ℝ) * ((Nt - 1 : ℕ) : ℝ) * (C_off * γ ^ Nt) := by
+          (Nt : ℝ) * ((Nt - 1 : ℕ) : ℝ) * (C_off * R) := by
         rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
-        have h1 : ∑ _t : ZMod Nt, C_diag * γ ^ Nt = (Nt : ℝ) * (C_diag * γ ^ Nt) := by
+        have h1 : ∑ _t : ZMod Nt, C_diag * R = (Nt : ℝ) * (C_diag * R) := by
           rw [Finset.sum_const, hcard_univ, nsmul_eq_mul]
         have h2 : ∑ t : ZMod Nt, ∑ t' ∈ Finset.univ.erase t,
-            ((1 / 2) * (b t + b t') * w (t' - t) + C_off * γ ^ Nt) =
+            ((1 / 2) * (b t + b t') * w (t' - t) + C_off * R) =
             (∑ t : ZMod Nt, ∑ t' ∈ Finset.univ.erase t,
               (1 / 2) * (b t + b t') * w (t' - t)) +
-            (Nt : ℝ) * ((Nt - 1 : ℕ) : ℝ) * (C_off * γ ^ Nt) := by
+            (Nt : ℝ) * ((Nt - 1 : ℕ) : ℝ) * (C_off * R) := by
           have h3 : ∀ t : ZMod Nt, ∑ t' ∈ Finset.univ.erase t,
-              ((1 / 2) * (b t + b t') * w (t' - t) + C_off * γ ^ Nt) =
+              ((1 / 2) * (b t + b t') * w (t' - t) + C_off * R) =
               (∑ t' ∈ Finset.univ.erase t, (1 / 2) * (b t + b t') * w (t' - t)) +
-                ((Nt - 1 : ℕ) : ℝ) * (C_off * γ ^ Nt) := by
+                ((Nt - 1 : ℕ) : ℝ) * (C_off * R) := by
             intro t
             rw [Finset.sum_add_distrib, Finset.sum_const, hcard_erase t, nsmul_eq_mul]
           rw [Finset.sum_congr rfl fun t _ => h3 t, Finset.sum_add_distrib,
@@ -706,16 +706,16 @@ theorem asymSliceFamilyTrunc_pathMeasure_second_moment_le
         rw [h1, h2]
         ring
     _ ≤ groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g +
-          (Nt : ℝ) * (C_diag * γ ^ Nt) +
+          (Nt : ℝ) * (C_diag * R) +
           ((1 + γ) / (1 - γ)) *
             groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g +
-          (Nt : ℝ) * (Nt : ℝ) * (C_off * γ ^ Nt) := by
+          (Nt : ℝ) * (Nt : ℝ) * (C_off * R) := by
         rw [hgsvsum_eq]
         have hNt1 : ((Nt - 1 : ℕ) : ℝ) ≤ (Nt : ℝ) :=
           Nat.cast_le.mpr (Nat.sub_le Nt 1)
-        have h4 : (Nt : ℝ) * ((Nt - 1 : ℕ) : ℝ) * (C_off * γ ^ Nt) ≤
-            (Nt : ℝ) * (Nt : ℝ) * (C_off * γ ^ Nt) := by
-          have hcoffγ : (0:ℝ) ≤ C_off * γ ^ Nt := mul_nonneg hCoff hγNt
+        have h4 : (Nt : ℝ) * ((Nt - 1 : ℕ) : ℝ) * (C_off * R) ≤
+            (Nt : ℝ) * (Nt : ℝ) * (C_off * R) := by
+          have hcoffγ : (0:ℝ) ≤ C_off * R := mul_nonneg hCoff hγNt
           have hNt0 : (0:ℝ) ≤ (Nt : ℝ) := Nat.cast_nonneg _
           exact mul_le_mul_of_nonneg_right
             (mul_le_mul_of_nonneg_left hNt1 hNt0) hcoffγ
@@ -723,7 +723,7 @@ theorem asymSliceFamilyTrunc_pathMeasure_second_moment_le
         linarith
     _ = (2 / (1 - γ)) *
           groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g +
-          (C_diag * Nt + C_off * Nt ^ 2) * γ ^ Nt := by
+          (C_diag * Nt + C_off * Nt ^ 2) * R := by
         have hne : (1 : ℝ) - γ ≠ 0 := ne_of_gt hden
         field_simp
         ring
@@ -753,28 +753,28 @@ theorem asymSliceFamily_pathMeasure_second_moment_le
     (g : ZMod Nt → SpatialField Ns)
     (hInt : ∀ t : ZMod Nt, Integrable (fun ψ => (asymSliceObsLinear (g t) ψ) ^ 2 *
         ((asymGroundVector Nt Ns P a mass ha hmass) ψ) ^ 2) ν)
-    (C_diag C_off : ℝ) (hCoff : 0 ≤ C_off)
+    (C_diag C_off : ℝ) (hCoff : 0 ≤ C_off) (R : ℝ) (hR : 0 ≤ R)
     (hDiag : ∀ (K : ℝ), 0 < K → ∀ t : ZMod Nt,
       ∫ ψ : ZMod Nt → SpatialField Ns, (asymSliceObsTrunc (g t) K (ψ t)) ^ 2
           ∂((asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt) ≤
         groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) +
-          C_diag * γ ^ Nt)
+          C_diag * R)
     (hRes : ∀ (K : ℝ) (hK : 0 < K), ∀ t t' d : ZMod Nt, 0 < d.val → d.val < Nt →
       finitePeriodicBridgeResidual
           (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
           (asymSliceObsTruncContract (Ns := Ns) (g t) hK)
           (asymSliceObsTruncContract (Ns := Ns) (g t') hK)
           (asymGappedTransfer Nt Ns P a mass ha hmass γ hγ0 hγ1 hnorm) γ Nt d ≤
-        C_off * γ ^ Nt) :
+        C_off * R) :
     ∫ ψ : ZMod Nt → SpatialField Ns, (asymSliceFamilyLinear g ψ) ^ 2
         ∂((asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt) ≤
       (2 / (1 - γ)) * groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g +
-        (C_diag * Nt + C_off * Nt ^ 2) * γ ^ Nt :=
+        (C_diag * Nt + C_off * Nt ^ 2) * R :=
   asymSliceObsLinear_pathMeasure_two_point_bound (Nt := Nt) (Ns := Ns)
     P a mass ha hmass g _
     (fun K hK => asymSliceFamilyTrunc_pathMeasure_second_moment_le
       (Nt := Nt) (Ns := Ns) P a mass ha hmass hγ0 hγ1 hnorm g hInt
-      C_diag C_off hCoff hK (hDiag K hK) (hRes K hK))
+      C_diag C_off hCoff R hR hK (hDiag K hK) (hRes K hK))
 
 /-! ## S2: the fixed-`Ls` a-uniform transfer gap (γ-form) -/
 
@@ -867,70 +867,78 @@ theorem asymSliceFamily_pathMeasure_second_moment_le_fixedLs
     simpa using h1
   have hnorm := hgap Nt Ns a ha hLsa haa
   exact asymSliceFamily_pathMeasure_second_moment_le (Nt := Nt) (Ns := Ns)
-    P a mass ha hmass hγ0 hγ1 hnorm g hInt C_diag C_off hCoff hDiag
+    P a mass ha hmass hγ0 hγ1 hnorm g hInt C_diag C_off hCoff
+    (Real.exp (-(m₀ * a)) ^ Nt) (pow_nonneg (Real.exp_pos _).le _) hDiag
     (hRes hγ0 hγ1 hnorm)
 
-/-! ## K-uniform finite-periodic inputs (IUC-vetted axioms) and the
+/-! ## τ-form K-uniform finite-periodic inputs (IUC at fixed physical time) and the
 hypothesis-free corollaries
 
-The two hypotheses `hDiag`/`hRes` above are supplied by the following
-K-uniform axioms.  Mechanism (Gemini-vetted 2026-07-12, adjudication in
-`planning/b2-stageB-holes-spec.md` §"Hole B-I"): intrinsic ultracontractivity
-of the P(φ)₂ transfer kernel, `T(x,y) ≤ C·Ω(x)Ω(y)`, bounds every residual
-trace term by Ω-weighted `L¹/L²` data
-(`Tr(M_A Q^d M_B Q^{Nt−d}) ≤ C²γ^{Nt}·‖AΩ‖₁‖BΩ‖₁`, and
-`|Q^{Nt}(x,x)| ≤ C·γ^{Nt}·Ω(x)²` for the diagonal), so the pointwise clamp
-domination `|A_K| ≤ |⟨g,·⟩|` transfers uniformly in `K` — no `‖A‖_∞`
-penalty.  The constants may depend on `(Nt, Ns, a, P, mass, γ`-data`, g)`;
-NO `a`- or `Ls`-uniformity is claimed (the `a → 0` corner is Stage-C design
-question #1).  Both collapse with
-`asymFinitePeriodicBridge_remainder_bound` in the trace-bridge discharge. -/
+The finite-volume inputs `hDiag`/`hRes` are supplied by the following axioms, stated in the
+**τ-form** (planning/b2-stageB-holes-spec.md §"Item-1 upgrade", Gemini-vetted 2026-07-12):
+the per-step intrinsic-ultracontractivity constant blows up as `a → 0`, so the kernel bound
+is attached to a fixed physical reference time `τ > 0` (proviso `2τ ≤ Nt·a`): operator-norm
+contraction `γ^k` on the short arcs, IUC only across a `τ`-window
+(`Q^{⌈τ/a⌉}(x,x) ≤ C(Ls,τ)·Ω(x)²`), total damping `γ^(Nt − ⌈τ/a⌉)`.  The constants depend
+only on `(P, mass, Ls, τ)` — uniform in `(Nt, Ns, a, γ`-data`, g, K, d, t, t')` under
+`Ns·a = Ls` — which is what closes the Stage-C `a → 0` corner:
+`C·Nt·γ^(Nt−⌈τ/a⌉)·(1−γ) ≈ C·Lt·m₀·e^{−m₀(Lt−τ)}`, bounded in `a` and decaying in `Lt`.
+Both collapse with `asymFinitePeriodicBridge_remainder_bound` in the trace-bridge
+discharge.  The small-`Lt` regime (`Nt·a < 2τ`) is handled separately at Stage C. -/
 
-/-- **Axiom (finite-periodic GNS remainder, K-uniform family form).**
-(NOT VERIFIED — statement IUC-vetted 2026-07-12; see section docstring.) -/
+/-- **Axiom (finite-periodic GNS remainder, τ-form, a-uniform at fixed `Ls`).**
+(NOT VERIFIED — statement IUC-vetted 2026-07-12 with proof blueprint; see section
+docstring.) -/
 axiom asymFinitePeriodicBridge_remainder_bound_uniform
-    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
-    {γ : ℝ} (hγ0 : 0 ≤ γ) (hγ1 : γ < 1)
-    (hnorm : ∀ v : L2SpatialField Ns,
-      ⟪asymGroundVector Nt Ns P a mass ha hmass, v⟫ = 0 →
-        ‖asymTransferNormalized Nt Ns P a mass ha hmass v‖ ≤ γ * ‖v‖) :
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (Ls : ℝ) (hLs : 0 < Ls) (τ : ℝ) (hτ : 0 < τ) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (g : ZMod Nt → SpatialField Ns) (K : ℝ) (hK : 0 < K),
+      ∀ (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
+        (Ns : ℝ) * a = Ls → 2 * τ ≤ (Nt : ℝ) * a →
+        ∀ {γ : ℝ} (hγ0 : 0 ≤ γ) (hγ1 : γ < 1)
+          (hnorm : ∀ v : L2SpatialField Ns,
+            ⟪asymGroundVector Nt Ns P a mass ha hmass, v⟫ = 0 →
+              ‖asymTransferNormalized Nt Ns P a mass ha hmass v‖ ≤ γ * ‖v‖)
+          (g : ZMod Nt → SpatialField Ns) (K : ℝ) (hK : 0 < K),
         ∀ t t' d : ZMod Nt, 0 < d.val → d.val < Nt →
-        finitePeriodicBridgeResidual
-            (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
-            (asymSliceObsTruncContract (Ns := Ns) (g t) hK)
-            (asymSliceObsTruncContract (Ns := Ns) (g t') hK)
-            (asymGappedTransfer Nt Ns P a mass ha hmass γ hγ0 hγ1 hnorm)
-            γ Nt d ≤
-          C * Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t)) *
-            Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t')) *
-            γ ^ Nt
+          finitePeriodicBridgeResidual
+              (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
+              (asymSliceObsTruncContract (Ns := Ns) (g t) hK)
+              (asymSliceObsTruncContract (Ns := Ns) (g t') hK)
+              (asymGappedTransfer Nt Ns P a mass ha hmass γ hγ0 hγ1 hnorm)
+              γ Nt d ≤
+            C * Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+                P a mass ha hmass (g t)) *
+              Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
+                P a mass ha hmass (g t')) *
+              γ ^ (Nt - Nat.ceil (τ / a))
 
-/-- **Axiom (finite-periodic diagonal ground dominance, K-uniform).**  The
-single-slice path marginal has density `Z⁻¹·kPow(Nt−1)(x,x)` rather than
-`Ω(x)²`; the IUC diagonal bound controls the difference.
-(NOT VERIFIED — statement IUC-vetted 2026-07-12; see section docstring.) -/
+/-- **Axiom (finite-periodic diagonal ground dominance, τ-form, a-uniform at fixed
+`Ls`).**  (NOT VERIFIED — statement IUC-vetted 2026-07-12; see section docstring.) -/
 axiom asymFinitePeriodicBridge_diagonal_bound
-    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
-    {γ : ℝ} (_hγ0 : 0 ≤ γ) (_hγ1 : γ < 1)
-    (_hnorm : ∀ v : L2SpatialField Ns,
-      ⟪asymGroundVector Nt Ns P a mass ha hmass, v⟫ = 0 →
-        ‖asymTransferNormalized Nt Ns P a mass ha hmass v‖ ≤ γ * ‖v‖) :
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (Ls : ℝ) (hLs : 0 < Ls) (τ : ℝ) (hτ : 0 < τ) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (g : ZMod Nt → SpatialField Ns) (K : ℝ), 0 < K → ∀ t : ZMod Nt,
+      ∀ (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
+        (Ns : ℝ) * a = Ls → 2 * τ ≤ (Nt : ℝ) * a →
+        ∀ {γ : ℝ} (_hγ0 : 0 ≤ γ) (_hγ1 : γ < 1)
+          (_hnorm : ∀ v : L2SpatialField Ns,
+            ⟪asymGroundVector Nt Ns P a mass ha hmass, v⟫ = 0 →
+              ‖asymTransferNormalized Nt Ns P a mass ha hmass v‖ ≤ γ * ‖v‖)
+          (g : ZMod Nt → SpatialField Ns) (K : ℝ), 0 < K → ∀ t : ZMod Nt,
         ∫ ψ : ZMod Nt → SpatialField Ns, (asymSliceObsTrunc (g t) K (ψ t)) ^ 2
             ∂((asymTransferSystem (Nt := Nt) (Ns := Ns)
                 P a mass ha hmass).pathMeasure Nt) ≤
-          (1 + C * γ ^ Nt) *
+          (1 + C * γ ^ (Nt - Nat.ceil (τ / a))) *
             groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t)
 
-/-- **Hole B-I, hypothesis-free form.**  The slice-family susceptibility bound
-with the finite-volume inputs supplied by the two K-uniform axioms above:
-there exist finite-volume constants `C_diag, C_off` (depending on the instance
-and on `g`, but not on `K`) realizing the bound. -/
+/-- **Hole B-I, hypothesis-free τ-form.**  At fixed `Ls` and reference time `τ` with
+`2τ ≤ Lt`, the slice-family susceptibility bound holds with the a-uniform remainder
+exponent `γ^(Nt − ⌈τ/a⌉)` and instance constants in `groundSliceVarianceSum` units. -/
 theorem asymSliceFamily_pathMeasure_second_moment_le'
     (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (Ls : ℝ) (hLs : 0 < Ls) (τ : ℝ) (hτ : 0 < τ)
+    (hLsa : (Ns : ℝ) * a = Ls) (hLta : 2 * τ ≤ (Nt : ℝ) * a)
     {γ : ℝ} (hγ0 : 0 ≤ γ) (hγ1 : γ < 1)
     (hnorm : ∀ v : L2SpatialField Ns,
       ⟪asymGroundVector Nt Ns P a mass ha hmass, v⟫ = 0 →
@@ -942,13 +950,11 @@ theorem asymSliceFamily_pathMeasure_second_moment_le'
       ∫ ψ : ZMod Nt → SpatialField Ns, (asymSliceFamilyLinear g ψ) ^ 2
           ∂((asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt) ≤
         (2 / (1 - γ)) * groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g +
-          (C_diag * Nt + C_off * Nt ^ 2) * γ ^ Nt := by
+          (C_diag * Nt + C_off * Nt ^ 2) * γ ^ (Nt - Nat.ceil (τ / a)) := by
   obtain ⟨C₁, hC₁, hDiagAx⟩ :=
-    asymFinitePeriodicBridge_diagonal_bound (Nt := Nt) (Ns := Ns)
-      P a mass ha hmass hγ0 hγ1 hnorm
+    asymFinitePeriodicBridge_diagonal_bound P mass hmass Ls hLs τ hτ
   obtain ⟨C₂, hC₂, hResAx⟩ :=
-    asymFinitePeriodicBridge_remainder_bound_uniform (Nt := Nt) (Ns := Ns)
-      P a mass ha hmass hγ0 hγ1 hnorm
+    asymFinitePeriodicBridge_remainder_bound_uniform P mass hmass Ls hLs τ hτ
   have hgsv : ∀ t : ZMod Nt,
       0 ≤ groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) := by
     intro t
@@ -960,18 +966,18 @@ theorem asymSliceFamily_pathMeasure_second_moment_le'
       groundSliceVariance (Nt := Nt) (Ns := Ns) P a mass ha hmass (g t) ≤ S := by
     intro t
     exact Finset.single_le_sum (fun t _ => hgsv t) (Finset.mem_univ t)
-  have hγpow : (0:ℝ) ≤ γ ^ Nt := pow_nonneg hγ0 _
+  have hγpow : (0:ℝ) ≤ γ ^ (Nt - Nat.ceil (τ / a)) := pow_nonneg hγ0 _
   refine ⟨C₁ * S, C₂ * S, mul_nonneg hC₂ hS_nonneg,
     asymSliceFamily_pathMeasure_second_moment_le (Nt := Nt) (Ns := Ns)
       P a mass ha hmass hγ0 hγ1 hnorm g hInt (C₁ * S) (C₂ * S)
-      (mul_nonneg hC₂ hS_nonneg) ?_ ?_⟩
+      (mul_nonneg hC₂ hS_nonneg) (γ ^ (Nt - Nat.ceil (τ / a))) hγpow ?_ ?_⟩
   · intro K hK t
-    refine le_trans (hDiagAx g K hK t) ?_
+    refine le_trans (hDiagAx Nt Ns a ha hLsa hLta hγ0 hγ1 hnorm g K hK t) ?_
     have h1 := hgsv t
     have h2 := hgsv_le t
-    nlinarith [mul_nonneg hC₁ hγpow]
+    nlinarith [mul_nonneg (mul_nonneg hC₁ hγpow) (sub_nonneg.mpr h2)]
   · intro K hK t t' d hd hdlt
-    refine le_trans (hResAx g K hK t t' d hd hdlt) ?_
+    refine le_trans (hResAx Nt Ns a ha hLsa hLta hγ0 hγ1 hnorm g K hK t t' d hd hdlt) ?_
     have h1 := hgsv t
     have h2 := hgsv t'
     have hsq : Real.sqrt (groundSliceVariance (Nt := Nt) (Ns := Ns)
@@ -988,16 +994,17 @@ theorem asymSliceFamily_pathMeasure_second_moment_le'
           P a mass ha hmass (g t')))]
     nlinarith [mul_nonneg (mul_nonneg hC₂ hγpow) (sub_nonneg.mpr hsq)]
 
-/-- **Hole B-I at the S2 gap, hypothesis-free.**  Combines
-`asymTransferGap_uniform_fixedLs` with the K-uniform finite-periodic axioms:
-at fixed `Ls` there are `m₀, a₀ > 0` such that for every admissible lattice
-and slice family the susceptibility bound holds with `γ = exp(-m₀·a)`. -/
+/-- **Hole B-I at the S2 gap, hypothesis-free τ-form.**  Combines
+`asymTransferGap_uniform_fixedLs` with the τ-form axioms: at fixed `Ls` and reference
+time `τ` there are `m₀, a₀ > 0` such that for every admissible lattice with `2τ ≤ Nt·a`
+and every slice family, the susceptibility bound holds with `γ = exp(-m₀·a)` and the
+a-uniform remainder exponent. -/
 theorem asymSliceFamily_pathMeasure_second_moment_le_fixedLs'
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
-    (Ls : ℝ) (hLs : 0 < Ls) :
+    (Ls : ℝ) (hLs : 0 < Ls) (τ : ℝ) (hτ : 0 < τ) :
     ∃ m₀ : ℝ, 0 < m₀ ∧ ∃ a₀ : ℝ, 0 < a₀ ∧
     ∀ (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
-      (Ns : ℝ) * a = Ls → a ≤ a₀ →
+      (Ns : ℝ) * a = Ls → a ≤ a₀ → 2 * τ ≤ (Nt : ℝ) * a →
       ∀ (g : ZMod Nt → SpatialField Ns),
         (∀ t : ZMod Nt, Integrable (fun ψ => (asymSliceObsLinear (g t) ψ) ^ 2 *
             ((asymGroundVector Nt Ns P a mass ha hmass) ψ) ^ 2)
@@ -1008,17 +1015,18 @@ theorem asymSliceFamily_pathMeasure_second_moment_le_fixedLs'
                   P a mass ha hmass).pathMeasure Nt) ≤
             (2 / (1 - Real.exp (-(m₀ * a)))) *
               groundSliceVarianceSum (Nt := Nt) (Ns := Ns) P a mass ha hmass g +
-              (C_diag * Nt + C_off * Nt ^ 2) * Real.exp (-(m₀ * a)) ^ Nt := by
+              (C_diag * Nt + C_off * Nt ^ 2) *
+                Real.exp (-(m₀ * a)) ^ (Nt - Nat.ceil (τ / a)) := by
   obtain ⟨m₀, hm₀, a₀, ha₀, hgap⟩ := asymTransferGap_uniform_fixedLs P mass hmass Ls hLs
   refine ⟨m₀, hm₀, a₀, ha₀, ?_⟩
-  intro Nt Ns _ _ a ha hLsa haa g hInt
+  intro Nt Ns _ _ a ha hLsa haa hLta g hInt
   have hγ0 : (0:ℝ) ≤ Real.exp (-(m₀ * a)) := (Real.exp_pos _).le
   have hγ1 : Real.exp (-(m₀ * a)) < 1 := by
     have h1 : Real.exp (-(m₀ * a)) < Real.exp 0 :=
       Real.exp_lt_exp.mpr (by nlinarith)
     simpa using h1
   exact asymSliceFamily_pathMeasure_second_moment_le' (Nt := Nt) (Ns := Ns)
-    P a mass ha hmass hγ0 hγ1 (hgap Nt Ns a ha hLsa haa) g hInt
+    P a mass ha hmass Ls hLs τ hτ hLsa hLta hγ0 hγ1 (hgap Nt Ns a ha hLsa haa) g hInt
 
 end Pphi2
 

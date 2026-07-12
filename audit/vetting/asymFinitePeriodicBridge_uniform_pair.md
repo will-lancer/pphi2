@@ -29,3 +29,11 @@ Mechanism: intrinsic ultracontractivity of the P(φ)₂ transfer kernel
 
 IUC constants depend on `(a, Ls)`; NO a-uniformity claimed or used at this layer. The
 `a→0`-at-fixed-`Lt` corner of the remainder is Stage-C design question #1.
+
+## 2026-07-12 (later) — τ-form revision
+
+Statements revised to the τ-form after the a-uniformity follow-up vet: per-step IUC
+constants diverge as `a → 0`; the kernel bound is attached to a fixed physical time `τ`
+(`2τ ≤ Nt·a`), giving constants `C(P, mass, Ls, τ)` uniform in `(Nt, Ns, a, γ-data, g, K,
+d, t, t')` at fixed `Ls`, with damping `γ^(Nt−⌈τ/a⌉)`. Proof blueprint (HS splitting) in
+`planning/b2-stageB-holes-spec.md` §"Item-1 upgrade". Rating unchanged: Standard / GR, LP.

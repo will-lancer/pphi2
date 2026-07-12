@@ -45,6 +45,24 @@
 * **Count note**: +1 raw/+1 real → 28 raw / 26 real (status.md header + README counter
   updated in the same commit).
 
+## 2026-07-12 — τ-form revision of the K-uniform bridge axioms (statements strengthened in place)
+
+* `asymFinitePeriodicBridge_remainder_bound_uniform` and `_diagonal_bound` restated in the
+  **τ-form** (fixed physical reference time; `2τ ≤ Nt·a` proviso): constants now depend only
+  on `(P, mass, Ls, τ)` — **a-uniform at fixed `Ls`** — with damping `γ^(Nt − ⌈τ/a⌉)` and
+  explicit `√groundSliceVariance` observable factors. Two-step vet (Gemini 3.1-pro,
+  2026-07-12): (i) the per-step IUC constant blows up as `a → 0` (short-time kernel), so the
+  previous per-instance form was implicitly a-divergent; (ii) the τ-form with HS
+  Cauchy–Schwarz splitting (operator norm on short arcs, IUC only across a fixed-τ window,
+  `γ^{−⌈τ/a⌉} = e^{m₀τ}` at the S2 gap) is exact — full proof blueprint recorded in
+  `planning/b2-stageB-holes-spec.md` §"Item-1 upgrade". This RESOLVES Stage-C design
+  question #1 (the `a → 0` remainder corner): remainder/main ≈ `C·Lt·m₀·e^{−m₀(Lt−τ)}`,
+  bounded in `a`, decaying in `Lt`.
+* Consumers rederived: `asymSliceFamily_pathMeasure_second_moment_le'` and `…_fixedLs'`
+  (τ-form, `gSVSum`-unit remainders); the two core B-I theorems generalized to an abstract
+  remainder slot `R` (no proof change — `γ^Nt` was already opaque). Counts unchanged
+  (30 raw / 28 real). Small-`Lt` regime (`Nt·a < 2τ`) deferred to Stage C explicitly.
+
 ## 2026-07-12 — K-uniform finite-periodic bridge axioms (B-I cleanup; +2)
 
 * **New axioms (2)** in `Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`:

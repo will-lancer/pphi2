@@ -204,3 +204,34 @@ C·(Lt/a)·e^{−m₀(Lt−τ)}·(m₀a)/2 = C·Lt·m₀·e^{−m₀(Lt−τ)}/2
 Status: explicit-factor forms + rederived corollaries landed (compile in progress); the
 τ-form revision is the next edit (same files; thread `τ` + the `Nt·a ≥ 2τ` proviso through
 the corollaries; audit records updated to cite this section).
+
+## Item 1 CLOSED (commit pending) → Stage C work plan (item 2)
+
+τ-form landed and kernel-verified: `asymSliceFamily_pathMeasure_second_moment_le'` =
+`[trio, diagonal_bound, remainder_bound_uniform]`; `…_fixedLs'` adds S2. Core theorems
+R-generalized. Counts unchanged 30/28.
+
+**Stage C tasks (mapped during the corner re-audit):**
+- **C3 (REQUIRED for the corner, do first):** the main finite-K theorem still takes a SCALAR
+  `C_off`, so the remainder carries `Nt²·γ^†·gSVSum` — ratio to main
+  `~ m₀Lt²e^{−m₀(Lt−τ)}/(2a)`, STILL 1/a-divergent. Generalize `hRes` to a per-pair bound
+  `r t t'` (conclusion `… + Nt·C_diag·R + Σ_{t≠t'} r t t'·R`), instantiate
+  `r t t' := C·√gSV_t·√gSV_t'`, and Cauchy–Schwarz the double sum to `Nt·gSVSum`
+  (`(Σ√gSV)² ≤ Nt·S`) — then remainder/main `≈ C·Lt·m₀·e^{−m₀(Lt−τ)}` ✓ bounded.
+- **C1:** band-limitedness of the low projection: slice-constant eigenvector profiles are 1D
+  temporal eigenvectors (via the Stage-A commutation), and the two-eigenvalue pairing trick
+  kills temporal-DFT coefficients above `κ²` — gives B-II's `temporalBandLimited` for
+  `asymModeProj S_low G`.
+- **C2:** discharge `hInt` (`⟨g,ψ⟩²Ω² ∈ L¹`): from the transfer-kernel smoothing
+  `Ω = λ₀⁻¹TΩ` (M_w Conv M_w structure gives explicit weight decay) — investigate existing
+  bricks (AsymL2Operator/AsymNelson); else one new lemma. The B2 target has NO such
+  hypothesis, so it must be discharged, not carried.
+- **C4 (master assembly):** κ := min(mass, 4/Ls) (Stage-A `spatialGap_ge_sixteen_of_fixed_Ls`
+  gives `κ² ≤ spatialGap` ⟹ low modes slice-constant); split G via `asymModeProj` (S4);
+  `(x+y)² ≤ 2x²+2y²`; high branch = S1 consumer; low branch = B3 → B-I(τ,C3) → B5b → B-II;
+  free-side reassembly exact (S4 additivity). Small-`Lt` (`Nt·a < 2τ`) regime: per-instance
+  bound via B1 (`asymTorusIso_interacting_second_moment_density_transfer` per INDEX row-3
+  notes) — finitely many... NO: (Nt,a) both continuous — handle via the per-instance
+  τ-free bound with constant depending on `Lt ≤ 2τ` compactness — design at C4 time.
+  Then Piece-5 converts `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform` to a
+  theorem; clustering axioms 14/15 follow per `cyl-2a-spectral-gap.md`.
