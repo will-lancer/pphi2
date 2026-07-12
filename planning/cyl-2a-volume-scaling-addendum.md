@@ -97,3 +97,27 @@ and for a different reason (wrong-counterterm shrinking box).
    coordinated with D3 of `r2-honest-headline-spec.md`); update INDEX rows + audit.
 4. **3.4′** Formalize 17a via compact-resolvent convergence (the genuinely new ~3–6 wk
    campaign); 17b joins the keystone-18 / FSS track.
+
+## 2026-07-13 — post-B2 clustering design (item 3a of the loop)
+
+With Stage C landed (`081ef48`: the thresholded variance bound on 5 vetted axioms) the CYL-2a
+clustering payoff is a bounded assembly, on the ASYM lattice (the square 14/15 axioms are
+dormant dead-branch — true as stated at fixed `(Ns,a)`, zero consumers — leave them):
+
+**Target** `asym_exponential_clustering_fixedLs` (new file `AsymClustering.lean`): at fixed
+`Ls`, `∃ m₀ a₀ > 0`, for all lattices (`Ns·a = Ls`, `a ≤ a₀`) and slice observables
+(truncated `A_{K,t}` and, via the landed K→∞ engine, the linear `⟨g_t,·⟩`), the path-measure
+connected two-point at separation `d` obeys
+`|⟨A_t; A_{t'}⟩_conn| ≤ C·√gSV(g_t)·√gSV(g_{t'})·(e^{−m₀·(d·a)} + e^{−m₀·(Lt−d·a)}) + (τ-residual)`
+— i.e. exponential clustering in PHYSICAL distance at the a-uniform rate `m₀`, the two-arc
+periodic form. Ingredients (all landed): the finite-K bridge
+`asymSliceObsTrunc_pathMeasure_connected_two_point_bound` (AsymBridgeInstance.lean:288) with
+S2 supplying `γ = e^{−m₀a}` (so `γ^{d} = e^{−m₀·(d·a)}` — the sites→physical conversion is
+definitional), Piece 1 (`norm_sq_proj_obsTrunc_omega_le`) for the `√gSV` factors, the τ-form
+residual axiom for the K-uniform remainder, C2's `hInt` discharge, and the K→∞ DCT engine
+for the linear-observable corollary. Expected kernel footprint: trio + the same 5 axioms
+(minus B5b if gSV-form retained; plus nothing new).
+
+This is the honest asym replacement for the removed `clustering_uniform` and the dormant
+square 14/15 — and the direct input for the eventual cylinder OS4 (continuum transfer of the
+two-point clustering along the IR limit).
