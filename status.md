@@ -32,7 +32,15 @@ proof-term consumers). **2026-07-13 (B2 Stage C): the thresholded master theorem
 (`Pphi2/AsymTorus/AsymVarianceAssembly.lean`) landed** — kernel footprint = trio +
 {`fss_infrared_quadratic`, `asymTransferGap_uniform_fixedLs`,
 `asymFinitePeriodicBridge_diagonal_bound`, `asymFinitePeriodicBridge_remainder_bound_uniform`,
-`groundVariance_le_freeCovariance`}; no new axioms, counts unchanged (30 raw, 0 sorries). The 24 real break down as **22 architectural** (enumerated by OS-program cluster in
+`groundVariance_le_freeCovariance`}; no new axioms, counts unchanged (30 raw, 0 sorries).
+**2026-07-13 (item 3a): asym exponential clustering in physical distance landed**
+(`asymSliceObsTrunc_exponential_clustering_fixedLs`,
+`Pphi2/AsymTorus/AsymClustering.lean`): at fixed `(Ls, τ)` the truncated-slice connected
+two-point decays as `C·√gSV·√gSV'·(e^{−m₀·d·a} + e^{−m₀·(Nt·a−d·a)} + e^{−m₀·(Nt·a−τ)})`,
+a-uniformly; kernel footprint = trio + {`asymTransferGap_uniform_fixedLs`,
+`asymFinitePeriodicBridge_remainder_bound_uniform`} only (the definitional
+envelope/residual split avoids the packaged GNS-bridge axioms); no new axioms, counts
+unchanged (30 raw, 0 sorries). The 24 real break down as **22 architectural** (enumerated by OS-program cluster in
 [`planning/INDEX.md`](planning/INDEX.md), the master status machine) and **2 private
 scaffolding** (`asymTorusInteracting_exponentialMomentBound` in `AsymTorusOS.lean`,
 `gaussian_rp_cov_perfect_square` in `OS3_RP_Lattice.lean`). The seven new architectural axioms
