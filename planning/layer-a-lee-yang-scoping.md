@@ -105,9 +105,11 @@ folded into A1/A2 below, and one **red flag on the existing axiom**:
 
 ## Risks / pin-before-building
 
-1. ~~Re-vet the restructure~~ **DONE 2026-07-12** (above). Residual: get a Codex second
-   opinion on the red-flag axiom restatement before editing the axiom (protocol for disputed
-   statements), though the counterexample arithmetic is verified by hand.
+1. ~~Re-vet the restructure~~ **DONE 2026-07-12** (above). ~~Codex second opinion~~ **DONE
+   2026-07-12 — CONFIRMED**: axiom positively FALSE for the P(φ)₂ class (double-well → Ising
+   reduction; the K=2 |·|-form falls to n-pair amplification). Refined fix constants recorded
+   in AXIOM_AUDIT.md: split bound is `2·exp(Var(f₊)+Var(f₋))`; Layer C seminorm must be stated
+   at `|f|` (free covariance kernel ≥ 0 entrywise makes `V(f₊)+V(f₋) ≤ V(|f|)`).
 2. **Fugacity↔field conventions** (A1): Lee–Yang "zeros on unit circle in fugacity `z = e^{−2h}`"
    vs "imaginary axis in `h`" vs the polydisk normalization used by `IsPolydiskZeroFree` — one
    Möbius/exponential bridge per formulation. Historically where sign errors enter; pin with a

@@ -2,6 +2,27 @@
 
 **Last updated**: 2026-07-12.
 
+## 2026-07-12 — ⚠⚠ `spectral_gap_uniform` + `spectral_gap_lower_bound` are FALSE as stated
+
+* **Finding (hand computation + Gemini 3.1-pro verification + consumer trace, 2026-07-12):**
+  both axioms (`TransferMatrix/SpectralGap.lean:89,100`) are stated at **fixed `Ns`** with
+  `a → 0` — a shrinking-volume limit in which the hard-coded 2D Wick constant is the *wrong*
+  counterterm: its zero-mode contribution `(a²N²m²)⁻¹` diverges like `a⁻²` (in the coupled
+  `N·a = L` limit it is the finite `m⁻²/L²`). The over-subtraction gives the spatial zero mode
+  a symmetric double well (minima `~ a⁻¹`, barrier `~ a⁻³`); the gap is a tunneling splitting
+  `massGap ~ (1/a)·e^{−c/a²} → 0`. This falsifies `∃ m₀ > 0` uniformly in `a` at **every**
+  coupling (every `InteractionPolynomial` has leading coefficient `1/n > 0`) — a different and
+  earlier failure than the known criticality caveat. **Rating: FALSE (was ⚠ Correct for P(Φ)₂).**
+* **Mitigation:** proof-term trace confirms both axioms and the entire lattice OS4 chain
+  (`two_point_clustering_lattice`, `general_clustering_lattice`, `clustering_uniform`,
+  `os4_lattice`, `exponential_mixing`) are a **dead branch** — zero external consumers; Main's
+  OS4 rests on the standalone `continuum_exponential_clustering`. The headline kernel trace is
+  uncontaminated. Nevertheless false axioms in the build are a standing soundness hazard.
+* **Action required (soon, small PR):** delete or restate along a coupled sequence
+  (fixed `L = N·a`, or `N·a → ∞` + `IsWeakCoupling`), per
+  `planning/cyl-2a-volume-scaling-addendum.md` (17a/17b split). The fixed-`(Ns,a)` clustering
+  axioms 14/15 are unaffected (they don't take the `a→0` limit).
+
 ## 2026-07-12 — ⚠ Layer A axiom `asymInteracting_mgf_gaussianDominated` OVER-QUANTIFIED
 
 * **Flag (Gemini 3.1-pro vet of the Layer-A scoping, 2026-07-12; arithmetic verified by hand):**
@@ -15,8 +36,17 @@
   to the axiom; recover signed `f` in Layer C via the `f = f₊ − f₋` split + Cauchy–Schwarz
   (constants change to `K = 2`, variance `2(Var f₊ + Var f₋)` — compatible with the Layer C
   target form). Downstream Layer C consumers must NOT feed signed `f` into Layer A directly.
-* Axiom text in the tree left unchanged pending the campaign PR + Codex second opinion
-  (disputed-statement protocol).
+* **Codex second opinion (GPT-5.5, 2026-07-12): CONFIRMED on all points** — arithmetic verified;
+  Newman/Lee–Yang literature requires same-sign coefficients; the axiom is **positively false
+  for the P(φ)₂ class** (deep double-well single-site concentration → Ising reduction; Wick
+  ordering cannot repair it), and its `K = 2` absolute-value form falls to amplification
+  (`n` mixed-sign pairs: `n·log(1+p(cosh 2 − 1)) > n·2p + log 2`). Refined fix constants:
+  the `f = f₊ − f₋` split with Cauchy–Schwarz + Newman at `2f±` gives
+  `E e^{|⟨ω,f⟩|} ≤ 2·exp(Var(f₊) + Var(f₋))` (NOT half that — the `2f±` doubling cancels the
+  `½`). ⚠ Downstream: `V_free(f₊) + V_free(f₋)` is NOT controlled by `V_free(f)` (cross-term
+  cancellation); state the Layer C seminorm at `|f|` — sound since the free lattice covariance
+  kernel is entrywise ≥ 0 (random walk), so `V(f₊) + V(f₋) ≤ V(|f|)`. Rating stays
+  **Flagged (FALSE as stated)**; restatement in the campaign PR.
 
 ## 2026-07-12 — Upstream Nelson/hypercontractivity chain is axiom-free (kernel-verified)
 

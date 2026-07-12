@@ -12,15 +12,47 @@ quantify `∀ a ≤ a₀` at **fixed section-variable `Ns`** (spatial sites). So
 oscillators (quantum mechanics), NOT the fixed-`L` field-theory limit and NOT the thermodynamic
 limit. Three regimes must be kept apart:
 
-| Regime | Physics | Gap at strong coupling | Regime hypothesis needed? |
+| Regime | Physics | Gap behavior | Regime hypothesis needed? |
 |---|---|---|---|
-| **(i) fixed `Ns`, `a → 0`** (the axioms as stated) | QM limit of `Ns` oscillators | plausibly open at ALL couplings (discrete spectrum + Perron–Frobenius simple ground state) — see Q1 | plausibly **none** |
+| **(i) fixed `Ns`, `a → 0`** (the axioms as stated) | degenerate dimensional reduction with the WRONG (2D) counterterm hard-coded | **gap CLOSES: `~ (1/a)·e^{−c/a²} → 0`** — see resolution of Q1 below | moot — **axioms FALSE as stated** |
 | **(ii) fixed `L = N·a`, `a → 0`** (fixed-volume field theory; the cylinder story at fixed `Ls`) | spatially-cutoff P(φ)₂ Hamiltonian `H(Ls)`; `e^{−tH}` trace class; ground state simple | open at ALL couplings at fixed volume (gap may be tiny but positive) | none for positivity; weak coupling only for *quantitative* `c·mass` bounds |
-| **(iii) `Ls → ∞`** (thermodynamic) | infinite-volume mass gap | **closes at criticality** (GJS phase transition) | **weak coupling required** |
+| **(iii) `N·a → ∞`** (thermodynamic) | infinite-volume mass gap | **closes at criticality** (GJS phase transition) | **weak coupling required** |
+
+## ⚠ Q1 RESOLVED (2026-07-12, hand computation + Gemini 3.1-pro verification): the axioms are FALSE
+
+With the Lean definitions (`latticeEigenvalue = (4/a²)Σᵢsin²(πkᵢ/N) + m²`,
+`wickConstant = (a²N²)⁻¹ Σ_k λ_k⁻¹`, `massGap = −(1/a)log(λ₁/λ₀)`):
+
+1. **Zero-mode divergence of the Wick constant at fixed `N`**: the `k = 0` term contributes
+   `(a²N²m²)⁻¹` — in the coupled limit `N·a = L` this is the finite `m⁻²/L²` (and the nonzero
+   modes give the usual `log` divergence), but at fixed `N` it makes `c_a ~ a⁻²`. The 2D
+   counterterm is the *wrong* subtraction for the dimensionally-reduced (QM) limit, which has
+   no UV divergence at all.
+2. **Consequence for the spectrum** (Gemini-verified mechanism): the Wick-ordered quartic
+   on-site term expands as `a²φ⁴ − (6/(N²m²))φ² + O(a⁻²)`; in the transfer Hamiltonian the
+   spatial zero mode `y` sees a symmetric double well with minima at `|y| ~ a⁻¹` and barrier
+   `~ a⁻³`; the gap is the tunneling splitting, instanton action `~ a⁻²`, so
+   `massGap ~ (1/a)·exp(−c/a²) → 0`. This kills the `∃ m₀ > 0` uniformly-in-`a` claim at
+   **every** coupling (the leading coefficient of any `InteractionPolynomial` is `1/n > 0`),
+   so both `spectral_gap_uniform` AND `spectral_gap_lower_bound` are **false as stated** —
+   a stronger and different failure than the criticality caveat.
+3. **Mitigation — dead branch (3.1′ trace, 2026-07-12)**: at the proof-term level NOTHING
+   consumes these two axioms or the lattice clustering chain (`two_point_clustering_lattice`,
+   `general_clustering_lattice`, `clustering_uniform`, `os4_lattice`, `exponential_mixing`
+   have zero external references); Main's OS4 comes from the standalone
+   `continuum_exponential_clustering` axiom. So the headline kernel trace is uncontaminated —
+   consistent with the 2026-06 finding that the gap axioms are dormant. **But false axioms in
+   the build are a standing soundness hazard** (any future consumer inherits inconsistency
+   potential) and must be removed or restated promptly, independent of campaign scheduling.
+4. **Physical-reach mismatch** (3.1′): even if true, a fixed-`Ns` gap could only give decay up
+   to physical separation `(Ns/2)·a → 0`; `continuum_exponential_clustering` needs decay out
+   to `‖a‖ → ∞`, i.e. regime (iii) along the `Nₙ·aₙ → ∞` sequence of
+   `canonical_continuumMeasure_cf_tendsto`. The lattice OS4 chain must be rewired to feed the
+   continuum axiom (today it is decorative).
 
 The blanket "false at criticality" caveat in `cyl-2a-spectral-gap.md` (and echoed in the
-completion plan's 3.1) applies to regime (iii) — and to any use where the constants must be
-`Ns`- or `Ls`-uniform. It does **not** obviously apply to the axioms as literally stated.
+completion plan's 3.1) was aimed at regime (iii); the axioms as literally stated fail earlier
+and for a different reason (wrong-counterterm shrinking box).
 
 ## Consequences for statement design (do this before any proof work)
 
