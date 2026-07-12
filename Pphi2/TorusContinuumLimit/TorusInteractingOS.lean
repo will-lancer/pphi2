@@ -94,7 +94,7 @@ translations and D4 point group symmetries. These follow from:
 References: Glimm-Jaffe §19.4, Simon Ch. V §1. -/
 
 /-- Linear map on lattice field induced by a site permutation `σ`. -/
-private def latticeSitePermuteLM (N : ℕ)
+def latticeSitePermuteLM (N : ℕ)
     (σ : FinLatticeSites 2 N → FinLatticeSites 2 N) :
     FinLatticeField 2 N →ₗ[ℝ] FinLatticeField 2 N where
   toFun g := g ∘ σ
@@ -116,20 +116,52 @@ private lemma piCongrLeft_eq_comp_symm {N : ℕ}
     σ_equiv φ (σ_equiv.symm x)
   rwa [σ_equiv.apply_symm_apply] at h
 
-omit hL in
-/-- **Lattice interacting measure is invariant under site symmetries.**
+/-- **Relabeling invariance of the interaction functional.**
 
-For a bijective site permutation `σ` that preserves the Gaussian density,
-`integral F(omega . sigma) d mu_int = integral F(omega) d mu_int`.
+Composing a configuration with the site-permutation map of a bijection `σ` leaves
+`V` unchanged, because the interaction sums over all lattice sites. This is the only
+weight-specific input to the symmetry invariance of the interacting lattice measure;
+the coupling-family weight `g·V` inherits invariance by congruence. -/
+theorem interactionFunctional_sitePermute_invariant
+    (N : ℕ) [NeZero N] (P : InteractionPolynomial) (a mass : ℝ)
+    (σ : FinLatticeSites 2 N → FinLatticeSites 2 N)
+    (hσ_bij : Function.Bijective σ)
+    (ω : Configuration (FinLatticeField 2 N)) :
+    interactionFunctional 2 N P a mass
+      (ω.comp (latticeSitePermuteLM N σ).toContinuousLinearMap) =
+    interactionFunctional 2 N P a mass ω := by
+  set σ_equiv := Equiv.ofBijective σ hσ_bij
+  set L_σ : FinLatticeField 2 N →ₗ[ℝ] FinLatticeField 2 N :=
+    latticeSitePermuteLM N σ
+  simp only [interactionFunctional]
+  congr 1
+  apply Fintype.sum_equiv σ_equiv.symm
+  intro x; congr 1
+  -- (ω.comp L_σ)(δ_x) = ω(δ_x ∘ σ) = ω(δ_{σ⁻¹ x})
+  change ω (L_σ (finLatticeDelta 2 N x)) = ω (finLatticeDelta 2 N (σ_equiv.symm x))
+  congr 1; ext y
+  simp only [L_σ, latticeSitePermuteLM, LinearMap.coe_mk, AddHom.coe_mk,
+    Function.comp, finLatticeDelta]
+  -- Goal: (if σ y = x then 1 else 0) = (if y = σ_equiv.symm x then 1 else 0)
+  congr 1; exact propext σ_equiv.apply_eq_iff_eq_symm_apply
+
+omit hL in
+/-- **Weight-generic lattice symmetry invariance.**
+
+For a bijective site permutation `σ` preserving the Gaussian density and any measurable
+weight `W` invariant under the induced configuration relabeling, the normalized
+reweighted measure `Z⁻¹ • μ_GFF.withDensity (ofReal (exp (−W)))` is invariant under
+`ω ↦ ω ∘ L_σ`. Instantiates to the `g = 1` interacting measure (`W = V`, giving
+`interactingLatticeMeasure_symmetry_invariant`) and to the coupling family (`W = g·V`).
 
 Proof:
-1. BW invariance: V(omega . sigma) = V(omega) (interaction sum relabeling)
-2. Density invariance: rho(phi . sigma^-1) = rho(phi) (hypothesis)
-3. Lebesgue preservation: phi -> phi . sigma^-1 is a permutation (det = plus or minus 1)
-4. Gaussian measure preservation: combines 2 + 3 (sorry: requires MeasurePreserving for withDensity)
+1. Strip the normalization `Z⁻¹` (both sides carry the same factor)
+2. Weight invariance: exp(-W(omega . sigma)) = exp(-W(omega)) (hypothesis `hW_inv`)
+3. Density invariance: rho(phi . sigma^-1) = rho(phi) (hypothesis `hσ_density`)
+4. Lebesgue preservation: phi -> phi . sigma^-1 is a permutation (det = plus or minus 1)
 5. Change of variables on the E-valued Bochner integral -/
-theorem interactingLatticeMeasure_symmetry_invariant
-    (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
+theorem latticeWithDensity_symmetry_invariant
+    (N : ℕ) [NeZero N] (mass : ℝ)
     (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
     (σ : FinLatticeSites 2 N → FinLatticeSites 2 N)
     (hσ_bij : Function.Bijective σ)
@@ -137,57 +169,43 @@ theorem interactingLatticeMeasure_symmetry_invariant
       gaussianDensity 2 N (circleSpacing L N) mass
         (φ ∘ (Equiv.ofBijective σ hσ_bij).symm) =
       gaussianDensity 2 N (circleSpacing L N) mass φ)
+    (W : Configuration (FinLatticeField 2 N) → ℝ)
+    (hW_meas : Measurable W)
+    (hW_inv : ∀ ω : Configuration (FinLatticeField 2 N),
+      W (ω.comp (latticeSitePermuteLM N σ).toContinuousLinearMap) = W ω)
+    (Z : ENNReal)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (F : Configuration (FinLatticeField 2 N) → E) :
     ∫ ω, F (ω.comp (latticeSitePermuteLM N σ).toContinuousLinearMap)
-      ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) =
-    ∫ ω, F ω ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) := by
+      ∂(Z⁻¹ • (latticeGaussianMeasure 2 N (circleSpacing L N) mass ha hmass).withDensity
+          (fun ω => ENNReal.ofReal (Real.exp (-(W ω))))) =
+    ∫ ω, F ω
+      ∂(Z⁻¹ • (latticeGaussianMeasure 2 N (circleSpacing L N) mass ha hmass).withDensity
+          (fun ω => ENNReal.ofReal (Real.exp (-(W ω))))) := by
   -- Setup notation
   set a := circleSpacing L N
   set mu_GFF := latticeGaussianMeasure 2 N a mass ha hmass
-  set bw := boltzmannWeight 2 N P a mass
   set σ_equiv := Equiv.ofBijective σ hσ_bij
   set L_σ : FinLatticeField 2 N →ₗ[ℝ] FinLatticeField 2 N :=
     latticeSitePermuteLM N σ
-  -- Step 1: Unfold the interacting measure = Z⁻¹ • μ_GFF.withDensity(bw)
-  unfold interactingLatticeMeasure
+  -- Step 1: Strip the normalization factor Z⁻¹
   simp_rw [integral_smul_measure]
   congr 1  -- Z⁻¹ factor is the same on both sides
   -- Step 2: Convert withDensity integrals to μ_GFF integrals with NNReal smul
-  set bw_nn := fun ω : Configuration (FinLatticeField 2 N) => Real.toNNReal (bw ω)
+  set bw_nn := fun ω : Configuration (FinLatticeField 2 N) =>
+    Real.toNNReal (Real.exp (-(W ω)))
   have hbw_nn_meas : Measurable bw_nn :=
-    Measurable.real_toNNReal
-      ((interactionFunctional_measurable 2 N P a mass).neg.exp)
+    Measurable.real_toNNReal (hW_meas.neg.exp)
   change ∫ ω, F (ω.comp L_σ.toContinuousLinearMap)
       ∂(mu_GFF.withDensity (fun ω => ↑(bw_nn ω))) =
     ∫ ω, F ω ∂(mu_GFF.withDensity (fun ω => ↑(bw_nn ω)))
   rw [integral_withDensity_eq_integral_smul hbw_nn_meas,
       integral_withDensity_eq_integral_smul hbw_nn_meas]
-  -- Step 3: BW invariance at the configuration level
-  -- bw(ω.comp L_σ) = bw(ω) because the interaction sums over all sites
-  -- and composing with σ just relabels the sum.
-  have hBW_config : ∀ ω : Configuration (FinLatticeField 2 N),
-      bw (ω.comp L_σ.toContinuousLinearMap) = bw ω := by
-    intro ω
-    suffices h : interactionFunctional 2 N P a mass
-        (ω.comp L_σ.toContinuousLinearMap) =
-        interactionFunctional 2 N P a mass ω by
-      simp only [bw, boltzmannWeight, h]
-    simp only [interactionFunctional]
-    congr 1
-    apply Fintype.sum_equiv σ_equiv.symm
-    intro x; congr 1
-    -- (ω.comp L_σ)(δ_x) = ω(δ_x ∘ σ) = ω(δ_{σ⁻¹ x})
-    change ω (L_σ (finLatticeDelta 2 N x)) = ω (finLatticeDelta 2 N (σ_equiv.symm x))
-    congr 1; ext y
-    simp only [L_σ, latticeSitePermuteLM, LinearMap.coe_mk, AddHom.coe_mk,
-      Function.comp, finLatticeDelta]
-    -- Goal: (if σ y = x then 1 else 0) = (if y = σ_equiv.symm x then 1 else 0)
-    congr 1; exact propext σ_equiv.apply_eq_iff_eq_symm_apply
-  -- Step 4: Use BW invariance to factor the LHS integrand as G ∘ Φ
+  -- Step 3: Weight invariance at the configuration level (hypothesis)
   have hBW_nn_config : ∀ ω : Configuration (FinLatticeField 2 N),
       bw_nn (ω.comp L_σ.toContinuousLinearMap) = bw_nn ω := by
-    intro ω; simp only [bw_nn, hBW_config]
+    intro ω; simp only [bw_nn, hW_inv]
+  -- Step 4: Use weight invariance to factor the LHS integrand as G ∘ Φ
   set G := fun ω : Configuration (FinLatticeField 2 N) => bw_nn ω • F ω
   -- Rewrite LHS integrand: bw_nn(ω) • F(Φ(ω)) = G(Φ(ω))
   -- using bw_nn(Φ(ω)) = bw_nn(ω)
@@ -310,32 +328,80 @@ theorem interactingLatticeMeasure_symmetry_invariant
     exact h_evalME.trans (h_sigma.trans h_evalME_symm)
   exact hΦ_mp.integral_comp' G
 
--- Specific instances:
-
-private def latticeTranslateLM (N : ℕ) (j₁ j₂ : ℤ) :=
-  latticeSitePermuteLM N (translateSites N j₁ j₂)
-
 omit hL in
-private theorem interactingLatticeMeasure_translation_invariant
+/-- **Lattice interacting measure is invariant under site symmetries.**
+
+For a bijective site permutation `σ` that preserves the Gaussian density,
+`integral F(omega . sigma) d mu_int = integral F(omega) d mu_int`.
+
+Corollary of the weight-generic core `latticeWithDensity_symmetry_invariant`
+with weight `W = V` (the interaction functional); the weight invariance is
+`interactionFunctional_sitePermute_invariant`. -/
+theorem interactingLatticeMeasure_symmetry_invariant
     (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
     (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
+    (σ : FinLatticeSites 2 N → FinLatticeSites 2 N)
+    (hσ_bij : Function.Bijective σ)
+    (hσ_density : ∀ φ : FinLatticeField 2 N,
+      gaussianDensity 2 N (circleSpacing L N) mass
+        (φ ∘ (Equiv.ofBijective σ hσ_bij).symm) =
+      gaussianDensity 2 N (circleSpacing L N) mass φ)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (j₁ j₂ : ℤ) (F : Configuration (FinLatticeField 2 N) → E) :
-    ∫ ω, F (ω.comp (latticeTranslateLM N j₁ j₂).toContinuousLinearMap)
+    (F : Configuration (FinLatticeField 2 N) → E) :
+    ∫ ω, F (ω.comp (latticeSitePermuteLM N σ).toContinuousLinearMap)
       ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) =
     ∫ ω, F ω ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) := by
-  -- Translation x ↦ x - (j₁, j₂) on (ZMod N)² is bijective (group subtraction)
-  have hbij : Function.Bijective (translateSites N j₁ j₂) := by
-    set σ_inv := fun (x : FinLatticeSites 2 N) =>
-      (![x 0 + (j₁ : ZMod N), x 1 + (j₂ : ZMod N)] : FinLatticeSites 2 N)
-    have hleft : Function.LeftInverse σ_inv (translateSites N j₁ j₂) := by
-      intro x; simp only [translateSites, σ_inv]
-      ext i; fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
-    have hright : Function.RightInverse σ_inv (translateSites N j₁ j₂) := by
-      intro x; simp only [translateSites, σ_inv]
-      ext i; fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
-    exact ⟨hleft.injective, hright.surjective⟩
-  exact interactingLatticeMeasure_symmetry_invariant L N P mass ha hmass
+  unfold interactingLatticeMeasure boltzmannWeight
+  exact latticeWithDensity_symmetry_invariant L N mass ha hmass σ hσ_bij hσ_density
+    (interactionFunctional 2 N P (circleSpacing L N) mass)
+    (interactionFunctional_measurable 2 N P (circleSpacing L N) mass)
+    (interactionFunctional_sitePermute_invariant N P (circleSpacing L N) mass σ hσ_bij)
+    _ F
+
+-- Specific instances:
+
+/-- The lattice translation linear map: `(L_T g)(x) = g(translateSites N j₁ j₂ x)`. -/
+def latticeTranslateLM (N : ℕ) (j₁ j₂ : ℤ) :=
+  latticeSitePermuteLM N (translateSites N j₁ j₂)
+
+/-- Lattice translation `x ↦ x - (j₁, j₂)` on `(ZMod N)²` is bijective (group subtraction). -/
+theorem translateSites_bijective (N : ℕ) [NeZero N] (j₁ j₂ : ℤ) :
+    Function.Bijective (translateSites N j₁ j₂) := by
+  set σ_inv := fun (x : FinLatticeSites 2 N) =>
+    (![x 0 + (j₁ : ZMod N), x 1 + (j₂ : ZMod N)] : FinLatticeSites 2 N)
+  have hleft : Function.LeftInverse σ_inv (translateSites N j₁ j₂) := by
+    intro x; simp only [translateSites, σ_inv]
+    ext i; fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
+  have hright : Function.RightInverse σ_inv (translateSites N j₁ j₂) := by
+    intro x; simp only [translateSites, σ_inv]
+    ext i; fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
+  exact ⟨hleft.injective, hright.surjective⟩
+
+omit hL in
+/-- **Weight-generic lattice translation invariance.** Specialization of
+`latticeWithDensity_symmetry_invariant` to `σ = translateSites N j₁ j₂`, packaging the
+weight-independent bijectivity and Gaussian-density-invariance facts. Instantiates to
+any translation-invariant weight, in particular `W = V` and the coupling family
+`W = g·V`. -/
+theorem latticeWithDensity_translation_invariant
+    (N : ℕ) [NeZero N] (mass : ℝ)
+    (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
+    (j₁ j₂ : ℤ)
+    (W : Configuration (FinLatticeField 2 N) → ℝ)
+    (hW_meas : Measurable W)
+    (hW_inv : ∀ ω : Configuration (FinLatticeField 2 N),
+      W (ω.comp (latticeTranslateLM N j₁ j₂).toContinuousLinearMap) = W ω)
+    (Z : ENNReal)
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (F : Configuration (FinLatticeField 2 N) → E) :
+    ∫ ω, F (ω.comp (latticeTranslateLM N j₁ j₂).toContinuousLinearMap)
+      ∂(Z⁻¹ • (latticeGaussianMeasure 2 N (circleSpacing L N) mass ha hmass).withDensity
+          (fun ω => ENNReal.ofReal (Real.exp (-(W ω))))) =
+    ∫ ω, F ω
+      ∂(Z⁻¹ • (latticeGaussianMeasure 2 N (circleSpacing L N) mass ha hmass).withDensity
+          (fun ω => ENNReal.ofReal (Real.exp (-(W ω))))) := by
+  have hbij := translateSites_bijective N j₁ j₂
+  exact latticeWithDensity_symmetry_invariant L N mass ha hmass
     (translateSites N j₁ j₂) hbij
     (by -- Density preservation: gaussianDensity(φ∘σ⁻¹) = gaussianDensity(φ)
       intro φ
@@ -359,7 +425,26 @@ private theorem interactingLatticeMeasure_translation_invariant
       simp only [Function.comp, hsymm_eq, latticeTranslation]
       congr 1; funext i; fin_cases i <;>
         simp [v, Matrix.cons_val_zero, Matrix.cons_val_one, sub_neg_eq_add])
-    F
+    W hW_meas hW_inv Z F
+
+omit hL in
+/-- Lattice translation invariance of the `g = 1` interacting measure. Corollary of the
+weight-generic `latticeWithDensity_translation_invariant` with weight `W = V`. -/
+theorem interactingLatticeMeasure_translation_invariant
+    (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
+    (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (j₁ j₂ : ℤ) (F : Configuration (FinLatticeField 2 N) → E) :
+    ∫ ω, F (ω.comp (latticeTranslateLM N j₁ j₂).toContinuousLinearMap)
+      ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) =
+    ∫ ω, F ω ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) := by
+  unfold interactingLatticeMeasure boltzmannWeight
+  exact latticeWithDensity_translation_invariant L N mass ha hmass j₁ j₂
+    (interactionFunctional 2 N P (circleSpacing L N) mass)
+    (interactionFunctional_measurable 2 N P (circleSpacing L N) mass)
+    (interactionFunctional_sitePermute_invariant N P (circleSpacing L N) mass
+      (translateSites N j₁ j₂) (translateSites_bijective N j₁ j₂))
+    _ F
 
 theorem torusInteractingMeasure_gf_latticeTranslation_invariant
     (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
@@ -1668,7 +1753,7 @@ theorem torusInteractingLimit_translation_invariant
 /-- The Laplacian commutes with the swap `(x₀,x₁) ↦ (x₁,x₀)` on a 2D lattice.
 Proof: The stencil sums over directions i ∈ {0,1}. Swapping coordinates
 exchanges i=0 and i=1 terms; the sum is invariant by commutativity. -/
-private theorem finiteLaplacian_swap_commute (N : ℕ) [NeZero N] (a : ℝ)
+theorem finiteLaplacian_swap_commute (N : ℕ) [NeZero N] (a : ℝ)
     (φ : FinLatticeField 2 N) :
     finiteLaplacian 2 N a (φ ∘ swapSites N) =
     (finiteLaplacian 2 N a φ) ∘ swapSites N := by
@@ -1707,7 +1792,7 @@ private theorem finiteLaplacian_swap_commute (N : ℕ) [NeZero N] (a : ℝ)
 
 /-- The mass operator Q = -Δ + m² commutes with swap.
 `Q(φ ∘ swap) = (Qφ) ∘ swap` pointwise. -/
-private theorem massOperator_swap_commute (N : ℕ) [NeZero N] (a mass : ℝ)
+theorem massOperator_swap_commute (N : ℕ) [NeZero N] (a mass : ℝ)
     (φ : FinLatticeField 2 N) :
     massOperator 2 N a mass (φ ∘ swapSites N) =
     (massOperator 2 N a mass φ) ∘ swapSites N := by
@@ -1721,10 +1806,12 @@ private theorem massOperator_swap_commute (N : ℕ) [NeZero N] (a mass : ℝ)
   simp only [Function.comp] at h
   linarith
 
-private def latticeSwapLM (N : ℕ) := latticeSitePermuteLM N (swapSites N)
+/-- The lattice coordinate-swap linear map: `(L_swap g)(x) = g(swapSites N x)`. -/
+def latticeSwapLM (N : ℕ) := latticeSitePermuteLM N (swapSites N)
 
 omit hL in
-private theorem interactingLatticeMeasure_swap_invariant
+/-- Lattice coordinate-swap invariance of the `g = 1` interacting measure. -/
+theorem interactingLatticeMeasure_swap_invariant
     (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
     (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -1842,7 +1929,7 @@ theorem torusInteractingMeasure_gf_swap_invariant
 /-- The Laplacian commutes with time reflection `(x₀,x₁) ↦ (-x₀,x₁)`.
 Proof: For i=0, the stencil `φ(-x₀+1,x₁) + φ(-x₀-1,x₁)` = `φ(-x₀-1,x₁) + φ(-x₀+1,x₁)`
 by add_comm. For i=1, the stencil is unchanged since reflection only affects x₀. -/
-private theorem finiteLaplacian_timeReflect_commute (N : ℕ) [NeZero N] (a : ℝ)
+theorem finiteLaplacian_timeReflect_commute (N : ℕ) [NeZero N] (a : ℝ)
     (φ : FinLatticeField 2 N) :
     finiteLaplacian 2 N a (φ ∘ timeReflectSites N) =
     (finiteLaplacian 2 N a φ) ∘ timeReflectSites N := by
@@ -1878,7 +1965,7 @@ private theorem finiteLaplacian_timeReflect_commute (N : ℕ) [NeZero N] (a : �
 
 /-- The mass operator Q = -Δ + m² commutes with time reflection.
 `Q(φ ∘ refl) = (Qφ) ∘ refl` pointwise. -/
-private theorem massOperator_timeReflect_commute (N : ℕ) [NeZero N] (a mass : ℝ)
+theorem massOperator_timeReflect_commute (N : ℕ) [NeZero N] (a mass : ℝ)
     (φ : FinLatticeField 2 N) :
     massOperator 2 N a mass (φ ∘ timeReflectSites N) =
     (massOperator 2 N a mass φ) ∘ timeReflectSites N := by
@@ -1893,10 +1980,11 @@ private theorem massOperator_timeReflect_commute (N : ℕ) [NeZero N] (a mass : 
   linarith
 
 /-- The lattice time-reflection linear map: `(L_refl g)(x) = g(timeReflectSites x)`. -/
-private def latticeTimeReflectLM (N : ℕ) := latticeSitePermuteLM N (timeReflectSites N)
+def latticeTimeReflectLM (N : ℕ) := latticeSitePermuteLM N (timeReflectSites N)
 
 omit hL in
-private theorem interactingLatticeMeasure_timeReflection_invariant
+/-- Lattice time-reflection invariance of the `g = 1` interacting measure. -/
+theorem interactingLatticeMeasure_timeReflection_invariant
     (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
     (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
