@@ -1,5 +1,13 @@
 # Layer B2 — wiring scope + PR plan
 
+> **⚠ 2026-07-12 design-pass verdict** ([`layer-b2-freeside-designpass.md`](layer-b2-freeside-designpass.md)):
+> the Pieces 2–3 → B5b chain's free-side assembly **cannot close the all-`G` axiom** — the
+> oscillation-blind susceptibility bound is `a`-power-lossy at high temporal frequency (Nyquist
+> test, verified + externally reviewed). Repair = temporal mode split (FSS infrared at
+> `|k_t| ≳ m_gap` + gap band at `|k_t| ≲ m_gap`) or the operator Poisson-kernel resummation.
+> Pieces 1–5 remain valid as the low-frequency branch. Do not write free-side assembly code
+> against the old target.
+
 **Current target axiom.**
 `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`
 (`Pphi2/AsymTorus/AsymExpMomentDischarge.lean:215`). The former torus
