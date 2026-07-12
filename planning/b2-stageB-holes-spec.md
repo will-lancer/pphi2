@@ -235,3 +235,38 @@ R-generalized. Counts unchanged 30/28.
   τ-free bound with constant depending on `Lt ≤ 2τ` compactness — design at C4 time.
   Then Piece-5 converts `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform` to a
   theorem; clustering axioms 14/15 follow per `cyl-2a-spectral-gap.md`.
+
+## C4 design (2026-07-12, late) — thresholded target; C1 landed; regime analysis
+
+**C1 LANDED** (`2083fe3`, `AsymLowModeBand.lean`): `asymModeProj_temporalBandLimited` — low-mode
+projections are `temporalBandLimited κ` when `κ² ≤ spatialGap` (two-eigenvalue pairing; bare
+trio; the 1D toolkit was size-generic, reused at `Nt` without cloning). C3 landed earlier
+(`45937eb`, sharp `((2/(1−γ)) + C_rem·Nt·γ^†)·gSVSum` corollaries). C2 in flight.
+
+**Regime analysis for C4 (the master assembly).** The B2 axiom as stated quantifies ALL
+`(Lt, a)`; the proved chain covers `a ≤ a₀` (S2) and `Nt·a ≥ 2τ` (τ-axioms). The two
+complements are analytically real but PHYSICALLY ARTIFICIAL:
+- coarse `a > a₀` ⟺ finitely many `Ns` (since `a = Ls/Ns`), but `Nt`-uniformity at each
+  fixed `(Ns, a)` is another S2-type input;
+- short `Lt < 2τ`: no arc reaches the IUC window; B1's per-`(Lt, Ls)` constant has no
+  proved sup over `Lt ∈ (0, 2τ]`.
+Every downstream consumer needs the bound only EVENTUALLY (`Lt → ∞` IR limit, `a → 0` UV
+limit). **Decision (flag for owner sign-off): C4's main theorem takes the thresholded form**
+`∃ C L₀ a₀, 0 < C ∧ … ∀ Lt ≥ L₀, ∀ a ≤ a₀, (Nt·a = Lt, Ns·a = Ls) → ∀ G, Var_int ≤ C·Var_free`
+(with `L₀ := 2τ`, `a₀` from S2) — pure assembly, no new axioms, no regime patches. Piece-5 /
+Layer-C then migrate to eventual-form wiring (mechanical thread); the original all-`(Lt,a)`
+axiom `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform` is retained until the
+migration, then deleted or restated (it is over-broad in the same spirit as the removed gap
+axioms, though not false — the small-`Lt`/coarse-`a` cases are true but unproved).
+
+**C4 assembly skeleton** (after C2): fix `τ := 1` (say), `κ := min mass (4/Ls)`
+(`κ² ≤ 16/Ls² ≤ spatialGap`, Stage A A6); `S_low := {k : λ_k < mass² + κ²}`,
+`S_high := S_lowᶜ` (`∀ k ∈ S_high, mass² + κ² ≤ λ_k`); split `G = P_low G + P_high G`
+(S4 `asymModeProj_add_compl`); `(x+y)² ≤ 2x² + 2y²` inside `∫dμ_int`;
+- high: S1 consumer `asymHighModes_variance_le_freeVariance` → `(1 + m²/κ²)·Var_free(P_high G)`;
+- low: B3 (`interacting_second_moment_eq_pathMeasure`) + `asymSliceFamilyLinear_eq_slicePairing`
+  → C3-sharp `…_le_fixedLs_sharp` (hInt by C2) → B5b (`groundVariance_sum_le_freeCovariance_sum`)
+  → B-II (`freeSingleSliceCovarianceSum_le_freeVariance_of_band`; predicates by Stage A A5 +
+  C1) → `C_low(Ls, m, κ, τ, m₀)·Var_free(P_low G)`;
+- reassemble: `Var_free(P_low G) + Var_free(P_high G) = Var_free(G)` (S4 additivity);
+  `C := 2·max(C_high, C_low)`. All constants depend only on `(P, mass, Ls, τ)`.
