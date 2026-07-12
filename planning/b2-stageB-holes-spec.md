@@ -66,7 +66,20 @@ theorem asymSliceFamily_pathMeasure_second_moment_le
 this theorem making `2/(1−γ) ≤ 2/(m₀a·(1−ε))`-controlled uniformly. Audit rows + vetting
 record (cite the §S2 vet) in the same commit.
 
-## Hole B-II — band-limited free-side comparison
+## Hole B-II — band-limited free-side comparison — **LANDED (`580205b`)**
+
+**Outcome (2026-07-12): all theorems, 0 axioms/sorries, kernel-clean.** Final theorem
+`freeSingleSliceCovarianceSum_le_freeVariance_of_band` with the HONEST constant
+`C_band Ls mass κ = (κ² + mass²)·(4/mass² + 2·Ls/mass)`, uniform in `(a, Nt)` at fixed `Ls`.
+Constant vs the vetted ledger (reported, not absorbed): per-instance coefficient is
+`(κ²+m²)·(4/(Nt·m²) + 2a/m)` — the `2a/m` term confirms the predicted spare `a` (better than
+the ledger); the `4/(Nt·m²)` term is the temporal ZERO MODE, not covered by the pure
+`Ls(κ²+m²)/m` form at small `Nt` (the ledger implicitly assumed bounded `Lt`). T4 proved as
+`Σ(λ+m²)⁻¹ ≤ 2/m² + a·Nt/m` (coarse split, no integral comparison). Note for B-I merge:
+this file defines `sliceConstant` (pointwise) + the `sliceAvgProj` bridge lemma — reconcile
+if B-I introduces its own.
+
+
 
 **Design principle (avoids the eigenbasis-indexing trap a third time):** never touch the
 abstract 2D eigenbasis. `sliceAvgProj` commutes with `massOperatorAsym` (Stage A), hence with
