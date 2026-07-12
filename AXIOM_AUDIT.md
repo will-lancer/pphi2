@@ -100,6 +100,31 @@
   non-core axioms") predates the markov-semigroups discharges and needs updating in that repo;
   likewise RandomFields `GrossODE.lean` carries "documented `sorry`" status prose over
   now-complete proofs.
+## 2026-07-12 — `spectral_gap_uniform` + `spectral_gap_lower_bound` REMOVED (false as stated)
+
+* **Finding (hand computation + Gemini 3.1-pro verification + proof-term consumer trace):**
+  both axioms (`TransferMatrix/SpectralGap.lean`) asserted an `a`-uniform gap lower bound at
+  **fixed `Ns`** — a shrinking-volume limit (`Ns·a → 0`) in which the hard-coded 2D Wick
+  constant is the wrong counterterm: its zero-mode contribution `(a²Ns²m²)⁻¹` diverges like
+  `a⁻²` (in the coupled `N·a = L` limit it is the finite `m⁻²/L²`). The over-subtraction gives
+  the spatial zero mode a symmetric double well (minima `~ a⁻¹`, barrier `~ a⁻³`); the gap is
+  the tunneling splitting `massGap ~ (1/a)·e^{−c/a²} → 0`, at **every** coupling (every
+  `InteractionPolynomial` has leading coefficient `1/n > 0`). This is a different and earlier
+  failure than the known criticality caveat. **Rating: FALSE (was ⚠ Correct for P(Φ)₂,
+  Gemini 2026-03-07 — that vet addressed the physics of the coupled limit, not the fixed-`Ns`
+  quantifier).**
+* **Removal:** both axioms deleted, together with their sole term-consumer `clustering_uniform`
+  (`OSProofs/OS4_MassGap.lean` — a literal restatement). The trace confirms the rest of the
+  lattice OS4 chain and Main's OS4 never consumed them (`continuum_exponential_clustering`
+  carries OS4), so no downstream proof changes. Live docstring references updated
+  (`AxiomInheritance.lean`, `OS2_WardIdentity.lean`).
+* **Replacement policy (per the no-consumer precedent):** the corrected statement — the gap
+  along a *coupled* sequence (fixed `L = N·a`, no regime hypothesis; or `N·a → ∞` under
+  `IsWeakCoupling`) — is recorded with its discharge route in
+  `planning/cyl-2a-volume-scaling-addendum.md` (17a/17b split) and will enter the build only
+  with its consumer (the OS4 campaign).
+* **Counts:** pphi2 **28 raw / 26 real → 26 raw / 24 real**, 0 sorries. `lake build` green
+  (4038 jobs). The fixed-`(Ns,a)` clustering axioms 14/15 are unaffected.
 
 ## 2026-06-23 — Layer-B2 Piece 5 torus assembly landed
 
@@ -804,13 +829,13 @@ elementary inequality `x² ≤ 2 e^|x|` and a scaling optimization.
 eventual pullback RP predicate `CylinderMeasureSequenceEventuallyReflectionPositive`
 and proves the IR-limit OS3 transfer by characteristic-functional convergence.
 
-## Current pphi2 Axiom Inventory (28 raw / 26 real as of 2026-06-23, 0 sorries)
+## Current pphi2 Axiom Inventory (26 raw / 24 real as of 2026-07-12, 0 sorries)
 
 This table is generated from the current `./scripts/count_axioms.sh` result and
 is the source of truth for active pphi2 axioms in this audit. Historical branch
 cohorts are retained below for provenance only.
 
-### Main inventory (26 real axioms — present on `layer-B2/piece-5`)
+### Main inventory (24 real axioms — updated 2026-07-12 after the SpectralGap removal)
 
 | File | Active axioms | Names |
 |------|---------------|-------|
@@ -822,14 +847,13 @@ cohorts are retained below for provenance only.
 | `Pphi2/OSProofs/OS2_WardIdentity.lean` | 1 | `rotation_cf_defect_polylog_bound` |
 | `Pphi2/OSProofs/OS3_RP_Lattice.lean` | 1 | `gaussian_rp_cov_perfect_square` (private) |
 | `Pphi2/OSProofs/OS4_MassGap.lean` | 2 | `two_point_clustering_from_spectral_gap`, `general_clustering_from_spectral_gap` |
-| `Pphi2/TransferMatrix/SpectralGap.lean` | 2 | `spectral_gap_uniform`, `spectral_gap_lower_bound` |
 | `Pphi2/AsymTorus/AsymBridgeInstance.lean` | 6 | `asymGroundStateRep_pos_ae`, `asymTransferNormalized_contract`, `asymGroundStateRep_eq_groundIsometry_one`, `asymGroundSemigroup_intertwines`, `asymPartition_ground_bound`, `asymFinitePeriodicBridge_remainder_bound` |
 | `Pphi2/AsymTorus/AsymB5bSingleSlice.lean` | 1 | `groundVariance_le_freeCovariance` |
 | `Pphi2/AsymTorus/AsymContinuumLimit.lean` | 1 | `asymInteracting_expMoment_volume_uniform` |
 | `Pphi2/AsymTorus/AsymExpMomentDischarge.lean` | 2 | `asymInteracting_mgf_gaussianDominated`, `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform` |
 | `Pphi2/NelsonEstimate/PolynomialChaosBridge.lean` | 1 | `nelson_exponential_estimate_master_bounded` |
 | `Pphi2/AsymTorus/AsymTorusOS.lean` | 1 | `asymTorusInteracting_exponentialMomentBound` (private) |
-| **Subtotal** | **26** | |
+| **Subtotal** | **24** | |
 
 ### Historical note: isotropic `Z_Nt × Z_Ns` cylinder redesign
 

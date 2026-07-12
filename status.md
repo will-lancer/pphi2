@@ -16,14 +16,16 @@ and backend-independent reconstruction rules. This keeps the current scalar
 positive-measure construction explicit while opening a path to broader
 Euclidean/Minkowski interfaces.
 
-**Current counter (`./scripts/count_axioms.sh`, 2026-06-23): pphi2 28 raw / 26 real axioms,
+**Current counter (`./scripts/count_axioms.sh`, 2026-07-12, post-S1): pphi2 27 raw / 25 real axioms,
 0 sorries; gaussian-field 3 axioms, 0 sorries** (both verified via `count_axioms.sh`,
-GaussianField pinned at `5bb35e8`). The 28 raw → 26 real reconciliation: 2 lines are docstring
+GaussianField pinned at `5bb35e8`). The 27 raw → 25 real reconciliation: 2 lines are docstring
 matches of the word "axiom" (`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
-`Pphi2/NelsonEstimate/LayerCake.lean:85`). The third match at
-`AsymExpMomentDischarge.lean:244` was removed when axiom 3 became a theorem
-(Layer-B2 Piece 5, PR #58, 2026-06-23).
-The 26 real break down as **24 architectural** (enumerated by OS-program cluster in
+`Pphi2/NelsonEstimate/LayerCake.lean:85`). The +1 is the vetted B2 route-(a) axiom
+`fss_infrared_quadratic` (AXIOM_AUDIT.md 2026-07-12 S1 entry).
+**2026-07-12: `spectral_gap_uniform` and `spectral_gap_lower_bound` were REMOVED as false**
+(fixed-`Ns` shrinking-volume regime; wrong-counterterm double-well closes the gap — see
+`AXIOM_AUDIT.md` 2026-07-12 and `planning/cyl-2a-volume-scaling-addendum.md`; they had no
+proof-term consumers). The 24 real break down as **22 architectural** (enumerated by OS-program cluster in
 [`planning/INDEX.md`](planning/INDEX.md), the master status machine) and **2 private
 scaffolding** (`asymTorusInteracting_exponentialMomentBound` in `AsymTorusOS.lean`,
 `gaussian_rp_cov_perfect_square` in `OS3_RP_Lattice.lean`). The seven new architectural axioms
@@ -252,7 +254,7 @@ itself is a theorem via `embeddedTwoPoint_eq_latticeGreenBilinear`.
 | 2 | `TransferMatrix/Positivity.lean` | 0 axioms (energy levels, mass gap) |
 | 2 | `OSProofs/OS3_RP_Lattice.lean` | 1 axiom (`gaussian_rp_cov_perfect_square`), 0 sorries |
 | 2 | `OSProofs/OS3_RP_Inheritance.lean` | 0 axioms, 0 sorries |
-| 3 | `TransferMatrix/SpectralGap.lean` | 2 axioms |
+| 3 | `TransferMatrix/SpectralGap.lean` | 0 axioms (2 removed 2026-07-12 as false; `spectral_gap_pos` proved) |
 | 3 | `OSProofs/OS4_MassGap.lean` | 2 axioms, 0 sorries |
 | 3 | `OSProofs/OS4_Ergodicity.lean` | 0 axioms, 0 sorries |
 | 4 | `ContinuumLimit/Embedding.lean` | 0 axioms (`IsPphi2Limit` is a def) |
@@ -502,8 +504,8 @@ All Phase 1 axioms have been proved or removed. `wickConstant_log_divergence`
 
 | Axiom | File | Difficulty | Description |
 |-------|------|-----------|-------------|
-| `spectral_gap_uniform` | SpectralGap | Hard | Mass gap bounded below uniformly in a. Key input: the interaction is a bounded perturbation of the free field in the sense of Kato-Rellich, and the free mass gap is m > 0. Needs careful control of the perturbation as a→0. |
-| `spectral_gap_lower_bound` | SpectralGap | Hard | m_phys ≥ c·m_bare. Quantitative bound on the physical mass. |
+| ~~`spectral_gap_uniform`~~ | SpectralGap | **REMOVED 2026-07-12** | False as stated (fixed-`Ns` shrinking-volume regime; wrong-counterterm double well closes the gap). Coupled-limit replacement designed in `planning/cyl-2a-volume-scaling-addendum.md` (17a/17b). |
+| ~~`spectral_gap_lower_bound`~~ | SpectralGap | **REMOVED 2026-07-12** | Same mechanism; see AXIOM_AUDIT.md 2026-07-12 entry. |
 | ~~`connectedTwoPoint_nonneg_delta`~~ | OS4_MassGap | ✅ **Proved** | Variance nonnegativity: direct proof via ∫(X-E[X])² ≥ 0. |
 | ~~`two_point_clustering_lattice`~~ | OS4_MassGap | ✅ **Proved** | Exponential decay bound using `finLatticeDelta`, `massGap`, and the cyclic torus time separation. |
 | ~~`general_clustering_lattice`~~ | OS4_MassGap | ✅ **Proved** | Bounded `F`, `G` with `G` on time-shifted config `latticeConfigEuclideanTimeShift N R ω`, decaying in `latticeEuclideanTimeSeparation N R`. |
@@ -747,7 +749,7 @@ Note: `os1_inheritance` is a theorem (not axiom) — OS1 transfers trivially sin
 
 5. **Hypercontractivity** — `wickMonomial_latticeGaussian`, `wickConstant_eq_variance`, and `gaussian_hermite_zero_mean` are now **theorems**. The remaining work in this area is downstream analytic strengthening, not the Wick/GFF variance bridge. `wickConstant_eq_variance` is now proved generically via `GeneralResults/LatticeProductDFT.lean`. `wickPolynomial_uniform_bounded_below` proved. `exponential_moment_bound` proved from bounded-below + probability measure. `interactionFunctional_mean_nonpos` proved from `wickMonomial_latticeGaussian` + linearity + `P.coeff_zero_nonpos`. `partitionFunction_ge_one` / `interacting_moment_bound` as before.
 6. **`second_moment_uniform` + `continuumMeasures_tight`** — Tightness argument. Depends on Nelson.
-7. **`spectral_gap_uniform`** — Uniform mass gap. Kato-Rellich perturbation theory.
+7. ~~**`spectral_gap_uniform`**~~ — REMOVED 2026-07-12 (false as stated; coupled-limit replacement = `planning/cyl-2a-volume-scaling-addendum.md` 17a).
 8. **`ward_identity_lattice` + `anomaly_vanishes`** — Ward identity + power counting for rotation invariance.
 
 ### Tier 3: Medium-difficulty proofs
@@ -778,7 +780,6 @@ The following theorems have complete proofs (no sorry):
 | `transferKernel_pos` | TransferMatrix | Transfer kernel > 0 (from exp_pos) |
 | `massGap_pos` | Positivity | Mass gap > 0 (from eigenvalue gap) |
 | `spectral_gap_pos` | SpectralGap | Spectral gap > 0 (from mass gap) |
-| `clustering_uniform` | OS4_MassGap | Uniform clustering (from uniform spectral gap) |
 | `os4_lattice_from_gap` | OS4_Ergodicity | OS4 from mass gap (assembly) |
 | `timeReflection2D_involution` | OS3_RP_Lattice | Time reflection is an involution |
 | `timeReflection2_involution` | OSAxioms | Θ² = id for continuum time reflection |
@@ -905,8 +906,8 @@ infrastructure. Assessment date: 2026-03-04.
 
 | Axiom | File | Strategy |
 |-------|------|----------|
-| `spectral_gap_uniform` | SpectralGap | Uniform mass gap. Central result of Glimm-Jaffe. |
-| `spectral_gap_lower_bound` | SpectralGap | Quantitative mass gap bound. |
+| ~~`spectral_gap_uniform`~~ | SpectralGap | REMOVED 2026-07-12 (false as stated; see AXIOM_AUDIT.md). |
+| ~~`spectral_gap_lower_bound`~~ | SpectralGap | REMOVED 2026-07-12 (same). |
 | `prokhorov_configuration_sequential` | Convergence | Sequential extraction on S'(ℝ²). Blocked by Mathlib nuclear space gap. (Not needed for torus path.) |
 | `continuumLimit_nonGaussian` | Convergence | Nonzero 4th cumulant via perturbation theory. |
 | `continuumLimit_nontrivial` | Convergence | Two-point function > 0. Correlation inequalities (Griffiths, FKG). |
