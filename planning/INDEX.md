@@ -88,6 +88,12 @@ clustering, gating OS4). Master campaign doc: [`docs/cylinder-master-plan.md`].
   (per Route A blueprint):** discharge the lattice input by closing the finite-K
   time-family estimate, the `K → ∞` packaging, B5b, and the free-side assembly
   without introducing the known `1/(1-γ)` a-nonuniform shortcut.
+  **⚠ 2026-07-12 design-pass verdict** ([`layer-b2-freeside-designpass.md`]): the free-side
+  assembly **cannot close for all `G`** via the oscillation-blind susceptibility chain
+  (Nyquist-mode a-power loss, verified + reviewed). Repair: temporal mode split (FSS infrared
+  `|k_t| ≳ m_gap` ⊕ gap band `|k_t| ≲ m_gap`) or operator Poisson-kernel resummation; either
+  needs a temporal DFT layer. Pieces 1–5 + B5b + GNS bridge remain valid as the low-frequency
+  branch. Owner decision needed before further B2 assembly code.
   SUPERSEDED: [`docs/transfer-instantiation-plan.md`] (banner), the older 6-brick HS-Cauchy-Schwarz
   plan in `docs/B4B5-design.md` (eliminated by Route A — op-norm ≤ HS-norm is the wrong direction).
 
