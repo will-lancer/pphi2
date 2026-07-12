@@ -102,6 +102,7 @@ import Pphi2.AsymTorus.AsymB5bSingleSlice
 import Pphi2.AsymTorus.AsymFreeSpectral
 import Pphi2.AsymTorus.AsymInfraredBound
 import Pphi2.AsymTorus.AsymSpatialConstant
+import Pphi2.AsymTorus.AsymBandFreeComparison
 import Pphi2.IRLimit.CylinderEmbedding
 import Pphi2.IRLimit.GreenFunctionComparison
 import Pphi2.IRLimit.UniformExponentialMoment
