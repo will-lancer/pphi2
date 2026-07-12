@@ -66,6 +66,34 @@ theorem asymSliceFamily_pathMeasure_second_moment_le
 this theorem making `2/(1−γ) ≤ 2/(m₀a·(1−ε))`-controlled uniformly. Audit rows + vetting
 record (cite the §S2 vet) in the same commit.
 
+## Hole B-I — **LANDED (`1b2807a`) modulo two carried hypotheses; adjudication below**
+
+**Outcome:** headline `asymSliceFamily_pathMeasure_second_moment_le` kernel-clean (bare trio);
+S2 landed with consumer; counts 28 raw / 26 real; parity (step 3) proved OUTRIGHT via the
+field-flip route (no L² representative issues); cyclic invariance proved generically over
+`TransferSystem` (upstreaming candidate). Spec's step-6 diagonal claim was WRONG at finite
+`Nt` (single-slice marginal = `Z⁻¹·kPow(Nt−1)(x,x)·ν`, not `Ω²ν`) — agent caught it; the
+`O(γ^Nt)` correction is carried as `hDiag`. The K-uniformity gap of
+`asymFinitePeriodicBridge_remainder_bound` is carried as `hRes`. Remainder shape:
+`(C_diag·Nt + C_off·Nt²)·γ^Nt`; shell consumed it unchanged; constant exactly `2/(1−γ)`.
+
+**Adjudication (coordinator, Gemini-vetted 2026-07-12): STRENGTHEN the bridge axiom to the
+K-uniform form.** Mechanism confirmed: intrinsic ultracontractivity
+(`T(x,y) ≤ C·Ω(x)Ω(y)`) reduces all residual/trace terms to Ω-weighted L¹/L² data
+(`Tr(M_A Q^d M_B Q^{Nt−d}) ≤ C²γ^{Nt}·‖AΩ‖₁‖BΩ‖₁`), so the clamp domination
+`|A_K| ≤ |⟨g,·⟩|` passes with NO `‖A‖_∞` penalty; the diagonal correction
+(`|Q^{Nt}(x,x)| ≤ Cγ^{Nt}Ω(x)²`) discharges `hDiag` by the same mechanism. Strengthened
+statement: same shape, `∃ C` depending on `(Nt-FREE: uniform in K, d, Nt; may depend on
+a, Ns, P, mass)`, bound `C·‖M_{⟨g,·⟩}Ω‖·‖M_{⟨g',·⟩}Ω‖·γ^Nt`. Same rating (Standard) and
+discharge plan (trace bridge / IUC); vetting-record update required.
+
+**⚠ Stage-C design question #1 (from the vet's fine print):** the IUC constants depend on
+`(a, Ls)`; at fixed `Lt`, `γ^Nt ≤ e^{−m₀Lt}` does NOT decay while `Nt² = (Lt/a)² → ∞` as
+`a → 0` — the remainder's `a→0` corner is NOT automatically dominated. Stage C must either
+(i) show the shell's `hRem` absorption works with the free sum's own `a`-powers in that
+corner, or (ii) restate the remainder control with explicit `a`-dependence and check the
+three-way stitching there. Do not hand-wave this corner — it is crux-2 class.
+
 ## Hole B-II — band-limited free-side comparison — **LANDED (`580205b`)**
 
 **Outcome (2026-07-12): all theorems, 0 axioms/sorries, kernel-clean.** Final theorem
