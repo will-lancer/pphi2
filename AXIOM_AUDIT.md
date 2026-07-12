@@ -2,6 +2,22 @@
 
 **Last updated**: 2026-07-12.
 
+## 2026-07-12 — ⚠ Layer A axiom `asymInteracting_mgf_gaussianDominated` OVER-QUANTIFIED
+
+* **Flag (Gemini 3.1-pro vet of the Layer-A scoping, 2026-07-12; arithmetic verified by hand):**
+  the axiom (`Pphi2/AsymTorus/AsymExpMomentDischarge.lean:127`) quantifies over **all**
+  `f : AsymLatticeField Nt Ns`, but Newman/Lee–Yang Gaussian domination requires **same-sign**
+  coefficients. Counterexample mechanism: 2-spin ferromagnet, `S = σ₁ − σ₂` — the `t⁴`
+  comparison fails for `J > ½·log 2`; equivalently, mixed-sign `fᵢfⱼfₖfₗ` against
+  Lebowitz-negative `u₄` makes `κ₄(⟨ω,f⟩) > 0`. The 2026-06-02 vet confirmed the K=2/Var form
+  but not the quantifier. **Rating downgraded: Likely correct → Flagged (over-quantified).**
+* **Fix path** (campaign PR, see `planning/layer-a-lee-yang-scoping.md`): add sitewise `0 ≤ f`
+  to the axiom; recover signed `f` in Layer C via the `f = f₊ − f₋` split + Cauchy–Schwarz
+  (constants change to `K = 2`, variance `2(Var f₊ + Var f₋)` — compatible with the Layer C
+  target form). Downstream Layer C consumers must NOT feed signed `f` into Layer A directly.
+* Axiom text in the tree left unchanged pending the campaign PR + Codex second opinion
+  (disputed-statement protocol).
+
 ## 2026-07-12 — Upstream Nelson/hypercontractivity chain is axiom-free (kernel-verified)
 
 * **Finding (Phase 1 of `planning/completion-plan-2026-07.md`):** at pphi2's current pins

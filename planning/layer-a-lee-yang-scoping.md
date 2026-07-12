@@ -70,11 +70,44 @@ Total: ~4–7 weeks at recalibrated norms, parallelizable A1/A2 (independent) th
 A2 is delegable once statements are pinned; A1's bridge lemmas and all of A3's statement design
 are Fable-grade (convention traps, limit-interchange hygiene).
 
+## ⚠ Vet result (Gemini 3.1-pro, 2026-07-12) — route CONFIRMED; existing axiom OVER-QUANTIFIED
+
+The inequality-first route was vetted same-day. Verdict: **sound, no hidden Hadamard/Hurwitz**
+(zeros are never tracked through the limit; only the real inequality passes). Two corrections
+folded into A1/A2 below, and one **red flag on the existing axiom**:
+
+1. **RED FLAG — `asymInteracting_mgf_gaussianDominated` is FALSE as stated for mixed-sign `f`.**
+   Newman/Lee–Yang Gaussian domination requires **same-sign coefficients** (`f ≥ 0` or `f ≤ 0`
+   sitewise). Elementary counterexample (verified by hand): 2-spin ferromagnet weight
+   `e^{Jσ₁σ₂}`, `S = σ₁ − σ₂`; then `P(S = ±2) = p/2` with `p = e^{−J}/(e^J + e^{−J})`,
+   `M(t) = 1 − p + p·cosh 2t`, `Var S = 4p`, and the `t⁴` comparison `(2/3)p ≤ 2p²` fails for
+   `p < 1/3` (any `J > ½·log 2`). Independent corroboration: with mixed-sign `f`, the products
+   `fᵢfⱼfₖfₗ` against Lebowitz-negative `u₄` make `κ₄(⟨ω,f⟩)` positive, breaking domination at
+   fourth order. The GS mechanism transfers this to the continuous-spin measure, so the pphi2
+   axiom (which quantifies over all `f : AsymLatticeField`) is over-quantified; the 2026-06-02
+   vet record ("confirmed … K=2 / Var_int form") did not cover the quantifier. **Required fix**:
+   add `0 ≤ f` (sitewise) to the axiom; recover signed `f` in **Layer C** via the split
+   `f = f₊ − f₋`, `|⟨ω,f⟩| ≤ |⟨ω,f₊⟩| + |⟨ω,f₋⟩|`, Cauchy–Schwarz, and Newman at `f₊, f₋`
+   (costs `K = 2`, variance terms `2(Var(⟨ω,f₊⟩) + Var(⟨ω,f₋⟩))` — compatible with the Layer C
+   target `K·exp(C·σ²(f))` since B2 bounds each by the free form at `f₊, f₋ ≤ |f|`). Do NOT
+   change the Lean axiom outside the campaign PR; recorded in `AXIOM_AUDIT.md` (2026-07-12).
+2. **A2's factorization corrected (friendlier than the draft):** the finite-Ising MGF is not
+   `∏(1 + t²/αⱼ²)` (that shape is the Hadamard form). Reduce `f` to rational coefficients
+   (scale to integers `q·f`), so the MGF is a polynomial in `z = e^{t/q}` with unit-circle
+   roots `e^{iθⱼ}` (Lee–Yang); pairing conjugates gives
+   `M(t) = ∏ⱼ (cosh(t/q) − cos θⱼ)/(1 − cos θⱼ)`, and the per-factor elementary bound
+   `(cosh x − cos θ)/(1 − cos θ) ≤ exp(x²/(2(1 − cos θ)))` multiplies out to
+   `M(t) ≤ exp(t²·Var/2)` exactly. No `e^{bt²}` prefactor in the finite case (`b = 0`).
+   Real `f` by density/continuity in the rational approximation (one limit, fixed lattice).
+3. **A1 boundary subtlety pinned:** with `fₓ = 0` sites, `zₓ = 1` marginalizes to a smaller
+   ferromagnetic subsystem (polydisk property retained); roots land ON the unit circle,
+   `θ = 0` excluded by positivity of the partition function.
+
 ## Risks / pin-before-building
 
-1. **Re-vet the restructure** (protocol): send this doc's route 1–3 to Gemini + Codex before
-   writing A1 — specifically whether any step of the classical GS argument secretly needs
-   zero-structure in the limit (it should not: the consumer is an inequality at fixed lattice).
+1. ~~Re-vet the restructure~~ **DONE 2026-07-12** (above). Residual: get a Codex second
+   opinion on the red-flag axiom restatement before editing the axiom (protocol for disputed
+   statements), though the counterexample arithmetic is verified by hand.
 2. **Fugacity↔field conventions** (A1): Lee–Yang "zeros on unit circle in fugacity `z = e^{−2h}`"
    vs "imaginary axis in `h`" vs the polydisk normalization used by `IsPolydiskZeroFree` — one
    Möbius/exponential bridge per formulation. Historically where sign errors enter; pin with a
