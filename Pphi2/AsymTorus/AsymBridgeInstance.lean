@@ -166,6 +166,13 @@ axiom asymPartition_ground_bound
 rank-one split, denominator correction, and finite-periodic one-point
 corrections is bounded by `C_rem γ^n`.
 
+NOTE (2026-07-12): for the K→∞ route this per-contract form is superseded by
+the K-uniform `asymFinitePeriodicBridge_remainder_bound_uniform`
+(in `AsymSliceFamilySusceptibility.lean`) (the
+constant here may depend on `‖A‖_∞`, hence on the truncation `K`); it is
+retained for the finite-K bridge theorems in this file.  All three remainder
+axioms collapse together in the trace-bridge discharge (one IUC estimate).
+
 Discharge plan: prove the signed-kernel remainder estimate from the explicit
 Gaussian transfer kernel.  The expected route is an `L²`/Hilbert-Schmidt bound
 for `kernelRemainder` plus the already-proved operator-norm decay bricks in

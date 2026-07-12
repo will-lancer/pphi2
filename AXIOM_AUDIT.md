@@ -45,6 +45,27 @@
 * **Count note**: +1 raw/+1 real → 28 raw / 26 real (status.md header + README counter
   updated in the same commit).
 
+## 2026-07-12 — K-uniform finite-periodic bridge axioms (B-I cleanup; +2)
+
+* **New axioms (2)** in `Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`:
+  `asymFinitePeriodicBridge_remainder_bound_uniform` (K-uniform family form of the GNS
+  remainder — the per-contract `asymFinitePeriodicBridge_remainder_bound` allows `C_rem` to
+  depend on `‖A_K‖_∞`, hence on `K`, which blocks the K→∞ dominated-convergence step) and
+  `asymFinitePeriodicBridge_diagonal_bound` (single-slice marginal has density
+  `Z⁻¹·kPow(Nt−1)(x,x)`, not `Ω²` — the `O(γ^Nt)` correction, K-uniform).
+* **Vetting (statement level, Gemini 3.1-pro 2026-07-12)**: intrinsic ultracontractivity
+  `T(x,y) ≤ C·Ω(x)Ω(y)` reduces all residual/diagonal trace terms to Ω-weighted `L¹/L²`
+  data, so the clamp domination `|A_K| ≤ |⟨g,·⟩|` transfers with no `‖A‖_∞` penalty.
+  Constants may depend on `(a, Ls)` — NOT claimed a-uniform (the `a→0` corner is Stage-C
+  design question #1, `planning/b2-stageB-holes-spec.md`). Rating: **Standard** /
+  Sources: GR, LP (IUC for Schrödinger semigroups with confining potentials — Davies–Simon;
+  GJ trace bounds). Old per-contract axiom retained (supersession note added) for the
+  finite-K bridge theorems; all three collapse in the trace-bridge discharge.
+* **Consumers (proved, same commit)**: `asymSliceFamily_pathMeasure_second_moment_le'`
+  (hypothesis-free hole B-I) and `asymSliceFamily_pathMeasure_second_moment_le_fixedLs'`
+  (S2-specialized, hypothesis-free).
+* **Counts**: pphi2 28 raw / 26 real → **30 raw / 28 real**, 0 sorries.
+
 ## 2026-07-12 — S1 `fss_infrared_quadratic` introduced (B2 route (a))
 
 * **New axiom** `fss_infrared_quadratic` (`Pphi2/AsymTorus/AsymInfraredBound.lean`): the
