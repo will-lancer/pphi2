@@ -243,7 +243,12 @@ track). Follow the addendum's 3.1'-3.4' sequencing.)*
   `planning/ispphi2limit-strengthening-scope.md`). Demote the current `pphi2_existence` to a
   clearly-labeled structural lemma or delete. This also resolves the blocked axiom 7
   (`canonical_continuumMeasure_cf_tendsto`) by never needing the converse.
-- [ ] **4.2 Keystone 18 — weak-coupling uniqueness (cluster expansion).** The glue for Gaps
+- [ ] **4.2 Keystone 18 — weak-coupling uniqueness (cluster expansion).** *(Campaign design
+  DONE 2026-07-13 — [`keystone-18-campaign.md`](keystone-18-campaign.md): K18-0 KP-core
+  extraction (delegable) → K18-1 foundations → K18-2 small/large-field research core (★★★,
+  Fable-led, vet-first) → K18-3 fixed-spacing uniqueness assembly → K18-4 coupled-limit step
+  (Gap C proper, own design pass). Template extraction verified the KP engine is fully
+  generic; only the activity layer is genuinely new.)* The glue for Gaps
   A/B/C (`coherence-analysis.md`). Route: continuum/lattice P(φ)₂ polymer expansion at weak
   coupling → boundary-independence + uniqueness + exponential clustering. **Template**: the
   genuine `Ch6Subtree/` expansion in `random-fields/GibbsMeasure`
