@@ -154,7 +154,40 @@ sub-`spatialGap` mode set is slice-constant, plus (A6) the a-uniformity
 `Ns·a = Ls → spatialGap ≥ (16/π²)·(π/Ls)²`-type bound (the `sin x ≥ (2/π)x` trick) for the
 κ selection.
 
-**Stage B — interacting band bound (consumes S2; S2 lands here):** Pieces 2–3 of the Route-A
+**Stage B — interface extraction DONE (2026-07-12, evening). Two holes remain, everything
+else composes.** The algebraic shell `interacting_second_moment_bound_to_freeCovariance_sum`
+(`AsymB5bSingleSlice.lean:273`, with `piece3_pathMeasure_bound_to_freeCovariance_sum:224`)
+already stitches B3 + Piece 3 + B5b into
+`∫(ωG)² ≤ (2/(1−γ)·C_B5b + C_rem_free)·freeSingleSliceCovarianceSum` — but takes `hPiece3`
+and `hRem` as hypotheses. The full brick inventory with verbatim signatures is in the Stage-B
+extraction (agent report, 2026-07-12): B3 bridge `interacting_second_moment_eq_pathMeasure`
+(`AsymVarianceDischarge.lean:64`, arbitrary `G`), the reflection-positivity engine
+(`GappedTransfer`, `susceptibility_le`, `averaged_susceptibility_bound` at `(1+γ)/(1−γ)`,
+`connected_two_point_le`), `asymGappedTransfer'` (γ = existential operator-norm contraction —
+S2 must be stated on exactly this γ), Piece 1 (`norm_sq_proj_obsTrunc_omega_le`, RHS =
+`groundSliceVariance`), the finite-K bridge theorems (`AsymBridgeInstance.lean:288/:320/:346`,
+single-`g` diagonal form, constant `2/(1−γ)`, tail `C_rem·Nt·γ^Nt`), the Piece-3 K→∞ engine
+(**complete**: `AsymBridgeKLimit.lean:296/:320`), and the slice API (`asymSliceEquiv`,
+`singleSliceLatticeField`, `slicePairing`).
+
+**Hole B-I (`hPiece3`) — substantive:** `∫(slicePairing G ψ)² dpath ≤
+(2/(1−γ))·groundSliceVarianceSum + C_rem·Nt·γ^Nt·(…)` for slice FAMILIES (the landed finite-K
+bounds are diagonal single-`g`). Route = the 7 steps of `layer-b2-completion-route.md:24`:
+square expansion into the double time sum, **pathMeasure cyclic translation invariance**
+(unproved), discharge of `twoPoint_dictionary`'s bounded-observable hypotheses for the
+truncated observables, kernel→operator pairing, then `connected_two_point_le` +
+`averaged_susceptibility_bound`, and the landed K→∞ transfer. ~400–800 lines.
+
+**Hole B-II (free-side band comparison) — substantive but pure Gaussian, ledger pre-vetted:**
+for slice-constant band-limited `G` (Stage A modeset, `κ² < spatialGap`):
+`freeSingleSliceCovarianceSum ≤ C(Ls, m, κ, m₀)·Var_free(G)` — needs the temporal 1D-DFT /
+temporal-symbol lemma (nothing temporal exists yet; `AsymSpatialConstant` built the spatial
+direction) + the one-slice free covariance zero-mode evaluation. This replaces the flagged
+`hFreeAssemble` trap hypothesis (`AsymB5bSingleSlice.lean:319`) **on the band only** — the
+all-`G` version is impossible (the design-pass verdict); the band restriction is what makes
+the vetted `Ls(κ²+m²)/(m·m₀)` ledger close.
+
+**S2 lands with B-I** (its γ-uniformity is what makes `2/(1−γ)` a-uniform): Pieces 2–3 of the Route-A
 blueprint (finite-K time-family susceptibility estimate + K→∞ DCT), applied to slice-constant
 fields, + B5b; plus the band-limited free comparison with the vetted `Ls(κ²+m²)/(m·m₀)`
 ledger. S2 (`asymTransferGap_uniform_fixedLs`) enters the build here with its consumer.
