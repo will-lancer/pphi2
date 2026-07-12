@@ -175,3 +175,32 @@ AsymSpatialConstant, AsymB5bSingleSlice, AsymFreeSpectral); B-I in a new
 AsymSpectralGap.lean; + possible small addition to reflection-positivity? NO — keep the
 cyclic-invariance lemma in pphi2 for now, upstream later). Disjoint from each other ⟹
 parallel implementation.
+
+## Item-1 upgrade (2026-07-12, latest): the τ-form — a-uniform bridge axioms (Gemini-vetted)
+
+The explicit-factor sharpening (C independent of `g`, `√gSV` factors — landed) is necessary
+but NOT sufficient: the per-step IUC constant `C(a)` **blows up as `a → 0`** (short-time
+kernel → delta; rate `~ a^{−1/2}`-ish), so the instance-existential `C` in the current axioms
+is implicitly a-divergent, and Stage C's corner would still fail. **Vetted fix (full proof
+blueprint received)**: attach the kernel bound to a fixed physical reference time `τ > 0`
+(require `Lt = Nt·a ≥ 2τ`; at least one arc is ≥ `Lt/2 ≥ τ`):
+- HS Cauchy–Schwarz split `|Tr(Ã Q^d B̃ Q^{Nt−d})| ≤ ‖Q^{τ/(2a)}Ã‖_HS·‖Q^d‖op·‖B̃ Q^{Nt−d−τ/(2a)}‖_HS`;
+- operator norm `γ^k` on the short arcs, IUC ONLY at the fixed physical time
+  (`Q^{τ/a}(x,x) ≤ C_IUC(Ls,τ)·Ω(x)²`);
+- total damping `γ^{Nt}·γ^{−τ/a}`; with the S2 gap `γ = e^{−m₀a}` this is `e^{m₀τ}` — constant.
+
+**Axiom shapes to adopt (replace the current pair; keep names, add `(τ)` argument or fold
+`γ^{−⌈τ/a⌉}` explicitly):**
+  `residual ≤ C(Ls,τ,P,mass) · γ^(Nt − ⌈τ/a⌉) · √gSV(g t) · √gSV(g t')`   (for `Nt·a ≥ 2τ`)
+  `∫A_K(ψ_t)² dpath ≤ (1 + C(Ls,τ,P,mass)·γ^(Nt − ⌈τ/a⌉)) · gSV(g t)`     (same proviso)
+with `∃C` AFTER fixing only `(P, mass, Ls, τ)` — uniform over `(Nt, Ns, a, γ-data, g, K, d, t, t')`
+with `Ns·a = Ls`. Small-`Lt` regime (`Nt·a < 2τ`): handled separately at Stage C (finite
+physical volume — the B2 target there follows from the per-instance B1/Nelson bound, no gap
+needed; OR keep the current per-instance axioms for that regime).
+**Corner check with the τ-form**: remainder/main ≈ C·Nt·γ^{Nt−τ/a}·(1−γ)/2 =
+C·(Lt/a)·e^{−m₀(Lt−τ)}·(m₀a)/2 = C·Lt·m₀·e^{−m₀(Lt−τ)}/2 — bounded in `a` AND decaying in
+`Lt` ✓. Stage-C design question #1 is thereby RESOLVED at the design level.
+
+Status: explicit-factor forms + rederived corollaries landed (compile in progress); the
+τ-form revision is the next edit (same files; thread `τ` + the `Nt·a ≥ 2τ` proviso through
+the corollaries; audit records updated to cite this section).
