@@ -2,6 +2,49 @@
 
 **Last updated**: 2026-07-12.
 
+## 2026-07-12 — S2 `asymTransferGap_uniform_fixedLs` introduced (B2 route (a), with hole B-I)
+
+* **New axiom** `asymTransferGap_uniform_fixedLs`
+  (`Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`): the fixed-`Ls` a-uniform spectral
+  gap of the asym transfer operator in **γ-form** — at fixed spatial circumference
+  `Ls = Ns·a` there exist `m₀ > 0`, `a₀ > 0` such that for all `(Nt, Ns, a)` with
+  `Ns·a = Ls`, `a ≤ a₀`, the normalized transfer contracts by `γ = exp(-m₀·a)` on the
+  ground-orthogonal complement. This is §S2 ("17a") of `planning/b2-route-a-statements.md`,
+  entered with the coordinator-pinned statement verbatim. The carrier is the PROVED
+  operator-norm contraction object (`asymTransferNormalized` / `asymGappedTransfer`'s
+  `hnorm` slot), NOT `exp(-a·asymMassGap)`; the coupled `Ns·a = Ls` quantifier is what the
+  removed false predecessors (`spectral_gap_uniform`, `spectral_gap_lower_bound`, PR #60)
+  lacked.
+* **Vetted statement**: Gemini 3.1-pro, 2026-07-12 (§S2 vet record in
+  `planning/b2-route-a-statements.md`; `audit/vetting/asymTransferGap_uniform_fixedLs.md`):
+  `Nt`-dependence through `wickConstantAsym` is harmless (`wickConstantAsym → c(∞, Ns, a)`
+  as `Nt → ∞`; Schrödinger eigenvalues continuous in coefficients; every finite `Nt` has a
+  positive gap, so `inf_{Nt} m_gap > 0`). Expert story: `T_a → e^{-aH(Ls)}` in
+  compact-resolvent sense (`reflection-positivity/docs/B2_UNIFORMITY_QUESTION.md`,
+  Simon *P(φ)₂* Ch. VI).
+* **Consumer (proved, same file)**: `asymSliceFamily_pathMeasure_second_moment_le_fixedLs`
+  — the `γ := exp(-m₀·a)` specialization of the hole B-I slice-family susceptibility bound
+  `asymSliceFamily_pathMeasure_second_moment_le` (steps 1–7 of the Stage-B B-I spec: parity
+  mean-zero, path-measure cyclic invariance, off-diagonal two-observable bridge, AM–GM +
+  wrap-around geometric sum, Piece-1 substitution, K→∞ DCT transfer), making `2/(1-γ)`
+  a-uniformly `≲ 2/(m₀·a)`-controlled at fixed `Ls`.
+* **B-I interface note**: the B-I theorem carries two explicitly-named finite-volume
+  hypotheses NOT derivable from the landed bricks (no new axioms for them): `hDiag`
+  (diagonal one-point ground dominance `∫A_{t,K}(ψ_t)² dμ_path ≤ groundSliceVariance +
+  C_diag·γ^Nt` — the single-slice path-measure marginal is `Z⁻¹·kPow(Nt-1)(x,x)·ν ≠ Ω²·ν`
+  at finite `Nt`) and `hRes` (a `K`-UNIFORM finite-periodic bridge residual constant — the
+  existing axiom `asymFinitePeriodicBridge_remainder_bound` yields a per-contract-pair,
+  hence `K`-dependent, constant which the K→∞ engine cannot consume). Both are `γ^Nt`-
+  remainder data in the exact shapes their discharge will produce; total remainder
+  `(C_diag·Nt + C_off·Nt²)·γ^Nt` feeds the B5b shell's abstract `rem` slot.
+* **Rating**: Standard. **Sources**: GR (Gemini 3.1-pro 2026-07-12, §S2 extraction vet),
+  LP (Glimm–Jaffe Ch. 6, 19; Simon *P(φ)₂* Ch. VI). Discharge route: norm-resolvent
+  convergence of the lattice transfer generator to the spatially cut-off circle
+  Hamiltonian `H(Ls)` + continuity of the bottom of the spectrum + per-lattice Jentzsch
+  gap for the finite-`a` tail.
+* **Count note**: +1 raw/+1 real → 28 raw / 26 real (status.md header + README counter
+  updated in the same commit).
+
 ## 2026-07-12 — S1 `fss_infrared_quadratic` introduced (B2 route (a))
 
 * **New axiom** `fss_infrared_quadratic` (`Pphi2/AsymTorus/AsymInfraredBound.lean`): the
@@ -829,13 +872,13 @@ elementary inequality `x² ≤ 2 e^|x|` and a scaling optimization.
 eventual pullback RP predicate `CylinderMeasureSequenceEventuallyReflectionPositive`
 and proves the IR-limit OS3 transfer by characteristic-functional convergence.
 
-## Current pphi2 Axiom Inventory (26 raw / 24 real as of 2026-07-12, 0 sorries)
+## Current pphi2 Axiom Inventory (28 raw / 26 real as of 2026-07-12, 0 sorries)
 
 This table is generated from the current `./scripts/count_axioms.sh` result and
 is the source of truth for active pphi2 axioms in this audit. Historical branch
 cohorts are retained below for provenance only.
 
-### Main inventory (24 real axioms — updated 2026-07-12 after the SpectralGap removal)
+### Main inventory (26 real axioms — updated 2026-07-12 after S1 + S2 landed)
 
 | File | Active axioms | Names |
 |------|---------------|-------|
@@ -853,7 +896,9 @@ cohorts are retained below for provenance only.
 | `Pphi2/AsymTorus/AsymExpMomentDischarge.lean` | 2 | `asymInteracting_mgf_gaussianDominated`, `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform` |
 | `Pphi2/NelsonEstimate/PolynomialChaosBridge.lean` | 1 | `nelson_exponential_estimate_master_bounded` |
 | `Pphi2/AsymTorus/AsymTorusOS.lean` | 1 | `asymTorusInteracting_exponentialMomentBound` (private) |
-| **Subtotal** | **24** | |
+| `Pphi2/AsymTorus/AsymInfraredBound.lean` | 1 | `fss_infrared_quadratic` (S1, 2026-07-12) |
+| `Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean` | 1 | `asymTransferGap_uniform_fixedLs` (S2, 2026-07-12) |
+| **Subtotal** | **26** | |
 
 ### Historical note: isotropic `Z_Nt × Z_Ns` cylinder redesign
 

@@ -16,12 +16,14 @@ and backend-independent reconstruction rules. This keeps the current scalar
 positive-measure construction explicit while opening a path to broader
 Euclidean/Minkowski interfaces.
 
-**Current counter (`./scripts/count_axioms.sh`, 2026-07-12, post-S1): pphi2 27 raw / 25 real axioms,
+**Current counter (`./scripts/count_axioms.sh`, 2026-07-12, post-S2): pphi2 28 raw / 26 real axioms,
 0 sorries; gaussian-field 3 axioms, 0 sorries** (both verified via `count_axioms.sh`,
-GaussianField pinned at `5bb35e8`). The 27 raw → 25 real reconciliation: 2 lines are docstring
+GaussianField pinned at `5bb35e8`). The 28 raw → 26 real reconciliation: 2 lines are docstring
 matches of the word "axiom" (`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
-`Pphi2/NelsonEstimate/LayerCake.lean:85`). The +1 is the vetted B2 route-(a) axiom
-`fss_infrared_quadratic` (AXIOM_AUDIT.md 2026-07-12 S1 entry).
+`Pphi2/NelsonEstimate/LayerCake.lean:85`). The +2 over the pre-route-(a) base are the vetted
+B2 route-(a) axioms `fss_infrared_quadratic` (S1, AXIOM_AUDIT.md 2026-07-12 S1 entry) and
+`asymTransferGap_uniform_fixedLs` (S2, γ-form fixed-`Ls` a-uniform transfer gap,
+`Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`, AXIOM_AUDIT.md 2026-07-12 S2 entry).
 **2026-07-12: `spectral_gap_uniform` and `spectral_gap_lower_bound` were REMOVED as false**
 (fixed-`Ns` shrinking-volume regime; wrong-counterterm double-well closes the gap — see
 `AXIOM_AUDIT.md` 2026-07-12 and `planning/cyl-2a-volume-scaling-addendum.md`; they had no

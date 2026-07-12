@@ -229,9 +229,10 @@ consistency checks:
 All six phases are structurally complete and the full project builds
 (`lake build`).
 
-Current counter (`./scripts/count_axioms.sh`, 2026-07-12, post-S1): pphi2 **27 raw /
-25 real axioms**, 0 sorries (+1 = the vetted FSS infrared axiom `fss_infrared_quadratic`,
-B2 route (a)); gaussian-field **3 axioms**, 0 sorries. The eight
+Current counter (`./scripts/count_axioms.sh`, 2026-07-12, post-S2): pphi2 **28 raw /
+26 real axioms**, 0 sorries (+2 = the vetted B2 route-(a) axioms `fss_infrared_quadratic`
+(S1) and `asymTransferGap_uniform_fixedLs` (S2, γ-form fixed-`Ls` a-uniform transfer gap,
+`Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`)); gaussian-field **3 axioms**, 0 sorries. The eight
 real Layer-B2 Route-A axioms are the six GNS bridge obligations isolated in
 `Pphi2/AsymTorus/AsymBridgeInstance.lean`, B5b single-slice stability in
 `Pphi2/AsymTorus/AsymB5bSingleSlice.lean`, and the final lattice Route-A

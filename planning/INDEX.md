@@ -98,6 +98,12 @@ clustering, gating OS4). Master campaign doc: [`docs/cylinder-master-plan.md`].
   **2026-07-12 S1 landed:** axiom `fss_infrared_quadratic` (`AsymTorus/AsymInfraredBound.lean`,
   vetted, = S1 of [`planning/b2-route-a-statements.md`]) + its proved high-branch consumer
   `asymHighModes_variance_le_freeVariance` — the FSS high-`k` branch of the B2 mode split.
+  **2026-07-12 S2 + hole B-I landed:** axiom `asymTransferGap_uniform_fixedLs` (S2, γ-form
+  fixed-`Ls` a-uniform gap, vetted) + the hole B-I slice-family susceptibility bound
+  `asymSliceFamily_pathMeasure_second_moment_le` and its `γ = exp(−m₀a)` S2-consumer, in
+  `AsymTorus/AsymSliceFamilySusceptibility.lean` (spec: `planning/b2-stageB-holes-spec.md`;
+  B-I carries two named finite-volume hypotheses `hDiag`/`hRes` — see the AXIOM_AUDIT.md
+  2026-07-12 S2 entry — as `γ^Nt`-remainder discharge points, no extra axioms).
   SUPERSEDED: [`docs/transfer-instantiation-plan.md`] (banner), the older 6-brick HS-Cauchy-Schwarz
   plan in `docs/B4B5-design.md` (eliminated by Route A — op-norm ≤ HS-norm is the wrong direction).
 
