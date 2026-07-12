@@ -140,7 +140,9 @@ invariance):
 
 ### Arc-4 staging (2026-07-12, evening)
 
-**Stage A — spatially-constant characterization (no new axioms, dispatched):** new file
+**Stage A — LANDED (`74746c2`, `AsymSpatialConstant.lean`, 462 lines, 0 axioms/sorries;
+all headline declarations kernel-verified to the bare trio; sharp `spatialGap` constant, and
+A6 delivered `16/Ls² ≤ spatialGap` — use the 16/Ls² form for κ-selection):** new file
 `AsymSpatialConstant.lean` with (A1) `sliceAvgProj` (spatial average per time slice, linear),
 (A2) commutation with `massOperatorAsym` (from `massOperatorAsym_translation_commute` —
 `sliceAvgProj` is the average of spatial shifts), (A3) discrete spatial Poincaré:
