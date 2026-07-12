@@ -115,13 +115,26 @@ invariance):
   `latticeEigenvalue1d`; mind `latticeFourierNormSq` at Nyquist and the signed
   `fourierFreq` indexing.
 
-## Sequencing (updated)
+## Sequencing (updated 2026-07-12, evening)
 
-1. ~~Extraction~~ DONE; ~~Gemini a-power vet~~ **PASSED 2026-07-12** (c₀ = 1; band ratio
+1. ~~Extraction~~ DONE; ~~Gemini a-power vet~~ **PASSED** (c₀ = 1; band ratio
    `Ls(κ²+m²)/(m·m₀)`; 3-way split exact on the free side; `Nt` harmless in S2).
-2. **S4 — next delegable item** (free-side DFT assembly, all ingredients named above).
-3. S1 + S2 enter Lean together with S3's statement (consumers in place); audit rows +
-   `audit/vetting/` records citing this doc's vet record, in the same PR.
-4. S3 proof: high branch (computation from S1 + S4), band branch (Pieces 1–3 + B5b + the
-   vetted band comparison), stitching; then Piece-5 assembly converts the B2 axiom to a
-   theorem; clustering axioms 14/15 ride the same trace bridge (`cyl-2a-spectral-gap.md`).
+2. ~~S4~~ **LANDED** (`6234206`, `Pphi2/AsymTorus/AsymFreeSpectral.lean`, 0 axioms/sorries;
+   orthogonality lemma `massEigenvectorBasisAsym_orthogonal` derived from the Hermitian API).
+3. ~~S1 + high branch~~ **LANDED** (`af9579e`, `Pphi2/AsymTorus/AsymInfraredBound.lean`):
+   axiom `fss_infrared_quadratic` (pinned statement verbatim; audit + vetting record in the
+   same commit) + proved consumer `asymHighModes_variance_le_freeVariance` —
+   kernel-verified footprint `[trio, fss_infrared_quadratic]`. Supporting proved lemmas:
+   `massOperatorAsym_const`, `sum_massEigenvectorBasisAsym_eq_zero_of_ne` (the
+   constants-are-`m²`-eigenvectors pairing), `sum_asymModeProj_eq_zero`,
+   `inv_sub_le_one_add_div_mul_inv`.
+4. **REMAINING — the band/zero branch + stitching** (the last B2 analytic arc):
+   a. S2 (`asymTransferGap_uniform_fixedLs`, γ-form) enters with its consumer (b);
+   b. the band-limited free-side comparison (vetted ledger — pure Gaussian/DFT computation,
+      `C_band = Ls(κ²+m²)/(m·m₀)`) + Pieces 1–3 applied to the band projection + B5b;
+   c. the three-way stitching (`3·max(C_high, C_band, C_zero)`) closing
+      `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform` → theorem (Piece 5).
+   The zero/band split needs the spatially-constant-mode set characterization (the
+   `k_s = 0` column) — the one S4 deliverable deliberately skipped (zero-mode
+   identification); scope it as the first task of arc 4.
+5. Clustering axioms 14/15 ride the same trace bridge afterward (`cyl-2a-spectral-gap.md`).
