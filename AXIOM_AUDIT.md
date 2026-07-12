@@ -1,6 +1,33 @@
 # Comprehensive Axiom Audit: pphi2 + gaussian-field + markov-semigroups + gaussian-hilbert
 
-**Last updated**: 2026-06-23.
+**Last updated**: 2026-07-12.
+
+## 2026-07-12 — Upstream Nelson/hypercontractivity chain is axiom-free (kernel-verified)
+
+* **Finding (Phase 1 of `planning/completion-plan-2026-07.md`):** at pphi2's current pins
+  (gaussian-hilbert `56ee09f` = its main HEAD; markov-semigroups `acf6491`), `#print axioms`
+  yields exactly `[propext, Classical.choice, Quot.sound]` for
+  `GaussianHilbert.ouSemigroupAct_eLpNorm_hypercontractive`,
+  `GaussianHilbert.bonami_nelson_chaos`, and
+  `GaussianHilbert.polynomial_chaos_concentration`. The whole
+  hypercontractivity → chaos-concentration chain feeding pphi2's `NelsonEstimate/` is
+  **theorem-backed upstream**; the Gross step routes through markov-semigroups' proved
+  `gross_lsi_implies_hypercontractive_of_hypotheses`
+  (`Instances/WorkInProgress/EuclideanHypercontractive.lean:482`), not the legacy axiom
+  `gross_lsi_implies_hypercontractive` (`Abstract/Hypercontractivity.lean:648`), and the
+  Concentration axioms (`herbst_mgf_bound`, `poincare_of_lsi`) are not in the closure.
+* **Consequence for the tables below:** the "gaussian-hilbert 1 axiom
+  (`ouSemigroupAct_eLpNorm_hypercontractive`)" row and the markov-semigroups "11 axioms"
+  row overstate the *load-bearing* debt for pphi2's Nelson chain — the remaining
+  markov-semigroups axioms (16 raw on main, incl. legacy Gross/Stroock–Varopoulos,
+  Herbst, DZ, matrix) are dormant for this chain. Cross-checked against
+  `random-fields/RandomFields` `Instances/OUDiffusion`, whose
+  `gaussian_{hypercontractive,lp_improvement,chaos_hypercontractive}` are independently
+  kernel-verified axiom-free (same DirichletMarkovSemigroup lineage).
+* **Stale-doc flag:** gaussian-hilbert `HypercontractivityFromBE.lean:21–46` ("inherits four
+  non-core axioms") predates the markov-semigroups discharges and needs updating in that repo;
+  likewise RandomFields `GrossODE.lean` carries "documented `sorry`" status prose over
+  now-complete proofs.
 
 ## 2026-06-23 — Layer-B2 Piece 5 torus assembly landed
 

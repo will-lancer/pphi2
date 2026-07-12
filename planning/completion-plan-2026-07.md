@@ -86,9 +86,24 @@ claims/code gaps found in the audit. All mechanical or near-mechanical.
 
 ---
 
-## Phase 1 — Upstream hypercontractivity check  *(≈ 1–2 active days; independent, do early)*
+## Phase 1 — Upstream hypercontractivity check  *(RESOLVED 2026-07-12 — already done upstream)*
 
-- [ ] **1.1** Compare `random-fields/RandomFields` `Instances/OUDiffusion`
+**Outcome (kernel-verified 2026-07-12, closes 1.1–1.3): no port needed.** At pphi2's current pins
+(gaussian-hilbert `56ee09f` = its main HEAD; markov-semigroups `acf6491`, two doc-only commits
+behind main), `#print axioms` gives the bare Mathlib trio for all of:
+`GaussianHilbert.ouSemigroupAct_eLpNorm_hypercontractive`, `GaussianHilbert.bonami_nelson_chaos`,
+`GaussianHilbert.polynomial_chaos_concentration`. The Gross step rides markov-semigroups'
+**proved** `gross_lsi_implies_hypercontractive_of_hypotheses`
+(`Instances/WorkInProgress/EuclideanHypercontractive.lean:482` explicitly bypasses the legacy
+axiom at `Abstract/Hypercontractivity.lean:648`); the Concentration axioms (`herbst_mgf_bound`,
+`poincare_of_lsi`) are not load-bearing for the chain either. RandomFields'
+`gaussian_{hypercontractive,lp_improvement,chaos_hypercontractive}` were independently
+kernel-verified axiom-free (its `GrossODE.lean` "documented sorry" notes are stale prose over
+real proofs). **Follow-ups**: (a) gaussian-hilbert `HypercontractivityFromBE.lean:21–46`
+header ("4 non-core axioms") is stale — fix in that repo; (b) pphi2 `AXIOM_AUDIT.md` summary
+rows for MarkovSemigroups/gaussian-hilbert overstate the load-bearing debt — dated entry added.
+
+- [x] **1.1** Compare `random-fields/RandomFields` `Instances/OUDiffusion`
   (`gaussian_hypercontractive`, `gaussian_lp_improvement`, chaos-level
   `gaussian_chaos_hypercontractive`: `‖f‖_{L^p(γ)} ≤ (p−1)^{k/2}‖f‖_{L²}`) against the **single
   remaining gaussian-hilbert axiom** `ouSemigroupAct_eLpNorm_hypercontractive`
@@ -96,12 +111,8 @@ claims/code gaps found in the audit. All mechanical or near-mechanical.
   `gaussian-hilbert/docs/hypercontractivity-discharge-plan.md`). Check: measure conventions
   (γFin vs isonormal), semigroup vs chaos-grading form, Lp index conventions, Mathlib pin
   compatibility (RandomFields is on v4.30.0).
-- [ ] **1.2** If compatible: port/adapt into gaussian-hilbert, discharge the axiom, bump pins up
-  the chain (gaussian-hilbert → markov-semigroups → pphi2; remember the stale-dep-cache clear on
-  every pin bump). This makes pphi2's polynomial-chaos concentration chain
-  (`bonami_nelson_chaos`, `polynomial_chaos_concentration`) fully theorem-backed upstream.
-- [ ] **1.3** If not compatible, record the mismatch in the gaussian-hilbert discharge plan and
-  drop this phase (no forcing).
+- [x] **1.2** Moot — chain already theorem-backed at current pins (see outcome above).
+- [x] **1.3** Moot — no mismatch to record; stale docs flagged instead (see outcome above).
 
 **Payoff**: removes the last upstream axiom under every Nelson-estimate consumer in pphi2 —
 cheap, high leverage, independent of all other phases.
