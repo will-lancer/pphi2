@@ -197,3 +197,10 @@ ledger. S2 (`asymTransferGap_uniform_fixedLs`) enters the build here with its co
 when `κ² < spatialGap`), `3·max(C_high, C_band)`, Piece-5 assembly → the B2 axiom becomes a
 theorem.
 5. Clustering axioms 14/15 ride the same trace bridge afterward (`cyl-2a-spectral-gap.md`).
+
+## STAGE C COMPLETE (2026-07-13, `081ef48`)
+
+`asymInteractingVariance_le_freeVariance_lattice_thresholded` proved; kernel footprint =
+trio + the 5 vetted axioms (S1, S2, τ-bridge pair, B5b) — independently re-verified.
+Remaining: Piece-5/Layer-C migration to the thresholded form (owner-flagged), then
+clustering 14/15 via the trace bridge.

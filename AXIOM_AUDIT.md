@@ -45,6 +45,31 @@
 * **Count note**: +1 raw/+1 real → 28 raw / 26 real (status.md header + README counter
   updated in the same commit).
 
+## 2026-07-13 — B2 STAGE C COMPLETE: the thresholded variance bound is a THEOREM on 5 vetted axioms
+
+* **`asymInteractingVariance_le_freeVariance_lattice_thresholded`**
+  (`Pphi2/AsymTorus/AsymVarianceAssembly.lean`, commit `081ef48`): at fixed `Ls`, there are
+  `C, L₀, a₀ > 0` with `Var_int(ωG) ≤ C·Var_free(ωG)` for ALL `G` and all lattices with
+  `Ns·a = Ls`, `a ≤ a₀`, `Nt·a ≥ L₀`. Kernel footprint (independently re-verified):
+  `[trio] + {fss_infrared_quadratic, asymTransferGap_uniform_fixedLs,
+  asymFinitePeriodicBridge_diagonal_bound, asymFinitePeriodicBridge_remainder_bound_uniform,
+  groundVariance_le_freeCovariance}` — the B3/GNS/measure-factorization chain contributes
+  nothing beyond these five vetted (GR+LP) axioms.
+* **Route recap** (all 2026-07-12/13, `planning/b2-route-a-statements.md` +
+  `planning/b2-stageB-holes-spec.md`): mode-split design (FSS high branch ⊕ gap band branch)
+  after the design-pass verdict killed the oscillation-blind chain; S4 spectral toolkit;
+  S1 integrated-form FSS + proved high branch; Stage A slice-average characterization;
+  B-II band free comparison (honest zero-mode constant); B-I slice-family susceptibility
+  (parity + cyclic invariance proved; τ-form IUC bridge axioms with the fixed-physical-time
+  structure); C1 band-limitedness; C2 hInt discharged via ground-vector Gaussian-decay
+  smoothing (bare trio); C3 per-pair Cauchy–Schwarz sharp remainder; C4 assembly with the
+  pinned a-cancellations (`(2/(1−γ))·(2a/m)` etc.).
+* **Remaining for full B2 closure (wiring, owner-flagged)**: migrate Piece-5 / Layer C to the
+  thresholded (eventual-in-`Lt,a`) form; then the original all-`(Lt,a)` axiom
+  `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform` (over-broad: true-but-unproved
+  at small `Lt` / coarse `a`) can be deleted or restated. Clustering axioms 14/15 ride the
+  same trace bridge next (`planning/cyl-2a-spectral-gap.md`).
+
 ## 2026-07-12 — τ-form revision of the K-uniform bridge axioms (statements strengthened in place)
 
 * `asymFinitePeriodicBridge_remainder_bound_uniform` and `_diagonal_bound` restated in the
