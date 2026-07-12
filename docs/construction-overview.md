@@ -202,10 +202,11 @@ $$m_{\mathrm{phys}} = -\frac{1}{a} \log(\lambda_1 / \lambda_0).$$
 
 The spectral gap $\lambda_0 > \lambda_1$ immediately gives
 $m_{\mathrm{phys}} > 0$. For the continuum limit, one needs the
-spectral gap to be **uniform** in the lattice spacing $a$. This is
-the content of the axiom `spectral_gap_uniform`: there exists
-$m_0 > 0$ such that $\operatorname{gap}(a) \geq m_0$ for all
-$a \leq a_0$. The physical justification is that P(phi)_2 with
+spectral gap to be **uniform** in the lattice spacing $a$ along the
+coupled sequence ($N \cdot a$ fixed or growing). This is currently an
+**open target** (17a/17b in `planning/cyl-2a-volume-scaling-addendum.md`):
+the former axiom `spectral_gap_uniform`, which asserted uniformity at
+fixed lattice-site count, was removed 2026-07-12 as false as stated. The physical justification is that P(phi)_2 with
 $m > 0$ has no phase transition (Glimm-Jaffe-Spencer), so the mass
 gap cannot close.
 
@@ -323,9 +324,12 @@ mechanisms:
   functional. Since the generating functional converges pointwise
   under weak convergence, the RP inequality passes to the limit.
 
-- **OS4:** The uniform spectral gap gives uniform exponential
-  clustering at each lattice spacing. Exponential decay of
-  correlations with a uniform rate transfers under weak convergence.
+- **OS4:** A spectral gap uniform along the coupled continuum-limit
+  sequence would give uniform exponential clustering at each lattice
+  spacing, and exponential decay with a uniform rate transfers under
+  weak convergence. (The former fixed-`Ns` uniform-gap axioms were
+  removed 2026-07-12 as false as stated; the coupled-limit statement
+  is an open target — see `planning/cyl-2a-volume-scaling-addendum.md`.)
 
 ## 6. Phase 5: Euclidean Invariance (OS2)
 
@@ -497,15 +501,19 @@ The proof architecture uses **axioms** for unproved analytic and
 probabilistic results, with the logical structure connecting them fully
 formalized.
 
-As of the latest count: **pphi2 has 15 axioms and 0 sorries**;
-the pinned Lake `GaussianField` dependency has **4 axioms and 0 sorries**,
-for a combined total of **19 axioms** across both projects.
+As of 2026-07-12: **pphi2 has 24 real axiom declarations (26 raw per
+`count_axioms.sh`) and 0 sorries**; the pinned Lake `GaussianField`
+dependency has **3 axioms and 0 sorries**. (Historical counts in this
+paragraph predated the cylinder-era axiom cohorts and the 2026-07-12
+removal of the false spectral-gap pair; see `AXIOM_AUDIT.md` for the
+authoritative inventory.)
 
 The axioms cluster into several thematic groups:
 
-- **Cluster expansions and uniform bounds** (spectral gap uniformity,
-  Nelson's full estimate on $\mathbb{R}^2$): These are the deepest
-  analytic results. On the torus, the physical volume identity gives
+- **Cluster expansions and uniform bounds** (the open coupled-limit
+  spectral-gap uniformity — the former axioms were removed 2026-07-12
+  as false as stated — and Nelson's full estimate on $\mathbb{R}^2$):
+  These are the deepest analytic results. On the torus, the physical volume identity gives
   the bound for free; on $\mathbb{R}^2$, cluster expansions
   (Glimm-Jaffe Ch. 8, Simon Ch. V) are needed to control the
   infinite-volume limit.

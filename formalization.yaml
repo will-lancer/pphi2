@@ -1,7 +1,7 @@
 # formalization.yaml — https://github.com/mathlib-initiative/formalization.yaml (v0.3)
 # Describes the `layer-B2/piece-5` branch state of pphi2.
-# Built tree (Pphi2.lean + Common): 0 sorries, 26 real `axiom` declarations
-#   (24 public + 2 private). `scripts/count_axioms.sh` reports "28 raw" because
+# Built tree (Pphi2.lean + Common): 0 sorries, 24 real `axiom` declarations
+#   (22 public + 2 private). `scripts/count_axioms.sh` reports "26 raw" because
 #   it also matches 2 docstring lines that begin with the word "axiom".
 #   Legacy `ddj/` and parked `future/` are NOT part of the default build target.
 version: "v0.3"
@@ -48,16 +48,17 @@ status:
     and the default target builds with 0 sorries. The headline existence theorem
     `Pphi2.pphi2_existence` (∃ μ on S'(ℝ²) satisfying all five OS axioms) is
     assembled from the lattice construction + continuum limit, but is CONDITIONAL
-    on a set of named analytic axioms (uniform exponential moment bounds, uniform
-    spectral gap, clustering-from-spectral-gap, rotation/Ward-identity restoration,
-    propagator convergence, non-Gaussianity). These represent the standard but
+    on a set of named analytic axioms (uniform exponential moment bounds,
+    clustering-from-spectral-gap, rotation/Ward-identity restoration,
+    propagator convergence, non-Gaussianity). (The former uniform-spectral-gap
+    axioms were removed 2026-07-12 as false-as-stated; see AXIOM_AUDIT.md.) These represent the standard but
     not-yet-formalized analytic hard cores of the construction. The build target
     is the `Pphi2` library (with `Common`); the legacy `ddj/` directory and the
     parked `future/CylinderContinuumLimit/` directory are NOT in the build and
     contain their own separate axioms/sorries that do not affect the main results.
   sorry_count: 0                 # in the built Pphi2/ + Common tree
   sorry_in_definitions: 0
-  axioms:                        # 26 real axiom declarations in the built Pphi2/ tree (24 public + 2 private)
+  axioms:                        # 24 real axiom declarations in the built Pphi2/ tree (22 public + 2 private)
     - schwinger_agreement                                  # Bridge.lean:274
     - os2_from_phi4                                        # Bridge.lean:345
     - pphi2_nontriviality                                  # Main.lean:128
@@ -76,8 +77,6 @@ status:
     - asymGroundSemigroup_intertwines                      # AsymTorus/AsymBridgeInstance.lean:219
     - groundVariance_le_freeCovariance                     # AsymTorus/AsymB5bSingleSlice.lean:162
     - asymTorusInteracting_exponentialMomentBound          # AsymTorus/AsymTorusOS.lean:852 (private)
-    - spectral_gap_uniform                                 # TransferMatrix/SpectralGap.lean:89
-    - spectral_gap_lower_bound                             # TransferMatrix/SpectralGap.lean:100
     - rotation_cf_defect_polylog_bound                     # OSProofs/OS2_WardIdentity.lean:614
     - two_point_clustering_from_spectral_gap               # OSProofs/OS4_MassGap.lean:137
     - general_clustering_from_spectral_gap                 # OSProofs/OS4_MassGap.lean:160
@@ -89,7 +88,7 @@ status:
       file: "Pphi2/Main.lean"
       sorry_count: 0
       literature_dependencies:
-        - statement: "existence of a probability measure on S'(ℝ²) satisfying the OS0–OS4 axioms for P(Φ)₂; conditional on the named uniform-estimate / spectral-gap / clustering / rotation-restoration axioms"
+        - statement: "existence of a probability measure on S'(ℝ²) satisfying the OS0–OS4 axioms for P(Φ)₂; conditional on the named uniform-estimate / clustering / rotation-restoration axioms (the former uniform-spectral-gap axioms were removed 2026-07-12 as false as stated)"
           source: "ISBN:978-0-691-08144-3"
         - statement: "lattice construction and continuum limit of the P(Φ)₂ measure"
           source: "ISBN:978-0-387-96477-7"
@@ -141,9 +140,11 @@ fidelity:
     space, or field operators are constructed; `massParameter_positive` is
     bookkeeping over the input bare mass, not a derived physical mass gap). The
     headline existence theorem is conditional on several named analytic axioms
-    (uniform exponential moments, uniform spectral gap, clustering, rotation
-    restoration, propagator/non-Gaussianity inputs) standing in for the
-    not-yet-formalized cluster-expansion / correlation-inequality content. Per
+    (uniform exponential moments, clustering, rotation restoration,
+    propagator/non-Gaussianity inputs) standing in for the not-yet-formalized
+    cluster-expansion / correlation-inequality content. (The former
+    uniform-spectral-gap axioms were removed 2026-07-12 as false as stated;
+    see AXIOM_AUDIT.md.) Per
     the project's own coherence analysis, `SatisfiesFullOS` is also satisfied by
     the free field, and non-triviality / non-Gaussianity are separate existence
     statements not yet conjoined with the OS measure into a single interacting
@@ -154,7 +155,7 @@ fidelity:
 review:
   status: "self-assessed"
   reviewers: []
-  notes: "0 sorries on the active build (main, HEAD 9f2dcd6); 19 named axioms remain in the built Pphi2/ tree. The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
+  notes: "0 sorries on the active build; 24 real axiom declarations remain in the built Pphi2/ tree (26 raw per count_axioms.sh; the former uniform-spectral-gap pair was removed 2026-07-12 as false as stated). The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
 
 alignment:
   namespace: "Pphi2"
@@ -163,7 +164,7 @@ alignment:
       lean: "Pphi2.pphi2_existence"
       module: "Pphi2.Main"
       status: "literature-dependency"
-      note: "OS0–OS4 existence; conditional on the named analytic axioms (uniform moments, spectral gap, clustering, rotation restoration)."
+      note: "OS0–OS4 existence; conditional on the named analytic axioms (uniform moments, clustering, rotation restoration; the former spectral-gap axioms were removed 2026-07-12 as false as stated)."
     - source: "10.1007/BF01645738"
       lean: "Pphi2.SatisfiesFullOS"
       module: "Pphi2.OSAxioms"
@@ -184,10 +185,5 @@ alignment:
       module: "Pphi2.AsymTorus.AsymContinuumLimit"
       status: "literature-dependency"
       note: "cylinder OS0–OS3 assembly via the Nelson Markov-field / transfer-matrix route; conditional on RP, OS2-symmetry, and the uniform exp-moment axiom."
-    - source: "ISBN:978-0-387-96477-7"
-      lean: "Pphi2.spectral_gap_uniform"
-      module: "Pphi2.TransferMatrix.SpectralGap"
-      status: "literature-dependency"
-      note: "uniform spectral gap of the transfer matrix; one of the genuine hard-core analytic axioms (GJ Ch. VI)."
 
 acknowledgements: ""

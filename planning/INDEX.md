@@ -17,12 +17,12 @@ QFT exists"**. Three architecture gaps (all fixed by one keystone — weak-coupl
 - **A.** `SatisfiesFullOS` (OS0–OS4) is satisfied by the **free field** too; non-triviality (11)
   and non-Gaussianity (9) are **separate `∃μ`**, never conjoined with the OS measure. No theorem
   says "the OS measure is interacting."
-- **B.** Gap (16/17) + non-Gaussianity (9) hold **only at weak coupling** (phase transition), but
+- **B.** The gap (now the open 17b replacement — 16/17 removed 2026-07-12) + non-Gaussianity (9) hold **only at weak coupling** (phase transition), but
   `pphi2_exists` is stated for **all `P`** with no coupling hypothesis → over-claim. Must thread
   `IsWeakCoupling` (already in `Bridge.lean`) up into the headline.
 - **C.** Keystone **missing from the 17**: **weak-coupling uniqueness of the limit** (cluster
   expansion) — glues the separate `∃μ` into one, fixes the regime, and upgrades subsequence → limit.
-- [ ] **18. weak-coupling uniqueness** (NEW target) `—`   status: open   deps: [16/17 regime]   diff: ★★★
+- [ ] **18. weak-coupling uniqueness** (NEW target) `—`   status: open   deps: [17b regime]   diff: ★★★
   note: cluster expansion / Dobrushin uniqueness at weak coupling. The keystone for A+B+C. Then
   restate the headline as `∃ μ, SatisfiesFullOS μ ∧ (∀f≠0,S₂>0) ∧ u₄≠0`. → `coherence-analysis.md`.
 
@@ -39,12 +39,13 @@ clustering, gating OS4). Master campaign doc: [`docs/cylinder-master-plan.md`].
 ```
                                  nelson_exponential_estimate_master_bounded (12) ★★★
                                               │
-   spectral_gap_lower_bound (16) ──┐          ▼
-   spectral_gap_uniform (17) ──────┤    asymInteracting_mgf_gaussianDominated (2)  [Layer A]
-        │  (CYL-2a) ★★★            │          │
-        ▼                          │          ▼          asymInteractingVariance_le_
-   two_point_clustering (14) ★★    │   asymInteracting_expMoment_volume_uniform (1) ◄── freeVariance_Lt_uniform (3) [Layer B2, OURS] ★★★
-   general_clustering (15) ★★      │          │  [CYL-1a, Layer C assembly] ★
+   [gap 17a/17b — OPEN target;  ──┐          ▼
+    former axioms 16/17 REMOVED    │    asymInteracting_mgf_gaussianDominated (2)  [Layer A]
+    2026-07-12 as false]           │          │
+        │  (CYL-2a) ★★★            │          ▼          asymInteractingVariance_le_
+        ▼                          │   asymInteracting_expMoment_volume_uniform (1) ◄── freeVariance_Lt_uniform (3) [Layer B2, OURS] ★★★
+   two_point_clustering (14) ★★    │          │  [CYL-1a, Layer C assembly] ★
+   general_clustering (15) ★★      │          │
         │ (OS4)                    │          ▼
         ▼                          │   continuum_exponential_moment_bound (6) ★★ ──► OS0/OS1
    continuum_exponential_          │   canonical_continuumMeasure_cf_tendsto (7) ★★
@@ -94,13 +95,16 @@ they discharge in the same PR as B2 (★★ given that bridge); (ii) `spectral_g
 as stated are **too strong** — φ⁴₂ has a phase transition where the gap closes, so they need a
 weak-coupling / single-phase hypothesis.
 
-- [ ] **17. `spectral_gap_uniform`** `TransferMatrix/SpectralGap.lean:89`   status: scoped   deps: []   diff: ★★★
-  note: gap survives `a→0` (finite-`a` gap `asymGappedTransfer'` PROVED; continuum uniformity
-  remains). **Regime-restricted** (phase transition). Route: `a→0` eigenvalue-gap limit /
-  perturbative. THE independent hard core of CYL-2a. → `planning/cyl-2a-spectral-gap.md`.
-- [ ] **16. `spectral_gap_lower_bound`** `TransferMatrix/SpectralGap.lean:100`   status: scoped   deps: []   diff: ★★★→★★
-  note: `c·mass ≤ massGap` — FALSE at criticality; weak-coupling `m_phys ≥ m − Cλ` via the existing
-  Nelson estimates. → `planning/cyl-2a-spectral-gap.md`.
+- [x] **17. `spectral_gap_uniform`** — **REMOVED 2026-07-12 (FALSE as stated)**
+  note: was quantified at fixed `Ns` with `a→0` (shrinking volume `Ns·a → 0`), where the
+  hard-coded 2D Wick constant over-subtracts (zero mode `~ a⁻²`) and the gap closes as a
+  tunneling splitting `~ (1/a)e^{−c/a²}` at every coupling. No proof-term consumers (dead
+  branch; Main's OS4 = `continuum_exponential_clustering`). Corrected coupled-limit statement
+  (17a fixed-`L`, no regime; 17b volume-uniform, weak coupling) recorded in
+  `planning/cyl-2a-volume-scaling-addendum.md`; enters the build only with the OS4 campaign.
+- [x] **16. `spectral_gap_lower_bound`** — **REMOVED 2026-07-12 (FALSE as stated)**
+  note: same fixed-`Ns` mechanism as 17 (and additionally false at criticality even in the
+  coupled limit without weak coupling). Same addendum carries the replacement design.
 - [ ] **14. `two_point_clustering_from_spectral_gap`** `OSProofs/OS4_MassGap.lean:137`   status: scoped   deps: [3-bridge]   diff: ★★ (given B2 trace bridge)
   note: = `connected_two_point_le` with `γ=e^{−massGap·a}` via `twoPoint_dictionary` +
   `asymTransferKernel_kPow_apply` (proved). Do in the B2 trace-bridge PR. → `planning/cyl-2a-spectral-gap.md`.
@@ -177,9 +181,13 @@ interacting content (`u₄≠0`, ★★★, needs `λ>0`).
 
 1. **The exp-moment chain** (1 ← 2 ← 12, + 3) — Layer A (Nelson/Lee–Yang) + Layer B2 (transfer gap,
    ours). Status: B2 mostly proved (HS trace-bridge tail); Layer A not started.
-2. **The uniform spectral gap** (16, 17) — the OS4 mass gap surviving `a→0`. **Regime-restricted**
-   (phase transition). *Independent of B2.* — Note: the **clustering** axioms (14, 15) are NOT a
-   separate mountain; they ride on the B2 trace bridge (= `connected_two_point_le`).
+2. **The uniform spectral gap** — the OS4 mass gap surviving `a→0` along a coupled sequence.
+   The former axioms (16, 17) were **REMOVED 2026-07-12 as false as stated** (fixed-`Ns`
+   shrinking-volume regime — see the Cluster-2 rows above and AXIOM_AUDIT.md); the mountain
+   remains as the OPEN coupled-limit replacement (17a/17b,
+   `planning/cyl-2a-volume-scaling-addendum.md`), to be introduced with its consumer. — Note:
+   the **clustering** axioms (14, 15) are NOT a separate mountain; they ride on the B2 trace
+   bridge (= `connected_two_point_le`).
 3. **Non-Gaussianity** (9, `u₄≠0`) — the limit is genuinely interacting. *Needs `λ>0`.* — Note:
    `pphi2_nontriviality` (11, `S₂>0`) is only ★★, NOT a mountain.
 4. **Rotation restoration** (13) for OS2 — the lattice→continuum rotation defect.
@@ -232,8 +240,9 @@ asym↔square at `Nt=Ns`) — a substantial step, not a few edits. → deps: [sq
 variance bound) via the asym dictionary + the operator bricks 0–2 (proved this session) +
 `connected_susceptibility_le`. Everything else is blocked on one of: keystone 18 (cluster
 expansion), the IR-limit theorem, FKG two-point domination, the square trace dictionary, the
-Layer-A Nelson/Lee–Yang engine (2/12), the spectral-gap-uniformity (17), or a regime/intent human
-decision (11, 16/17/9, 7).
+Layer-A Nelson/Lee–Yang engine (2/12), the open coupled-limit spectral-gap replacement (17a/17b —
+the former axioms 16/17 were removed 2026-07-12 as false), or a regime/intent human
+decision (11, 9, 7).
 
 ## Plan-loop frontier — 2026-06-07 (post Route-A non-triviality)
 
@@ -249,7 +258,10 @@ second moment + HS trace-class + B5b single-slice stability + the `1/a` cancella
 
 Remaining ★★★ mountains / human-gated items (unchanged from the 2026-06-04 triage):
 - **Layer A** (`asymInteracting_mgf_gaussianDominated`, item 2) — Newman MGF via Lee–Yang; not started.
-- **Spectral gap uniformity** (16/17) — also feeds OS4 clustering (14/15) *and* the deferred Route B.
+- **Spectral gap uniformity** — the former axioms (16/17) were REMOVED 2026-07-12 as false as
+  stated; the mountain persists as the OPEN coupled-limit replacement (17a/17b,
+  `planning/cyl-2a-volume-scaling-addendum.md`) — still feeds OS4 clustering (14/15) *and* the
+  deferred Route B.
 - **S₂>0 continuum nondegeneracy** (item 11) — short-distance singularity / cluster expansion.
 - **Nelson/Lee–Yang** (12), **rotation defect** (13), **IR-limit** (10), **cluster-expansion
   keystone** (4/18).
@@ -259,10 +271,11 @@ the cylinder Layer-B2 wiring (item 3); everything else is a standalone research-
 
 ## Axioms beyond the 17 (sanity check vs `count_axioms.sh`)
 
-`count_axioms.sh` reports **28 raw axioms** on `layer-B2/piece-5` (rechecked 2026-06-23);
-2 are docstring matches of the word "axiom" inside text continuations
+`count_axioms.sh` reports **26 raw axioms** (rechecked 2026-07-12, after the removal of the
+false `spectral_gap_uniform`/`spectral_gap_lower_bound` — see the AXIOM_AUDIT 2026-07-12
+entry); 2 are docstring matches of the word "axiom" inside text continuations
 (`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
-`Pphi2/NelsonEstimate/LayerCake.lean:85`), leaving **26 real axioms**.
+`Pphi2/NelsonEstimate/LayerCake.lean:85`), leaving **24 real axioms**.
 
 The 24 architectural axioms account for the current proof debt, including the
 six Layer-B2 Route-A GNS bridge obligations in
