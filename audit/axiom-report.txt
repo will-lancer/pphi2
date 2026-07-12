@@ -3,6 +3,7 @@
  Pphi2.canonical_continuumMeasure_cf_tendsto,
  Pphi2.continuum_exponential_clustering,
  Pphi2.continuum_exponential_moment_bound,
+ Pphi2.pphi2_limit_exists,
  Pphi2.rotation_cf_defect_polylog_bound,
  Quot.sound]
 'Pphi2.pphi2_main' depends on axioms: [propext,
@@ -16,7 +17,11 @@
  Classical.choice,
  Pphi2.continuumLimit_nonGaussian,
  Quot.sound]
-'Pphi2.pphi2_nontrivial' depends on axioms: [propext, Classical.choice, Pphi2.pphi2_nontriviality, Quot.sound]
+'Pphi2.pphi2_nontrivial' depends on axioms: [propext,
+ Classical.choice,
+ Pphi2.pphi2_limit_exists,
+ Pphi2.pphi2_nontriviality,
+ Quot.sound]
 'Pphi2.cylinderIso_OS_of_RP_OS2' depends on axioms: [propext,
  Classical.choice,
  GaussianField.embed_l2_uniform_bound,
@@ -27,6 +32,7 @@
  Pphi2.canonical_continuumMeasure_cf_tendsto,
  Pphi2.continuum_exponential_clustering,
  Pphi2.continuum_exponential_moment_bound,
+ Pphi2.pphi2_limit_exists,
  Pphi2.rotation_cf_defect_polylog_bound,
  Quot.sound]
 'Pphi2.asymInteractingVariance_le_freeVariance_Lt_uniform' depends on axioms: [propext,

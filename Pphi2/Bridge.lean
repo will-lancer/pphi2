@@ -87,11 +87,10 @@ To bridge the two projects, we need to identify pphi2's `InteractionPolynomial`
 with Phi4's `Phi4Params`. The φ⁴ interaction corresponds to the polynomial
 P(τ) = λτ⁴ with the same mass and coupling. -/
 
-/-- A pphi2 `InteractionPolynomial` is a φ⁴ interaction if its polynomial is
-P(τ) = λτ⁴ for some coupling constant λ > 0. -/
-def isPhi4 (P : InteractionPolynomial) (coupling : ℝ) : Prop :=
-  P.n = 4 ∧ 0 < coupling
-  -- Full version: all coefficients match the φ⁴ interaction
+/-! `isPhi4` and `IsWeakCoupling` moved upstream to
+`Pphi2/ContinuumLimit/Convergence.lean` (2026-07, spec D3) so the
+regime-sensitive axioms there can carry them as hypotheses. The unqualified
+names below still resolve (namespace ascent `Pphi2.Bridge` → `Pphi2`). -/
 
 /-! ## Measure predicates
 
@@ -103,10 +102,12 @@ weak limit of the respective regularized measure sequences. -/
 of pphi2's lattice construction: μ = weak-lim_{a→0} (ι_a)_* μ_a
 where μ_a is the interacting lattice measure at spacing a, embedded into S'(ℝ²).
 
-Placeholder body. Full definition requires weak convergence along a subsequence
-as in `continuumLimit`. We also record the standard Z₂ symmetry
-`Measure.map Neg.neg μ = μ` for even interactions, together with reflection
-positivity of the approximating continuum measures. -/
+Twin of `IsPphi2Limit` (Embedding.lean) in Bridge type aliases; the bodies are
+kept literally identical so `IsPphi2ContinuumLimit.toIsPphi2Limit` is `exact h`.
+We record the standard Z₂ symmetry `Measure.map Neg.neg μ = μ` for even
+interactions, reflection positivity of the approximating continuum measures,
+and (2026-07, δ₀-exclusion) the coupled lattice approximation conjunct forcing
+`ν k = continuumMeasure 2 (N k) P (a k) mass` with `N k → ∞`, `N k · a k → ∞`. -/
 def IsPphi2ContinuumLimit
     (μ : @Measure FieldConfig instMeasurableSpaceConfiguration)
     [IsProbabilityMeasure μ]
@@ -145,7 +146,16 @@ def IsPphi2ContinuumLimit
       0 ≤ ∑ i, ∑ j, c i * c j *
         (∫ ω : FieldConfig,
           Complex.exp (Complex.I * ↑(ω ((f i : TestFun) -
-            compTimeReflection2 (f j : TestFun)))) ∂(ν k)).re)
+            compTimeReflection2 (f j : TestFun)))) ∂(ν k)).re) ∧
+    -- Coupled lattice approximation (mirrors `IsPphi2Limit`, Embedding.lean):
+    -- ν k is the continuum-embedded interacting lattice measure at size N k,
+    -- spacing a k, with N k → ∞ and physical volume N k · a k → ∞.
+    (∃ N : ℕ → ℕ,
+      Filter.Tendsto N Filter.atTop Filter.atTop ∧
+      Filter.Tendsto (fun k => (N k : ℝ) * a k) Filter.atTop Filter.atTop ∧
+      ∀ k, ∃ (hN : N k ≠ 0) (hak : 0 < a k) (hm : 0 < mass),
+        ν k = (haveI : NeZero (N k) := ⟨hN⟩
+          continuumMeasure 2 (N k) P (a k) mass hak hm))
 
 /-- A probability measure μ on S'(ℝ²) that arises as the infinite-volume limit
 of the Phi4 continuum construction: μ = weak-lim_{Λ→∞} μ^{Phi4}_{Λ}
@@ -168,22 +178,6 @@ def IsPhi4ContinuumLimit
         (fun k : ℕ => ∫ ω : FieldConfig, ∏ i, ω (f i) ∂(ν k))
         Filter.atTop
         (nhds (∫ ω : FieldConfig, ∏ i, ω (f i) ∂μ))
-
-/-- The coupling constant is in the weak-coupling regime where the cluster
-expansion converges, guaranteeing uniqueness of the infinite-volume limit.
-
-Placeholder body. The full condition is `coupling < l₀(P, mass)` where l₀
-is the radius of convergence of the Glimm-Jaffe-Spencer cluster expansion.
-Reference: Glimm-Jaffe-Spencer (1974). -/
-def IsWeakCoupling (P : InteractionPolynomial) (mass coupling : ℝ) : Prop :=
-  -- The coupling constant is small enough for the Glimm-Jaffe-Spencer cluster
-  -- expansion to converge. Concretely, for P(τ) = λτ⁴ this requires λ < λ₀(m)
-  -- where λ₀(m) > 0 is a mass-dependent radius of convergence.
-  -- We state this as: there exists a positive threshold λ₀ > coupling such that
-  -- the expansion converges, ensuring uniqueness of the infinite-volume limit.
-  0 < coupling ∧ coupling < mass ^ 2 / 4
-  -- Note: the true condition is coupling < λ₀(P, mass) per Glimm-Jaffe-Spencer (1974).
-  -- We use mass² / 4 as a conservative stand-in for the convergence radius.
 
 /-! ## Bridge between IsPphi2ContinuumLimit and IsPphi2Limit
 

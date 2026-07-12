@@ -213,6 +213,10 @@ consistency checks:
   and the interaction. Shifting the bare mass m → m' while compensating
   P → P + m²/2 − (m')²/2 leaves the total quadratic term (−Δ + m²) + P
   unchanged, so the resulting continuum measure must be identical.
+  (Status 2026-07-13: the previous Lean statements were vacuity artifacts of
+  the unstrengthened `IsPphi2Limit` and were removed; the conjecture and its
+  proof strategy are recorded in `docs/plan.md` § "Deferred consistency
+  checks".)
 
 - **Wick ordering scheme independence.** The Wick ordering constant
   c_a = G_a(0,0) depends on the bare mass m through the propagator. A mass
@@ -229,10 +233,20 @@ consistency checks:
 All six phases are structurally complete and the full project builds
 (`lake build`).
 
-Current counter (`./scripts/count_axioms.sh`, 2026-07-12, post-B-I-cleanup): pphi2 **30 raw /
-28 real axioms** (+2 = the K-uniform finite-periodic bridge pair, IUC-vetted), 0 sorries (+2 = the vetted B2 route-(a) axioms `fss_infrared_quadratic`
-(S1) and `asymTransferGap_uniform_fixedLs` (S2, γ-form fixed-`Ls` a-uniform transfer gap,
-`Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`)); gaussian-field **3 axioms**, 0 sorries. The eight
+Current counter (`./scripts/count_axioms.sh`, 2026-07-13, post-Phase-4.1): pphi2 **31 raw /
+29 real axioms**, 0 sorries; gaussian-field **3 axioms**, 0 sorries. The +1 over the
+post-B-I-cleanup base (30 raw / 28 real) is `pphi2_limit_exists`
+(`Pphi2/ContinuumLimit/Convergence.lean`), the single clearly-labeled OPEN existence input
+of the ℝ² headline: the 2026-07-13 Phase-4.1 strengthening of `IsPphi2Limit` (coupled
+lattice conjunct `ν k = continuumMeasure 2 (N k) P (a k) mass`, `N k → ∞`, `N k·a k → ∞`)
+closed the δ₀ vacuity, so the former Dirac-measure "proof" was replaced by a Gemini-vetted
+textbook axiom (Fröhlich 1976 + Park 1977 tightness route; see `AXIOM_AUDIT.md` 2026-07-13
+and `planning/r2-honest-headline-spec.md`). `#print axioms Pphi2.pphi2_existence` = Mathlib
+trio + 5 project axioms (the 4 OS-inheritance axioms + `pphi2_limit_exists`) — the honest
+count. Earlier deltas: +2 = the K-uniform finite-periodic bridge pair (IUC-vetted); +2 = the
+vetted B2 route-(a) axioms `fss_infrared_quadratic` (S1) and `asymTransferGap_uniform_fixedLs`
+(S2, γ-form fixed-`Ls` a-uniform transfer gap,
+`Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`). The eight
 real Layer-B2 Route-A axioms are the six GNS bridge obligations isolated in
 `Pphi2/AsymTorus/AsymBridgeInstance.lean`, B5b single-slice stability in
 `Pphi2/AsymTorus/AsymB5bSingleSlice.lean`, and the final lattice Route-A

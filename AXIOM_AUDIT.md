@@ -59,6 +59,64 @@
   square axioms 14/15 (which remain true-but-dead-branch at fixed `(Ns,a)`), and the direct
   lattice input for the eventual cylinder OS4 transfer.
 
+## 2026-07-13 — Phase 4.1: honest ℝ² headline (δ₀ vacuity closed; spec D1–D5)
+
+Implements `planning/r2-honest-headline-spec.md` (design 2026-07-12). Counter delta:
+**+1 raw / +1 real → 31 raw / 29 real, 0 sorries** (verified `count_axioms.sh` 2026-07-13;
+the +1 is `pphi2_limit_exists`, theorem → axiom; the D4 deletions were theorems, no count
+change; `continuumLimit_nonGaussian` and `pphi2_nontriviality` are restatements in place).
+
+* **D1 — `IsPphi2Limit` strengthened (δ₀ vacuity CLOSED).** Appended the coupled-lattice
+  conjunct to `IsPphi2Limit` (`Pphi2/ContinuumLimit/Embedding.lean`) and its twin
+  `IsPphi2ContinuumLimit` (`Pphi2/Bridge.lean`): `∃ N : ℕ → ℕ`, `N k → ∞`,
+  `(N k : ℝ) · a k → ∞`, and `∀ k, ν k = continuumMeasure 2 (N k) P (a k) mass` (with
+  `N k ≠ 0`, `0 < a k`, `0 < mass` carried as inner existentials so the `NeZero`/positivity
+  plumbing stays inside the conjunct). `P, mass` are now genuinely used; the previous δ₀
+  witness (`ν k ≡ dirac 0`) is excluded. 3 mechanical destructure touch-ups
+  (`CharacteristicFunctional.lean`, `OS2_WardIdentity.lean` ×2, trailing `_hcoupled`);
+  all forwarding consumers unaffected, exactly per the scope doc
+  (`planning/ispphi2limit-strengthening-scope.md`).
+* **D2 — NEW AXIOM `pphi2_limit_exists`** (`Pphi2/ContinuumLimit/Convergence.lean:325`):
+  existence of the infinite-volume P(φ)₂ continuum limit — the δ₀ proof died by D1, replaced
+  by ONE clearly-labeled OPEN existence input. Conclusion shape kept as the pre-existing
+  `∃ μ (_ : IsProbabilityMeasure μ), IsPphi2Limit μ P mass` (anonymous-constructor form,
+  so downstream `obtain ⟨μ, hμ, h_limit⟩` patterns are untouched).
+  **Vet record (Gemini 3.1-pro, 2026-07-12) — PASSED with citation correction**: (a) type/
+  shape/quantifiers confirmed; (b) strength: NOT Guerra–Rosen–Simon — GKS/FKG monotonicity
+  fails for general even deg ≥ 6 multi-well P (Ellis–Monroe–Newman, CMP 46 (1976)); cited
+  route is Fröhlich, Adv. Math. 23 (1976) + Y.M. Park, J. Math. Phys. 18 (1977) (volume- and
+  spacing-uniform lattice moment bounds via lattice Nelson symmetry/checkerboard), which
+  covers the full InteractionPolynomial class at all couplings; (c) non-vacuous; (d)
+  hypotheses sufficient. **Rating: Standard. Sources: GR, LP.** Discharge route: cylinder
+  campaign M2–M4 + keystone 18 (`docs/cylinder-master-plan.md`). Marked (NOT VERIFIED —
+  statement Gemini-vetted 2026-07-12) pending a full proof.
+* **D3 (partial) — regime hypotheses threaded into `continuumLimit_nonGaussian`**
+  (`Convergence.lean:293`): added `(coupling : ℝ) (hP4 : isPhi4 P coupling)
+  (hweak : IsWeakCoupling P mass coupling)` — the unrestricted all-`P` form is false at the
+  φ⁴₂ critical point. `isPhi4` / `IsWeakCoupling` moved upstream from `Bridge.lean` to
+  `Convergence.lean` (same `Pphi2` namespace ascent keeps Bridge call sites working).
+  Consumers `pphi2_nonGaussianity` / `pphi2_nonGaussian` (`Main.lean`) carry the same
+  hypotheses. The spectral-gap axioms named in spec D3 were already removed 2026-07-12.
+* **D4 — reparametrization artifacts DELETED**: `mass_reparametrization_invariance`
+  (`:= h_limit`, a vacuity artifact) and `mass_reparametrization_exists` (both theorems, no
+  proof-term consumers — verified by grep). Statements + strategy recorded in `docs/plan.md`
+  § "Deferred consistency checks".
+* **D5 — headline restatements**: `pphi2_existence` docstring now names its inputs explicitly
+  (existence = `pphi2_limit_exists`; OS = the 4 inheritance axioms
+  `continuum_exponential_moment_bound`, `canonical_continuumMeasure_cf_tendsto`,
+  `continuum_exponential_clustering`, `rotation_cf_defect_polylog_bound`; interaction/
+  nondegeneracy separate pending keystone 18 → `planning/coherence-analysis.md`).
+  `pphi2_nontriviality` (`Main.lean:158`) RESTATED in the about-the-limit form
+  `IsPphi2Limit μ P mass → ∀ f ≠ 0, 0 < ∫ (ω f)² ∂μ` — with D1 this is a true statement
+  about the real coupled limit (δ₀ gone). Kept as axiom; Rating: Standard (GRS two-point
+  lower bound, Simon Ch. V), (NOT VERIFIED). `pphi2_nontrivial` re-derived via
+  `pphi2_limit_exists`.
+* **Kernel footprint of the headline**: `#print axioms Pphi2.pphi2_existence` = trio +
+  {`pphi2_limit_exists`, `continuum_exponential_moment_bound`,
+  `canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering`,
+  `rotation_cf_defect_polylog_bound`} — grew 4 → 5 project axioms; **that is the honest
+  count** (the previous 4 was purchased by the δ₀ witness).
+
 ## 2026-07-13 — B2 STAGE C COMPLETE: the thresholded variance bound is a THEOREM on 5 vetted axioms
 
 * **`asymInteractingVariance_le_freeVariance_lattice_thresholded`**
@@ -950,21 +1008,21 @@ elementary inequality `x² ≤ 2 e^|x|` and a scaling optimization.
 eventual pullback RP predicate `CylinderMeasureSequenceEventuallyReflectionPositive`
 and proves the IR-limit OS3 transfer by characteristic-functional convergence.
 
-## Current pphi2 Axiom Inventory (28 raw / 26 real as of 2026-07-12, 0 sorries)
+## Current pphi2 Axiom Inventory (31 raw / 29 real as of 2026-07-13, 0 sorries)
 
 This table is generated from the current `./scripts/count_axioms.sh` result and
 is the source of truth for active pphi2 axioms in this audit. Historical branch
 cohorts are retained below for provenance only.
 
-### Main inventory (26 real axioms — updated 2026-07-12 after S1 + S2 landed)
+### Main inventory (29 real axioms — updated 2026-07-13 after Phase 4.1 honest-headline)
 
 | File | Active axioms | Names |
 |------|---------------|-------|
 | `Pphi2/Bridge.lean` | 2 | `schwinger_agreement`, `os2_from_phi4` |
 | `Pphi2/ContinuumLimit/AxiomInheritance.lean` | 3 | `continuum_exponential_moment_bound`, `canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering` |
-| `Pphi2/ContinuumLimit/Convergence.lean` | 1 | `continuumLimit_nonGaussian` |
+| `Pphi2/ContinuumLimit/Convergence.lean` | 2 | `continuumLimit_nonGaussian` (regime-restricted 2026-07-13), `pphi2_limit_exists` (NEW 2026-07-13, D2) |
 | `Pphi2/GaussianContinuumLimit/PropagatorConvergence.lean` | 1 | `latticeGreenBilinear_basis_tendsto_continuum` |
-| `Pphi2/Main.lean` | 1 | `pphi2_nontriviality` |
+| `Pphi2/Main.lean` | 1 | `pphi2_nontriviality` (restated about-the-limit 2026-07-13, D5) |
 | `Pphi2/OSProofs/OS2_WardIdentity.lean` | 1 | `rotation_cf_defect_polylog_bound` |
 | `Pphi2/OSProofs/OS3_RP_Lattice.lean` | 1 | `gaussian_rp_cov_perfect_square` (private) |
 | `Pphi2/OSProofs/OS4_MassGap.lean` | 2 | `two_point_clustering_from_spectral_gap`, `general_clustering_from_spectral_gap` |
@@ -975,8 +1033,8 @@ cohorts are retained below for provenance only.
 | `Pphi2/NelsonEstimate/PolynomialChaosBridge.lean` | 1 | `nelson_exponential_estimate_master_bounded` |
 | `Pphi2/AsymTorus/AsymTorusOS.lean` | 1 | `asymTorusInteracting_exponentialMomentBound` (private) |
 | `Pphi2/AsymTorus/AsymInfraredBound.lean` | 1 | `fss_infrared_quadratic` (S1, 2026-07-12) |
-| `Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean` | 1 | `asymTransferGap_uniform_fixedLs` (S2, 2026-07-12) |
-| **Subtotal** | **26** | |
+| `Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean` | 3 | `asymTransferGap_uniform_fixedLs` (S2, 2026-07-12), `asymFinitePeriodicBridge_remainder_bound_uniform`, `asymFinitePeriodicBridge_diagonal_bound` (K-uniform τ-form bridge pair, 2026-07-12) |
+| **Subtotal** | **29** | |
 
 ### Historical note: isotropic `Z_Nt × Z_Ns` cylinder redesign
 

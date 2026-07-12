@@ -404,7 +404,7 @@ theorem translation_invariance_continuum (P : InteractionPolynomial)
     ∀ (v : EuclideanSpace ℝ (Fin 2)) (f : TestFunction2),
     generatingFunctional μ f = generatingFunctional μ (SchwartzMap.translate v f) := by
   rcases h_limit with ⟨a, ν, hprob, _ha_tend, _ha_pos, _hmom, _hneg, hcf, hlat, _hweakconv,
-    _happrox_os3⟩
+    _happrox_os3, _hcoupled⟩
   intro v f
   -- SchwartzMap.translate v f = schwartzTranslate 2 v f (same definition)
   have htranslate_eq : SchwartzMap.translate v f = schwartzTranslate 2 v f := rfl
@@ -768,7 +768,7 @@ theorem os3_for_continuum_limit (P : InteractionPolynomial)
     (h_limit : IsPphi2Limit μ P mass) :
     @OS3_ReflectionPositivity μ hμ := by
   rcases h_limit with ⟨_a, ν, _hprob, _ha_tend, _ha_pos, _hmom, _hneg, hcf, _hlat, _hweakconv,
-    happrox_os3⟩
+    happrox_os3, _hcoupled⟩
   intro n f c
   simp only [EuclideanOS.generatingFunctional]
   have hentry :

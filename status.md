@@ -16,11 +16,22 @@ and backend-independent reconstruction rules. This keeps the current scalar
 positive-measure construction explicit while opening a path to broader
 Euclidean/Minkowski interfaces.
 
-**Current counter (`./scripts/count_axioms.sh`, 2026-07-12, post-B-I-cleanup): pphi2 30 raw / 28 real axioms,
+**Current counter (`./scripts/count_axioms.sh`, 2026-07-13, post-Phase-4.1): pphi2 31 raw / 29 real axioms,
 0 sorries; gaussian-field 3 axioms, 0 sorries** (both verified via `count_axioms.sh`,
-GaussianField pinned at `5bb35e8`). The 28 raw → 26 real reconciliation: 2 lines are docstring
+GaussianField pinned at `5bb35e8`). The 31 raw → 29 real reconciliation: 2 lines are docstring
 matches of the word "axiom" (`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
-`Pphi2/NelsonEstimate/LayerCake.lean:85`). The +2 over the pre-route-(a) base are the vetted
+`Pphi2/NelsonEstimate/LayerCake.lean:85`).
+**2026-07-13 (Phase 4.1, honest ℝ² headline — spec `planning/r2-honest-headline-spec.md`):**
+`IsPphi2Limit` strengthened with the coupled-lattice conjunct (`ν k = continuumMeasure 2 (N k)
+P (a k) mass`, `N k → ∞`, `N k·a k → ∞`) — the δ₀ vacuity is CLOSED; the former δ₀ "proof" of
+`pphi2_limit_exists` is replaced by ONE Gemini-vetted OPEN existence axiom (**+1 axiom**,
+Fröhlich 1976 + Park 1977 tightness route, Rating Standard, **(NOT VERIFIED)** pending proof);
+`continuumLimit_nonGaussian` regime-restricted (`isPhi4` + `IsWeakCoupling` hypotheses, moved
+upstream to `Convergence.lean`); `pphi2_nontriviality` restated about-the-limit
+(`IsPphi2Limit μ P mass → ∀ f ≠ 0, S₂(f,f) > 0`, **(NOT VERIFIED)**, GRS two-point lower
+bound); the vacuous reparametrization theorems deleted (→ `docs/plan.md` § Deferred
+consistency checks). `#print axioms Pphi2.pphi2_existence` = trio + 5 project axioms
+(the 4 inheritance axioms + `pphi2_limit_exists`) — the honest count. The +2 over the pre-route-(a) base are the vetted
 B2 route-(a) axioms `fss_infrared_quadratic` (S1, AXIOM_AUDIT.md 2026-07-12 S1 entry) and
 `asymTransferGap_uniform_fixedLs` (S2, γ-form fixed-`Ls` a-uniform transfer gap,
 `Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`, AXIOM_AUDIT.md 2026-07-12 S2 entry).
@@ -272,10 +283,10 @@ itself is a theorem via `embeddedTwoPoint_eq_latticeGreenBilinear`.
 | 3 | `TransferMatrix/SpectralGap.lean` | 0 axioms (2 removed 2026-07-12 as false; `spectral_gap_pos` proved) |
 | 3 | `OSProofs/OS4_MassGap.lean` | 2 axioms, 0 sorries |
 | 3 | `OSProofs/OS4_Ergodicity.lean` | 0 axioms, 0 sorries |
-| 4 | `ContinuumLimit/Embedding.lean` | 0 axioms (`IsPphi2Limit` is a def) |
+| 4 | `ContinuumLimit/Embedding.lean` | 0 axioms (`IsPphi2Limit` is a def; strengthened 2026-07-13 with the coupled-lattice conjunct — δ₀ excluded) |
 | 4 | `ContinuumLimit/Hypercontractivity.lean` | 1 axiom, 0 sorries (Stage 1: `exponential_moment_bound` axiomatised — uniform-in-`a≤1` claim no longer holds via the easy pointwise lower bound under GJ-aligned wickConstant; Phase 2). `wickConstant_eq_variance` updated to use `latticeCovarianceGJ` via the bridge `latticeCovariance_GJ_eq_inv_smul_bare`. |
 | 4 | `ContinuumLimit/Tightness.lean` | **0 axioms, 0 sorries** (`continuumMeasures_tight` proved from Mitoma-Chebyshev + `interacting_moment_bound`) |
-| 4 | `ContinuumLimit/Convergence.lean` | 1 axiom, 0 sorries (`continuumLimit` and `pphi2_limit_exists` proved) |
+| 4 | `ContinuumLimit/Convergence.lean` | 2 axioms, 0 sorries (`continuumLimit` proved; `pphi2_limit_exists` is the vetted OPEN existence axiom since 2026-07-13; `continuumLimit_nonGaussian` regime-restricted) |
 | 4 | `ContinuumLimit/AxiomInheritance.lean` | **3 axioms, 0 sorries** (`continuum_exponential_moment_bound`, `canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering`; derived OS0/OS1/OS4 inheritance wrappers live here) |
 | 4 | `ContinuumLimit/CharacteristicFunctional.lean` | 0 axioms, 0 sorries (complex analyticity, complex-from-real invariance, Z₂/reality, translation continuity, ergodicity support) |
 | 4 | `ContinuumLimit/TimeReflection.lean` | 0 axioms, 0 sorries (continuum time reflection on Schwartz space and distributions) |
@@ -299,7 +310,7 @@ itself is a theorem via `embeddedTwoPoint_eq_latticeGreenBilinear`.
 | — | `OSforGFF/TimeTranslation.lean` | 0 axioms, 0 sorries (Schwartz translation continuity) |
 | 6 | `OSAxioms.lean` | 0 axioms, 0 sorries |
 | 6 | `FormulationAdapter.lean` | 0 axioms, 0 sorries (exports `Pphi2` into the shared formulation layer) |
-| 6 | `Main.lean` | 1 axiom, 0 sorries |
+| 6 | `Main.lean` | 1 axiom, 0 sorries (`pphi2_nontriviality`, restated about-the-limit 2026-07-13; reparametrization theorems removed → `docs/plan.md`) |
 | 4T | `TorusContinuumLimit/TorusEmbedding.lean` | 0 axioms, 0 sorries (`torusContinuumGreen` now `greenFunctionBilinear`) |
 | 4T | `TorusContinuumLimit/TorusPropagatorConvergence.lean` | **0 axioms**, 0 sorries (Phase 2 Cluster B partial 2026-05-08: `torusEmbeddedTwoPoint_uniform_bound` and `torus_propagator_convergence_GJ` both discharged via the `(a^d)⁻¹ · (L/N)² = 1` cancellation between `evalTorusAtSiteGJ` and `latticeCovarianceGJ`). |
 | 4T | `TorusContinuumLimit/TorusTightness.lean` | 0 axioms, 0 sorries |

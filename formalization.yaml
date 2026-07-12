@@ -1,7 +1,7 @@
 # formalization.yaml — https://github.com/mathlib-initiative/formalization.yaml (v0.3)
-# Describes the `layer-B2/piece-5` branch state of pphi2.
-# Built tree (Pphi2.lean + Common): 0 sorries, 24 real `axiom` declarations
-#   (22 public + 2 private). `scripts/count_axioms.sh` reports "26 raw" because
+# Describes the post-Phase-4.1 (honest ℝ² headline, 2026-07-13) state of pphi2.
+# Built tree (Pphi2.lean + Common): 0 sorries, 29 real `axiom` declarations
+#   (27 public + 2 private). `scripts/count_axioms.sh` reports "31 raw" because
 #   it also matches 2 docstring lines that begin with the word "axiom".
 #   Legacy `ddj/` and parked `future/` are NOT part of the default build target.
 version: "v0.3"
@@ -58,14 +58,19 @@ status:
     contain their own separate axioms/sorries that do not affect the main results.
   sorry_count: 0                 # in the built Pphi2/ + Common tree
   sorry_in_definitions: 0
-  axioms:                        # 24 real axiom declarations in the built Pphi2/ tree (22 public + 2 private)
-    - schwinger_agreement                                  # Bridge.lean:274
-    - os2_from_phi4                                        # Bridge.lean:345
-    - pphi2_nontriviality                                  # Main.lean:128
+  axioms:                        # 29 real axiom declarations in the built Pphi2/ tree (27 public + 2 private)
+    - schwinger_agreement                                  # Bridge.lean
+    - os2_from_phi4                                        # Bridge.lean
+    - pphi2_nontriviality                                  # Main.lean:158 (restated about-the-limit 2026-07-13)
     - continuum_exponential_moment_bound                   # ContinuumLimit/AxiomInheritance.lean:123
     - canonical_continuumMeasure_cf_tendsto                # ContinuumLimit/AxiomInheritance.lean:327
     - continuum_exponential_clustering                     # ContinuumLimit/AxiomInheritance.lean:354
-    - continuumLimit_nonGaussian                           # ContinuumLimit/Convergence.lean:256
+    - continuumLimit_nonGaussian                           # ContinuumLimit/Convergence.lean:293 (regime-restricted 2026-07-13)
+    - pphi2_limit_exists                                   # ContinuumLimit/Convergence.lean:325 (NEW 2026-07-13, the OPEN existence input)
+    - fss_infrared_quadratic                               # AsymTorus/AsymInfraredBound.lean:113
+    - asymTransferGap_uniform_fixedLs                      # AsymTorus/AsymSliceFamilySusceptibility.lean:886
+    - asymFinitePeriodicBridge_remainder_bound_uniform     # AsymTorus/AsymSliceFamilySusceptibility.lean:971
+    - asymFinitePeriodicBridge_diagonal_bound              # AsymTorus/AsymSliceFamilySusceptibility.lean:997
     - asymInteracting_expMoment_volume_uniform             # AsymTorus/AsymContinuumLimit.lean:621
     - asymInteracting_mgf_gaussianDominated                # AsymTorus/AsymExpMomentDischarge.lean:127
     - asymInteractingVariance_le_freeVariance_lattice_Lt_uniform # AsymTorus/AsymExpMomentDischarge.lean:215
@@ -88,7 +93,7 @@ status:
       file: "Pphi2/Main.lean"
       sorry_count: 0
       literature_dependencies:
-        - statement: "existence of a probability measure on S'(ℝ²) satisfying the OS0–OS4 axioms for P(Φ)₂; conditional on the named uniform-estimate / clustering / rotation-restoration axioms (the former uniform-spectral-gap axioms were removed 2026-07-12 as false as stated)"
+        - statement: "existence of a probability measure on S'(ℝ²) satisfying the OS0–OS4 axioms for P(Φ)₂; conditional on the single OPEN existence axiom `pphi2_limit_exists` (Fröhlich 1976 / Park 1977 tightness route; δ₀ vacuity of the limit predicate closed 2026-07-13) plus the 4 named OS-inheritance axioms (the former uniform-spectral-gap axioms were removed 2026-07-12 as false as stated)"
           source: "ISBN:978-0-691-08144-3"
         - statement: "lattice construction and continuum limit of the P(Φ)₂ measure"
           source: "ISBN:978-0-387-96477-7"
@@ -108,7 +113,7 @@ status:
       file: "Pphi2/Main.lean"
       sorry_count: 0
       literature_dependencies:
-        - statement: "nontriviality of the two-point function S₂(f,f) > 0 (rests on the `pphi2_nontriviality` axiom; correlation-inequality lower bound)"
+        - statement: "nontriviality of the two-point function S₂(f,f) > 0 (rests on the `pphi2_nontriviality` axiom — restated 2026-07-13 about the coupled limit — packaged via `pphi2_limit_exists`; correlation-inequality lower bound)"
           source: "10.2307/1970988"
     - declaration: "Pphi2.cylinderIso_OS_of_RP_OS2"
       file: "Pphi2/AsymTorus/AsymContinuumLimit.lean"

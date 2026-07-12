@@ -142,11 +142,26 @@ weak-coupling / single-phase hypothesis.
 
 ## Cluster 4 — continuum-limit inheritance
 
+- [ ] **19. `pphi2_limit_exists`** (NEW 2026-07-13, Phase 4.1 / spec D2) `ContinuumLimit/Convergence.lean:325`   status: open   deps: [cylinder M2–M4, 18]   diff: ★★★
+  note: existence of the infinite-volume P(φ)₂ continuum limit in the D1-strengthened
+  `IsPphi2Limit` sense — the single OPEN existence input of the ℝ² headline (`pphi2_existence`
+  kernel footprint = the 4 inheritance axioms + this). Replaced the δ₀ vacuity "proof" killed by
+  D1. Rating: **Standard**; Sources: **GR, LP** (Gemini 3.1-pro vet 2026-07-12, citation-corrected
+  to Fröhlich Adv. Math. 23 (1976) + Y.M. Park JMP 18 (1977) tightness route — NOT GRS, which
+  fails for even deg ≥ 6 multi-well P per Ellis–Monroe–Newman). Discharge route: cylinder campaign
+  (`docs/cylinder-master-plan.md`) IR limit `Lt→∞` then `Ls→∞`; keystone 18's cluster expansion
+  gives it with uniqueness at weak coupling. Vet record: `planning/r2-honest-headline-spec.md` D2.
 - [ ] **6. `continuum_exponential_moment_bound`** `ContinuumLimit/AxiomInheritance.lean:123`   status: scoped   deps: [1]   diff: ★★
   note: pass the `Lt`-uniform exp-moment (1) to the continuum measure. Plan:
   [`docs/asym-interacting-expmoment-volume-uniform-discharge-plan.md`].
 - [ ] **7. `canonical_continuumMeasure_cf_tendsto`** `ContinuumLimit/AxiomInheritance.lean:327`   status: scoped   deps: []   diff: ★★
   note: characteristic-function convergence lattice → continuum. Plan: [`docs/pr10_summary.md`].
+  **2026-07-13 (Phase 4.1)**: `IsPphi2Limit` now carries the forward-direction coupled conjunct
+  (`ν k = continuumMeasure 2 (N k) P (a k) mass`, `N k → ∞`, `N k·a k → ∞`) **plus** the
+  CF-convergence clause `Z_{ν k}[f] → Z_μ[f]` — re-examine whether this axiom's blocked converse
+  form (see needs-human note below) can be restated forward and discharged directly from the
+  strengthened predicate, which carries exactly the CF-convergence data along a
+  canonically-coupled sequence; if so, the needs-human flag closes.
 - [ ] **8. `continuum_exponential_clustering`** `ContinuumLimit/AxiomInheritance.lean:354`   status: scoped   deps: [14, 15]   diff: ★★
   note: clustering passes to the continuum. Plan: [`docs/cyl-2-scope.md`].
 - [ ] **10. `latticeGreenBilinear_basis_tendsto_continuum`** `GaussianContinuumLimit/PropagatorConvergence.lean:103`   status: scoped   deps: []   diff: ★★
@@ -159,14 +174,19 @@ weak-coupling / single-phase hypothesis.
 non-Gaussianity (only `S₂>0`, ★★ via correlation inequalities, all phases); 9 is the genuine
 interacting content (`u₄≠0`, ★★★, needs `λ>0`).
 
-- [~] **11. `pphi2_nontriviality`** (`S₂(f,f)>0` for `f≠0`) `Main.lean:128`   status: **MIS-FORMULATED → reformulated on T²**   deps: []   diff: ★★→★★★
-  note: The ℝ² axiom is `∃μ,S₂>0` with **P,mass unused** → free-field/δ₀ satisfy it (`IsPphi2Limit`
-  itself is δ₀-vacuous; see memory `pphi2-existence-vacuous-delta0`). **Honest version formulated on
-  the genuine (axiom-clean-existing) T² theory**: `TorusNontriviality.lean` —
-  `IsTorusPphi2Limit` + `torusPphi2Limit_exists` (PROVED), `TorusIsNondegenerate` (S₂>0). ⚠️ Route
-  **corrected** (Gemini-vetted, memory `pphi2-s2-domination-direction`): "Griffiths/FKG ⟹ ≥free" is
-  **wrong-direction** — continuum nondegeneracy needs short-distance singularity / cluster expansion
-  (★★★), not FKG. → `planning/non-triviality.md`.
+- [~] **11. `pphi2_nontriviality`** (`S₂(f,f)>0` for `f≠0`) `Main.lean:158`   status: **RESTATED about-the-limit (Phase 4.1, 2026-07-13)**   deps: []   diff: ★★→★★★
+  note: **2026-07-13**: restated in the about-the-limit form
+  `IsPphi2Limit μ P mass → ∀ f ≠ 0, S₂(f,f) > 0` (spec D5) — with the D1-strengthened
+  `IsPphi2Limit` (δ₀ excluded, `ν k = continuumMeasure …` forced) the old objections lapse: it is
+  no longer `∃μ` free-floating and no longer free-field/δ₀-satisfiable, so the cheap free-field
+  discharge (needs-human note below) is CLOSED — the axiom is now genuinely about the interacting
+  coupled limit. Historical: the previous `∃μ,S₂>0` form (P,mass unused) was mis-formulated
+  (memory `pphi2-existence-vacuous-delta0`); the honest T² version remains in
+  `TorusNontriviality.lean` (`IsTorusPphi2Limit` + `torusPphi2Limit_exists` PROVED,
+  `TorusIsNondegenerate`). ⚠️ Route **corrected** (Gemini-vetted, memory
+  `pphi2-s2-domination-direction`): "Griffiths/FKG ⟹ ≥free" is **wrong-direction** — continuum
+  nondegeneracy needs short-distance singularity / cluster expansion (★★★), not FKG.
+  → `planning/non-triviality.md`.
 - [x] **9. `continuumLimit_nonGaussian`** (`u₄≠0`) — **T² non-Gaussianity DONE, AXIOM-FREE (Route A, 2026-06-07)**   deps: []   diff: ★★★
   note: `torus_pphi2_isInteractingStrict_weakCoupling` (`TorusContinuumLimit/TorusCouplingResult.lean`)
   is a THEOREM, `#print axioms ⟹ [propext, Classical.choice, Quot.sound]`: for some small coupling
@@ -178,8 +198,11 @@ interacting content (`u₄≠0`, ★★★, needs `λ>0`).
   **Still open (separate):** (i) the conventional `λ=1`/large-mass *normalization* — Route B (continuum
   dilation), DEFERRED, needs clustering (`planning/continuum-rescaling-plan.md`); (ii) the **ℝ²**
   (infinite-volume) `continuumLimit_nonGaussian` axiom itself, which additionally needs `L→∞`
-  cluster expansion; (iii) conjoining `u₄≠0` with the *same* OS measure + full OS0–OS4 (keystone 18).
-  The T² non-Gaussianity *content* is now proved.
+  cluster expansion — **2026-07-13 (Phase 4.1, spec D3)**: regime-restricted in place with
+  `(coupling) (hP4 : isPhi4 P coupling) (hweak : IsWeakCoupling P mass coupling)` (the
+  unrestricted all-`P` form is false at the φ⁴₂ critical point); `isPhi4`/`IsWeakCoupling` now
+  live upstream in `ContinuumLimit/Convergence.lean`; (iii) conjoining `u₄≠0` with the *same* OS
+  measure + full OS0–OS4 (keystone 18). The T² non-Gaussianity *content* is now proved.
 
 ## Cluster 6 — OS→Schwinger bridge
 
@@ -238,16 +261,15 @@ Precise blockers (so the next owner starts from the exact gap, not a re-investig
   `ir_limit_continuum_green_tendsto : limₗ asymTorusContinuumGreen L = continuumGreenBilinear`.
   Then dominated convergence + DM nuclear extension finishes. Flagged **not on the T² critical
   path** (~3 wk standalone). → deps: [IR-limit].
-- **11 `pphi2_nontriviality` (S₂>0)** — **actionable cheaply, but a project-intent decision.**
-  Step 1 (free positivity) is **PROVED**: `gaussianContinuumLimit_nontrivial` (GaussianLimit.lean:102)
-  exhibits a free-field continuum-limit measure with `∀f≠0, S₂(f,f)>0` — which **already witnesses
-  the axiom as literally stated** (`∃μ, …`). So the axiom is dischargeable NOW via the free field.
-  BUT that conflicts with intent (coherence Gap A: we want S₂>0 for the *interacting* μ). The
-  genuine route (step 2, Griffiths/FKG `S₂^int ≥ S₂^free`) is **missing** — FKG infra exists
+- **11 `pphi2_nontriviality` (S₂>0)** — needs-human flag **CLOSED 2026-07-13 (Phase 4.1)**: the
+  restatement (`IsPphi2Limit μ P mass → ∀f≠0, S₂>0`) plus the D1 strengthening of `IsPphi2Limit`
+  removes the cheap free-field/δ₀ discharge loophole entirely — the axiom is now about the actual
+  interacting coupled limit, so the project-intent decision is moot. What remains is the genuine
+  ★★★ discharge: a two-point *lower* bound for the interacting limit — FKG infra exists
   (`Lattice/FKG.lean`, proved) but is not applied to two-point monotonicity-in-coupling; pphi2's
   Nelson bound (`asymInteractingVariance_le_freeVariance_lattice`) is an *upper* bound (wrong
-  direction for a lower bound). → **human decision: cheap free-field discharge vs. keep open for
-  the interacting result.**
+  direction), and per the corrected route the real path is short-distance singularity / cluster
+  expansion, not FKG (→ `planning/non-triviality.md`).
 
 **Clustering 14/15 reassessment** (was "★★ given the B2 trace bridge"): the B2 dictionary
 (`twoPoint_dictionary`) exists **only on the asym torus**; 14/15 are stated on the **square**
