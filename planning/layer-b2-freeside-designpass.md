@@ -60,6 +60,46 @@ gaussian-field's DFT machinery per `docs/track2-upstream-dft-machinery.md` is th
   Källén–Lehmann territory that the 2026-06-02 vetting said not to axiomatize; it is viable
   ONLY as a proved spectral-theorem computation, never as a representation axiom.
 
+## Reduction (2026-07-12, sharpens the split): only the `k_s = 0` column is at issue
+
+At fixed `Ls`, every mode with `k_s ≠ 0` has spatial symbol `≥ c/Ls²` — a constant the axiom's
+`C(P, mass, Ls)` may absorb — so FSS handles all of them with `C = 1 + m²Ls²·c⁻¹`-type
+constants. The entire mechanism question concerns the **spatially-constant column**
+`k_s = 0`, `k_t ∈ (2π/Lt, π/a]`: FSS covers `|k_t| ≳ κ` (massless/massive ratio `≤ 1 + m²/κ²`)
+but NOT small `k_t` (ratio `(k_t²+m²)/k_t²` diverges as `Lt → ∞`); the gap/susceptibility
+branch covers `|k_t| ≲ κ` (phase loss `O(1)` below the inverse correlation length) but NOT
+large `k_t` (the (†) failure). Neither extends over the other; `κ ~ m_gap` is forced, and the
+stitching constant `sup_{band}(phase loss) × (1 + m²/κ²)` is the one genuinely new estimate
+of route (a).
+
+## Shared dependency (both routes): the fixed-`Ls` a-uniform gap (= 17a)
+
+Both routes' constants degrade unless `m_gap(a) ≥ m₀ > 0` uniformly as `a → 0` at fixed `Ls`
+(`1/(1−γ)` and the Poisson factors both carry `m_gap(a)`). That is exactly statement **17a**
+of `cyl-2a-volume-scaling-addendum.md` (regime (ii), compact-resolvent convergence
+`T_a → e^{−aH(Ls)}`; expert-vetted in `reflection-positivity/docs/B2_UNIFORMITY_QUESTION.md`),
+which is also the OS4/M4 core target — B2 and OS4 share this brick. It enters either as one
+vetted interim axiom (Standard, no coupling hypothesis needed at fixed `Ls`) or as the
+compact-resolvent campaign itself.
+
+## Recommendation (Fable, 2026-07-12): route (a), FSS + band-split
+
+1. **Minimize statement-design risk** (the project's dominant historical failure mode): every
+   step of (a) is a classical, citable shape with textbook a-uniformity. Route (b)'s central
+   high-`k_t` comparison has an **unverified a-ledger** (Poisson factor `~ m_gap·a` at Nyquist
+   vs free `~ a²`, one power of `a` apart pending the slice-vs-spacetime normalization) — the
+   crux-2 error class; (b) must not be attempted without its own full a-power design pass.
+2. **Synergy**: (a)'s only new input (FSS) shares its hard machinery (Griffiths–Simon/Ising)
+   with the Layer A campaign, and FSS was already earmarked for the eventual `Ls → ∞` step —
+   the investment double-serves.
+3. **Reversibility**: (a)'s band branch can later be upgraded by (b)'s Poisson kernel; if
+   (b)'s ledger is someday verified, it can replace the FSS axiom for an axiom-free discharge.
+
+If (a) is adopted, next artifacts: DFT-layer scoping (delegable once specced); the FSS axiom
+statement + protocol vetting (Fable — re-audit `docs/fss-infrared-bound-spec.md`'s
+normalization against the GJ ledger; its "not for B2" banner is superseded); the
+band-stitching lemma statement (Fable).
+
 ## Decision needed (owner): FSS + gap band-split vs Poisson kernel
 
 - **FSS + band-split**: canonical in the literature (both reviewers), reuses Layer A's
