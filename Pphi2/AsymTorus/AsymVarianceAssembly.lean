@@ -480,6 +480,66 @@ theorem asymInteractingVariance_le_freeVariance_lattice_thresholded
           (ω G) ^ 2 ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) := by
         rw [hVadd]
 
+/-! ## Torus-level thresholded assembly (Piece-5 migration) -/
+
+/-- **B2 torus assembly, thresholded form.** The torus variance bound in the thresholded
+(eventual) quantifier structure: there are `C, L₀, a₀ > 0` — depending only on
+`(P, mass, Ls)` — such that for every asymmetric torus with `Nt·a = Lt ≥ L₀`, `Ns·a = Ls`,
+`a ≤ a₀`, and every torus test function `f`, the interacting second moment of the torus
+pairing is bounded by `C` times the free lattice second moment of the pulled-back pairing.
+
+Proved from the Stage-C lattice master theorem
+`asymInteractingVariance_le_freeVariance_lattice_thresholded` by the same Piece-5
+pushforward + pairing argument as `asymInteractingVariance_le_freeVariance_Lt_uniform`
+(push the torus interacting measure back along `asymTorusEmbedLiftIso` and rewrite the
+torus pairing as the lattice pairing against `asymLatticeTestFnIso`), but consuming the
+proved lattice **theorem** instead of the legacy all-`(Lt, a)` axiom
+`asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`. Downstream consumers should
+migrate to this form (planning/b2-stageB-holes-spec.md §C4 design). -/
+theorem asymInteractingVariance_le_freeVariance_torus_thresholded
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (Ls : ℝ) [Fact (0 < Ls)] :
+    ∃ C L₀ a₀ : ℝ, 0 < C ∧ 0 < L₀ ∧ 0 < a₀ ∧
+      ∀ (Lt : ℝ) [Fact (0 < Lt)]
+        (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
+        (Nt : ℝ) * a = Lt → (Ns : ℝ) * a = Ls → a ≤ a₀ → L₀ ≤ Lt →
+        ∀ (f : AsymTorusTestFunction Lt Ls),
+          ∫ ω : Configuration (AsymTorusTestFunction Lt Ls), (ω f) ^ 2
+            ∂(asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass) ≤
+          C * ∫ ω : Configuration (AsymLatticeField Nt Ns),
+            (ω (asymLatticeTestFnIso Lt Ls Nt Ns a f)) ^ 2
+              ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) := by
+  obtain ⟨C, L₀, a₀, hC_pos, hL₀, ha₀, hC_bound⟩ :=
+    asymInteractingVariance_le_freeVariance_lattice_thresholded P mass hmass Ls Fact.out
+  refine ⟨C, L₀, a₀, hC_pos, hL₀, ha₀, ?_⟩
+  intro Lt _hLt Nt Ns _ _ a ha hvolt hvols haa hLta f
+  have hLta' : L₀ ≤ (Nt : ℝ) * a := by rw [hvolt]; exact hLta
+  set g := asymLatticeTestFnIso Lt Ls Nt Ns a f
+  set μ_int_T := asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass
+  set μ_int_L := interactingLatticeMeasureAsym Nt Ns P a mass ha hmass
+  have hι_meas : Measurable (asymTorusEmbedLiftIso Lt Ls Nt Ns a) :=
+    asymTorusEmbedLiftIso_measurable Lt Ls Nt Ns a
+  have h_eval : ∀ ω : Configuration (AsymLatticeField Nt Ns),
+      (asymTorusEmbedLiftIso Lt Ls Nt Ns a ω) f = ω g :=
+    asymTorusEmbedLiftIso_eval_eq Lt Ls Nt Ns a f
+  have h_pushforward : μ_int_T =
+      Measure.map (asymTorusEmbedLiftIso Lt Ls Nt Ns a) μ_int_L := rfl
+  have h_F_sq_meas :
+      AEStronglyMeasurable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) =>
+        (ω f) ^ 2) μ_int_T :=
+    ((configuration_eval_measurable f).pow_const 2).aestronglyMeasurable
+  rw [h_pushforward]
+  rw [integral_map hι_meas.aemeasurable h_F_sq_meas]
+  have h_integrand :
+      ∫ ω : Configuration (AsymLatticeField Nt Ns),
+          (asymTorusEmbedLiftIso Lt Ls Nt Ns a ω f) ^ 2 ∂μ_int_L =
+        ∫ ω : Configuration (AsymLatticeField Nt Ns), (ω g) ^ 2 ∂μ_int_L := by
+    apply integral_congr_ae
+    refine Filter.Eventually.of_forall fun ω => ?_
+    simpa using congrArg (fun x : ℝ => x ^ 2) (h_eval ω)
+  rw [h_integrand]
+  exact hC_bound Nt Ns a ha hvols haa hLta' g
+
 end Pphi2
 
 end

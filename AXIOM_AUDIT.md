@@ -1,6 +1,26 @@
 # Comprehensive Axiom Audit: pphi2 + gaussian-field + markov-semigroups + gaussian-hilbert
 
-**Last updated**: 2026-07-12.
+**Last updated**: 2026-07-13.
+
+## 2026-07-13 — B2 torus-level thresholded variance THEOREM landed (additive Piece-5 migration)
+
+* **New theorem `asymInteractingVariance_le_freeVariance_torus_thresholded`**
+  (`Pphi2/AsymTorus/AsymVarianceAssembly.lean`): the torus-level interacting ≤ free variance
+  bound in the thresholded form (`∃ C L₀ a₀, … ∀ Lt ≥ L₀ … ∀ a ≤ a₀ …`), proved from the
+  Stage-C lattice master theorem `…_lattice_thresholded` by the same Piece-5 pushforward
+  (`asymTorusInteractingMeasureIso`) + pairing (`asymLatticeTestFnIso`) argument as the legacy
+  `asymInteractingVariance_le_freeVariance_Lt_uniform` — but consuming the lattice THEOREM
+  instead of the legacy axiom. Kernel footprint (verified `#print axioms` 2026-07-13):
+  trio + exactly the 5 Stage-C axioms `{fss_infrared_quadratic, asymTransferGap_uniform_fixedLs,
+  asymFinitePeriodicBridge_diagonal_bound, asymFinitePeriodicBridge_remainder_bound_uniform,
+  groundVariance_le_freeCovariance}`.
+* **Migration note added** to the legacy axiom
+  `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`
+  (`Pphi2/AsymTorus/AsymExpMomentDischarge.lean`) docstring: it remains only for the legacy
+  Layer-C wiring, is over-broad at small `Lt` / coarse `a` (true but unproved there); consumers
+  should migrate to the thresholded form (`planning/b2-stageB-holes-spec.md` §C4 design).
+* **Count note**: purely additive — no axioms added or removed; counts unchanged
+  (31 raw / 29 real, 0 sorries; verified `count_axioms.sh` 2026-07-13).
 
 ## 2026-07-12 — S2 `asymTransferGap_uniform_fixedLs` introduced (B2 route (a), with hole B-I)
 

@@ -211,7 +211,14 @@ from this lattice statement plus the already-proved pushforward identity
 asymTorusEmbedLiftIso` and pairing identity
 `(asymTorusEmbedLiftIso ω) f = ω (asymLatticeTestFnIso f)`. This keeps the
 remaining Route-A obligation at the lattice level, where Piece 4
-`interacting_second_moment_bound_to_lattice_free_covariance` is stated. -/
+`interacting_second_moment_bound_to_lattice_free_covariance` is stated.
+
+MIGRATION NOTE (2026-07-13): the thresholded form is now a THEOREM
+(`asymInteractingVariance_le_freeVariance_torus_thresholded` /
+`asymInteractingVariance_le_freeVariance_lattice_thresholded`, 5 vetted axioms);
+this all-(Lt,a) axiom remains only for the legacy Layer-C wiring and is
+over-broad at small Lt / coarse a (true but unproved there) — consumers should
+migrate to the thresholded form (planning/b2-stageB-holes-spec.md §C4 design). -/
 axiom asymInteractingVariance_le_freeVariance_lattice_Lt_uniform
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
     (Ls : ℝ) [Fact (0 < Ls)] :
