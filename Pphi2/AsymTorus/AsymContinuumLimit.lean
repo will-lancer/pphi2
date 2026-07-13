@@ -622,7 +622,15 @@ needs the entrywise nonnegativity of the free lattice covariance kernel
 (`Var_free(f₊) + Var_free(f₋) ≤ Var_free(|f|)`) plus an `|f|`-seminorm
 restatement here — see `AXIOM_AUDIT.md` (2026-07-13). This axiom is retained
 pro tem (cannot be deleted from this file without an import refactor, as the
-Layer C files are downstream of this file via `AsymVarianceBound.lean`). -/
+Layer C files are downstream of this file via `AsymVarianceBound.lean`).
+
+    UPDATE 2026-07-13: the entrywise nonnegativity is now PROVED
+    (`latticeCovarianceAsymGJ_pairing_nonneg`) and the honest thresholded
+    `|f|`-form is a THEOREM
+    (`asymInteracting_expMoment_volume_uniform_absForm_thresholded`, both in
+    `AsymCovariancePositivity.lean`). This axiom's exact `C · Var_free(f)` form
+    for signed `f` is unvetted post-sign-restriction; consumers (the routeBPrime
+    `hUnif` chain) should migrate to the thresholded `|f|`-form theorem. -/
 axiom asymInteracting_expMoment_volume_uniform
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ K C : ℝ, 0 < K ∧ 0 < C ∧

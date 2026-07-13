@@ -405,6 +405,67 @@ theorem asymInteracting_expMoment_absForm_thresholded
           ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) :=
         mul_le_mul_of_nonneg_left hsplit hC.le
 
+/-! ## The torus-level `|f|`-form exp-moment (Piece-5 pushforward) -/
+
+/-- **Torus-level `|f|`-form exp-moment bound, thresholded.** The honest thresholded
+`|f|`-seminorm restatement of the legacy torus axiom
+`asymInteracting_expMoment_volume_uniform` (`AsymContinuumLimit.lean`): there are
+`K, C, L₀, a₀ > 0` — depending only on `(P, mass, Ls)`, uniform in the time period `Lt`
+and the lattice `(Nt, Ns, a)` — such that for every asymmetric torus with `Nt·a = Lt ≥ L₀`,
+`Ns·a = Ls`, `a ≤ a₀`, and every (signed) torus test function `f`,
+
+`∫ e^{|ω f|} dμ̃_int ≤ K · exp(C · Var_free(|g|))`,    `g = asymLatticeTestFnIso f`,
+
+where `Var_free(|g|)` is the free lattice second moment at the **sitewise absolute value**
+of the pulled-back lattice test vector. Compared to the legacy axiom the differences are
+(i) the `(a₀, L₀)` Stage-C thresholds and (ii) the `|g|`-seminorm on the right (the exact
+`C·Var_free(g)` form for signed `g` is not recoverable from the signed split — cross-term
+cancellation; see `AXIOM_AUDIT.md` 2026-07-13).
+
+Proved from the lattice theorem `asymInteracting_expMoment_absForm_thresholded` by the
+same Piece-5 pushforward + pairing argument as
+`asymInteractingVariance_le_freeVariance_torus_thresholded` (push the torus interacting
+measure back along `asymTorusEmbedLiftIso` via `integral_map`/`integrable_map_measure`
+and rewrite the torus pairing as the lattice pairing against `asymLatticeTestFnIso`),
+applied to the exp-integrand instead of the square. -/
+theorem asymInteracting_expMoment_volume_uniform_absForm_thresholded
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (Ls : ℝ) [Fact (0 < Ls)] :
+    ∃ K C L₀ a₀ : ℝ, 0 < K ∧ 0 < C ∧ 0 < L₀ ∧ 0 < a₀ ∧
+      ∀ (Lt : ℝ) [Fact (0 < Lt)]
+        (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
+        (Nt : ℝ) * a = Lt → (Ns : ℝ) * a = Ls → a ≤ a₀ → L₀ ≤ Lt →
+        ∀ f : AsymTorusTestFunction Lt Ls,
+          Integrable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) =>
+              Real.exp (|ω f|))
+            (asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass) ∧
+          ∫ ω : Configuration (AsymTorusTestFunction Lt Ls), Real.exp (|ω f|)
+              ∂(asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass) ≤
+          K * Real.exp (C * ∫ ω : Configuration (AsymLatticeField Nt Ns),
+            (ω (fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a f x|)) ^ 2
+            ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)) := by
+  obtain ⟨C, L₀, a₀, hC, hL₀, ha₀, hLat⟩ :=
+    asymInteracting_expMoment_absForm_thresholded P mass hmass Ls Fact.out
+  refine ⟨2, C, L₀, a₀, by norm_num, hC, hL₀, ha₀, ?_⟩
+  intro Lt _hLt Nt Ns _ _ a ha hvolt hvols haa hLtb f
+  have hLta' : L₀ ≤ (Nt : ℝ) * a := by rw [hvolt]; exact hLtb
+  set μ_int := interactingLatticeMeasureAsym Nt Ns P a mass ha hmass
+  set ι := asymTorusEmbedLiftIso Lt Ls Nt Ns a
+  set g := asymLatticeTestFnIso Lt Ls Nt Ns a f with hg_def
+  have hι_meas : AEMeasurable ι μ_int :=
+    (asymTorusEmbedLiftIso_measurable Lt Ls Nt Ns a).aemeasurable
+  have h_eval : ∀ ω : Configuration (AsymLatticeField Nt Ns), (ι ω) f = ω g :=
+    fun ω => asymTorusEmbedLiftIso_eval_eq Lt Ls Nt Ns a f ω
+  have hmeas_lhs : AEStronglyMeasurable
+      (fun ω : Configuration (AsymTorusTestFunction Lt Ls) => Real.exp (|ω f|))
+      (Measure.map ι μ_int) :=
+    (Real.measurable_exp.comp (configuration_eval_measurable f).abs).aestronglyMeasurable
+  have h_pushforward : asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass =
+      Measure.map ι μ_int := rfl
+  rw [h_pushforward, integrable_map_measure hmeas_lhs hι_meas, integral_map hι_meas hmeas_lhs]
+  simp_rw [Function.comp_def, h_eval]
+  exact hLat Nt Ns a ha hvols haa hLta' g
+
 end Pphi2
 
 end

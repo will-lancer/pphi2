@@ -2,6 +2,20 @@
 
 **Last updated**: 2026-07-13.
 
+## 2026-07-13 — Torus |f|-form thresholded exp-moment THEOREM landed
+
+* **`asymInteracting_expMoment_volume_uniform_absForm_thresholded`**
+  (`Pphi2/AsymTorus/AsymCovariancePositivity.lean`) — the torus-level Piece-5 pushforward of
+  the lattice `|f|`-form exp-moment bound (`asymInteracting_expMoment_absForm_thresholded`),
+  in thresholded form. Kernel footprint (independently verified): trio + the same 6 axioms
+  {restated Layer-A `asymInteracting_mgf_gaussianDominated`, the 5 Stage-C axioms}.
+* This is the honest restatement target for the legacy torus axiom
+  `asymInteracting_expMoment_volume_uniform` (`AsymContinuumLimit.lean:626`); a migration note
+  now points its consumers (routeBPrime `hUnif` chain) at the theorem. Counts unchanged
+  (31 raw / 29 real / 0 sorries).
+* Landed by a Fable-5 agent that ran out of credits during the footprint check; finished and
+  committed by the coordinator (Opus 4.8).
+
 ## 2026-07-13 — Free-covariance kernel positivity PROVED; |f|-form exp-moment composed (6 axioms)
 
 * **`latticeCovarianceAsymGJ_pairing_nonneg`** (`Pphi2/AsymTorus/AsymCovariancePositivity.lean`)
