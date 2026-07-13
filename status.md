@@ -16,9 +16,9 @@ and backend-independent reconstruction rules. This keeps the current scalar
 positive-measure construction explicit while opening a path to broader
 Euclidean/Minkowski interfaces.
 
-**Current counter (`./scripts/count_axioms.sh`, 2026-07-13, post-Phase-4.1): pphi2 31 raw / 29 real axioms,
+**Current counter (`./scripts/count_axioms.sh`, 2026-07-13): pphi2 30 raw / 28 real axioms,
 0 sorries; gaussian-field 3 axioms, 0 sorries** (both verified via `count_axioms.sh`,
-GaussianField pinned at `5bb35e8`). The 31 raw → 29 real reconciliation: 2 lines are docstring
+GaussianField pinned at `5bb35e8`). The 30 raw → 28 real reconciliation: 2 lines are docstring
 matches of the word "axiom" (`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
 `Pphi2/NelsonEstimate/LayerCake.lean:85`).
 **2026-07-13 (Phase 4.1, honest ℝ² headline — spec `planning/r2-honest-headline-spec.md`):**

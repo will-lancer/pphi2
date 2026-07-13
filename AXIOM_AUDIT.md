@@ -11,6 +11,8 @@
   Pythagoras.
 * Kernel footprint (verified 2026-07-13): `#print axioms Pphi2.asymTransferNormalized_contract`
   reports exactly `[propext, Classical.choice, Quot.sound]` — no project axioms, no sorries.
+* **Counts:** pphi2 **31 raw / 29 real → 30 raw / 28 real**, 0 sorries (verified
+  `count_axioms.sh` 2026-07-13). First dormant GNS-bridge bookkeeping axiom retired via Codex.
 
 ## 2026-07-13 — Torus |f|-form thresholded exp-moment THEOREM landed
 
