@@ -2,6 +2,16 @@
 
 **Last updated**: 2026-07-13.
 
+## 2026-07-13 — Asym normalized-transfer contraction PROVED (axiom discharged)
+
+* **`asymTransferNormalized_contract`** (`Pphi2/AsymTorus/AsymBridgeInstance.lean`) was
+  converted from axiom to theorem with the same statement. Proof route: decompose
+  `f = ⟪Ω,f⟫ • Ω + v`, use `asymTransferNormalized_gap` on `v ⟂ Ω`, preserve
+  orthogonality by the packaged self-adjoint normalized transfer, then recombine with
+  Pythagoras.
+* Kernel footprint (verified 2026-07-13): `#print axioms Pphi2.asymTransferNormalized_contract`
+  reports exactly `[propext, Classical.choice, Quot.sound]` — no project axioms, no sorries.
+
 ## 2026-07-13 — Torus |f|-form thresholded exp-moment THEOREM landed
 
 * **`asymInteracting_expMoment_volume_uniform_absForm_thresholded`**

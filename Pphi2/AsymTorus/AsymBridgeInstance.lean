@@ -29,7 +29,7 @@ the asymmetric torus transfer system.  The algebraic part is now concrete:
 The remaining analytic inputs are isolated as axioms with audit records:
 
 * sign/representative normalization for the chosen Jentzsch basis vector;
-* normalized-transfer global contraction and ground-isometry intertwining;
+* ground-isometry intertwining;
 * the finite-periodic denominator and scalar remainder estimates.
 
 These are exactly the model-specific GNS discharge obligations described in the
@@ -115,21 +115,81 @@ noncomputable instance asymGroundStateRep_isProbabilityMeasure
     (asymGroundStateRep_measurable (Nt := Nt) (Ns := Ns) P a mass ha hmass)
     (asymGroundStateRep_norm_integral_eq_one (Nt := Nt) (Ns := Ns) P a mass ha hmass)
 
-/-! ## Model-specific GNS discharge axioms -/
+/-! ## Model-specific GNS discharge inputs -/
 
-/-- **Axiom (global normalized-transfer contraction).** The normalized asym
-transfer is a contraction on all of `L²(volume)`.
+/-- The normalized asym transfer is a contraction on all of `L²(volume)`.
 
-The already-proved `asymTransferNormalized_gap` gives the strict contraction on
-the vacuum-orthogonal complement.  This global bound follows from
-self-adjoint positivity plus the Perron-Frobenius top-eigenvalue normalization;
-the missing pphi2-side proof is the standard spectral-radius argument for the
-compact self-adjoint transfer operator. -/
-axiom asymTransferNormalized_contract
+Proof: decompose into the normalized ground vector plus its orthogonal
+complement, use the strict gap on the complement, and recombine by
+Pythagoras. -/
+theorem asymTransferNormalized_contract
     (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass) :
     ∀ f : L2SpatialField Ns,
       ‖(((1 / asymTransferGroundEigenvalue Nt Ns P a mass ha hmass) •
-          asymTransferOperatorCLM Nt Ns P a mass ha hmass) f)‖ ≤ ‖f‖
+          asymTransferOperatorCLM Nt Ns P a mass ha hmass) f)‖ ≤ ‖f‖ := by
+  intro f
+  classical
+  obtain ⟨γ, hγ0, hγ1, hgap⟩ := asymTransferNormalized_gap Nt Ns P a mass ha hmass
+  set Ω := asymGroundVector Nt Ns P a mass ha hmass with hΩ_def
+  set T := asymTransferNormalized Nt Ns P a mass ha hmass with hT_def
+  set c : ℝ := @inner ℝ _ _ Ω f with hc_def
+  set v : L2SpatialField Ns := f - c • Ω with hv_def
+  have hΩnorm : ‖Ω‖ = 1 := by
+    simpa [hΩ_def] using
+      asymGroundVector_norm_eq_one (Nt := Nt) (Ns := Ns) P a mass ha hmass
+  have hΩ_inner_self : @inner ℝ _ _ Ω Ω = 1 := by
+    rw [real_inner_self_eq_norm_sq, hΩnorm]
+    norm_num
+  have hv_orth : @inner ℝ _ _ Ω v = 0 := by
+    rw [hv_def, inner_sub_right, inner_smul_right, hc_def, hΩ_inner_self]
+    ring
+  have hTv_le_gap : ‖T v‖ ≤ γ * ‖v‖ := by
+    simpa [T, Ω, hΩ_def] using
+      hgap v (by simpa [Ω, hΩ_def, v, hv_def] using hv_orth)
+  have hγ_le_one : γ ≤ 1 := le_of_lt hγ1
+  have hTv_le : ‖T v‖ ≤ ‖v‖ := by
+    calc
+      ‖T v‖ ≤ γ * ‖v‖ := hTv_le_gap
+      _ ≤ 1 * ‖v‖ := mul_le_mul_of_nonneg_right hγ_le_one (norm_nonneg _)
+      _ = ‖v‖ := one_mul _
+  let G := asymGappedTransfer Nt Ns P a mass ha hmass γ hγ0 hγ1 hgap
+  have hTΩ : T Ω = Ω := by
+    simpa [G, T, Ω, hΩ_def] using G.vacuum_eq
+  have hΩ_Tv : @inner ℝ _ _ Ω (T v) = 0 := by
+    have hvG : @inner ℝ _ _ G.vacuum v = 0 := by
+      simpa [G, Ω, hΩ_def] using hv_orth
+    simpa [G, T, Ω, hΩ_def] using G.inner_vacuum_T_eq_zero hvG
+  have horth_Tv : @inner ℝ _ _ (c • Ω) (T v) = 0 := by
+    rw [real_inner_smul_left, hΩ_Tv, mul_zero]
+  have horth_v : @inner ℝ _ _ (c • Ω) v = 0 := by
+    rw [real_inner_smul_left, hv_orth, mul_zero]
+  have hf_decomp : f = c • Ω + v := by
+    rw [hv_def]
+    abel
+  have hTf_decomp : T f = c • Ω + T v := by
+    rw [hf_decomp, map_add, map_smul, hTΩ]
+  have hTf_sq : ‖T f‖ ^ 2 = ‖c • Ω‖ ^ 2 + ‖T v‖ ^ 2 := by
+    rw [hTf_decomp]
+    simpa [pow_two] using norm_add_sq_eq_norm_sq_add_norm_sq_real horth_Tv
+  have hf_sq : ‖f‖ ^ 2 = ‖c • Ω‖ ^ 2 + ‖v‖ ^ 2 := by
+    rw [hf_decomp]
+    simpa [pow_two] using norm_add_sq_eq_norm_sq_add_norm_sq_real horth_v
+  have hTv_sq : ‖T v‖ ^ 2 ≤ ‖v‖ ^ 2 := by
+    nlinarith [hTv_le, norm_nonneg (T v), norm_nonneg v]
+  have hsq : ‖T f‖ ^ 2 ≤ ‖f‖ ^ 2 := by
+    rw [hTf_sq, hf_sq]
+    nlinarith
+  have hnorm : ‖T f‖ ≤ ‖f‖ := by
+    have hsqrt := Real.sqrt_le_sqrt hsq
+    simpa [Real.sqrt_sq (norm_nonneg (T f)), Real.sqrt_sq (norm_nonneg f)] using hsqrt
+  have hgoal_op :
+      ((1 / asymTransferGroundEigenvalue Nt Ns P a mass ha hmass) •
+          asymTransferOperatorCLM Nt Ns P a mass ha hmass :
+        L2SpatialField Ns →L[ℝ] L2SpatialField Ns) =
+        asymTransferNormalized Nt Ns P a mass ha hmass := by
+    rw [asymTransferNormalized, one_div]
+  rw [hgoal_op]
+  exact hnorm
 
 /-- **Axiom (ground isometry sends one to the selected ground vector).**
 
