@@ -1,6 +1,7 @@
 # K18-2 design draft — P(φ)₂ polymer activities + KP verification (stage 1: pre-vet)
 
-**Date**: 2026-07-13. **Status**: DRAFT for the vetting cycle — do NOT implement from this.
+**Date**: 2026-07-13. **Status**: **VETTED (Gemini 3.1-pro, same day) — design FINAL with
+the corrections in the "Vet outcome" section below.** Implementable after K18-0/K18-1.
 **Parent**: [`keystone-18-campaign.md`](keystone-18-campaign.md). Consumes the generic
 `PolymerSystem`/KP engine (GibbsMeasure `Ch6Subtree`, to be extracted per K18-0).
 
@@ -79,3 +80,38 @@ interaction `V_B = λ·a²Σ_{x∈B}:P(φ_x):_{c_a}` per unit block `B`:
 
 ## Not in scope for K18-2 (recorded to prevent creep)
 Uniqueness assembly (K18-3), the coupled `a→0` step (K18-4), the KP-core extraction (K18-0).
+
+## Vet outcome (stage 2, 2026-07-13) — MAJOR SIMPLIFICATION, design final
+
+1. **Architecture confirmed**: Abdesselam–Rivasseau (1995) BKAR form — in finite dimensions
+   it is a finite ALGEBRAIC identity (multivariate Taylor/forest formula), no functional
+   calculus; PSD of the interpolated covariance is elementary (`C(s) = C ∘ S` Schur/Hadamard
+   product of PSD matrices). Unit-scale blocks confirmed.
+2. **NO small/large-field split needed** (Q2/Q3 merged): pointwise sup-cutoffs would inject
+   `a`-dependence (sup over 1/a² sites diverges logarithmically) — instead:
+   - exponential part: Hölder + **Nelson's per-block exponential bound** (pphi2's existing
+     NelsonEstimate machinery!) — `E[e^{−qV_B}]` a-uniform for `qλ` small; the Wick
+     `(log 1/a)`-lower-bound divergence is neutralized by measure concentration;
+   - polynomial part: `∂_F`-factors bounded via Hölder + Gaussian **Wick moments**.
+   **λ₀ is genuinely a-uniform.** The K18-2 "research core" therefore collapses to
+   assembling EXISTING pphi2 bricks (Nelson per-block, Wick moments/hypercontractivity,
+   Cluster-B covariance sums) into the AR framework.
+3. **⚠ Coordinator correction to the vet** (adjacent blocks): the claim "forest lines
+   evaluate at distance ≥ 1, so no log" fails for ADJACENT unit blocks (sites near the
+   shared edge see the 2D `log|x−y|` singularity). The a-uniform bound for adjacent-block
+   lines is the INTEGRATED form `a⁴·Σ_{x∈B}Σ_{y∈B'}|C(x,y)|^k ≤ C_k` (2D log is locally
+   integrable — this is precisely pphi2's Phase-B/Cluster-B `canonicalRoughCovariance_pow_sum`
+   estimate class), NOT a sup bound. Statement design must use block-pair line weights in
+   integrated form throughout.
+4. **Derivative bookkeeping**: option (a) — algebraic Wick expansion + hypercontractivity.
+   (b) IBP rejected (combinatorial explosion in Lean); (c) BBK tree-graph positivity rejected
+   (needs pointwise-positive interaction; Wick-ordered `:P:` is not).
+5. **Boundary independence**: activities are Λ-independent by construction (BKAR decouples
+   blocks); finite-vs-infinite-volume comparison = the KP cluster tail over polymers meeting
+   both the observable support and `∂Λ`, on the **a-independent unit-block grid** — the
+   lattice boundary (1/a sites) is invisible to the KP layer. The template's `deltaT/Einf`
+   scaffolding is thus optional; the direct tail route is preferred.
+
+**Revised effort**: K18-2 drops from ★★★/4–8 wk to **★★–★★★ / 2–4 wk** (the split is gone;
+the new content is the AR identity + the activity assembly). Updated in
+`keystone-18-campaign.md`.
