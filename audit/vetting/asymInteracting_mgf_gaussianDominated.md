@@ -1,9 +1,41 @@
 # Vetting — `asymInteracting_mgf_gaussianDominated`
 
 Captured soundness-review records for `asymInteracting_mgf_gaussianDominated`
-(`Pphi2/AsymTorus/AsymExpMomentDischarge.lean:127`). Linked from
+(`Pphi2/AsymTorus/AsymExpMomentDischarge.lean`). Linked from
 [`../../AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md) and
 [`../../planning/INDEX.md`](../../planning/INDEX.md) item 2.
+
+---
+
+```yaml
+---
+axiom: asymInteracting_mgf_gaussianDominated
+file: Pphi2/AsymTorus/AsymExpMomentDischarge.lean
+statement_hash: null
+model: gemini-3.1-pro + codex-gpt-5.5
+tool: mcp__gemini__chat_gemini + codex
+source_code: GR, SA
+date: 2026-07-12
+questions: [quantifier-correctness, sign-restriction]
+verdict: FALSE-AS-STATED (unrestricted); RESTATED 2026-07-13
+rating: Standard (sign-restricted)
+discharged: false
+superseded_by: null
+---
+```
+
+**Restatement (2026-07-13).** The 2026-07-12 vet (Gemini 3.1-pro; independently
+confirmed by Codex GPT-5.5) found the axiom's quantifier over ALL
+`f : AsymLatticeField Nt Ns` FALSE: Newman/Lee–Yang Gaussian domination requires
+same-sign coefficients (2-spin mixed-sign counterexample; Lebowitz-κ₄ mechanism;
+n-pair amplification defeats the `K = 2` `|·|`-form). The axiom now carries
+`hf : ∀ x, 0 ≤ f x` (sitewise nonnegative). **Rating: Flagged → Standard
+(sign-restricted).** Signed `f` is recovered by the theorem
+`asymInteracting_expMoment_of_signed` (`Pphi2/AsymTorus/AsymSignedSplit.lean`):
+`f = f₊ − f₋` split + Cauchy–Schwarz + the axiom at `2f₊`, `2f₋`, giving
+`∫ e^{|⟨ω,f⟩|} dμ_int ≤ 2·exp(Var_int(f₊) + Var_int(f₋))`. Full record:
+`AXIOM_AUDIT.md` entries 2026-07-12 (flag) and 2026-07-13 (resolution);
+`planning/layer-a-lee-yang-scoping.md` §"Vet result".
 
 ---
 

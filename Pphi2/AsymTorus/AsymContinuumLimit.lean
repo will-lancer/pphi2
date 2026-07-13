@@ -599,8 +599,9 @@ statement is **Standard / Likely correct**; uniformity in `L` and `a` confirmed 
 + mass-gap variance domination; fixed-`Ls` quasi-1D is the safe direction. See
 `docs/cylinder-conditional-inputs-provability.md` §4.
 
-**Architecture closure verified 2026-06-02** (deep-think-vetted). This axiom is now
-provably dischargeable from two factored upstream-input axioms in
+**Architecture closure verified 2026-06-02** (deep-think-vetted; 2026-07-13:
+the closure lands in the split-seminorm form, see the final paragraph). The
+factored upstream-input axioms live in
 `Pphi2/AsymTorus/AsymExpMomentDischarge.lean`:
 
 * **Layer A** `asymInteracting_mgf_gaussianDominated`: lattice-level Newman MGF
@@ -613,11 +614,15 @@ provably dischargeable from two factored upstream-input axioms in
   `AsymPositivity.lean`).
 
 The Layer C assembly `asymInteracting_expMoment_volume_uniform_proof` (in
-`AsymExpMomentDischarge.lean`) proves the exact statement of this axiom from
-Layers A + B2. This axiom is retained pro tem (cannot be deleted from this
-file without an import refactor, as `AsymExpMomentDischarge.lean` is downstream
-of this file via `AsymVarianceBound.lean`); the structural close is
-mathematically complete. -/
+`AsymSignedSplit.lean`; moved 2026-07-13 with the sign restriction of Layer A)
+proves the **split-seminorm variant** of this statement from Layers A + B2:
+the free-variance seminorm there is `C · (Var_free(f₊) + Var_free(f₋))`, not
+this axiom's `C · Var_free(f)`. Matching this axiom's exact form additionally
+needs the entrywise nonnegativity of the free lattice covariance kernel
+(`Var_free(f₊) + Var_free(f₋) ≤ Var_free(|f|)`) plus an `|f|`-seminorm
+restatement here — see `AXIOM_AUDIT.md` (2026-07-13). This axiom is retained
+pro tem (cannot be deleted from this file without an import refactor, as the
+Layer C files are downstream of this file via `AsymVarianceBound.lean`). -/
 axiom asymInteracting_expMoment_volume_uniform
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ K C : ℝ, 0 < K ∧ 0 < C ∧

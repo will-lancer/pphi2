@@ -2,6 +2,44 @@
 
 **Last updated**: 2026-07-13.
 
+## 2026-07-13 — Layer A `asymInteracting_mgf_gaussianDominated` RESTATED (sign-restricted) + signed-split Layer C landed
+
+* **Restatement (closes the 2026-07-12 red flag):** the Layer A axiom
+  (`Pphi2/AsymTorus/AsymExpMomentDischarge.lean`) now carries the hypothesis
+  `hf : ∀ x, 0 ≤ f x` (sitewise nonnegative), per the 2026-07-12 Gemini 3.1-pro + Codex
+  GPT-5.5 verdict that the unrestricted quantifier is FALSE (2-spin mixed-sign
+  counterexample; Lebowitz-κ₄ mechanism; n-pair amplification kills the K=2 |·|-form).
+  **Rating upgraded: Flagged (FALSE as stated) → Standard (sign-restricted)** — the
+  same-sign form is exactly Newman's Thm 3 via Griffiths–Simon/Asano, which both external
+  vets confirmed.
+* **Signed `f` recovered (the axiom's consumer):** new theorem
+  `asymInteracting_expMoment_of_signed` (`Pphi2/AsymTorus/AsymSignedSplit.lean`) — the
+  vetted `f = f₊ − f₋` split: `|⟨ω,f⟩| ≤ |⟨ω,f₊⟩| + |⟨ω,f₋⟩|`, Cauchy–Schwarz, and the
+  restated axiom at `2f₊`/`2f₋`; conclusion
+  `∫ e^{|⟨ω,f⟩|} dμ_int ≤ 2·exp(Var_int(f₊) + Var_int(f₋))` — exactly the Codex-refined
+  constants of the 2026-07-12 entry (the `2f±` doubling cancels the `½`). Kernel footprint
+  (verified `#print axioms` 2026-07-13): trio + the restated axiom only.
+* **Layer C assembly reworked:** `asymInteracting_expMoment_volume_uniform_proof` — the
+  pre-existing in-repo consumer of the axiom, which fed it a signed `g` — moved from
+  `AsymExpMomentDischarge.lean` to `AsymSignedSplit.lean` and is now proved from the split
+  lemma + the Layer B2 lattice bound at `g₊`, `g₋`; its seminorm is the **split form**
+  `K·exp(C·(Var_free(g₊) + Var_free(g₋)))` (`K = 2`, `C = C_B`). As the 07-12 Codex entry
+  warned, `Var_free(g₊) + Var_free(g₋)` is NOT controlled by `Var_free(g)` (cross-term
+  cancellation), so the pre-restatement conclusion form `C·Var_free(g)` is not recoverable
+  without the entrywise nonnegativity of the free lattice covariance kernel
+  (→ `≤ Var_free(|g|)`), which is not formalized — no new axioms in this change. Kernel
+  footprint: trio + {restated Layer A, legacy Layer B2 lattice axiom} — the same axiom set
+  as before the restatement.
+* **Follow-up (torus-level target form):** the separate torus axiom
+  `asymInteracting_expMoment_volume_uniform` (`AsymContinuumLimit.lean`, vetted 2026-05-27)
+  retains the `C·Var_free(f)` seminorm for signed `f`; the Layer-C discharge now lands at
+  the split seminorm, so its eventual discharge needs either the covariance-kernel
+  entrywise nonnegativity + an `|f|`-form restatement, or a fresh vet of the
+  `C·Var_free(f)` form — tracked for the Layer A campaign
+  (`planning/layer-a-lee-yang-scoping.md`).
+* **Counts:** unchanged — restatement, not addition (31 raw / 29 real, 0 sorries; verified
+  `count_axioms.sh` 2026-07-13). `lake build` green.
+
 ## 2026-07-13 — B2 torus-level thresholded variance THEOREM landed (additive Piece-5 migration)
 
 * **New theorem `asymInteractingVariance_le_freeVariance_torus_thresholded`**
@@ -249,6 +287,10 @@ change; `continuumLimit_nonGaussian` and `pphi2_nontriviality` are restatements 
   axioms 14/15 are unaffected (they don't take the `a→0` limit).
 
 ## 2026-07-12 — ⚠ Layer A axiom `asymInteracting_mgf_gaussianDominated` OVER-QUANTIFIED
+
+**RESOLVED 2026-07-13 — restated** (hypothesis `∀ x, 0 ≤ f x` added; signed-split lemma
+landed as its consumer in `AsymSignedSplit.lean`; rating Flagged → Standard
+(sign-restricted) — see the 2026-07-13 entry above).
 
 * **Flag (Gemini 3.1-pro vet of the Layer-A scoping, 2026-07-12; arithmetic verified by hand):**
   the axiom (`Pphi2/AsymTorus/AsymExpMomentDischarge.lean:127`) quantifies over **all**

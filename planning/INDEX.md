@@ -68,10 +68,14 @@ clustering, gating OS4). Master campaign doc: [`docs/cylinder-master-plan.md`].
   status: scoped   deps: [2, 3]   diff: ★ (Layer C assembly, ~50 lines)
   note: `K·exp(C·Var_free)` bound. Assembly of Layer A (2) × Layer B2 (3). Plan:
   [`docs/asym-interacting-expmoment-volume-uniform-discharge-plan.md`], [`docs/cyl-1a-bridge-plan.md`].
-- [ ] **2. `asymInteracting_mgf_gaussianDominated`** (Layer A) `AsymExpMomentDischarge.lean:127`
+- [ ] **2. `asymInteracting_mgf_gaussianDominated`** (Layer A) `AsymExpMomentDischarge.lean:143`
   status: scoped   deps: [12]   diff: ★★★
   note: Newman MGF via Gaussian domination / Lee–Yang. New `lee-yang` repo scaffolded, Phase 1 not
   implemented. Plan: [`docs/asym-expmoment-discharge-via-lee-yang-vet-request.md`].
+  **Restated 2026-07-13**: sign-restricted to sitewise `0 ≤ f` (the unrestricted form was FALSE
+  for mixed-sign `f`; AXIOM_AUDIT 2026-07-12/13, rating Flagged → Standard); signed `f` recovered
+  by `asymInteracting_expMoment_of_signed` (`AsymSignedSplit.lean`); the Layer C assembly (1) is
+  now proved there in the split-seminorm form `K·exp(C·(Var_free(f₊)+Var_free(f₋)))`.
 - [~] **3. `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`** (Layer B2 Route-A lattice input) `AsymExpMomentDischarge.lean:215`
   status: **in_progress — torus axiom replaced by theorem 2026-06-23; lattice Route-A input remains**   deps: [17]   diff: ★★★ (★★ with the route pinned)
   note: transfer-matrix Feynman–Kac route, **Route A** (bounded-cutoff approximation, gemini-vetted

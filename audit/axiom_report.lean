@@ -33,7 +33,10 @@ Secondary regression targets (not in `formalization.yaml`):
 * `Pphi2.asymInteractingVariance_le_freeVariance_Lt_uniform` — the
   Layer-B2 torus statement converted from axiom to theorem in Piece 5.
 * `Pphi2.asymInteracting_expMoment_volume_uniform_proof` — the Layer-C
-  assembly theorem consuming Layer A and Layer B2.
+  assembly theorem consuming Layer A and Layer B2 (since 2026-07-13 in
+  `AsymSignedSplit.lean`, split-seminorm form).
+* `Pphi2.asymInteracting_expMoment_of_signed` — the signed-split recovery
+  lemma (sole direct consumer of the sign-restricted Layer A axiom).
 
 **Usage**:
 
@@ -55,3 +58,4 @@ filename per the hub convention.
 #print axioms Pphi2.pphi2_exists_os_and_massParameter_positive
 #print axioms Pphi2.asymInteractingVariance_le_freeVariance_Lt_uniform
 #print axioms Pphi2.asymInteracting_expMoment_volume_uniform_proof
+#print axioms Pphi2.asymInteracting_expMoment_of_signed

@@ -77,6 +77,10 @@ The inequality-first route was vetted same-day. Verdict: **sound, no hidden Hada
 folded into A1/A2 below, and one **red flag on the existing axiom**:
 
 1. **RED FLAG — `asymInteracting_mgf_gaussianDominated` is FALSE as stated for mixed-sign `f`.**
+   **RESOLVED 2026-07-13**: axiom restated with sitewise `hf : ∀ x, 0 ≤ f x`; signed `f`
+   recovered by the split lemma `asymInteracting_expMoment_of_signed` and the Layer C assembly
+   moved/restated in the split-seminorm form (`Pphi2/AsymTorus/AsymSignedSplit.lean`); rating
+   Flagged → Standard (sign-restricted). See `AXIOM_AUDIT.md` 2026-07-13 entry. Original flag:
    Newman/Lee–Yang Gaussian domination requires **same-sign coefficients** (`f ≥ 0` or `f ≤ 0`
    sitewise). Elementary counterexample (verified by hand): 2-spin ferromagnet weight
    `e^{Jσ₁σ₂}`, `S = σ₁ − σ₂`; then `P(S = ±2) = p/2` with `p = e^{−J}/(e^J + e^{−J})`,
