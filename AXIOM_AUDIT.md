@@ -2,6 +2,25 @@
 
 **Last updated**: 2026-07-13.
 
+## 2026-07-13 — Free-covariance kernel positivity PROVED; |f|-form exp-moment composed (6 axioms)
+
+* **`latticeCovarianceAsymGJ_pairing_nonneg`** (`Pphi2/AsymTorus/AsymCovariancePositivity.lean`)
+  — entrywise/pairing nonnegativity of the free asym covariance for sitewise-nonneg test
+  vectors, proved via a discrete maximum principle (`massOperatorAsym_solution_nonneg`) +
+  the spectral Green operator (`asymMassGreen`, `massOperatorAsym_asymMassGreen`). **Bare
+  Mathlib trio.** Consequence `asymFreeVariance_posPart_add_negPart_le`
+  (`Var(f₊)+Var(f₋) ≤ Var(|f|)`) also proved.
+* **`asymInteracting_expMoment_absForm_thresholded`** — the composed lattice exp-moment bound
+  `∫e^{|ωf|}dμ_int ≤ 2·exp(2C·Var_free(|f|))`-form under the (a₀, L₀) thresholds: kernel
+  footprint = trio + {restated Layer-A `asymInteracting_mgf_gaussianDominated`, the 5
+  Stage-C axioms}. This realizes the honest lattice-level CYL-1a content and IS the
+  restatement target for the flagged torus axiom `asymInteracting_expMoment_volume_uniform`
+  (follow-up: restate that axiom in the |f|/thresholded form and derive it from this
+  theorem via the torus pushforward — closing the 2026-07-13 sign-restriction follow-up).
+* File finished by the coordinator after two agent infrastructure failures (fixes: an
+  already-consumed `Finset.mul_sum` rewrite; `hλ` is an illegal identifier — λ is the
+  lambda keyword). Build green (4059 jobs); counts unchanged **31 raw / 29 real / 0 sorries**.
+
 ## 2026-07-13 — Layer A `asymInteracting_mgf_gaussianDominated` RESTATED (sign-restricted) + signed-split Layer C landed
 
 * **Restatement (closes the 2026-07-12 red flag):** the Layer A axiom
