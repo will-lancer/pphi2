@@ -1,6 +1,6 @@
 # pphi2 completion plan — 2026-07 review synthesis
 
-**Date**: 2026-07-12. **Source**: full-project review (four parallel audits: T² validity,
+**Date**: 2026-07-12 (status refreshed 2026-07-13 — see the addendum at the end). **Source**: full-project review (four parallel audits: T² validity,
 cylinder Route B′ gaps, Route A ℝ² status, planning-repo/random-fields leverage). Fresh
 `lean_verify` kernel checks were run against the current build cache for every headline named
 below; findings marked **[verified]** are from those runs, not from the committed certificate.
@@ -307,3 +307,30 @@ track). Follow the addendum's 3.1'-3.4' sequencing.)*
 Ordering: M0 → M1 immediately; M2 is the main line; M4 scoping (3.1–3.2 plan doc) can start in
 parallel; M5's 4.1 (headline restatement) should land **before** any further ℝ²-specific
 analytic work so effort accrues to a non-vacuous target.
+
+---
+
+## Status addendum (2026-07-13, end of the overnight/morning loop)
+
+**Landed since the plan was written** (all on `t2-conjoined-os`, pushed):
+- **B2 DISCHARGED (thresholded)**: `asymInteractingVariance_le_freeVariance_lattice_thresholded`
+  AND its torus-level Piece-5 migration `…_torus_thresholded` — theorems on exactly the
+  5 vetted axioms (S1 FSS, S2 gap, τ-bridge pair, B5b). Legacy all-`(Lt,a)` axiom carries a
+  migration note; Layer-C rewiring to the eventual form is the remaining wiring.
+- **Asym exponential clustering** in physical distance (2-axiom footprint) — the OS4 lattice
+  input, replacing the removed `clustering_uniform` route.
+- **Phase 4.1 DONE**: honest ℝ² headline (δ₀ closed, vetted existence axiom, 31 raw/29 real).
+- **Keystone-18 fully designed**: campaign staged (K18-0..4) + the K18-2 activity layer
+  vetted FINAL (AR-BKAR, no field split — Hölder+Nelson; λ₀ a-uniform; adjacent-block
+  integrated bounds). Effort for K18-2 reduced to 2–4 wk.
+- **Layer A**: A2.1–A2.4 landed in lee-yang (Codex, reviewed/accepted); task files for A2.5
+  + A1 committed and Codex-ready; repo now public (mrdouglasny/lee-yang).
+- Also this cycle: PR #60 merged (false gap axioms off main); the τ-form/K-uniform bridge
+  axiom architecture; Stage A/B2 route (a) infrastructure (S4 spectral toolkit, S1 high
+  branch, slice-constant + band machinery, B-I/B-II, hInt discharge).
+
+**Open owner decisions**: K18-0 home; Layer-A axiom restatement (`0 ≤ f`); Layer-C
+eventual-form rewiring sign-off; lee-yang A2.5/A1 Codex dispatch.
+**Next Fable arcs** (fresh-context recommended): K18-1 foundations + AR-identity statement
+work (after K18-0), Layer-A A3 (GS limit passage) design, OS4 continuum-transfer design
+(cylinder clustering → `continuum_exponential_clustering`).
