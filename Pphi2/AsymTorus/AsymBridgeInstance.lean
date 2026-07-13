@@ -191,13 +191,12 @@ theorem asymTransferNormalized_contract
   rw [hgoal_op]
   exact hnorm
 
-/-- **Axiom (ground isometry sends one to the selected ground vector).**
+/-- The ground isometry sends one to the selected ground vector.
 
 This is representative bookkeeping for `W 1 = Ω` after choosing the measurable
 representative above.  It follows from `groundIsometry_coeFn`, the constant-one
-representative, and `asymGroundVector_coeFn_eq_groundStateRep`; the proof is
-routine but currently blocked by the upstream `mk` representative details. -/
-axiom asymGroundStateRep_eq_groundIsometry_one
+representative, and `asymGroundVector_coeFn_eq_groundStateRep`. -/
+theorem asymGroundStateRep_eq_groundIsometry_one
     (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass) :
     (letI : IsProbabilityMeasure
         (groundMeasure ν (asymGroundStateRep (Nt := Nt) (Ns := Ns) P a mass ha hmass)) :=
@@ -208,7 +207,40 @@ axiom asymGroundStateRep_eq_groundIsometry_one
         (Lp.const 2
           (groundMeasure ν (asymGroundStateRep (Nt := Nt) (Ns := Ns) P a mass ha hmass))
           (1 : ℝ))) =
-      asymGroundVector Nt Ns P a mass ha hmass
+      asymGroundVector Nt Ns P a mass ha hmass := by
+  classical
+  let Ω := asymGroundStateRep (Nt := Nt) (Ns := Ns) P a mass ha hmass
+  let μg := groundMeasure ν Ω
+  have hΩ_meas : Measurable Ω := by
+    simpa [Ω] using
+      asymGroundStateRep_measurable (Nt := Nt) (Ns := Ns) P a mass ha hmass
+  letI : IsProbabilityMeasure μg := by
+    simpa [μg, Ω] using
+      asymGroundStateRep_isProbabilityMeasure (Nt := Nt) (Ns := Ns) P a mass ha hmass
+  let u : Lp ℝ 2 μg := Lp.const 2 μg (1 : ℝ)
+  change groundIsometry hΩ_meas u = asymGroundVector Nt Ns P a mass ha hmass
+  ext1
+  have hdens_meas : Measurable (fun x => ENNReal.ofReal (Ω x ^ 2)) :=
+    ENNReal.measurable_ofReal.comp (hΩ_meas.pow_const 2)
+  have hmk_one_ground :
+      (fun x => (Lp.aestronglyMeasurable u).mk u x) =ᵐ[μg] fun _ => (1 : ℝ) :=
+    (Lp.aestronglyMeasurable u).ae_eq_mk.symm.trans
+      (Lp.coeFn_const (p := 2) (μ := μg) (c := (1 : ℝ)))
+  have hmk_one_nu :
+      ∀ᵐ x ∂ν, ENNReal.ofReal (Ω x ^ 2) ≠ 0 →
+        (Lp.aestronglyMeasurable u).mk u x = (1 : ℝ) :=
+    (ae_withDensity_iff hdens_meas).1 (by simpa [μg, groundMeasure] using hmk_one_ground)
+  filter_upwards [groundIsometry_coeFn hΩ_meas u,
+    asymGroundVector_coeFn_eq_groundStateRep
+      (Nt := Nt) (Ns := Ns) P a mass ha hmass,
+    hmk_one_nu] with x hW hΩ hmk_one
+  rw [hW, hΩ]
+  by_cases hΩx : Ω x = 0
+  · simp [Ω, hΩx]
+  · have hmk_one_x :
+        (Lp.aestronglyMeasurable u).mk u x = (1 : ℝ) :=
+      hmk_one (ne_of_gt (ENNReal.ofReal_pos.2 (sq_pos_of_ne_zero hΩx)))
+    rw [hmk_one_x, one_mul]
 
 /-- **Axiom (finite-periodic denominator lower bound).** The asym path
 partition function dominates the ground eigenvalue contribution.

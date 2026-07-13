@@ -1,6 +1,21 @@
 # Comprehensive Axiom Audit: pphi2 + gaussian-field + markov-semigroups + gaussian-hilbert
 
-**Last updated**: 2026-07-13.
+**Last updated**: 2026-07-14.
+
+## 2026-07-14 — Ground-isometry-one bridge PROVED (axiom discharged)
+
+* **`asymGroundStateRep_eq_groundIsometry_one`**
+  (`Pphi2/AsymTorus/AsymBridgeInstance.lean`) was converted from axiom to theorem with the
+  same statement. Proof route: `Lp.ext`/a.e. equality, `groundIsometry_coeFn` for the left
+  side, `AEStronglyMeasurable.ae_eq_mk` + `Lp.coeFn_const` for the constant-one
+  representative, `ae_withDensity_iff` through
+  `groundMeasure ν Ω = ν.withDensity (ENNReal.ofReal (Ω^2))` with the density-nonzero guard
+  and the `Ω = 0` branch, then `asymGroundVector_coeFn_eq_groundStateRep` for the right side.
+* Kernel footprint (verified 2026-07-14): `#print axioms
+  Pphi2.asymGroundStateRep_eq_groundIsometry_one` reports exactly
+  `[propext, Classical.choice, Quot.sound]` — no project axioms, no sorries.
+* **Counts:** pphi2 raw axiom count **30 → 29**, 0 sorries (verified
+  `./scripts/count_axioms.sh` 2026-07-14).
 
 ## 2026-07-13 — Asym normalized-transfer contraction PROVED (axiom discharged)
 
