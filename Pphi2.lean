@@ -91,6 +91,7 @@ import Pphi2.AsymTorus.AsymJentzsch
 import Pphi2.AsymTorus.AsymPositivity
 import Pphi2.AsymTorus.AsymVarianceBound
 import Pphi2.AsymTorus.AsymExpMomentDischarge
+import Pphi2.AsymTorus.AsymSignedSplit
 import Pphi2.AsymTorus.AsymEnergyFactorization
 import Pphi2.AsymTorus.AsymMeasureFactorization
 import Pphi2.AsymTorus.AsymVarianceDischarge
@@ -116,6 +117,17 @@ import Pphi2.IRLimit.CylinderOS
 
 -- Phase 4c: Cylinder continuum limit (Route C — moved to future/)
 -- See future/CylinderContinuumLimit/ for Route C axioms and infrastructure
+
+-- Keystone 18 (K18-0): generic Kotecký–Preiss cluster-expansion engine,
+-- mirrored from GibbsMeasure (see Pphi2/ClusterExpansion/KP.lean)
+import Pphi2.ClusterExpansion.KP
+import Pphi2.ClusterExpansion.KP.Counting
+import Pphi2.ClusterExpansion.KP.Expansion
+import Pphi2.ClusterExpansion.KP.Geometry
+import Pphi2.ClusterExpansion.KP.Graphs
+import Pphi2.ClusterExpansion.KP.KPBound
+import Pphi2.ClusterExpansion.KP.Overlap
+import Pphi2.ClusterExpansion.KP.TsumFacts
 
 -- Phase 5: Euclidean invariance (OS2)
 import Pphi2.OSProofs.OS2_WardIdentity
