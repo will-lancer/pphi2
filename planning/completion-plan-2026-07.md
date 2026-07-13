@@ -151,7 +151,7 @@ deliberately retained as vetted GJ inputs — decide at 2.4).
   representation axiom (do not write). Surviving route: **B1 ⊕ gap**. No chessboard/FSS at
   fixed Ls.
 
-### 2b. Layer A — Newman/Lee–Yang MGF domination (★★★, not started; the schedule risk)
+### 2b. Layer A — Newman/Lee–Yang MGF domination (★★★ — *see 2026-07-13 addendum: axiom sign-restricted; producer chain proof-complete in `lee-yang`; A3/A4 remain*)
 
 - [x] **2b.1** *(DONE 2026-07-12 — [`layer-a-lee-yang-scoping.md`](layer-a-lee-yang-scoping.md):
   polynomial/Asano side already complete in `lee-yang`; recommended inequality-first restructure

@@ -1,10 +1,23 @@
 # pphi2 — remaining-axiom discharge plan (master index)
 
-**Plan-loop status machine for the 17 project-introduced axioms** standing between the current
-state and "φ⁴₂ is a Wightman QFT, in Lean." Single source of truth: this file. Each row points to
-the canonical detailed discharge plan (in `docs/`); where the detailed plan is stale or missing,
-that is flagged. Re-read this index every cycle; pick the next `todo`/`in_progress` item whose
-`deps` are `done`.
+> **⚠ Status banner (2026-07-13).** Current counts: **pphi2 31 raw / 29 real axioms, 0 sorries**
+> (the "17" below is the pre-cylinder architectural cohort; cylinder-era axioms and the
+> Phase-4.1 `pphi2_limit_exists` have since been added, and the false `spectral_gap_*` pair
+> removed). Major changes since this machine was written, all on `t2-conjoined-os`:
+> **Layer B2 is DISCHARGED** — the interacting≤free variance bound and the `|f|`-form
+> exp-moment are theorems on 5–6 vetted axioms (S1 FSS, S2 fixed-`Ls` gap, τ-form bridge pair,
+> B5b); **asym exponential clustering** is a theorem (2 axioms); **Layer A** is sign-restricted
+> (was false for mixed-sign `f`) with its finite-Ising→Newman producer chain proof-complete in
+> the sibling `lee-yang` repo; **Phase 4.1** made the ℝ² headline honest. See
+> [`completion-plan-2026-07.md`](completion-plan-2026-07.md) §"Status addendum (2026-07-13)"
+> for the full rollup and [`keystone-18-campaign.md`](keystone-18-campaign.md) for the
+> uniqueness keystone design. Per-row statuses below are being brought current incrementally.
+
+**Plan-loop status machine for the (originally 17) project-introduced axioms** standing between
+the current state and "φ⁴₂ is a Wightman QFT, in Lean." Single source of truth: this file. Each
+row points to the canonical detailed discharge plan (in `docs/`); where the detailed plan is
+stale or missing, that is flagged. Re-read this index every cycle; pick the next
+`todo`/`in_progress` item whose `deps` are `done`.
 
 Status legend: `done` = proved/sorry-free · `in_progress` = actively being formalized ·
 `scoped` = discharge route designed, not started · `open` = route not yet pinned.
@@ -227,7 +240,9 @@ interacting content (`u₄≠0`, ★★★, needs `λ>0`).
 ## The four genuine ★★★ mountains (mostly independent)
 
 1. **The exp-moment chain** (1 ← 2 ← 12, + 3) — Layer A (Nelson/Lee–Yang) + Layer B2 (transfer gap,
-   ours). Status: B2 mostly proved (HS trace-bridge tail); Layer A not started.
+   ours). Status (2026-07-13): **B2 DISCHARGED** — thresholded interacting≤free variance is a
+   theorem (`asymInteractingVariance_le_freeVariance_lattice_thresholded`, 5 vetted axioms).
+   Layer A: axiom sign-restricted; finite-Ising→Newman producer chain proof-complete in `lee-yang`.
 2. **The uniform spectral gap** — the OS4 mass gap surviving `a→0` along a coupled sequence.
    The former axioms (16, 17) were **REMOVED 2026-07-12 as false as stated** (fixed-`Ns`
    shrinking-volume regime — see the Cluster-2 rows above and AXIOM_AUDIT.md); the mountain
@@ -303,7 +318,10 @@ second moment + HS trace-class + B5b single-slice stability + the `1/a` cancella
 [`docs/B4B5-design.md`]. This is the nearest concrete win.
 
 Remaining ★★★ mountains / human-gated items (unchanged from the 2026-06-04 triage):
-- **Layer A** (`asymInteracting_mgf_gaussianDominated`, item 2) — Newman MGF via Lee–Yang; not started.
+- **Layer A** (`asymInteracting_mgf_gaussianDominated`, item 2) — Newman MGF via Lee–Yang. Axiom
+  **sign-restricted 2026-07-13** (was false for mixed-sign `f`); the finite-Ising→Newman producer
+  chain (Asano + unit-circle roots + cosh-factor bound) is **proof-complete** in the `lee-yang`
+  repo. Remaining: the Griffiths–Simon limit passage (A3) + the pphi2 adapter (A4).
 - **Spectral gap uniformity** — the former axioms (16/17) were REMOVED 2026-07-12 as false as
   stated; the mountain persists as the OPEN coupled-limit replacement (17a/17b,
   `planning/cyl-2a-volume-scaling-addendum.md`) — still feeds OS4 clustering (14/15) *and* the

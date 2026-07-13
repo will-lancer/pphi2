@@ -8,21 +8,19 @@
 > This file used to be a consolidated snapshot. It accumulated drift faster
 > than it could be refreshed and now serves only as a pointer.
 
-## At a glance (2026-06-21)
+## At a glance (refreshed 2026-07-13)
 
 | Count | Value | Source |
 |---|---|---|
-| pphi2 axioms (real) | **26** | `count_axioms.sh` reports 28; 2 are docstring matches |
+| pphi2 axioms (real) | **29** | `count_axioms.sh` reports 31 raw; 2 are docstring matches |
 | pphi2 sorries | **0** | `count_axioms.sh` |
 | gaussian-field axioms | **3** | `count_axioms.sh` |
 | gaussian-field sorries | **0** | `count_axioms.sh` |
 
-**Real-axiom breakdown (26 = 24 + 2):**
-- **24 architectural** — enumerated by OS-program cluster in
-  [`../planning/INDEX.md`](../planning/INDEX.md).
-- **2 private scaffolding** — `asymTorusInteracting_exponentialMomentBound`
-  (`Pphi2/AsymTorus/AsymTorusOS.lean`), `gaussian_rp_cov_perfect_square`
-  (`Pphi2/OSProofs/OS3_RP_Lattice.lean`).
+Net change since 2026-06-21: `spectral_gap_uniform`/`spectral_gap_lower_bound` removed
+(false as stated), and cylinder-era + Phase-4.1 axioms added (the B2 route-(a) S1/S2/τ-bridge
+pair, and `pphi2_limit_exists`). The authoritative live inventory is `AXIOM_AUDIT.md`;
+this snapshot is a pointer only.
 
 The superseded-chain `torus_weakCoupling_lattice_connectedFourPoint_strictNeg` axiom and
 its sole consumer `torus_pphi2_isInteracting_weakCoupling` (carrier file
