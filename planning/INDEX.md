@@ -1,6 +1,6 @@
 # pphi2 — remaining-axiom discharge plan (master index)
 
-> **⚠ Status banner (2026-07-13).** Current counts: **pphi2 30 raw / 28 real axioms, 0 sorries**
+> **⚠ Status banner (2026-07-14).** Current counts: **pphi2 29 raw / 27 real axioms, 0 sorries**
 > (the "17" below is the pre-cylinder architectural cohort; cylinder-era axioms and the
 > Phase-4.1 `pphi2_limit_exists` have since been added, and the false `spectral_gap_*` pair
 > removed). Major changes since this machine was written, all on `t2-conjoined-os`:

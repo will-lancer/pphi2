@@ -254,11 +254,11 @@ consistency checks:
 All six phases are structurally complete and the full project builds
 (`lake build`).
 
-Current counter (`./scripts/count_axioms.sh`, 2026-07-13): pphi2 **30 raw /
-28 real axioms**, 0 sorries; gaussian-field **3 axioms**, 0 sorries. Net history: the
+Current counter (`./scripts/count_axioms.sh`, 2026-07-14): pphi2 **29 raw /
+27 real axioms**, 0 sorries; gaussian-field **3 axioms**, 0 sorries. Net history: the
 post-B-I-cleanup base was 30 raw / 28 real; Phase 4.1 added `pphi2_limit_exists`
-(→ 31/29), and on 2026-07-13 `asymTransferNormalized_contract` was proved (axiom → theorem,
-Codex), bringing it back to 30/28. `pphi2_limit_exists`
+(→ 31/29), and on 2026-07-13/14 two dormant GNS-bridge axioms were proved (`asymTransferNormalized_contract`,
+`asymGroundStateRep_eq_groundIsometry_one`; axiom → theorem, Codex), bringing it to 29/27. `pphi2_limit_exists`
 (`Pphi2/ContinuumLimit/Convergence.lean`) is the single clearly-labeled OPEN existence input
 of the ℝ² headline: the 2026-07-13 Phase-4.1 strengthening of `IsPphi2Limit` (coupled
 lattice conjunct `ν k = continuumMeasure 2 (N k) P (a k) mass`, `N k → ∞`, `N k·a k → ∞`)

@@ -12,7 +12,7 @@
 
 | Count | Value | Source |
 |---|---|---|
-| pphi2 axioms (real) | **28** | `count_axioms.sh` reports 30 raw; 2 are docstring matches |
+| pphi2 axioms (real) | **27** | `count_axioms.sh` reports 29 raw; 2 are docstring matches |
 | pphi2 sorries | **0** | `count_axioms.sh` |
 | gaussian-field axioms | **3** | `count_axioms.sh` |
 | gaussian-field sorries | **0** | `count_axioms.sh` |
