@@ -142,6 +142,35 @@ subsequence (`a(φn)→0`), with **bounded-continuous weak convergence `∫ g d�
 Dispatch order: A′ first (foundational, no limit, uses Phase 1 directly), then B′ (the analysis
 crux — joint measure+operator limit with distributional moment control), then assembly + 2b.
 
+## 2026-07-20 B′ limit closure landed; concrete diagonal covariance bridge remains
+
+Landed in `Pphi2/AsymTorus/AsymLinkReflectionRPLimit.lean`:
+
+- `absMoment_le_of_uniform_expMoment`, including the zero-variance case and the optimized
+  `K * exp 1 * sqrt C * sqrt sigmaSq` bound;
+- `cylinderPullbackMeasure_cexp_tendsto_of_tendsto_bc`;
+- `cylinderRPMatrixNonnegative_of_link_limit`, the fixed-family joint weak-measure and moving-link
+  reflection closure theorem.
+
+The closure theorem isolates one construction-level input as `hsigmaSq_zero`: the finite-lattice
+quadratic controls must vanish on every moving test sequence tending to zero. The exact remaining
+bridge should be proved as the named lemma
+`asymCylinderLatticeSecondMoment_tendsto_zero_of_tendsto`:
+
+```lean
+Tendsto hseq atTop (nhds 0) →
+  Tendsto (fun k =>
+    ∫ ω, (ω (asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+      (cylinderToTorusEmbed Lt Ls (hseq k)))) ^ 2
+      ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k) mass (ha k) hmass))
+    atTop (nhds 0)
+```
+
+`second_moment_asym_tendsto` proves convergence only for each fixed test function, so it does not
+by itself discharge this diagonal statement. The intended proof is a uniform continuous-seminorm
+(equicontinuity) bound for the heterogeneous `(Nt, Ns, a)` covariance family, followed by
+`hseq → 0`. No axiom or conjecture declaration has been added to Lean.
+
 ## A′ scaffolding (salvaged from a stalled Codex run, 2026-07-20)
 A Codex attempt at A′ stalled (infra) mid-edit and was reverted, but it identified the right
 auxiliary defs to build first (do these cleanly, they are self-contained):
