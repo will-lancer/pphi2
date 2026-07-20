@@ -607,6 +607,230 @@ theorem configuration_cexp_eval_dist_le_abs_eval_sub
       ring
     _ = |ω (g - f)| := by rw [map_sub]
 
+/-- A seminorm-controlled exponential moment makes the characteristic
+functional Lipschitz in that seminorm. -/
+theorem norm_configuration_expIntegral_sub_le_seminorm
+    {E : Type*} [AddCommGroup E] [Module ℝ E]
+    [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]
+    (μ : Measure (Configuration E)) [IsProbabilityMeasure μ]
+    (K C : ℝ) (hK : 0 < K) (hC : 0 < C) (q : Seminorm ℝ E)
+    (hExp : ∀ h : E,
+      Integrable (fun ω : Configuration E => Real.exp |ω h|) μ ∧
+      ∫ ω : Configuration E, Real.exp |ω h| ∂μ ≤
+        K * Real.exp (C * q h ^ 2))
+    (f g : E) :
+    ‖(∫ ω, Complex.exp (Complex.I * ↑(ω g)) ∂μ) -
+        ∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂μ‖ ≤
+      K * Real.exp 1 * Real.sqrt C * q (g - f) := by
+  let h := g - f
+  have hExp_scaled : ∀ t : ℝ,
+      Integrable (fun ω : Configuration E => Real.exp |ω (t • h)|) μ ∧
+      ∫ ω : Configuration E, Real.exp |ω (t • h)| ∂μ ≤
+        K * Real.exp (C * t ^ 2 * q h ^ 2) := by
+    intro t
+    obtain ⟨hint, hle⟩ := hExp (t • h)
+    refine ⟨hint, ?_⟩
+    rw [SeminormClass.map_smul_eq_mul] at hle
+    have hsq : (|t| * q h) ^ 2 = t ^ 2 * q h ^ 2 := by
+      rw [mul_pow, sq_abs]
+    simpa [Real.norm_eq_abs, abs_mul, hsq, mul_assoc] using hle
+  obtain ⟨habs_int, habs_bound⟩ := absMoment_le_of_uniform_expMoment
+    μ h K C (q h ^ 2) hK hC (sq_nonneg (q h)) hExp_scaled
+  have hdist_int : Integrable (configuration_cexp_eval_dist f g) μ := by
+    have hg_int := configuration_cexp_eval_integrable μ g
+    have hf_int := configuration_cexp_eval_integrable μ f
+    simpa [configuration_cexp_eval_dist,
+      configuration_cexp_eval_sub_integrand] using (hg_int.sub hf_int).norm
+  calc
+    ‖(∫ ω, Complex.exp (Complex.I * ↑(ω g)) ∂μ) -
+        ∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂μ‖
+        ≤ ∫ ω, configuration_cexp_eval_dist f g ω ∂μ :=
+      norm_configuration_expIntegral_sub_le_integral_cexp_eval_dist μ f g
+    _ ≤ ∫ ω, |ω h| ∂μ := by
+      apply integral_mono hdist_int habs_int
+      intro ω
+      exact configuration_cexp_eval_dist_le_abs_eval_sub f g ω
+    _ ≤ K * Real.exp 1 * Real.sqrt C * Real.sqrt (q h ^ 2) := habs_bound
+    _ = K * Real.exp 1 * Real.sqrt C * q (g - f) := by
+      rw [Real.sqrt_sq (NonnegHomClass.apply_nonneg q h)]
+
+/-- A seminorm-controlled exponential moment makes the characteristic
+functional continuous in the test-function topology. -/
+theorem continuous_configuration_expIntegral_of_expMoment_seminorm
+    {E : Type*} [AddCommGroup E] [Module ℝ E]
+    [TopologicalSpace E] [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]
+    (μ : Measure (Configuration E)) [IsProbabilityMeasure μ]
+    (K C : ℝ) (hK : 0 < K) (hC : 0 < C) (q : Seminorm ℝ E)
+    (hq : Continuous q)
+    (hExp : ∀ h : E,
+      Integrable (fun ω : Configuration E => Real.exp |ω h|) μ ∧
+      ∫ ω : Configuration E, Real.exp |ω h| ∂μ ≤
+        K * Real.exp (C * q h ^ 2)) :
+    Continuous (fun h : E =>
+      ∫ ω, Complex.exp (Complex.I * ↑(ω h)) ∂μ) := by
+  rw [continuous_iff_continuousAt]
+  intro f
+  change Tendsto (fun h : E =>
+    ∫ ω, Complex.exp (Complex.I * ↑(ω h)) ∂μ) (nhds f)
+      (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂μ))
+  rw [Metric.tendsto_nhds]
+  intro ε hε
+  let D := K * Real.exp 1 * Real.sqrt C
+  have hD : 0 < D := mul_pos (mul_pos hK (Real.exp_pos 1)) (Real.sqrt_pos.2 hC)
+  have hcontrol : Continuous (fun g : E => D * q (g - f)) :=
+    continuous_const.mul (hq.comp (continuous_id.sub continuous_const))
+  have hevent : ∀ᶠ g : E in nhds f, D * q (g - f) < ε := by
+    apply hcontrol.continuousAt.eventually_lt continuousAt_const
+    simpa [D] using hε
+  filter_upwards [hevent] with g hg
+  rw [dist_eq_norm]
+  exact lt_of_le_of_lt
+    (norm_configuration_expIntegral_sub_le_seminorm μ K C hK hC q hExp f g) hg
+
+/-- Reflection positivity on the algebraic span of compact positive-time pure
+tensors extends to the full positive-time cylinder submodule when the
+characteristic functional obeys a continuous-seminorm exponential bound. -/
+theorem cylinderMeasureReflectionPositive_of_compactSpan
+    (Ls : ℝ) [Fact (0 < Ls)]
+    (μ : Measure (Configuration (CylinderTestFunction Ls))) [IsProbabilityMeasure μ]
+    (K C : ℝ) (hK : 0 < K) (hC : 0 < C)
+    (q : Seminorm ℝ (CylinderTestFunction Ls)) (hq : Continuous q)
+    (hExp : ∀ h : CylinderTestFunction Ls,
+      Integrable (fun ω : Configuration (CylinderTestFunction Ls) => Real.exp |ω h|) μ ∧
+      ∫ ω : Configuration (CylinderTestFunction Ls), Real.exp |ω h| ∂μ ≤
+        K * Real.exp (C * q h ^ 2))
+    (hRPspan : ∀ (n : ℕ)
+      (f : Fin n → ↥(cylinderPositiveTimeSubmodule Ls)) (c : Fin n → ℂ),
+      (∀ i, (f i : CylinderTestFunction Ls) ∈
+        Submodule.span ℝ (cylinderPositiveTimeCompactPureTensors Ls)) →
+      CylinderRPMatrixNonnegative Ls μ n f c) :
+    CylinderMeasureReflectionPositive Ls μ := by
+  have hχ : Continuous (fun h : CylinderTestFunction Ls =>
+      ∫ ω, Complex.exp (Complex.I * ↑(ω h)) ∂μ) :=
+    continuous_configuration_expIntegral_of_expMoment_seminorm
+      μ K C hK hC q hq hExp
+  let S := Submodule.span ℝ (cylinderPositiveTimeCompactPureTensors Ls)
+  let P := cylinderPositiveTimeSubmodule Ls
+  have hSP : (S : Set (CylinderTestFunction Ls)) ⊆ P := by
+    intro u hu
+    apply Submodule.span_induction (R := ℝ) (M := CylinderTestFunction Ls)
+      (s := cylinderPositiveTimeCompactPureTensors Ls)
+      (p := fun v _ => v ∈ P)
+    · intro v hv
+      rcases hv with ⟨g, h, T, _hT, hh, _hsupp, rfl⟩
+      exact pure_mem_cylinderPositiveTimeSubmodule Ls g h hh
+    · exact P.zero_mem
+    · intro x y _ _ hx hy
+      exact P.add_mem hx hy
+    · intro r x _ hx
+      exact P.smul_mem r hx
+    · exact hu
+  let e : S → P := Set.inclusion hSP
+  have he : DenseRange e := by
+    apply (denseRange_inclusion_iff hSP).2
+    intro u hu
+    have heq := cylinderPositiveTimeSubmodule_eq_closure_span_compactPure Ls
+    change (u : CylinderTestFunction Ls) ∈ closure (S : Set (CylinderTestFunction Ls))
+    rw [← Submodule.topologicalClosure_coe]
+    rw [← heq]
+    exact hu
+  intro n f c
+  let χ : CylinderTestFunction Ls → ℂ := fun h =>
+    ∫ ω, Complex.exp (Complex.I * ↑(ω h)) ∂μ
+  let Q : (Fin n → P) → ℝ := fun F =>
+    (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
+      χ ((F i : CylinderTestFunction Ls) -
+        cylinderTimeReflection Ls (F j : CylinderTestFunction Ls))).re
+  have hQ : Continuous Q := by
+    apply Complex.continuous_re.comp
+    apply continuous_finsetSum
+    intro i _
+    apply continuous_finsetSum
+    intro j _
+    apply continuous_const.mul
+    apply hχ.comp
+    exact (continuous_subtype_val.comp (continuous_apply i)).sub
+      ((cylinderTimeReflection Ls).cont.comp
+        (continuous_subtype_val.comp (continuous_apply j)))
+  have hePi : DenseRange (Pi.map fun _ : Fin n => e) :=
+    DenseRange.piMap fun _ => he
+  change 0 ≤ Q f
+  refine DenseRange.induction_on hePi (p := fun F => 0 ≤ Q F) f ?_ ?_
+  · exact isClosed_Ici.preimage hQ
+  · intro g
+    have hg := hRPspan n (Pi.map (fun _ : Fin n => e) g) c (fun i => (g i).property)
+    simpa [CylinderRPMatrixNonnegative, Q, χ, e] using hg
+
+/-- Characteristic-functional convergence transfers one eventually
+nonnegative cylinder RP matrix to the limit. -/
+theorem cylinderRPMatrixNonnegative_of_tendsto_cf
+    (Ls : ℝ) [Fact (0 < Ls)]
+    (νseq : ℕ → Measure (Configuration (CylinderTestFunction Ls)))
+    (ν : Measure (Configuration (CylinderTestFunction Ls)))
+    (hcf : ∀ h : CylinderTestFunction Ls,
+      Tendsto (fun k => ∫ ω, Complex.exp (Complex.I * ↑(ω h)) ∂(νseq k))
+        atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω h)) ∂ν)))
+    (n : ℕ) (f : Fin n → ↥(cylinderPositiveTimeSubmodule Ls)) (c : Fin n → ℂ)
+    (hrp : ∀ᶠ k in atTop, CylinderRPMatrixNonnegative Ls (νseq k) n f c) :
+    CylinderRPMatrixNonnegative Ls ν n f c := by
+  have hentry : ∀ i j : Fin n,
+      Tendsto (fun k => ∫ ω, Complex.exp (Complex.I *
+        ↑(ω ((f i : CylinderTestFunction Ls) -
+          cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂(νseq k))
+        atTop (nhds (∫ ω, Complex.exp (Complex.I *
+          ↑(ω ((f i : CylinderTestFunction Ls) -
+            cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν)) := by
+    intro i j
+    exact hcf ((f i : CylinderTestFunction Ls) -
+      cylinderTimeReflection Ls (f j : CylinderTestFunction Ls))
+  have hsum : Tendsto (fun k =>
+      (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
+        ∫ ω, Complex.exp (Complex.I *
+          ↑(ω ((f i : CylinderTestFunction Ls) -
+            cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂(νseq k)).re)
+      atTop (nhds ((∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
+        ∫ ω, Complex.exp (Complex.I *
+          ↑(ω ((f i : CylinderTestFunction Ls) -
+            cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν).re)) := by
+    apply Complex.continuous_re.continuousAt.tendsto.comp
+    apply tendsto_finsetSum
+    intro i _
+    apply tendsto_finsetSum
+    intro j _
+    exact Filter.Tendsto.const_mul (c i * starRingEnd ℂ (c j)) (hentry i j)
+  unfold CylinderRPMatrixNonnegative
+  exact ge_of_tendsto hsum hrp
+
+/-- No-wrap RP at finite periods, characteristic-functional convergence, and
+a continuous exponential-moment bound imply full cylinder RP at the IR
+limit. The density extension is performed only after `Lt → ∞`. -/
+theorem cylinderMeasureReflectionPositive_of_noWrap_limit
+    (Ls : ℝ) [Fact (0 < Ls)]
+    (Lt : ℕ → ℝ) (hLt_tend : Tendsto Lt atTop atTop)
+    (νseq : ℕ → Measure (Configuration (CylinderTestFunction Ls)))
+    (ν : Measure (Configuration (CylinderTestFunction Ls))) [IsProbabilityMeasure ν]
+    (hcf : ∀ h : CylinderTestFunction Ls,
+      Tendsto (fun k => ∫ ω, Complex.exp (Complex.I * ↑(ω h)) ∂(νseq k))
+        atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω h)) ∂ν)))
+    (hnoWrap : ∀ k, CylinderMeasureNoWrapReflectionPositive (Lt k) Ls (νseq k))
+    (K C : ℝ) (hK : 0 < K) (hC : 0 < C)
+    (q : Seminorm ℝ (CylinderTestFunction Ls)) (hq : Continuous q)
+    (hExp : ∀ h : CylinderTestFunction Ls,
+      Integrable (fun ω : Configuration (CylinderTestFunction Ls) => Real.exp |ω h|) ν ∧
+      ∫ ω : Configuration (CylinderTestFunction Ls), Real.exp |ω h| ∂ν ≤
+        K * Real.exp (C * q h ^ 2)) :
+    CylinderMeasureReflectionPositive Ls ν := by
+  apply cylinderMeasureReflectionPositive_of_compactSpan Ls ν K C hK hC q hq hExp
+  intro n f c hf
+  obtain ⟨R, hR, hfR⟩ :=
+    finite_mem_span_cylinderPositiveTimeCompactPureTensors_exists_radius Ls n
+      (fun i => (f i : CylinderTestFunction Ls)) hf
+  have hperiod : ∀ᶠ k in atTop, 2 * R < Lt k := by
+    have hlarge : ∀ᶠ k in atTop, 2 * R + 1 ≤ Lt k := tendsto_atTop.1 hLt_tend (2 * R + 1)
+    exact hlarge.mono fun k hk => by linarith
+  apply cylinderRPMatrixNonnegative_of_tendsto_cf Ls νseq ν hcf n f c
+  exact hperiod.mono fun k hk => hnoWrap k R hR hk n f c hfR
+
 /-- Joint weak-measure and link-reflection limit for one fixed cylinder RP
 matrix. The finite matrices may use a moving link reflection, provided their
 quadratic moment controls vanish on every test-function sequence tending to

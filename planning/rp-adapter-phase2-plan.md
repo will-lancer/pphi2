@@ -68,6 +68,31 @@ already establishes characteristic-functional convergence. So:
   *parallel* application of the generic GJ 6.2.2 theorem, orthogonal to the cylinder discharge.
   Do NOT bundle it into Phase 2.
 
+## 2026-07-20 assembly landed
+
+The fixed-period full-RP formulation originally suggested for
+`asymTorusIso_measureHasGreenMomentBound_of_cutoff_withRP` is too strong: no-wrap
+RP on a torus of time length `Lt` applies to support in `(0, Lt/2)`, which is not
+dense in the full positive-time cylinder Schwartz space for fixed finite `Lt`.
+The assembly now follows the valid order:
+
+- `asymTorusIso_measureHasGreenMomentBound_of_cutoff_withNoWrapRP` carries the
+  Green bound and `CylinderMeasureNoWrapReflectionPositive` through each even
+  UV limit;
+- `asymTorusIso_cylinderUniformGreenBound` threads that property through the
+  growing-period family;
+- `cylinderMeasureReflectionPositive_of_noWrap_limit` obtains eventual RP for
+  every fixed compact-span matrix, passes it to the IR limit, and only then uses
+  `cylinderPositiveTimeSubmodule_eq_closure_span_compactPure` plus characteristic-
+  functional continuity to extend to all positive-time tests;
+- `routeBPrimeIso_cylinder_OS` and `cylinderIso_OS_of_RP_OS2` no longer take an
+  `hRP` hypothesis. Cylinder OS3 is unconditional on an external RP input.
+
+Thus Phase 2 assembly is complete. The remaining headline assumption is the
+separate OS2-symmetry family input; the pre-existing volume-uniform interacting
+exponential-moment axiom remains the textbook input used by
+`cylinderIso_OS_of_RP_OS2`.
+
 ## 2026-07-20 partial landed (green)
 
 Landed in `Pphi2/IRLimit/CylinderOS.lean`:

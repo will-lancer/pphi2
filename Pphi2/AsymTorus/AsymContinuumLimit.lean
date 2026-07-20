@@ -661,11 +661,11 @@ construction).
 
 The complete conditional closure: given the single volume-uniform interacting exp-moment constant
 `K` (the cluster-expansion input — see `asymTorusIso_cylinderUniformGreenBound`) plus the separate
-reflection-positivity (OS3) and OS2-symmetry inputs for the IR family it produces, the isotropic
+OS2-symmetry input for the IR family it produces, the isotropic
 `Z_Nt × Z_Ns` construction yields a cylinder `S¹(Ls) × ℝ` measure satisfying OS0 (analyticity),
 OS2 (Euclidean invariance), and OS3 (reflection positivity). The uniform Green-moment bound — the
-crux that the metric-mismatched square construction never supplied — is produced by
-`asymTorusIso_cylinderUniformGreenBound`; the rest is the proved `routeBPrime_cylinder_OS`. -/
+crux that the metric-mismatched square construction never supplied — and no-wrap RP are produced by
+`asymTorusIso_cylinderUniformGreenBound`; compact-span RP is density-extended at the IR limit. -/
 theorem routeBPrimeIso_cylinder_OS
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
     (K C : ℝ) (hK_pos : 0 < K) (hC_pos : 0 < C)
@@ -678,10 +678,6 @@ theorem routeBPrimeIso_cylinder_OS
       K * Real.exp (C * ∫ ω : Configuration (AsymLatticeField Nt Ns),
         (ω (asymLatticeTestFnIso L Ls Nt Ns a f)) ^ 2
         ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)))
-    (hRP : ∀ (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
-        (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))),
-        CylinderMeasureSequenceEventuallyReflectionPositive Ls
-          (fun n => letI : Fact (0 < Lt n) := hLt n; cylinderPullbackMeasure (Lt n) Ls (μ n)))
     (hOS2 : ∀ (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
         (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))),
         AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ) :
@@ -704,11 +700,17 @@ theorem routeBPrimeIso_cylinder_OS
         ∫ ω, Complex.exp (Complex.I *
           ↑(ω ((f i : CylinderTestFunction Ls) -
             cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν).re) := by
-  obtain ⟨Lt, hLt, μ, hLt_tend, hμ_prob, hμ_green, _hμ_noWrap⟩ :=
+  obtain ⟨Lt, hLt, μ, hLt_tend, hμ_prob, hμ_green, hμ_noWrap⟩ :=
     asymTorusIso_cylinderUniformGreenBound Ls P mass hmass K C hK_pos hC_pos hUnif
   exact routeBPrime_cylinder_OS Ls mass hmass K C
     hK_pos hC_pos Lt hLt hLt_tend μ hμ_prob hμ_green
-    (hRP Lt hLt μ) (hOS2 Lt hLt μ)
+    (fun φ ν hν_prob hφ hcf K' C' q hK' hC' hq hExp => by
+      letI : IsProbabilityMeasure ν := hν_prob
+      exact cylinderMeasureReflectionPositive_of_noWrap_limit Ls
+        (fun k => Lt (φ k)) (hLt_tend.comp hφ.tendsto_atTop)
+        (fun k => cylinderPullbackMeasure (Lt (φ k)) Ls (μ (φ k)))
+        ν hcf (fun k => hμ_noWrap (φ k)) K' C' hK' hC' q hq hExp)
+    (hOS2 Lt hLt μ)
 
 /-- **Volume-uniform interacting exponential moment for P(φ)₂ on the cylinder** (textbook axiom).
 
@@ -790,14 +792,11 @@ axiom asymInteracting_expMoment_volume_uniform
           ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass))
 
 /-- **Cylinder OS0/OS1/OS2/OS3 for the isotropic P(φ)₂ construction**, unconditional in the
-volume-uniform exp-moment (now supplied by `asymInteracting_expMoment_volume_uniform`), conditional
-only on the separate reflection-positivity (OS3) and OS2-symmetry inputs. -/
+volume-uniform exp-moment (now supplied by `asymInteracting_expMoment_volume_uniform`) and in
+reflection positivity, conditional only on the separate OS2-symmetry input. The historical theorem
+name is retained for downstream compatibility. -/
 theorem cylinderIso_OS_of_RP_OS2
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
-    (hRP : ∀ (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
-        (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))),
-        CylinderMeasureSequenceEventuallyReflectionPositive Ls
-          (fun n => letI : Fact (0 < Lt n) := hLt n; cylinderPullbackMeasure (Lt n) Ls (μ n)))
     (hOS2 : ∀ (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
         (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))),
         AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ) :
@@ -822,7 +821,7 @@ theorem cylinderIso_OS_of_RP_OS2
             cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν).re) := by
   obtain ⟨K, C, hK_pos, hC_pos, hUnif⟩ :=
     asymInteracting_expMoment_volume_uniform Ls P mass hmass
-  exact routeBPrimeIso_cylinder_OS Ls P mass hmass K C hK_pos hC_pos hUnif hRP hOS2
+  exact routeBPrimeIso_cylinder_OS Ls P mass hmass K C hK_pos hC_pos hUnif hOS2
 
 end Pphi2
 

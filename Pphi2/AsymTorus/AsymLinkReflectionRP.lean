@@ -54,6 +54,66 @@ def cylinderPositiveTimeCompactPureTensorsWithin (R : ℝ) :
     (∀ t, R < |t| → h t = 0) ∧
     u = NuclearTensorProduct.pure g h}
 
+theorem cylinderPositiveTimeCompactPureTensorsWithin_mono
+    {R S : ℝ} (hRS : R ≤ S) :
+    cylinderPositiveTimeCompactPureTensorsWithin Ls R ⊆
+      cylinderPositiveTimeCompactPureTensorsWithin Ls S := by
+  intro u hu
+  rcases hu with ⟨g, h, hh, hsupp, rfl⟩
+  exact ⟨g, h, hh, fun t ht => hsupp t (lt_of_le_of_lt hRS ht), rfl⟩
+
+/-- Every element of the compact-pure algebraic span has a single positive
+support radius containing all pure tensors used in one finite expression. -/
+theorem mem_span_cylinderPositiveTimeCompactPureTensors_exists_radius
+    (u : CylinderTestFunction Ls)
+    (hu : u ∈ Submodule.span ℝ (cylinderPositiveTimeCompactPureTensors Ls)) :
+    ∃ R : ℝ, 0 < R ∧ u ∈
+      Submodule.span ℝ (cylinderPositiveTimeCompactPureTensorsWithin Ls R) := by
+  apply Submodule.span_induction (R := ℝ) (M := CylinderTestFunction Ls)
+    (s := cylinderPositiveTimeCompactPureTensors Ls)
+    (p := fun v _ => ∃ R : ℝ, 0 < R ∧ v ∈
+      Submodule.span ℝ (cylinderPositiveTimeCompactPureTensorsWithin Ls R))
+  · intro v hv
+    rcases hv with ⟨g, h, T, hT, hh, hsupp, rfl⟩
+    exact ⟨T, hT, Submodule.subset_span ⟨g, h, hh, hsupp, rfl⟩⟩
+  · exact ⟨1, zero_lt_one, Submodule.zero_mem _⟩
+  · intro x y _ _ hx hy
+    rcases hx with ⟨Rx, hRx, hx⟩
+    rcases hy with ⟨Ry, hRy, hy⟩
+    refine ⟨Rx + Ry, add_pos hRx hRy, ?_⟩
+    exact Submodule.add_mem _
+      (Submodule.span_mono
+        (cylinderPositiveTimeCompactPureTensorsWithin_mono Ls (le_add_of_nonneg_right hRy.le)) hx)
+      (Submodule.span_mono
+        (cylinderPositiveTimeCompactPureTensorsWithin_mono Ls (le_add_of_nonneg_left hRx.le)) hy)
+  · intro r x _ hx
+    rcases hx with ⟨R, hR, hx⟩
+    exact ⟨R, hR, Submodule.smul_mem _ r hx⟩
+  · exact hu
+
+/-- A finite family in the compact-pure span admits one common positive
+support radius. -/
+theorem finite_mem_span_cylinderPositiveTimeCompactPureTensors_exists_radius
+    (n : ℕ) (f : Fin n → CylinderTestFunction Ls)
+    (hf : ∀ i, f i ∈ Submodule.span ℝ (cylinderPositiveTimeCompactPureTensors Ls)) :
+    ∃ R : ℝ, 0 < R ∧ ∀ i, f i ∈
+      Submodule.span ℝ (cylinderPositiveTimeCompactPureTensorsWithin Ls R) := by
+  choose Ri hRi hfi using fun i =>
+    mem_span_cylinderPositiveTimeCompactPureTensors_exists_radius Ls (f i) (hf i)
+  let R : ℝ := 1 + ∑ i, Ri i
+  have hR : 0 < R := by
+    dsimp [R]
+    have hsum : 0 ≤ ∑ i, Ri i := Finset.sum_nonneg fun i _ => (hRi i).le
+    linarith
+  refine ⟨R, hR, fun i => ?_⟩
+  have hRi_le : Ri i ≤ R := by
+    dsimp [R]
+    have hle : Ri i ≤ ∑ j, Ri j :=
+      Finset.single_le_sum (fun j _ => (hRi j).le) (Finset.mem_univ i)
+    linarith
+  exact Submodule.span_mono
+    (cylinderPositiveTimeCompactPureTensorsWithin_mono Ls hRi_le) (hfi i)
+
 /-- Cylinder RP restricted to no-wrap compact-span families at a fixed time
 period. This is the finite-period property that is eventually available as
 the period tends to infinity. -/

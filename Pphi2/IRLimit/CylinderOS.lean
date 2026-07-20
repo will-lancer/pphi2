@@ -536,11 +536,11 @@ theorem cylinderMeasureReflectionPositive_of_tendsto_cf
 
 /-- **Route B' main theorem**: the IR limit satisfies OS0+OS2+OS3.
 
-The theorem assumes exactly the inputs it consumes: OS2 translation/reflection
-invariance for the asymmetric-torus measures, the eventual Green-controlled
-exponential moment bound recorded by `AsymTorusSequenceHasUniformGreenMomentBound`,
-and the exact eventual RP input for the pullback sequence. It then transfers
-these properties to the extracted IR limit. -/
+The theorem assumes OS2 translation/reflection invariance, the eventual
+Green-controlled exponential moment bound, and a callback proving RP for the
+extracted limit from its characteristic convergence and final exponential
+bound. This allows concrete adapters to perform compact-support density only
+after the time periods tend to infinity. -/
 theorem routeBPrime_cylinder_OS
     (mass : ℝ) (hmass : 0 < mass)
     (KG CG : ℝ) (hKG_pos : 0 < KG) (hCG_pos : 0 < CG)
@@ -549,9 +549,21 @@ theorem routeBPrime_cylinder_OS
     (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls)))
     (hμ_prob : ∀ n, IsProbabilityMeasure (μ n))
     (hμ_green : AsymTorusSequenceHasUniformGreenMomentBound Ls mass hmass KG CG Lt hLt μ)
-    (hμ_rp : CylinderMeasureSequenceEventuallyReflectionPositive Ls (fun n =>
-      letI : Fact (0 < Lt n) := hLt n
-      cylinderPullbackMeasure (Lt n) Ls (μ n)))
+    (hμ_rp : ∀ (φ : ℕ → ℕ)
+      (ν : Measure (Configuration (CylinderTestFunction Ls))),
+      IsProbabilityMeasure ν → StrictMono φ →
+      (∀ f : CylinderTestFunction Ls,
+        Tendsto (fun k => ∫ ω, Complex.exp (Complex.I * ↑(ω f))
+          ∂(cylinderPullbackMeasure (Lt (φ k)) Ls (μ (φ k))))
+          atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν))) →
+      ∀ (K C : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls)),
+        0 < K → 0 < C → Continuous q →
+        (∀ f : CylinderTestFunction Ls,
+          Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
+            Real.exp (|ω f|)) ν ∧
+          ∫ ω : Configuration (CylinderTestFunction Ls), Real.exp (|ω f|) ∂ν ≤
+            K * Real.exp (C * q f ^ 2)) →
+        CylinderMeasureReflectionPositive Ls ν)
     (hμ_os2 : AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ) :
     ∃ (ν : Measure (Configuration (CylinderTestFunction Ls))),
     IsProbabilityMeasure ν ∧
@@ -591,20 +603,16 @@ theorem routeBPrime_cylinder_OS
         atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν)) := by
     intro f
     simpa [νseqφ] using hν_conv f
-  have hνseqφ_rp : CylinderMeasureSequenceEventuallyReflectionPositive Ls νseqφ := by
-    intro n f c
-    simpa [νseqφ] using Filter.Tendsto.eventually hφ.tendsto_atTop (hμ_rp n f c)
-  have h_os3_limit : CylinderMeasureReflectionPositive Ls ν :=
-    cylinderMeasureReflectionPositive_of_tendsto_cf Ls νseqφ ν hνseqφ_conv hνseqφ_rp
+  obtain ⟨K, C, q, hK, hC, hq_cont, h_exp⟩ :=
+    cylinderIR_uniform_exponential_moment Ls mass hmass KG CG hKG_pos hCG_pos
   -- Exponential moments of the limit measure: from uniform exp moment bound
   -- on the pullback measures + BC weak convergence + truncation/MCT.
   have h_exp_limit : ∀ f : CylinderTestFunction Ls,
       Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
-        Real.exp (|ω f|)) ν := by
+        Real.exp (|ω f|)) ν ∧
+      ∫ ω : Configuration (CylinderTestFunction Ls), Real.exp (|ω f|) ∂ν ≤
+        K * Real.exp (C * q f ^ 2) := by
     intro f
-    -- Step 1: Get uniform exp moment constants K, C, q from the conditional theorem.
-    obtain ⟨K, C, q, hK, hC, hq_cont, h_exp⟩ :=
-      cylinderIR_uniform_exponential_moment Ls mass hmass KG CG hKG_pos hCG_pos
     -- Step 2: Get N0 such that ∀ n ≥ N0, 1 ≤ Lt n (from hLt_tend).
     have hLt_ge_one : ∀ᶠ n in atTop, 1 ≤ Lt n := tendsto_atTop.1 hLt_tend 1
     have h_green_tail : ∀ᶠ n in atTop,
@@ -654,9 +662,11 @@ theorem routeBPrime_cylinder_OS
       haveI : IsProbabilityMeasure (μ (φ (n + N0))) := hμ_prob (φ (n + N0))
       exact h_exp (Lt (φ (n + N0))) (hLt_shift n) (μ (φ (n + N0)))
         (h_tail_shift n).2 f
-    -- Step 8: Apply limit_exponential_moment and extract integrability.
-    exact (limit_exponential_moment Ls νseq' hνseq'_prob ν hbc' f
-      (K * Real.exp (C * q f ^ 2)) h_unif).1
+    -- Step 8: Apply limit_exponential_moment.
+    exact limit_exponential_moment Ls νseq' hνseq'_prob ν hbc' f
+      (K * Real.exp (C * q f ^ 2)) h_unif
+  have h_os3_limit : CylinderMeasureReflectionPositive Ls ν :=
+    hμ_rp φ ν inferInstance hφ hν_conv K C q hK hC hq_cont h_exp_limit
   refine ⟨ν, inferInstance, ?_, ?_, ?_, ?_, ?_⟩
   · -- OS0: Analyticity via analyticOnNhd_integral
     -- The limit measure has exponential moments (from uniform bounds + BC convergence),
@@ -700,7 +710,7 @@ theorem routeBPrime_cylinder_OS
             rw [map_smul, smul_eq_mul, abs_mul,
                 abs_of_nonneg (mul_nonneg (Nat.cast_nonneg' n) hC_K_nn)]
           simp_rw [hscale]
-          exact h_exp_limit ((↑n * C_K) • J i)
+          exact (h_exp_limit ((↑n * C_K) • J i)).1
         · -- Pointwise bound: ‖F(z, ω)‖ ≤ bound(ω) for z ∈ K
           rw [Complex.norm_exp]
           have h_re : (∑ i : Fin n, Complex.I * z i * ↑(ω (J i))).re =
