@@ -5,6 +5,8 @@ Authors: Michael R. Douglas, Codex
 -/
 
 import Pphi2.AsymTorus.AsymLinkReflectionRP
+import Pphi2.AsymTorus.AsymEnergyFactorization
+import Pphi2.AsymTorus.AsymFreeSpectral
 
 /-!
 # Link-reflection positivity in the UV limit
@@ -16,6 +18,287 @@ inequality to cylinder time reflection.
 open Filter GaussianField MeasureTheory
 
 namespace Pphi2
+
+/-! ## Uniform heterogeneous Gaussian control -/
+
+/-- The rectangular grid evaluations are bounded by a fixed continuous
+rapid-decay seminorm, uniformly in the two lattice sizes. -/
+theorem asymTorusSiteEval_norm_sq_le_seminorm
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (C₀t : ℝ) (hC₀t_pos : 0 < C₀t)
+    (hC₀t : ∀ m, SmoothMap_Circle.sobolevSeminorm (L := Lt) 0
+      (SmoothMap_Circle.fourierBasis m) ≤ C₀t)
+    (C₀s : ℝ) (hC₀s_pos : 0 < C₀s)
+    (hC₀s : ∀ m, SmoothMap_Circle.sobolevSeminorm (L := Ls) 0
+      (SmoothMap_Circle.fourierBasis m) ≤ C₀s)
+    (f : AsymTorusTestFunction Lt Ls) (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] :
+    ∑ x : AsymLatticeSites Nt Ns,
+        (evalAsymTorusAtSite Lt Ls Nt Ns x f) ^ 2 ≤
+      Lt * Ls * C₀t ^ 2 * C₀s ^ 2 *
+        (RapidDecaySeq.rapidDecaySeminorm 0 f) ^ 2 := by
+  set p₀f := RapidDecaySeq.rapidDecaySeminorm 0 f
+  have hf_sum : Summable (fun m => |f.val m|) :=
+    (f.rapid_decay 0).congr (fun m => by simp [pow_zero])
+  have hcr_t : ∀ m (x : ZMod Nt),
+      |circleRestriction Lt Nt
+        (DyninMityaginSpace.basis m : SmoothMap_Circle Lt ℝ) x| ≤
+        Real.sqrt (Lt / Nt) * C₀t := by
+    intro m x
+    rw [dm_basis_eq_fourierBasis (L := Lt), circleRestriction_apply,
+      circleSpacing_eq, abs_mul, abs_of_nonneg (Real.sqrt_nonneg _)]
+    apply mul_le_mul_of_nonneg_left _ (Real.sqrt_nonneg _)
+    calc
+      |(SmoothMap_Circle.fourierBasis (L := Lt) m : ℝ → ℝ)
+          (circlePoint Lt Nt x)| =
+          ‖iteratedDeriv 0
+            ((SmoothMap_Circle.fourierBasis (L := Lt) m : ℝ → ℝ))
+            (circlePoint Lt Nt x)‖ := by
+        rw [iteratedDeriv_zero, Real.norm_eq_abs]
+      _ ≤ SmoothMap_Circle.sobolevSeminorm 0
+          (SmoothMap_Circle.fourierBasis m) :=
+        SmoothMap_Circle.norm_iteratedDeriv_le_sobolevSeminorm' _ 0 _
+      _ ≤ C₀t := hC₀t m
+  have hcr_s : ∀ m (x : ZMod Ns),
+      |circleRestriction Ls Ns
+        (DyninMityaginSpace.basis m : SmoothMap_Circle Ls ℝ) x| ≤
+        Real.sqrt (Ls / Ns) * C₀s := by
+    intro m x
+    rw [dm_basis_eq_fourierBasis (L := Ls), circleRestriction_apply,
+      circleSpacing_eq, abs_mul, abs_of_nonneg (Real.sqrt_nonneg _)]
+    apply mul_le_mul_of_nonneg_left _ (Real.sqrt_nonneg _)
+    calc
+      |(SmoothMap_Circle.fourierBasis (L := Ls) m : ℝ → ℝ)
+          (circlePoint Ls Ns x)| =
+          ‖iteratedDeriv 0
+            ((SmoothMap_Circle.fourierBasis (L := Ls) m : ℝ → ℝ))
+            (circlePoint Ls Ns x)‖ := by
+        rw [iteratedDeriv_zero, Real.norm_eq_abs]
+      _ ≤ SmoothMap_Circle.sobolevSeminorm 0
+          (SmoothMap_Circle.fourierBasis m) :=
+        SmoothMap_Circle.norm_iteratedDeriv_le_sobolevSeminorm' _ 0 _
+      _ ≤ C₀s := hC₀s m
+  have hbasis : ∀ (x : AsymLatticeSites Nt Ns) (m : ℕ),
+      |evalAsymTorusAtSite Lt Ls Nt Ns x (RapidDecaySeq.basisVec m)| ≤
+        Real.sqrt (Lt / Nt) * C₀t * (Real.sqrt (Ls / Ns) * C₀s) := by
+    intro x m
+    unfold evalAsymTorusAtSite
+    rw [NuclearTensorProduct.basisVec_eq_pure
+      (DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis
+        (E := SmoothMap_Circle Lt ℝ))
+      (DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis
+        (E := SmoothMap_Circle Ls ℝ)) m]
+    rw [NuclearTensorProduct.evalCLM_pure]
+    simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.proj_apply]
+    rw [abs_mul]
+    exact mul_le_mul (hcr_t _ _) (hcr_s _ _) (abs_nonneg _)
+      (mul_nonneg (Real.sqrt_nonneg _) hC₀t_pos.le)
+  set B := Real.sqrt (Lt / Nt) * C₀t * (Real.sqrt (Ls / Ns) * C₀s)
+  have hB_nonneg : 0 ≤ B :=
+    mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hC₀t_pos.le)
+      (mul_nonneg (Real.sqrt_nonneg _) hC₀s_pos.le)
+  have hpw : ∀ x : AsymLatticeSites Nt Ns,
+      |evalAsymTorusAtSite Lt Ls Nt Ns x f| ≤ B * p₀f := by
+    intro x
+    rw [DyninMityaginSpace.expansion (evalAsymTorusAtSite Lt Ls Nt Ns x) f]
+    have hsf : Summable (fun m =>
+        f.val m * evalAsymTorusAtSite Lt Ls Nt Ns x
+          (RapidDecaySeq.basisVec m)) :=
+      (hf_sum.mul_right B).of_norm_bounded
+        (fun m => by
+          rw [Real.norm_eq_abs, abs_mul]
+          exact mul_le_mul_of_nonneg_left (hbasis x m) (abs_nonneg _))
+    calc
+      |∑' m, f.val m * evalAsymTorusAtSite Lt Ls Nt Ns x
+          (RapidDecaySeq.basisVec m)| =
+          ‖∑' m, f.val m * evalAsymTorusAtSite Lt Ls Nt Ns x
+            (RapidDecaySeq.basisVec m)‖ := (Real.norm_eq_abs _).symm
+      _ ≤ ∑' m, ‖f.val m * evalAsymTorusAtSite Lt Ls Nt Ns x
+          (RapidDecaySeq.basisVec m)‖ := norm_tsum_le_tsum_norm hsf.norm
+      _ ≤ ∑' m, |f.val m| * B := by
+        apply Summable.tsum_le_tsum _ hsf.norm (hf_sum.mul_right _)
+        intro m
+        rw [Real.norm_eq_abs, abs_mul]
+        exact mul_le_mul_of_nonneg_left (hbasis x m) (abs_nonneg _)
+      _ = B * ∑' m, |f.val m| := by rw [tsum_mul_right]; ring
+      _ = B * p₀f := by
+        congr 1
+        change ∑' m, |f.val m| = ∑' m, |f.val m| * (1 + (m : ℝ)) ^ 0
+        simp
+  have hLtNt : 0 ≤ Lt / (Nt : ℝ) :=
+    (div_pos (Fact.out : 0 < Lt) (Nat.cast_pos.mpr (NeZero.pos Nt))).le
+  have hLsNs : 0 ≤ Ls / (Ns : ℝ) :=
+    (div_pos (Fact.out : 0 < Ls) (Nat.cast_pos.mpr (NeZero.pos Ns))).le
+  calc
+    ∑ x : AsymLatticeSites Nt Ns,
+        (evalAsymTorusAtSite Lt Ls Nt Ns x f) ^ 2 ≤
+        ∑ _x : AsymLatticeSites Nt Ns, (B * p₀f) ^ 2 := by
+      apply Finset.sum_le_sum
+      intro x _
+      have hneg := neg_abs_le (evalAsymTorusAtSite Lt Ls Nt Ns x f)
+      exact sq_le_sq' (by linarith [hpw x, hneg])
+        (le_of_abs_le (hpw x))
+    _ = ((Nt : ℝ) * (Ns : ℝ)) * (B * p₀f) ^ 2 := by
+      simp [AsymLatticeSites, ZMod.card, nsmul_eq_mul]
+    _ = Lt * Ls * C₀t ^ 2 * C₀s ^ 2 * p₀f ^ 2 := by
+      have hNt_ne : (Nt : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne Nt)
+      have hNs_ne : (Ns : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne Ns)
+      change (Nt : ℝ) * (Ns : ℝ) *
+          ((Real.sqrt (Lt / Nt) * C₀t *
+            (Real.sqrt (Ls / Ns) * C₀s)) * p₀f) ^ 2 = _
+      rw [show ((Real.sqrt (Lt / Nt) * C₀t *
+          (Real.sqrt (Ls / Ns) * C₀s)) * p₀f) ^ 2 =
+        (Lt / Nt) * C₀t ^ 2 * (Ls / Ns) * C₀s ^ 2 * p₀f ^ 2 by
+          rw [mul_pow, mul_pow, mul_pow, mul_pow,
+            Real.sq_sqrt hLtNt, Real.sq_sqrt hLsNs]
+          ring]
+      field_simp [hNt_ne, hNs_ne]
+
+/-- Uniform heterogeneous Gaussian second-moment estimate in a fixed
+rapid-decay seminorm. The constant is independent of `Nt`, `Ns`, `a`, and
+the test function. -/
+theorem asymGaussianIso_second_moment_le_seminorm
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (mass : ℝ) (hmass : 0 < mass) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a)
+        (f : AsymTorusTestFunction Lt Ls),
+        ∫ ω : Configuration (AsymLatticeField Nt Ns),
+            (ω (asymLatticeTestFnIso Lt Ls Nt Ns a f)) ^ 2
+            ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) ≤
+          C * (RapidDecaySeq.rapidDecaySeminorm 0 f) ^ 2 := by
+  obtain ⟨C₀t, hC₀t_pos, hC₀t_bound⟩ :=
+    SmoothMap_Circle.sobolevSeminorm_fourierBasis_le (L := Lt) 0
+  have hC₀t : ∀ m, SmoothMap_Circle.sobolevSeminorm (L := Lt) 0
+      (SmoothMap_Circle.fourierBasis m) ≤ C₀t := fun m => by
+    specialize hC₀t_bound m
+    simpa only [pow_zero, mul_one] using hC₀t_bound
+  obtain ⟨C₀s, hC₀s_pos, hC₀s_bound⟩ :=
+    SmoothMap_Circle.sobolevSeminorm_fourierBasis_le (L := Ls) 0
+  have hC₀s : ∀ m, SmoothMap_Circle.sobolevSeminorm (L := Ls) 0
+      (SmoothMap_Circle.fourierBasis m) ≤ C₀s := fun m => by
+    specialize hC₀s_bound m
+    simpa only [pow_zero, mul_one] using hC₀s_bound
+  let C := mass⁻¹ ^ 2 * Lt * Ls * C₀t ^ 2 * C₀s ^ 2
+  have hC_pos : 0 < C := by
+    dsimp [C]
+    exact mul_pos
+      (mul_pos
+        (mul_pos
+          (mul_pos (sq_pos_of_pos (inv_pos.mpr hmass)) (Fact.out : 0 < Lt))
+          (Fact.out : 0 < Ls))
+        (sq_pos_of_pos hC₀t_pos))
+      (sq_pos_of_pos hC₀s_pos)
+  refine ⟨C, hC_pos, ?_⟩
+  intro Nt Ns _ _ a ha f
+  let G : AsymLatticeField Nt Ns :=
+    fun x => evalAsymTorusAtSite Lt Ls Nt Ns x f
+  have hmoment :
+      ∫ ω : Configuration (AsymLatticeField Nt Ns),
+          (ω (asymLatticeTestFnIso Lt Ls Nt Ns a f)) ^ 2
+          ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) =
+        covariance (spectralLatticeCovarianceAsym Nt Ns a mass ha hmass) G G := by
+    calc
+      ∫ ω : Configuration (AsymLatticeField Nt Ns),
+          (ω (asymLatticeTestFnIso Lt Ls Nt Ns a f)) ^ 2
+          ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) =
+        covariance (latticeCovarianceAsymGJ Nt Ns a mass ha hmass)
+          (asymLatticeTestFnIso Lt Ls Nt Ns a f)
+          (asymLatticeTestFnIso Lt Ls Nt Ns a f) :=
+        second_moment_eq_covariance _ _
+      _ = covariance (spectralLatticeCovarianceAsym Nt Ns a mass ha hmass) G G := by
+        exact second_moment_asym_eq_spectral Lt Ls Nt Ns a mass ha hmass f f
+  rw [hmoment, covariance_spectralLatticeCovarianceAsym_eq]
+  simp_rw [show ∀ k : AsymLatticeSites Nt Ns,
+      ((massEigenvaluesAsym Nt Ns a mass k)⁻¹ *
+          ∑ x, (massEigenvectorBasisAsym Nt Ns a mass k : EuclideanSpace ℝ _) x * G x) *
+        ∑ x, (massEigenvectorBasisAsym Nt Ns a mass k : EuclideanSpace ℝ _) x * G x =
+      (massEigenvaluesAsym Nt Ns a mass k)⁻¹ *
+        (∑ x, (massEigenvectorBasisAsym Nt Ns a mass k : EuclideanSpace ℝ _) x * G x) ^ 2
+      by intro k; ring]
+  change (∑ k : AsymLatticeSites Nt Ns,
+      (massEigenvaluesAsym Nt Ns a mass k)⁻¹ *
+        (asymModeCoeff Nt Ns a mass k G) ^ 2) ≤
+    C * (RapidDecaySeq.rapidDecaySeminorm 0 f) ^ 2
+  have heigen_ge : ∀ k : AsymLatticeSites Nt Ns,
+      mass ^ 2 ≤ massEigenvaluesAsym Nt Ns a mass k := by
+    intro k
+    let e : AsymLatticeField Nt Ns :=
+      massEigenvectorBasisAsym Nt Ns a mass k
+    have he_norm : ∑ x : AsymLatticeSites Nt Ns, e x ^ 2 = 1 := by
+      have hnorm := (massEigenvectorBasisAsym Nt Ns a mass).orthonormal.1 k
+      simp only [EuclideanSpace.norm_eq] at hnorm
+      have hsqrt : Real.sqrt (∑ x : AsymLatticeSites Nt Ns, ‖e x‖ ^ 2) = 1 := by
+        simpa [e] using hnorm
+      have hsum_nonneg : 0 ≤ ∑ x : AsymLatticeSites Nt Ns, ‖e x‖ ^ 2 :=
+        Finset.sum_nonneg fun x _ => sq_nonneg ‖e x‖
+      have hsquares : ∑ x : AsymLatticeSites Nt Ns, e x ^ 2 =
+          ∑ x : AsymLatticeSites Nt Ns, ‖e x‖ ^ 2 := by
+        apply Finset.sum_congr rfl
+        intro x _
+        rw [Real.norm_eq_abs, sq_abs]
+      rw [hsquares]
+      nlinarith [Real.sq_sqrt hsum_nonneg]
+    have hQe : massOperatorAsym Nt Ns a mass e =
+        massEigenvaluesAsym Nt Ns a mass k • e := by
+      ext x
+      rw [massOperatorAsym_eq_matrix_mulVec Nt Ns a mass e x]
+      simpa [massEigenvaluesAsym, massEigenvectorBasisAsym, e] using
+        congrFun (Matrix.IsHermitian.mulVec_eigenvectorBasis
+          (hA := massOperatorMatrixAsym_isHermitian Nt Ns a mass) k) x
+    have hquad := massOperatorAsym_quadratic_form_bonds
+      (Nt := Nt) (Ns := Ns) a mass e
+    rw [hQe] at hquad
+    have htime_nonneg : 0 ≤ a⁻¹ ^ 2 *
+        ∑ x : AsymLatticeSites Nt Ns,
+          (e (x + ((1 : ZMod Nt), (0 : ZMod Ns))) - e x) ^ 2 :=
+      mul_nonneg (sq_nonneg _) (Finset.sum_nonneg fun x _ => sq_nonneg _)
+    have hspace_nonneg : 0 ≤ a⁻¹ ^ 2 *
+        ∑ x : AsymLatticeSites Nt Ns,
+          (e (x + ((0 : ZMod Nt), (1 : ZMod Ns))) - e x) ^ 2 :=
+      mul_nonneg (sq_nonneg _) (Finset.sum_nonneg fun x _ => sq_nonneg _)
+    simp only [Pi.smul_apply, smul_eq_mul] at hquad
+    have hleft : ∑ x : AsymLatticeSites Nt Ns,
+        e x * (massEigenvaluesAsym Nt Ns a mass k * e x) =
+        massEigenvaluesAsym Nt Ns a mass k := by
+      calc
+        ∑ x : AsymLatticeSites Nt Ns,
+            e x * (massEigenvaluesAsym Nt Ns a mass k * e x) =
+            massEigenvaluesAsym Nt Ns a mass k * ∑ x, e x ^ 2 := by
+          rw [Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro x _
+          ring
+        _ = massEigenvaluesAsym Nt Ns a mass k := by rw [he_norm, mul_one]
+    rw [hleft, he_norm, mul_one] at hquad
+    linarith
+  have hinv_le : ∀ k : AsymLatticeSites Nt Ns,
+      (massEigenvaluesAsym Nt Ns a mass k)⁻¹ ≤ mass⁻¹ ^ 2 := by
+    intro k
+    rw [inv_pow, ← one_div, ← one_div]
+    exact div_le_div_of_nonneg_left zero_le_one (sq_pos_of_pos hmass) (heigen_ge k)
+  calc
+    ∑ k : AsymLatticeSites Nt Ns,
+        (massEigenvaluesAsym Nt Ns a mass k)⁻¹ *
+          (asymModeCoeff Nt Ns a mass k G) ^ 2 ≤
+        ∑ k : AsymLatticeSites Nt Ns,
+          mass⁻¹ ^ 2 * (asymModeCoeff Nt Ns a mass k G) ^ 2 := by
+      apply Finset.sum_le_sum
+      intro k _
+      exact mul_le_mul_of_nonneg_right (hinv_le k) (sq_nonneg _)
+    _ = mass⁻¹ ^ 2 * ∑ k : AsymLatticeSites Nt Ns,
+        (asymModeCoeff Nt Ns a mass k G) ^ 2 := by rw [Finset.mul_sum]
+    _ = mass⁻¹ ^ 2 * ∑ x : AsymLatticeSites Nt Ns, (G x) ^ 2 := by
+      rw [sum_asymModeCoeff_sq]
+    _ ≤ mass⁻¹ ^ 2 *
+        (Lt * Ls * C₀t ^ 2 * C₀s ^ 2 *
+          (RapidDecaySeq.rapidDecaySeminorm 0 f) ^ 2) := by
+      apply mul_le_mul_of_nonneg_left
+      · exact asymTorusSiteEval_norm_sq_le_seminorm Lt Ls
+          C₀t hC₀t_pos hC₀t C₀s hC₀s_pos hC₀s f Nt Ns
+      · exact sq_nonneg _
+    _ = C * (RapidDecaySeq.rapidDecaySeminorm 0 f) ^ 2 := by
+      dsimp [C]
+      ring
 
 /-- A scaled exponential-moment bound controls the absolute first moment by
 the square root of its variance parameter.
