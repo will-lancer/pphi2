@@ -349,6 +349,39 @@ theorem asymCylinderLatticeSecondMoment_tendsto_zero_of_tendsto
     exact hbound (Nt k) (Ns k) (a k) (ha k)
       (cylinderToTorusEmbed Lt Ls (hseq k))
 
+/-- The heterogeneous lattice Gaussian second moment is quadratic under real
+scaling of the cylinder test function. -/
+theorem asymCylinderLatticeSecondMoment_smul
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (t : ℝ) (h : CylinderTestFunction Ls) :
+    ∫ ω : Configuration (AsymLatticeField Nt Ns),
+        (ω (asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls (t • h)))) ^ 2
+        ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) =
+      t ^ 2 * ∫ ω : Configuration (AsymLatticeField Nt Ns),
+        (ω (asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls h))) ^ 2
+        ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) := by
+  have hpoint : (fun ω : Configuration (AsymLatticeField Nt Ns) =>
+      (ω (asymLatticeTestFnIso Lt Ls Nt Ns a
+        (cylinderToTorusEmbed Lt Ls (t • h)))) ^ 2) =
+      fun ω => t ^ 2 *
+        (ω (asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls h))) ^ 2 := by
+    have htest : asymLatticeTestFnIso Lt Ls Nt Ns a
+        (cylinderToTorusEmbed Lt Ls (t • h)) =
+        t • asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls h) := by
+      funext x
+      simp [asymLatticeTestFnIso, map_smul, Pi.smul_apply, smul_eq_mul]
+    funext ω
+    rw [htest, map_smul]
+    simp only [smul_eq_mul]
+    ring
+  rw [hpoint, integral_const_mul]
+
 /-- A scaled exponential-moment bound controls the absolute first moment by
 the square root of its variance parameter.
 

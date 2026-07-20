@@ -45,6 +45,26 @@ def CylinderLinkRPMatrixNonnegative
       ↑(ω ((f i : CylinderTestFunction Ls) -
         cylinderLinkReflection Ls a (f j : CylinderTestFunction Ls)))) ∂ν).re
 
+/-- Compact positive-time pure cylinder tensors supported inside a fixed
+symmetric interval. -/
+def cylinderPositiveTimeCompactPureTensorsWithin (R : ℝ) :
+    Set (CylinderTestFunction Ls) :=
+  {u | ∃ (g : SmoothMap_Circle Ls ℝ) (h : SchwartzMap ℝ ℝ),
+    h ∈ schwartzPositiveTimeSubmodule ∧
+    (∀ t, R < |t| → h t = 0) ∧
+    u = NuclearTensorProduct.pure g h}
+
+/-- Cylinder RP restricted to no-wrap compact-span families at a fixed time
+period. This is the finite-period property that is eventually available as
+the period tends to infinity. -/
+def CylinderMeasureNoWrapReflectionPositive
+    (ν : Measure (Configuration (CylinderTestFunction Ls))) : Prop :=
+  ∀ (R : ℝ), 0 < R → 2 * R < Lt →
+    ∀ (n : ℕ) (f : Fin n → ↥(cylinderPositiveTimeSubmodule Ls)) (c : Fin n → ℂ),
+      (∀ i, (f i : CylinderTestFunction Ls) ∈
+        Submodule.span ℝ (cylinderPositiveTimeCompactPureTensorsWithin Ls R)) →
+      CylinderRPMatrixNonnegative Ls ν n f c
+
 /-- Pulling back a torus link-RP matrix along the cylinder embedding gives the cylinder
 link-RP matrix. This is the Stage-0 equivariance square at matrix level. -/
 theorem cylinderPullbackMeasure_linkRPMatrix_of_asymTorus
@@ -723,12 +743,8 @@ theorem asymTorusInteractingMeasureIso_linkRPMatrix_span_noWrap
     (hvol_s : (Ns : ℝ) * a = Ls)
     (R : ℝ) (hR : 0 < R) (hLtR : 2 * R < Lt)
     (n : ℕ) (f : Fin n → ↥(cylinderPositiveTimeSubmodule Ls)) (c : Fin n → ℂ)
-    (hf : ∀ i, (f i : CylinderTestFunction Ls) ∈ Submodule.span ℝ
-      {u : CylinderTestFunction Ls | ∃ (g : SmoothMap_Circle Ls ℝ)
-          (h : SchwartzMap ℝ ℝ),
-        h ∈ schwartzPositiveTimeSubmodule ∧
-        (∀ t, R < |t| → h t = 0) ∧
-        u = NuclearTensorProduct.pure g h}) :
+    (hf : ∀ i, (f i : CylinderTestFunction Ls) ∈
+      Submodule.span ℝ (cylinderPositiveTimeCompactPureTensorsWithin Ls R)) :
     AsymTorusLinkRPMatrixNonnegative Lt Ls
       (asymTorusInteractingMeasureIso Lt Ls (2 * M) Ns a P mass ha hmass)
       a n (fun i => cylinderToTorusEmbed Lt Ls (f i : CylinderTestFunction Ls)) c := by
@@ -736,15 +752,15 @@ theorem asymTorusInteractingMeasureIso_linkRPMatrix_span_noWrap
     Lt Ls P a mass ha hmass M Ns hvol_t hvol_s n f c
   intro i x hx
   apply Submodule.span_induction (R := ℝ) (M := CylinderTestFunction Ls)
-    (s := {u : CylinderTestFunction Ls | ∃ (g : SmoothMap_Circle Ls ℝ)
-        (h : SchwartzMap ℝ ℝ),
-      h ∈ schwartzPositiveTimeSubmodule ∧
-      (∀ t, R < |t| → h t = 0) ∧
-      u = NuclearTensorProduct.pure g h})
+    (s := cylinderPositiveTimeCompactPureTensorsWithin Ls R)
     (p := fun u _ =>
       asymLatticeTestFnIso Lt Ls (2 * M) Ns a
         (cylinderToTorusEmbed Lt Ls u) x = 0)
   · intro u hu
+    change ∃ (g : SmoothMap_Circle Ls ℝ) (h : SchwartzMap ℝ ℝ),
+      h ∈ schwartzPositiveTimeSubmodule ∧
+      (∀ t, R < |t| → h t = 0) ∧
+      u = NuclearTensorProduct.pure g h at hu
     rcases hu with ⟨g, h, hh, hsupp, rfl⟩
     exact asymLatticeTestFnIso_cylinderPure_noWrap_vanish_negative
       Lt Ls M Ns a R hR hLtR g h hh hsupp x hx
@@ -763,5 +779,25 @@ theorem asymTorusInteractingMeasureIso_linkRPMatrix_span_noWrap
       smul_eq_mul]
     rw [hu, mul_zero]
   · exact hf i
+
+/-- Cylinder-pullback form of A′ for compact pure-tensor spans with a common
+no-wrap radius. -/
+theorem asymTorusInteractingMeasureIso_cylinderLinkRPMatrix_span_noWrap
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (M Ns : ℕ) [NeZero M] [NeZero Ns]
+    (hvol_t : ((2 * M : ℕ) : ℝ) * a = Lt)
+    (hvol_s : (Ns : ℝ) * a = Ls)
+    (R : ℝ) (hR : 0 < R) (hLtR : 2 * R < Lt)
+    (n : ℕ) (f : Fin n → ↥(cylinderPositiveTimeSubmodule Ls)) (c : Fin n → ℂ)
+    (hf : ∀ i, (f i : CylinderTestFunction Ls) ∈
+      Submodule.span ℝ (cylinderPositiveTimeCompactPureTensorsWithin Ls R)) :
+    CylinderLinkRPMatrixNonnegative Ls
+      (cylinderPullbackMeasure Lt Ls
+        (asymTorusInteractingMeasureIso Lt Ls (2 * M) Ns a P mass ha hmass))
+      a n f c := by
+  apply asymTorusInteractingMeasureIso_cylinderLinkRPMatrix_conditional
+    Lt Ls P a mass ha hmass M Ns hvol_t hvol_s n f c
+  exact asymTorusInteractingMeasureIso_linkRPMatrix_span_noWrap
+    Lt Ls P a mass ha hmass M Ns hvol_t hvol_s R hR hLtR n f c hf
 
 end Pphi2
