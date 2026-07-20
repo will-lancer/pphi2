@@ -154,6 +154,15 @@ auxiliary defs to build first (do these cleanly, they are self-contained):
 Then A′ = transport `interactingLatticeMeasureAsym_isReflectionPositive_link` through these +
 the no-wrap `mPos`-measurability of the exp-character observables.
 
+Named TODO from A′ scaffolding:
+- `cylinderLinkReflection_tendsto_timeReflection`: prove
+  `Tendsto (fun a : ℝ => cylinderLinkReflection Ls a f) (nhds 0)
+    (nhds (cylinderTimeReflection Ls f))`.
+  The needed analytic input is continuity at zero of
+  `a ↦ schwartzTranslation a h` in the Schwartz topology, lifted through the
+  cylinder nuclear tensor product. This was intentionally left out of the
+  small scaffolding run to avoid expanding the task beyond the adapter defs.
+
 NOTE (reliability): Codex has stalled/crashed TWICE on the monolithic Phase-2 core (both infra
 stream stalls, not math errors). Next attempt: build the 3 aux defs above as a small standalone
 first (self-driven or a short fresh Codex session), commit green, THEN the A′ transport, THEN B′.
