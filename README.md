@@ -195,6 +195,21 @@ exp-moment axiom, the sign-restricted Layer-A Lee–Yang axiom (producer chain p
 [`planning/b2-route-a-statements.md`](planning/b2-route-a-statements.md),
 [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). Discharge detail: [`docs/STATUS_HISTORY.md`](docs/STATUS_HISTORY.md).
 
+**Discharge plan for `asymInteracting_expMoment_volume_uniform` (CYL-1a)** — two stages.
+*Stage 1 (rewire):* migrate `cylinderIso_OS_of_RP_OS2`'s `hUnif` input from the axiom onto the
+already-proved thresholded `|f|`-form theorem `asymInteracting_expMoment_volume_uniform_absForm_thresholded`
+(`AsymCovariancePositivity.lean`); this trades the one monolithic axiom (whose signed-`f` form is
+unvetted post sign-restriction) for the theorem's honest footprint of six vetted, individually
+attackable axioms — Layer A `asymInteracting_mgf_gaussianDominated`; Layer B2 `fss_infrared_quadratic`,
+`asymTransferGap_uniform_fixedLs`, `asymFinitePeriodicBridge_diagonal_bound`,
+`asymFinitePeriodicBridge_remainder_bound_uniform`, `groundVariance_le_freeCovariance`.
+*Stage 2 (discharge the six):* Layer A via the sibling [`lee-yang`](https://github.com/mrdouglasny/lee-yang)
+repo (finite-Ising→Newman chain done; Griffiths–Simon A3 + pphi2 adapter remain) —
+[`planning/layer-a-lee-yang-scoping.md`](planning/layer-a-lee-yang-scoping.md); Layer B2 via the
+reflection-positivity / cylinder transfer-matrix route (`AsymL2Operator.lean`, `AsymJentzsch.lean`)
+with the τ-bridge pair via intrinsic ultracontractivity. Input-by-input provability map:
+[`docs/cylinder-conditional-inputs-provability.md`](docs/cylinder-conditional-inputs-provability.md).
+
 ### Route C: S¹_L × ℝ (cylinder, direct) — OS0–OS3
 Direct Nelson/Simon construction with natural time axis ℝ for OS reconstruction.
 The field is a distribution (not a function), requiring isonormal Gaussian extension.
