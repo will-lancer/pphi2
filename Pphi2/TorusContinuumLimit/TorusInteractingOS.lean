@@ -94,7 +94,7 @@ translations and D4 point group symmetries. These follow from:
 References: Glimm-Jaffe §19.4, Simon Ch. V §1. -/
 
 /-- Linear map on lattice field induced by a site permutation `σ`. -/
-private def latticeSitePermuteLM (N : ℕ)
+def latticeSitePermuteLM (N : ℕ)
     (σ : FinLatticeSites 2 N → FinLatticeSites 2 N) :
     FinLatticeField 2 N →ₗ[ℝ] FinLatticeField 2 N where
   toFun g := g ∘ σ
@@ -116,20 +116,52 @@ private lemma piCongrLeft_eq_comp_symm {N : ℕ}
     σ_equiv φ (σ_equiv.symm x)
   rwa [σ_equiv.apply_symm_apply] at h
 
-omit hL in
-/-- **Lattice interacting measure is invariant under site symmetries.**
+/-- **Relabeling invariance of the interaction functional.**
 
-For a bijective site permutation `σ` that preserves the Gaussian density,
-`integral F(omega . sigma) d mu_int = integral F(omega) d mu_int`.
+Composing a configuration with the site-permutation map of a bijection `σ` leaves
+`V` unchanged, because the interaction sums over all lattice sites. This is the only
+weight-specific input to the symmetry invariance of the interacting lattice measure;
+the coupling-family weight `g·V` inherits invariance by congruence. -/
+theorem interactionFunctional_sitePermute_invariant
+    (N : ℕ) [NeZero N] (P : InteractionPolynomial) (a mass : ℝ)
+    (σ : FinLatticeSites 2 N → FinLatticeSites 2 N)
+    (hσ_bij : Function.Bijective σ)
+    (ω : Configuration (FinLatticeField 2 N)) :
+    interactionFunctional 2 N P a mass
+      (ω.comp (latticeSitePermuteLM N σ).toContinuousLinearMap) =
+    interactionFunctional 2 N P a mass ω := by
+  set σ_equiv := Equiv.ofBijective σ hσ_bij
+  set L_σ : FinLatticeField 2 N →ₗ[ℝ] FinLatticeField 2 N :=
+    latticeSitePermuteLM N σ
+  simp only [interactionFunctional]
+  congr 1
+  apply Fintype.sum_equiv σ_equiv.symm
+  intro x; congr 1
+  -- (ω.comp L_σ)(δ_x) = ω(δ_x ∘ σ) = ω(δ_{σ⁻¹ x})
+  change ω (L_σ (finLatticeDelta 2 N x)) = ω (finLatticeDelta 2 N (σ_equiv.symm x))
+  congr 1; ext y
+  simp only [L_σ, latticeSitePermuteLM, LinearMap.coe_mk, AddHom.coe_mk,
+    Function.comp, finLatticeDelta]
+  -- Goal: (if σ y = x then 1 else 0) = (if y = σ_equiv.symm x then 1 else 0)
+  congr 1; exact propext σ_equiv.apply_eq_iff_eq_symm_apply
+
+omit hL in
+/-- **Weight-generic lattice symmetry invariance.**
+
+For a bijective site permutation `σ` preserving the Gaussian density and any measurable
+weight `W` invariant under the induced configuration relabeling, the normalized
+reweighted measure `Z⁻¹ • μ_GFF.withDensity (ofReal (exp (−W)))` is invariant under
+`ω ↦ ω ∘ L_σ`. Instantiates to the `g = 1` interacting measure (`W = V`, giving
+`interactingLatticeMeasure_symmetry_invariant`) and to the coupling family (`W = g·V`).
 
 Proof:
-1. BW invariance: V(omega . sigma) = V(omega) (interaction sum relabeling)
-2. Density invariance: rho(phi . sigma^-1) = rho(phi) (hypothesis)
-3. Lebesgue preservation: phi -> phi . sigma^-1 is a permutation (det = plus or minus 1)
-4. Gaussian measure preservation: combines 2 + 3 (sorry: requires MeasurePreserving for withDensity)
+1. Strip the normalization `Z⁻¹` (both sides carry the same factor)
+2. Weight invariance: exp(-W(omega . sigma)) = exp(-W(omega)) (hypothesis `hW_inv`)
+3. Density invariance: rho(phi . sigma^-1) = rho(phi) (hypothesis `hσ_density`)
+4. Lebesgue preservation: phi -> phi . sigma^-1 is a permutation (det = plus or minus 1)
 5. Change of variables on the E-valued Bochner integral -/
-theorem interactingLatticeMeasure_symmetry_invariant
-    (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
+theorem latticeWithDensity_symmetry_invariant
+    (N : ℕ) [NeZero N] (mass : ℝ)
     (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
     (σ : FinLatticeSites 2 N → FinLatticeSites 2 N)
     (hσ_bij : Function.Bijective σ)
@@ -137,57 +169,43 @@ theorem interactingLatticeMeasure_symmetry_invariant
       gaussianDensity 2 N (circleSpacing L N) mass
         (φ ∘ (Equiv.ofBijective σ hσ_bij).symm) =
       gaussianDensity 2 N (circleSpacing L N) mass φ)
+    (W : Configuration (FinLatticeField 2 N) → ℝ)
+    (hW_meas : Measurable W)
+    (hW_inv : ∀ ω : Configuration (FinLatticeField 2 N),
+      W (ω.comp (latticeSitePermuteLM N σ).toContinuousLinearMap) = W ω)
+    (Z : ENNReal)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (F : Configuration (FinLatticeField 2 N) → E) :
     ∫ ω, F (ω.comp (latticeSitePermuteLM N σ).toContinuousLinearMap)
-      ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) =
-    ∫ ω, F ω ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) := by
+      ∂(Z⁻¹ • (latticeGaussianMeasure 2 N (circleSpacing L N) mass ha hmass).withDensity
+          (fun ω => ENNReal.ofReal (Real.exp (-(W ω))))) =
+    ∫ ω, F ω
+      ∂(Z⁻¹ • (latticeGaussianMeasure 2 N (circleSpacing L N) mass ha hmass).withDensity
+          (fun ω => ENNReal.ofReal (Real.exp (-(W ω))))) := by
   -- Setup notation
   set a := circleSpacing L N
   set mu_GFF := latticeGaussianMeasure 2 N a mass ha hmass
-  set bw := boltzmannWeight 2 N P a mass
   set σ_equiv := Equiv.ofBijective σ hσ_bij
   set L_σ : FinLatticeField 2 N →ₗ[ℝ] FinLatticeField 2 N :=
     latticeSitePermuteLM N σ
-  -- Step 1: Unfold the interacting measure = Z⁻¹ • μ_GFF.withDensity(bw)
-  unfold interactingLatticeMeasure
+  -- Step 1: Strip the normalization factor Z⁻¹
   simp_rw [integral_smul_measure]
   congr 1  -- Z⁻¹ factor is the same on both sides
   -- Step 2: Convert withDensity integrals to μ_GFF integrals with NNReal smul
-  set bw_nn := fun ω : Configuration (FinLatticeField 2 N) => Real.toNNReal (bw ω)
+  set bw_nn := fun ω : Configuration (FinLatticeField 2 N) =>
+    Real.toNNReal (Real.exp (-(W ω)))
   have hbw_nn_meas : Measurable bw_nn :=
-    Measurable.real_toNNReal
-      ((interactionFunctional_measurable 2 N P a mass).neg.exp)
+    Measurable.real_toNNReal (hW_meas.neg.exp)
   change ∫ ω, F (ω.comp L_σ.toContinuousLinearMap)
       ∂(mu_GFF.withDensity (fun ω => ↑(bw_nn ω))) =
     ∫ ω, F ω ∂(mu_GFF.withDensity (fun ω => ↑(bw_nn ω)))
   rw [integral_withDensity_eq_integral_smul hbw_nn_meas,
       integral_withDensity_eq_integral_smul hbw_nn_meas]
-  -- Step 3: BW invariance at the configuration level
-  -- bw(ω.comp L_σ) = bw(ω) because the interaction sums over all sites
-  -- and composing with σ just relabels the sum.
-  have hBW_config : ∀ ω : Configuration (FinLatticeField 2 N),
-      bw (ω.comp L_σ.toContinuousLinearMap) = bw ω := by
-    intro ω
-    suffices h : interactionFunctional 2 N P a mass
-        (ω.comp L_σ.toContinuousLinearMap) =
-        interactionFunctional 2 N P a mass ω by
-      simp only [bw, boltzmannWeight, h]
-    simp only [interactionFunctional]
-    congr 1
-    apply Fintype.sum_equiv σ_equiv.symm
-    intro x; congr 1
-    -- (ω.comp L_σ)(δ_x) = ω(δ_x ∘ σ) = ω(δ_{σ⁻¹ x})
-    change ω (L_σ (finLatticeDelta 2 N x)) = ω (finLatticeDelta 2 N (σ_equiv.symm x))
-    congr 1; ext y
-    simp only [L_σ, latticeSitePermuteLM, LinearMap.coe_mk, AddHom.coe_mk,
-      Function.comp, finLatticeDelta]
-    -- Goal: (if σ y = x then 1 else 0) = (if y = σ_equiv.symm x then 1 else 0)
-    congr 1; exact propext σ_equiv.apply_eq_iff_eq_symm_apply
-  -- Step 4: Use BW invariance to factor the LHS integrand as G ∘ Φ
+  -- Step 3: Weight invariance at the configuration level (hypothesis)
   have hBW_nn_config : ∀ ω : Configuration (FinLatticeField 2 N),
       bw_nn (ω.comp L_σ.toContinuousLinearMap) = bw_nn ω := by
-    intro ω; simp only [bw_nn, hBW_config]
+    intro ω; simp only [bw_nn, hW_inv]
+  -- Step 4: Use weight invariance to factor the LHS integrand as G ∘ Φ
   set G := fun ω : Configuration (FinLatticeField 2 N) => bw_nn ω • F ω
   -- Rewrite LHS integrand: bw_nn(ω) • F(Φ(ω)) = G(Φ(ω))
   -- using bw_nn(Φ(ω)) = bw_nn(ω)
@@ -310,32 +328,80 @@ theorem interactingLatticeMeasure_symmetry_invariant
     exact h_evalME.trans (h_sigma.trans h_evalME_symm)
   exact hΦ_mp.integral_comp' G
 
--- Specific instances:
-
-private def latticeTranslateLM (N : ℕ) (j₁ j₂ : ℤ) :=
-  latticeSitePermuteLM N (translateSites N j₁ j₂)
-
 omit hL in
-private theorem interactingLatticeMeasure_translation_invariant
+/-- **Lattice interacting measure is invariant under site symmetries.**
+
+For a bijective site permutation `σ` that preserves the Gaussian density,
+`integral F(omega . sigma) d mu_int = integral F(omega) d mu_int`.
+
+Corollary of the weight-generic core `latticeWithDensity_symmetry_invariant`
+with weight `W = V` (the interaction functional); the weight invariance is
+`interactionFunctional_sitePermute_invariant`. -/
+theorem interactingLatticeMeasure_symmetry_invariant
     (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
     (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
+    (σ : FinLatticeSites 2 N → FinLatticeSites 2 N)
+    (hσ_bij : Function.Bijective σ)
+    (hσ_density : ∀ φ : FinLatticeField 2 N,
+      gaussianDensity 2 N (circleSpacing L N) mass
+        (φ ∘ (Equiv.ofBijective σ hσ_bij).symm) =
+      gaussianDensity 2 N (circleSpacing L N) mass φ)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (j₁ j₂ : ℤ) (F : Configuration (FinLatticeField 2 N) → E) :
-    ∫ ω, F (ω.comp (latticeTranslateLM N j₁ j₂).toContinuousLinearMap)
+    (F : Configuration (FinLatticeField 2 N) → E) :
+    ∫ ω, F (ω.comp (latticeSitePermuteLM N σ).toContinuousLinearMap)
       ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) =
     ∫ ω, F ω ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) := by
-  -- Translation x ↦ x - (j₁, j₂) on (ZMod N)² is bijective (group subtraction)
-  have hbij : Function.Bijective (translateSites N j₁ j₂) := by
-    set σ_inv := fun (x : FinLatticeSites 2 N) =>
-      (![x 0 + (j₁ : ZMod N), x 1 + (j₂ : ZMod N)] : FinLatticeSites 2 N)
-    have hleft : Function.LeftInverse σ_inv (translateSites N j₁ j₂) := by
-      intro x; simp only [translateSites, σ_inv]
-      ext i; fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
-    have hright : Function.RightInverse σ_inv (translateSites N j₁ j₂) := by
-      intro x; simp only [translateSites, σ_inv]
-      ext i; fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
-    exact ⟨hleft.injective, hright.surjective⟩
-  exact interactingLatticeMeasure_symmetry_invariant L N P mass ha hmass
+  unfold interactingLatticeMeasure boltzmannWeight
+  exact latticeWithDensity_symmetry_invariant L N mass ha hmass σ hσ_bij hσ_density
+    (interactionFunctional 2 N P (circleSpacing L N) mass)
+    (interactionFunctional_measurable 2 N P (circleSpacing L N) mass)
+    (interactionFunctional_sitePermute_invariant N P (circleSpacing L N) mass σ hσ_bij)
+    _ F
+
+-- Specific instances:
+
+/-- The lattice translation linear map: `(L_T g)(x) = g(translateSites N j₁ j₂ x)`. -/
+def latticeTranslateLM (N : ℕ) (j₁ j₂ : ℤ) :=
+  latticeSitePermuteLM N (translateSites N j₁ j₂)
+
+/-- Lattice translation `x ↦ x - (j₁, j₂)` on `(ZMod N)²` is bijective (group subtraction). -/
+theorem translateSites_bijective (N : ℕ) [NeZero N] (j₁ j₂ : ℤ) :
+    Function.Bijective (translateSites N j₁ j₂) := by
+  set σ_inv := fun (x : FinLatticeSites 2 N) =>
+    (![x 0 + (j₁ : ZMod N), x 1 + (j₂ : ZMod N)] : FinLatticeSites 2 N)
+  have hleft : Function.LeftInverse σ_inv (translateSites N j₁ j₂) := by
+    intro x; simp only [translateSites, σ_inv]
+    ext i; fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
+  have hright : Function.RightInverse σ_inv (translateSites N j₁ j₂) := by
+    intro x; simp only [translateSites, σ_inv]
+    ext i; fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
+  exact ⟨hleft.injective, hright.surjective⟩
+
+omit hL in
+/-- **Weight-generic lattice translation invariance.** Specialization of
+`latticeWithDensity_symmetry_invariant` to `σ = translateSites N j₁ j₂`, packaging the
+weight-independent bijectivity and Gaussian-density-invariance facts. Instantiates to
+any translation-invariant weight, in particular `W = V` and the coupling family
+`W = g·V`. -/
+theorem latticeWithDensity_translation_invariant
+    (N : ℕ) [NeZero N] (mass : ℝ)
+    (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
+    (j₁ j₂ : ℤ)
+    (W : Configuration (FinLatticeField 2 N) → ℝ)
+    (hW_meas : Measurable W)
+    (hW_inv : ∀ ω : Configuration (FinLatticeField 2 N),
+      W (ω.comp (latticeTranslateLM N j₁ j₂).toContinuousLinearMap) = W ω)
+    (Z : ENNReal)
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (F : Configuration (FinLatticeField 2 N) → E) :
+    ∫ ω, F (ω.comp (latticeTranslateLM N j₁ j₂).toContinuousLinearMap)
+      ∂(Z⁻¹ • (latticeGaussianMeasure 2 N (circleSpacing L N) mass ha hmass).withDensity
+          (fun ω => ENNReal.ofReal (Real.exp (-(W ω))))) =
+    ∫ ω, F ω
+      ∂(Z⁻¹ • (latticeGaussianMeasure 2 N (circleSpacing L N) mass ha hmass).withDensity
+          (fun ω => ENNReal.ofReal (Real.exp (-(W ω))))) := by
+  have hbij := translateSites_bijective N j₁ j₂
+  exact latticeWithDensity_symmetry_invariant L N mass ha hmass
     (translateSites N j₁ j₂) hbij
     (by -- Density preservation: gaussianDensity(φ∘σ⁻¹) = gaussianDensity(φ)
       intro φ
@@ -359,7 +425,26 @@ private theorem interactingLatticeMeasure_translation_invariant
       simp only [Function.comp, hsymm_eq, latticeTranslation]
       congr 1; funext i; fin_cases i <;>
         simp [v, Matrix.cons_val_zero, Matrix.cons_val_one, sub_neg_eq_add])
-    F
+    W hW_meas hW_inv Z F
+
+omit hL in
+/-- Lattice translation invariance of the `g = 1` interacting measure. Corollary of the
+weight-generic `latticeWithDensity_translation_invariant` with weight `W = V`. -/
+theorem interactingLatticeMeasure_translation_invariant
+    (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
+    (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (j₁ j₂ : ℤ) (F : Configuration (FinLatticeField 2 N) → E) :
+    ∫ ω, F (ω.comp (latticeTranslateLM N j₁ j₂).toContinuousLinearMap)
+      ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) =
+    ∫ ω, F ω ∂(interactingLatticeMeasure 2 N P (circleSpacing L N) mass ha hmass) := by
+  unfold interactingLatticeMeasure boltzmannWeight
+  exact latticeWithDensity_translation_invariant L N mass ha hmass j₁ j₂
+    (interactionFunctional 2 N P (circleSpacing L N) mass)
+    (interactionFunctional_measurable 2 N P (circleSpacing L N) mass)
+    (interactionFunctional_sitePermute_invariant N P (circleSpacing L N) mass
+      (translateSites N j₁ j₂) (translateSites_bijective N j₁ j₂))
+    _ F
 
 theorem torusInteractingMeasure_gf_latticeTranslation_invariant
     (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
@@ -1668,7 +1753,7 @@ theorem torusInteractingLimit_translation_invariant
 /-- The Laplacian commutes with the swap `(x₀,x₁) ↦ (x₁,x₀)` on a 2D lattice.
 Proof: The stencil sums over directions i ∈ {0,1}. Swapping coordinates
 exchanges i=0 and i=1 terms; the sum is invariant by commutativity. -/
-private theorem finiteLaplacian_swap_commute (N : ℕ) [NeZero N] (a : ℝ)
+theorem finiteLaplacian_swap_commute (N : ℕ) [NeZero N] (a : ℝ)
     (φ : FinLatticeField 2 N) :
     finiteLaplacian 2 N a (φ ∘ swapSites N) =
     (finiteLaplacian 2 N a φ) ∘ swapSites N := by
@@ -1707,7 +1792,7 @@ private theorem finiteLaplacian_swap_commute (N : ℕ) [NeZero N] (a : ℝ)
 
 /-- The mass operator Q = -Δ + m² commutes with swap.
 `Q(φ ∘ swap) = (Qφ) ∘ swap` pointwise. -/
-private theorem massOperator_swap_commute (N : ℕ) [NeZero N] (a mass : ℝ)
+theorem massOperator_swap_commute (N : ℕ) [NeZero N] (a mass : ℝ)
     (φ : FinLatticeField 2 N) :
     massOperator 2 N a mass (φ ∘ swapSites N) =
     (massOperator 2 N a mass φ) ∘ swapSites N := by
@@ -1721,10 +1806,12 @@ private theorem massOperator_swap_commute (N : ℕ) [NeZero N] (a mass : ℝ)
   simp only [Function.comp] at h
   linarith
 
-private def latticeSwapLM (N : ℕ) := latticeSitePermuteLM N (swapSites N)
+/-- The lattice coordinate-swap linear map: `(L_swap g)(x) = g(swapSites N x)`. -/
+def latticeSwapLM (N : ℕ) := latticeSitePermuteLM N (swapSites N)
 
 omit hL in
-private theorem interactingLatticeMeasure_swap_invariant
+/-- Lattice coordinate-swap invariance of the `g = 1` interacting measure. -/
+theorem interactingLatticeMeasure_swap_invariant
     (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
     (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -1842,7 +1929,7 @@ theorem torusInteractingMeasure_gf_swap_invariant
 /-- The Laplacian commutes with time reflection `(x₀,x₁) ↦ (-x₀,x₁)`.
 Proof: For i=0, the stencil `φ(-x₀+1,x₁) + φ(-x₀-1,x₁)` = `φ(-x₀-1,x₁) + φ(-x₀+1,x₁)`
 by add_comm. For i=1, the stencil is unchanged since reflection only affects x₀. -/
-private theorem finiteLaplacian_timeReflect_commute (N : ℕ) [NeZero N] (a : ℝ)
+theorem finiteLaplacian_timeReflect_commute (N : ℕ) [NeZero N] (a : ℝ)
     (φ : FinLatticeField 2 N) :
     finiteLaplacian 2 N a (φ ∘ timeReflectSites N) =
     (finiteLaplacian 2 N a φ) ∘ timeReflectSites N := by
@@ -1878,7 +1965,7 @@ private theorem finiteLaplacian_timeReflect_commute (N : ℕ) [NeZero N] (a : �
 
 /-- The mass operator Q = -Δ + m² commutes with time reflection.
 `Q(φ ∘ refl) = (Qφ) ∘ refl` pointwise. -/
-private theorem massOperator_timeReflect_commute (N : ℕ) [NeZero N] (a mass : ℝ)
+theorem massOperator_timeReflect_commute (N : ℕ) [NeZero N] (a mass : ℝ)
     (φ : FinLatticeField 2 N) :
     massOperator 2 N a mass (φ ∘ timeReflectSites N) =
     (massOperator 2 N a mass φ) ∘ timeReflectSites N := by
@@ -1893,10 +1980,11 @@ private theorem massOperator_timeReflect_commute (N : ℕ) [NeZero N] (a mass : 
   linarith
 
 /-- The lattice time-reflection linear map: `(L_refl g)(x) = g(timeReflectSites x)`. -/
-private def latticeTimeReflectLM (N : ℕ) := latticeSitePermuteLM N (timeReflectSites N)
+def latticeTimeReflectLM (N : ℕ) := latticeSitePermuteLM N (timeReflectSites N)
 
 omit hL in
-private theorem interactingLatticeMeasure_timeReflection_invariant
+/-- Lattice time-reflection invariance of the `g = 1` interacting measure. -/
+theorem interactingLatticeMeasure_timeReflection_invariant
     (N : ℕ) [NeZero N] (P : InteractionPolynomial) (mass : ℝ)
     (ha : 0 < circleSpacing L N) (hmass : 0 < mass)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -2833,6 +2921,762 @@ theorem torusInteracting_satisfies_OS
   os1 := torusInteracting_os1 L P mass hmass μ φ hφ hconv
   os2_translation := torusInteracting_os2_translation L P mass hmass μ φ hφ hconv
   os2_D4 := torusInteracting_os2_D4 L P mass hmass μ φ hφ hconv
+
+/-! ## Family-generic OS kernel
+
+Generic versions of the OS theorems, parameterized by an abstract sequence
+`ν : ℕ → Measure (Configuration (TorusTestFunction L))` of probability measures
+(`ν n` lives at lattice cutoff `N = φ n + 1`) converging weakly to a limit `μ`.
+Both the `g = 1` family `torusInteractingMeasure` and the coupling family
+`interactingLatticeMeasureCoupling` can instantiate these theorems by supplying
+the per-cutoff facts (exponential moment bound, lattice symmetry invariance)
+as hypotheses. -/
+
+section FamilyOS
+
+/-- **Limit exponential moment bound for an abstract weakly-convergent family.**
+
+If each `ν n` satisfies the cutoff exponential moment bound (with a constant
+uniform in `f` and `n`) and the family converges weakly to `μ`, then `μ`
+satisfies the limit bound with the continuum Green's function. Family-generic
+version of `torusInteracting_exponentialMomentBound`: the per-cutoff bound is
+a hypothesis instead of being derived from the `g = 1` family. -/
+theorem torusFamily_exponentialMomentBound
+    (mass : ℝ) (hmass : 0 < mass)
+    (μ : Measure (Configuration (TorusTestFunction L)))
+    [IsProbabilityMeasure μ]
+    (φ : ℕ → ℕ) (hφ : StrictMono φ)
+    (ν : ℕ → Measure (Configuration (TorusTestFunction L)))
+    [∀ n, IsProbabilityMeasure (ν n)]
+    (hexp : ∃ C : ℝ, 0 < C ∧ ∀ (f : TorusTestFunction L) (n : ℕ),
+      Integrable (fun ω : Configuration (TorusTestFunction L) => Real.exp (|ω f|)) (ν n) ∧
+      ∫ ω : Configuration (TorusTestFunction L), Real.exp (|ω f|) ∂(ν n) ≤
+        C * Real.exp (torusEmbeddedTwoPoint L (φ n + 1) mass hmass f f))
+    (hconv : ∀ (g : Configuration (TorusTestFunction L) → ℝ),
+      Continuous g → (∃ C, ∀ x, |g x| ≤ C) →
+        Tendsto (fun n => ∫ ω, g ω ∂(ν n)) atTop (nhds (∫ ω, g ω ∂μ))) :
+    ∃ K : ℝ, 0 < K ∧ ∀ (f : TorusTestFunction L),
+    Integrable (fun ω : Configuration (TorusTestFunction L) => Real.exp (|ω f|)) μ ∧
+    ∫ ω : Configuration (TorusTestFunction L), Real.exp (|ω f|) ∂μ ≤
+      K * Real.exp (torusContinuumGreen L mass hmass f f) := by
+  -- The universal cutoff bound (K independent of f and n) is the hypothesis
+  obtain ⟨K, hK_pos, hK_bound⟩ := hexp
+  refine ⟨K, hK_pos, fun f => ?_⟩
+  set B := K * Real.exp (torusContinuumGreen L mass hmass f f)
+  have hB_pos : 0 < B := mul_pos hK_pos (Real.exp_pos _)
+  have hG_conv := torus_propagator_convergence L mass hmass f f
+  -- Abbreviation for the target function
+  set F : Configuration (TorusTestFunction L) → ℝ := fun ω => Real.exp (|ω f|) with hF_def
+  have hF_nn : ∀ ω : Configuration (TorusTestFunction L), 0 ≤ F ω :=
+    fun ω => (Real.exp_pos _).le
+  have hF_meas : Measurable F :=
+    Real.measurable_exp.comp ((configuration_eval_measurable f).abs)
+  -- Step 1: For every M > 0, ∫ min(F, M) dμ ≤ B (truncation + weak convergence)
+  have h_trunc : ∀ M : ℝ, 0 < M →
+      ∫ ω : Configuration (TorusTestFunction L), min (F ω) M ∂μ ≤ B := by
+    intro M hM
+    have h_cont : Continuous (fun ω : Configuration (TorusTestFunction L) =>
+        min (F ω) M) :=
+      (Real.continuous_exp.comp (continuous_abs.comp (WeakDual.eval_continuous f))).min
+        continuous_const
+    have h_bdd : ∃ C, ∀ ω : Configuration (TorusTestFunction L),
+        |min (F ω) M| ≤ C :=
+      ⟨M, fun ω => by
+        rw [abs_of_nonneg (le_min (hF_nn ω) hM.le)]
+        exact min_le_right _ _⟩
+    have h_lim := hconv _ h_cont h_bdd
+    have h_cutoff : ∀ n, ∫ ω, min (F ω) M ∂(ν n) ≤
+        K * Real.exp (torusEmbeddedTwoPoint L (φ n + 1) mass hmass f f) := by
+      intro n
+      obtain ⟨h_int_n, h_bnd_n⟩ := hK_bound f n
+      calc ∫ ω, min (F ω) M ∂(ν n)
+          ≤ ∫ ω, F ω ∂(ν n) := by
+            apply integral_mono_of_nonneg
+            · exact ae_of_all _ (fun ω => le_min (hF_nn ω) hM.le)
+            · exact h_int_n
+            · exact ae_of_all _ (fun ω => min_le_left _ _)
+        _ ≤ K * Real.exp (torusEmbeddedTwoPoint L (φ n + 1) mass hmass f f) := h_bnd_n
+    have h_B_lim : Tendsto (fun n =>
+        K * Real.exp (torusEmbeddedTwoPoint L (φ n + 1) mass hmass f f))
+        atTop (nhds B) := by
+      show Tendsto _ atTop (nhds (K * Real.exp (torusContinuumGreen L mass hmass f f)))
+      apply Filter.Tendsto.const_mul
+      exact (Real.continuous_exp.tendsto _).comp
+        (hG_conv.comp (hφ.tendsto_atTop))
+    exact le_of_tendsto_of_tendsto h_lim h_B_lim (Filter.Eventually.of_forall h_cutoff)
+  -- Step 2: Each truncation min(F, n) is integrable (bounded on probability space)
+  have h_trunc_int : ∀ n : ℕ, Integrable (fun ω => min (F ω) (↑n : ℝ)) μ := by
+    intro n
+    exact Integrable.of_bound
+      (hF_meas.min measurable_const).aestronglyMeasurable n
+      (ae_of_all _ fun ω => by
+        rw [Real.norm_eq_abs, abs_of_nonneg (le_min (hF_nn ω) (Nat.cast_nonneg n))]
+        exact min_le_right _ _)
+  -- Truncation bounds for natural numbers
+  have h_trunc_nat : ∀ n : ℕ, ∫ ω, min (F ω) (↑n : ℝ) ∂μ ≤ B := by
+    intro n
+    by_cases hn : n = 0
+    · subst hn
+      simp only [Nat.cast_zero]
+      calc ∫ ω, min (F ω) (0 : ℝ) ∂μ
+          ≤ ∫ ω, (0 : ℝ) ∂μ := by
+            apply integral_mono_of_nonneg
+            · exact ae_of_all _ fun _ => le_min (hF_nn _) le_rfl
+            · exact integrable_const 0
+            · exact ae_of_all _ fun _ => min_le_right _ _
+        _ = 0 := by simp
+        _ ≤ B := le_of_lt hB_pos
+    · exact h_trunc n (Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn))
+  -- Step 3: Integrability of F from bounded lintegral (MCT for lintegrals)
+  have h_int : Integrable F μ := by
+    refine ⟨hF_meas.aestronglyMeasurable, ?_⟩
+    rw [hasFiniteIntegral_iff_ofReal (ae_of_all _ hF_nn)]
+    have h_lint_mono : ∀ᵐ ω ∂μ, Monotone
+        (fun n : ℕ => ENNReal.ofReal (min (F ω) (↑n : ℝ))) :=
+      ae_of_all _ fun ω n m hnm =>
+        ENNReal.ofReal_le_ofReal (min_le_min_left _ (Nat.cast_le.mpr hnm))
+    have h_lint_pw : ∀ᵐ ω ∂μ, Tendsto
+        (fun n : ℕ => ENNReal.ofReal (min (F ω) (↑n : ℝ)))
+        atTop (nhds (ENNReal.ofReal (F ω))) :=
+      ae_of_all _ fun ω => (ENNReal.continuous_ofReal.tendsto _).comp
+        (tendsto_atTop_of_eventually_const (i₀ := ⌈F ω⌉₊) fun n hn => by
+          rw [min_eq_left]; exact le_trans (Nat.le_ceil _) (Nat.cast_le.mpr hn))
+    have h_lint_meas : ∀ n : ℕ, AEMeasurable
+        (fun ω => ENNReal.ofReal (min (F ω) (↑n : ℝ))) μ :=
+      fun n => (hF_meas.min measurable_const).ennreal_ofReal.aemeasurable
+    have h_lint_conv := lintegral_tendsto_of_tendsto_of_monotone
+      h_lint_meas h_lint_mono h_lint_pw
+    have h_lint_bound : ∀ n : ℕ, ∫⁻ ω, ENNReal.ofReal (min (F ω) (↑n : ℝ)) ∂μ ≤
+        ENNReal.ofReal B := by
+      intro n
+      rw [← ofReal_integral_eq_lintegral_ofReal (h_trunc_int n)
+        (ae_of_all _ fun ω => le_min (hF_nn ω) (Nat.cast_nonneg n))]
+      exact ENNReal.ofReal_le_ofReal (h_trunc_nat n)
+    exact lt_of_le_of_lt (le_of_tendsto' h_lint_conv h_lint_bound) ENNReal.ofReal_lt_top
+  constructor
+  · exact h_int
+  · -- Step 4: ∫ F dμ ≤ B by MCT + truncation bounds
+    have h_mono : ∀ᵐ ω ∂μ, Monotone (fun n : ℕ => min (F ω) (↑n : ℝ)) :=
+      ae_of_all _ fun ω n m hnm => min_le_min_left _ (Nat.cast_le.mpr hnm)
+    have h_pw : ∀ᵐ ω ∂μ,
+        Tendsto (fun n : ℕ => min (F ω) (↑n : ℝ)) atTop (nhds (F ω)) :=
+      ae_of_all _ fun ω => tendsto_atTop_of_eventually_const
+        (i₀ := ⌈F ω⌉₊) fun n hn => by
+          rw [min_eq_left]
+          exact le_trans (Nat.le_ceil _) (Nat.cast_le.mpr hn)
+    have h_mct : Tendsto (fun n : ℕ => ∫ ω, min (F ω) (↑n : ℝ) ∂μ)
+        atTop (nhds (∫ ω, F ω ∂μ)) :=
+      integral_tendsto_of_tendsto_of_monotone h_trunc_int h_int h_mono h_pw
+    exact le_of_tendsto' h_mct h_trunc_nat
+
+/-- **OS0 (analyticity) from the limit exponential moment bound.**
+
+If a probability measure `μ` on torus configurations satisfies the exponential
+moment bound `∫ exp |ω f| ∂μ ≤ K · exp (G_L(f,f))`, its generating functional
+is entire analytic. Family-generic version of `torusInteracting_os0`: the
+moment bound is a hypothesis instead of being derived from the `g = 1` family. -/
+theorem torusOS0_of_expMomentBound
+    (mass : ℝ) (hmass : 0 < mass)
+    (μ : Measure (Configuration (TorusTestFunction L)))
+    [IsProbabilityMeasure μ]
+    (hK : ∃ K : ℝ, 0 < K ∧ ∀ (f : TorusTestFunction L),
+      Integrable (fun ω : Configuration (TorusTestFunction L) => Real.exp (|ω f|)) μ ∧
+      ∫ ω : Configuration (TorusTestFunction L), Real.exp (|ω f|) ∂μ ≤
+        K * Real.exp (torusContinuumGreen L mass hmass f f)) :
+    TorusOS0_Analyticity L μ := by
+  obtain ⟨K_exp, -, hK_exp_bound⟩ := hK
+  intro n J
+  -- Goal: z ↦ ∫ exp(I * (ω(Σ Re(zᵢ)Jᵢ) + I * ω(Σ Im(zᵢ)Jᵢ))) dμ is entire
+  rw [analyticOn_univ]
+  apply analyticOnNhd_integral
+  · -- Pointwise analyticity: z ↦ F(z, ω) is entire for each ω
+    intro ω z _
+    apply AnalyticAt.cexp'
+    have h_eq : ∀ w : Fin n → ℂ,
+        I * (↑(ω (∑ i, (w i).re • J i)) + I * ↑(ω (∑ i, (w i).im • J i))) =
+        I * ∑ i : Fin n, w i * ↑(ω (J i)) := by
+      intro w; congr 1
+      simp only [map_sum, map_smul, smul_eq_mul, Complex.ofReal_sum, Complex.ofReal_mul,
+        Finset.mul_sum, ← Finset.sum_add_distrib]
+      congr 1; ext i
+      calc ↑(w i).re * ↑(ω (J i)) + I * (↑(w i).im * ↑(ω (J i)))
+          = (↑(w i).re + ↑(w i).im * I) * ↑(ω (J i)) := by ring
+        _ = w i * ↑(ω (J i)) := by rw [re_add_im]
+    simp_rw [h_eq]
+    exact analyticAt_const.mul (Finset.univ.analyticAt_fun_sum (fun i _ =>
+      ((ContinuousLinearMap.proj (R := ℂ) (φ := fun _ : Fin n => ℂ) i).analyticAt z).mul
+      analyticAt_const))
+  · -- Measurability: F(z, ·) is ae strongly measurable for each z
+    intro z
+    apply (Complex.measurable_exp.comp _).aestronglyMeasurable
+    exact (measurable_const.mul ((Complex.measurable_ofReal.comp
+      (configuration_eval_measurable _)).add (measurable_const.mul
+      (Complex.measurable_ofReal.comp (configuration_eval_measurable _)))))
+  · -- Domination: on compact K, ‖F(z, ω)‖ ≤ bound(ω) integrable
+    intro K hK
+    obtain ⟨C_K, hC_K_nn, hC_K⟩ := compact_im_bound hK
+    by_cases hn : n = 0
+    · -- n = 0: integrand is exp(I * 0) = 1, bounded by 1
+      subst hn
+      exact ⟨fun _ => 1, integrable_const 1, fun z _ => ae_of_all μ fun ω => by
+        simp only [Finset.univ_eq_empty, Finset.sum_empty, map_zero,
+          Complex.ofReal_zero, add_zero, mul_zero, Complex.exp_zero, norm_one]; rfl⟩
+    · -- n > 0: bound by ∑ᵢ exp(n · C_K · |ω(Jᵢ)|)
+      set bound := fun ω : Configuration (TorusTestFunction L) =>
+        ∑ i : Fin n, Real.exp (↑n * C_K * |ω (J i)|) with hbound_def
+      refine ⟨bound, ?_, fun z hz => ae_of_all μ fun ω => ?_⟩
+      · -- Integrability: each exp(n·C_K·|ω(Jᵢ)|) = exp(|ω((n·C_K)•Jᵢ)|) is integrable
+        apply integrable_finset_sum; intro i _
+        have hscale : ∀ ω : Configuration (TorusTestFunction L),
+            Real.exp (↑n * C_K * |ω (J i)|) =
+            Real.exp (|ω ((↑n * C_K) • J i)|) := by
+          intro ω
+          rw [map_smul, smul_eq_mul, abs_mul,
+              abs_of_nonneg (mul_nonneg (Nat.cast_nonneg' n) hC_K_nn)]
+        simp_rw [hscale]
+        exact (hK_exp_bound ((↑n * C_K) • J i)).1
+      · -- Pointwise bound: ‖F(z, ω)‖ ≤ bound(ω) for z ∈ K
+        rw [Complex.norm_exp]
+        have h_re : (I * (↑(ω (∑ i, (z i).re • J i)) +
+            I * ↑(ω (∑ i, (z i).im • J i)))).re =
+            -(ω (∑ i, (z i).im • J i)) := by
+          have : I * (↑(ω (∑ i, (z i).re • J i)) +
+              I * ↑(ω (∑ i, (z i).im • J i))) =
+              -↑(ω (∑ i, (z i).im • J i)) +
+              ↑(ω (∑ i, (z i).re • J i)) * I := by
+            rw [mul_add, ← mul_assoc, Complex.I_mul_I, neg_one_mul]; ring
+          rw [this, Complex.add_re, Complex.neg_re, Complex.ofReal_re,
+              Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+              Complex.I_re, Complex.I_im, mul_zero, zero_mul, sub_zero,
+              add_zero]
+        rw [h_re]
+        calc Real.exp (-(ω (∑ i, (z i).im • J i)))
+            ≤ Real.exp (|ω (∑ i, (z i).im • J i)|) :=
+              Real.exp_le_exp_of_le (neg_le_abs _)
+          _ ≤ Real.exp (C_K * ∑ i : Fin n, |ω (J i)|) := by
+              apply Real.exp_le_exp_of_le
+              rw [map_sum]
+              calc |∑ i, ω ((z i).im • J i)|
+                  ≤ ∑ i, |ω ((z i).im • J i)| :=
+                    Finset.abs_sum_le_sum_abs _ _
+                _ = ∑ i, |(z i).im| * |ω (J i)| := by
+                    congr 1; ext i; rw [map_smul, smul_eq_mul, abs_mul]
+                _ ≤ ∑ i, C_K * |ω (J i)| :=
+                    Finset.sum_le_sum (fun i _ =>
+                      mul_le_mul_of_nonneg_right (hC_K z hz i) (abs_nonneg _))
+                _ = C_K * ∑ i, |ω (J i)| := (Finset.mul_sum _ _ _).symm
+          _ ≤ bound ω :=
+              exp_mul_sum_le (Nat.pos_of_ne_zero hn) C_K hC_K_nn _
+
+/-- **OS1 (regularity) from the limit exponential moment bound.**
+
+The complex generating functional of any probability measure with the
+exponential moment bound `∫ exp |ω f| ∂μ ≤ K · exp (G_L(f,f))` satisfies the
+OS1 bound `‖Z_ℂ[f_re, f_im]‖ ≤ exp (c · (q(f_re) + q(f_im)))` for a continuous
+seminorm `q`. Family-generic version of `torusInteracting_os1`. -/
+theorem torusOS1_of_expMomentBound
+    (mass : ℝ) (hmass : 0 < mass)
+    (μ : Measure (Configuration (TorusTestFunction L)))
+    [IsProbabilityMeasure μ]
+    (hK : ∃ K : ℝ, 0 < K ∧ ∀ (f : TorusTestFunction L),
+      Integrable (fun ω : Configuration (TorusTestFunction L) => Real.exp (|ω f|)) μ ∧
+      ∫ ω : Configuration (TorusTestFunction L), Real.exp (|ω f|) ∂μ ≤
+        K * Real.exp (torusContinuumGreen L mass hmass f f)) :
+    TorusOS1_Regularity L μ := by
+  obtain ⟨K, hK_pos, hK_all⟩ := hK
+  -- Use q(f) = G(f,f) + Real.log K to absorb the constant K
+  refine ⟨fun f => torusContinuumGreen L mass hmass f f + |Real.log K|,
+          (torusContinuumGreen_continuous_diag L mass hmass).add continuous_const,
+          1, one_pos, ?_⟩
+  intro f_re f_im
+  obtain ⟨h_int_im, h_exp_bound_im⟩ := hK_all f_im
+  have h_tri : ‖torusGeneratingFunctionalℂ L μ f_re f_im‖ ≤
+      ∫ ω, ‖Complex.exp (Complex.I * (↑(ω f_re) + Complex.I * ↑(ω f_im)))‖ ∂μ :=
+    norm_integral_le_integral_norm _
+  have h_norm : ∀ ω : Configuration (TorusTestFunction L),
+      ‖Complex.exp (Complex.I * (↑(ω f_re) + Complex.I * ↑(ω f_im)))‖ =
+      Real.exp (-(ω f_im)) := by
+    intro ω
+    rw [Complex.norm_exp]; congr 1
+    have : Complex.I * (↑(ω f_re) + Complex.I * ↑(ω f_im)) =
+        -↑(ω f_im) + ↑(ω f_re) * Complex.I := by
+      rw [mul_add, ← mul_assoc, Complex.I_mul_I, neg_one_mul]; ring
+    rw [this, Complex.add_re, Complex.neg_re, Complex.ofReal_re,
+        Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im, mul_zero, zero_mul, sub_zero, add_zero]
+  calc ‖torusGeneratingFunctionalℂ L μ f_re f_im‖
+      ≤ ∫ ω, ‖Complex.exp (Complex.I * (↑(ω f_re) + Complex.I * ↑(ω f_im)))‖ ∂μ := h_tri
+    _ = ∫ ω, Real.exp (-(ω f_im)) ∂μ := by congr 1; ext ω; exact h_norm ω
+    _ ≤ ∫ ω, Real.exp (|ω f_im|) ∂μ := by
+        apply integral_mono_of_nonneg
+        · exact ae_of_all _ (fun _ => (Real.exp_pos _).le)
+        · exact h_int_im
+        · exact ae_of_all _ (fun ω => Real.exp_le_exp_of_le (neg_le_abs (ω f_im)))
+    _ ≤ K * Real.exp (torusContinuumGreen L mass hmass f_im f_im) := h_exp_bound_im
+    _ ≤ Real.exp (torusContinuumGreen L mass hmass f_im f_im + |Real.log K|) := by
+        have hle : K ≤ Real.exp (|Real.log K|) := by
+          by_cases h1 : 1 ≤ K
+          · rw [abs_of_nonneg (Real.log_nonneg h1), Real.exp_log hK_pos]
+          · push Not at h1
+            exact le_trans h1.le (Real.one_le_exp (abs_nonneg _))
+        calc K * Real.exp (torusContinuumGreen L mass hmass f_im f_im)
+            ≤ Real.exp (|Real.log K|) *
+              Real.exp (torusContinuumGreen L mass hmass f_im f_im) :=
+              mul_le_mul_of_nonneg_right hle (Real.exp_pos _).le
+          _ = Real.exp (torusContinuumGreen L mass hmass f_im f_im + |Real.log K|) := by
+              rw [← Real.exp_add]; ring_nf
+    _ ≤ Real.exp (1 * ((torusContinuumGreen L mass hmass f_re f_re + |Real.log K|) +
+          (torusContinuumGreen L mass hmass f_im f_im + |Real.log K|))) := by
+        rw [one_mul]; apply Real.exp_le_exp_of_le
+        linarith [torusContinuumGreen_nonneg L mass hmass f_re, abs_nonneg (Real.log K)]
+
+/-- **Uniform GF Lipschitz bound for an abstract family** (generic version of
+`gf_sub_norm_le_seminorm`). The uniform second moment bound `hmom` controls the
+generating functional differences of the family uniformly in `n`, via the
+seminorm bound `torusEmbeddedTwoPoint_le_seminorm`. -/
+private theorem familyGF_sub_norm_le_seminorm
+    (mass : ℝ) (hmass : 0 < mass)
+    (φ : ℕ → ℕ)
+    (ν : ℕ → Measure (Configuration (TorusTestFunction L)))
+    [∀ n, IsProbabilityMeasure (ν n)]
+    (hmom : ∃ C : ℝ, 0 < C ∧ ∀ (f : TorusTestFunction L) (n : ℕ),
+      Integrable (fun ω : Configuration (TorusTestFunction L) => (ω f) ^ 2) (ν n) ∧
+      ∫ ω : Configuration (TorusTestFunction L), (ω f) ^ 2 ∂(ν n) ≤
+        C * torusEmbeddedTwoPoint L (φ n + 1) mass hmass f f) :
+    ∃ (B : ℝ) (p : TorusTestFunction L → ℝ),
+    Continuous p ∧ p 0 = 0 ∧
+    ∀ (g h : TorusTestFunction L) (n : ℕ),
+    ‖torusGeneratingFunctional L (ν n) g -
+      torusGeneratingFunctional L (ν n) h‖ ≤
+    B * p (g - h) := by
+  obtain ⟨C, hC_pos, hC_bound⟩ := hmom
+  obtain ⟨p, hp_cont, hp_zero, hp_bound⟩ :=
+    torusEmbeddedTwoPoint_le_seminorm L mass hmass
+  -- The bound B = 2 * √C works with seminorm |p|
+  refine ⟨2 * Real.sqrt C, fun f => |p f|, hp_cont.abs,
+    by simp [hp_zero], fun g h n => ?_⟩
+  · -- ‖Z_n[g] - Z_n[h]‖ ≤ 2√C · |p(g - h)|
+    set μ := ν n
+    have h_seminorm : torusEmbeddedTwoPoint L (φ n + 1) mass hmass
+        (g - h) (g - h) ≤ |p (g - h)| ^ 2 := by
+      have := hp_bound (g - h) (φ n + 1); rwa [sq_abs]
+    have h_combined : ∫ ω : Configuration (TorusTestFunction L),
+        (ω (g - h)) ^ 2 ∂μ ≤ C * |p (g - h)| ^ 2 :=
+      ((hC_bound (g - h) n).2).trans (mul_le_mul_of_nonneg_left h_seminorm hC_pos.le)
+    -- Abbreviation for the difference integrand
+    set F : Configuration (TorusTestFunction L) → ℂ := fun ω =>
+      Complex.exp (Complex.I * ↑(ω g)) - Complex.exp (Complex.I * ↑(ω h))
+    -- Each exp(iωf) is integrable (bounded in norm by 1)
+    have h_int : ∀ f : TorusTestFunction L,
+        Integrable (fun ω : Configuration (TorusTestFunction L) =>
+          Complex.exp (Complex.I * ↑(ω f))) μ := fun f =>
+      (integrable_const (1 : ℂ)).mono
+        (Complex.continuous_exp.measurable.comp
+          (measurable_const.mul (Complex.continuous_ofReal.measurable.comp
+            (configuration_eval_measurable f)))).aestronglyMeasurable
+        (ae_of_all _ fun ω => by
+          rw [norm_one, mul_comm Complex.I]; exact le_of_eq (Complex.norm_exp_ofReal_mul_I _))
+    -- GF difference = ∫ F dμ
+    have h_gf_eq : torusGeneratingFunctional L μ g -
+        torusGeneratingFunctional L μ h = ∫ ω, F ω ∂μ := by
+      simp only [torusGeneratingFunctional, F]
+      exact (integral_sub (h_int g) (h_int h)).symm
+    -- ‖F(ω)‖ ≤ 2 (trivial bound, for integrability)
+    have hF_bd2 : ∀ ω, ‖F ω‖ ≤ 2 := fun ω => by
+      exact (norm_sub_le _ _).trans (by
+        rw [mul_comm Complex.I (↑(ω g) : ℂ), Complex.norm_exp_ofReal_mul_I,
+            mul_comm Complex.I (↑(ω h) : ℂ), Complex.norm_exp_ofReal_mul_I]; norm_num)
+    -- ‖F(ω)‖ ≤ |ω(g-h)| (Lipschitz of exp on imaginary line)
+    have hF_lip : ∀ ω, ‖F ω‖ ≤ |ω (g - h)| := fun ω => by
+      -- exp(ia) - exp(ib) = exp(ib)(exp(i(a-b)) - 1)
+      have : F ω = Complex.exp (Complex.I * ↑(ω h)) *
+          (Complex.exp (Complex.I * ↑(ω g - ω h)) - 1) := by
+        simp only [F]; rw [mul_sub, mul_one, ← Complex.exp_add]; congr 1; push_cast; ring
+      rw [this, norm_mul, mul_comm Complex.I (↑(ω h) : ℂ),
+        Complex.norm_exp_ofReal_mul_I, one_mul]
+      -- Use: ‖exp(I*x) - 1‖ = |2 sin(x/2)| ≤ |x| (from sin bound)
+      have h_key : ‖Complex.exp (Complex.I * ↑(ω g - ω h)) - 1‖ ≤
+          |ω g - ω h| := by
+        rw [Complex.norm_exp_I_mul_ofReal_sub_one]
+        calc ‖2 * Real.sin ((ω g - ω h) / 2)‖
+            = 2 * |Real.sin ((ω g - ω h) / 2)| := by
+              rw [Real.norm_eq_abs, abs_mul, abs_of_pos (by norm_num : (0:ℝ) < 2)]
+          _ ≤ 2 * |(ω g - ω h) / 2| :=
+              mul_le_mul_of_nonneg_left Real.abs_sin_le_abs (by norm_num)
+          _ = |ω g - ω h| := by rw [abs_div, abs_of_pos (by norm_num : (0:ℝ) < 2)]; ring
+      exact h_key.trans (by rw [map_sub])
+    -- ‖F(ω)‖² ≤ (ω(g-h))² (from ‖F(ω)‖ ≤ |ω(g-h)|)
+    have hF_sq : ∀ ω, ‖F ω‖ ^ 2 ≤ (ω (g - h)) ^ 2 := fun ω =>
+      (sq_le_sq' (by linarith [norm_nonneg (F ω), abs_nonneg (ω (g - h))])
+        (hF_lip ω)).trans (le_of_eq (sq_abs _))
+    -- ‖F‖ is integrable (bounded by 2)
+    have hF_meas : Measurable F :=
+      (Complex.continuous_exp.measurable.comp
+        (measurable_const.mul (Complex.continuous_ofReal.measurable.comp
+          (configuration_eval_measurable g)))).sub
+      (Complex.continuous_exp.measurable.comp
+        (measurable_const.mul (Complex.continuous_ofReal.measurable.comp
+          (configuration_eval_measurable h))))
+    have hF_norm_int : Integrable (fun ω => ‖F ω‖) μ :=
+      (integrable_const (2 : ℝ)).mono hF_meas.norm.aestronglyMeasurable
+        (ae_of_all _ fun ω => by
+          rw [Real.norm_of_nonneg (norm_nonneg _), Real.norm_of_nonneg (by norm_num : (0:ℝ) ≤ 2)]
+          exact hF_bd2 ω)
+    -- ‖F‖² is integrable (bounded by 4)
+    have hF_sq_int : Integrable (fun ω => ‖F ω‖ ^ 2) μ :=
+      (integrable_const (4 : ℝ)).mono (hF_meas.norm.pow_const 2).aestronglyMeasurable
+        (ae_of_all _ fun ω => by
+          rw [Real.norm_of_nonneg (by positivity : (0:ℝ) ≤ ‖F ω‖ ^ 2),
+              Real.norm_of_nonneg (by norm_num : (0:ℝ) ≤ 4)]
+          exact (sq_le_sq' (by linarith [norm_nonneg (F ω)]) (hF_bd2 ω)).trans
+            (by norm_num))
+    -- (ω(g-h))² is integrable: directly from the hypothesis hmom
+    have hX_sq_int : Integrable (fun ω : Configuration (TorusTestFunction L) =>
+        (ω (g - h)) ^ 2) μ := (hC_bound (g - h) n).1
+    -- Main chain: ‖Z[g]-Z[h]‖² ≤ C·|p(g-h)|²
+    have h_sq_bound : ‖torusGeneratingFunctional L μ g -
+        torusGeneratingFunctional L μ h‖ ^ 2 ≤ C * |p (g - h)| ^ 2 := by
+      calc ‖torusGeneratingFunctional L μ g -
+              torusGeneratingFunctional L μ h‖ ^ 2
+          = ‖∫ ω, F ω ∂μ‖ ^ 2 := by rw [h_gf_eq]
+        _ ≤ (∫ ω, ‖F ω‖ ∂μ) ^ 2 :=
+            sq_le_sq' (by
+              have h1 := norm_nonneg (∫ ω, F ω ∂μ)
+              have h2 : (0 : ℝ) ≤ ∫ ω, ‖F ω‖ ∂μ :=
+                integral_nonneg fun ω => norm_nonneg (F ω)
+              linarith)
+              (norm_integral_le_integral_norm _)
+        _ ≤ ∫ ω, ‖F ω‖ ^ 2 ∂μ :=
+            ConvexOn.map_integral_le (Even.convexOn_pow (n := 2) even_two)
+              (continuousOn_pow 2) isClosed_univ
+              (ae_of_all _ fun _ => Set.mem_univ _) hF_norm_int hF_sq_int
+        _ ≤ ∫ ω, (ω (g - h)) ^ 2 ∂μ :=
+            integral_mono hF_sq_int hX_sq_int (fun ω => hF_sq ω)
+        _ ≤ C * |p (g - h)| ^ 2 := h_combined
+    -- Take square root and add the factor of 2
+    calc ‖torusGeneratingFunctional L μ g -
+            torusGeneratingFunctional L μ h‖
+        ≤ Real.sqrt (C * |p (g - h)| ^ 2) := by
+          rw [← Real.sqrt_sq (norm_nonneg _)]; exact Real.sqrt_le_sqrt h_sq_bound
+      _ = Real.sqrt C * |p (g - h)| := by
+          rw [Real.sqrt_mul hC_pos.le, Real.sqrt_sq_eq_abs, abs_abs]
+      _ ≤ 2 * Real.sqrt C * |p (g - h)| := by
+          have h1 : Real.sqrt C * |p (g - h)| ≥ 0 := mul_nonneg (Real.sqrt_nonneg _) (abs_nonneg _)
+          linarith
+
+/-- **Lattice approximation error vanishes for an abstract family** (generic
+version of `torusGF_latticeApproximation_error_vanishes`). The GF difference
+`Z_n[T_v f] - Z_n[f]` tends to `0`: exact lattice translation invariance
+(`htrans`) handles the nearest lattice translation `w_n → v`, and the uniform
+GF Lipschitz bound (from `hmom`) controls the round-off error. -/
+private theorem familyGF_latticeApproximation_error_vanishes
+    (mass : ℝ) (hmass : 0 < mass)
+    (φ : ℕ → ℕ) (hφ : StrictMono φ)
+    (ν : ℕ → Measure (Configuration (TorusTestFunction L)))
+    [∀ n, IsProbabilityMeasure (ν n)]
+    (hmom : ∃ C : ℝ, 0 < C ∧ ∀ (f : TorusTestFunction L) (n : ℕ),
+      Integrable (fun ω : Configuration (TorusTestFunction L) => (ω f) ^ 2) (ν n) ∧
+      ∫ ω : Configuration (TorusTestFunction L), (ω f) ^ 2 ∂(ν n) ≤
+        C * torusEmbeddedTwoPoint L (φ n + 1) mass hmass f f)
+    (htrans : ∀ (n : ℕ) (j₁ j₂ : ℤ) (f : TorusTestFunction L),
+      torusGeneratingFunctional L (ν n) f =
+        torusGeneratingFunctional L (ν n) (torusTranslation L
+          (circleSpacing L (φ n + 1) * j₁, circleSpacing L (φ n + 1) * j₂) f))
+    (v : ℝ × ℝ) (f : TorusTestFunction L) :
+    Tendsto (fun n =>
+      torusGeneratingFunctional L (ν n) (torusTranslation L v f) -
+      torusGeneratingFunctional L (ν n) f)
+    atTop (nhds 0) := by
+  -- Step 1: Get the uniform GF Lipschitz bound
+  obtain ⟨B, p, hp_cont, hp_zero, hp_bound⟩ :=
+    familyGF_sub_norm_le_seminorm L mass hmass φ ν hmom
+  -- Step 2: For each n, define w_n as the nearest lattice point to v.
+  set a : ℕ → ℝ := fun n => circleSpacing L (φ n + 1)
+  set j₁ : ℕ → ℤ := fun n => round (v.1 / a n)
+  set j₂ : ℕ → ℤ := fun n => round (v.2 / a n)
+  set w : ℕ → ℝ × ℝ := fun n => (a n * j₁ n, a n * j₂ n)
+  -- Step 3: Z_n[T_{w_n} f] = Z_n[f] by lattice translation invariance
+  have h_lattice_inv : ∀ n,
+      torusGeneratingFunctional L (ν n) (torusTranslation L (w n) f) =
+      torusGeneratingFunctional L (ν n) f := by
+    intro n
+    exact (htrans n (j₁ n) (j₂ n) f).symm
+  -- Step 4: Rewrite the target as Z_n[T_v f] - Z_n[T_{w_n} f]
+  have h_rewrite : ∀ n,
+      torusGeneratingFunctional L (ν n) (torusTranslation L v f) -
+      torusGeneratingFunctional L (ν n) f =
+      torusGeneratingFunctional L (ν n) (torusTranslation L v f) -
+      torusGeneratingFunctional L (ν n) (torusTranslation L (w n) f) := by
+    intro n; rw [h_lattice_inv n]
+  simp_rw [h_rewrite]
+  -- Step 5: Bound ‖Z_n[T_v f] - Z_n[T_{w_n} f]‖ ≤ B * p(T_v f - T_{w_n} f)
+  have h_norm_bound : ∀ n,
+      ‖torusGeneratingFunctional L (ν n) (torusTranslation L v f) -
+        torusGeneratingFunctional L (ν n) (torusTranslation L (w n) f)‖ ≤
+      B * p (torusTranslation L v f - torusTranslation L (w n) f) :=
+    fun n => hp_bound _ _ n
+  -- Step 6: Show B * p(T_v f - T_{w_n} f) → 0
+  -- Step 6a: a_n → 0 (lattice spacing vanishes)
+  have h_a_tendsto : Tendsto a atTop (nhds 0) := by
+    change Tendsto (fun n => L / (↑(φ n + 1) : ℝ)) atTop (nhds 0)
+    have h_denom : Tendsto (fun n => (↑(φ n + 1) : ℝ)) atTop atTop := by
+      exact tendsto_natCast_atTop_atTop.comp
+        ((tendsto_add_atTop_nat 1).comp (hφ.tendsto_atTop))
+    exact h_denom.const_div_atTop L
+  -- Step 6b: w_n → v (each component is within a_n/2 of v_i)
+  have h_w_tendsto : Tendsto w atTop (nhds v) := by
+    rw [Prod.tendsto_iff]
+    have h_comp : ∀ (vi : ℝ) (ji : ℕ → ℤ),
+        (∀ n, ji n = round (vi / a n)) →
+        Tendsto (fun n => a n * (ji n : ℝ)) atTop (nhds vi) := by
+      intro vi ji hji
+      -- |a_n * ji_n - vi| ≤ a_n/2, so a_n * ji_n → vi as a_n → 0
+      have h_a_half : Tendsto (fun n => a n / 2) atTop (nhds 0) := by
+        simpa using h_a_tendsto.div_const (2 : ℝ)
+      apply tendsto_of_tendsto_of_tendsto_of_le_of_le
+        (g := fun n => vi - a n / 2) (h := fun n => vi + a n / 2)
+      · -- vi - a_n/2 → vi
+        simpa using tendsto_const_nhds.sub h_a_half
+      · -- vi + a_n/2 → vi
+        simpa using tendsto_const_nhds.add h_a_half
+      · -- vi - a_n/2 ≤ a_n * ji_n
+        intro n; simp only
+        have ha_pos : 0 < a n := circleSpacing_pos L (φ n + 1)
+        have h_bnd := abs_sub_round (vi / a n)
+        rw [abs_le] at h_bnd
+        have h1 : vi / a n - (1:ℝ) / 2 ≤ ↑(ji n) := by
+          rw [hji]; linarith [h_bnd.1]
+        have h2 : vi = a n * (vi / a n) := by field_simp
+        linarith [mul_le_mul_of_nonneg_left h1 ha_pos.le]
+      · -- a_n * ji_n ≤ vi + a_n/2
+        intro n; simp only
+        have ha_pos : 0 < a n := circleSpacing_pos L (φ n + 1)
+        have h_bnd := abs_sub_round (vi / a n)
+        rw [abs_le] at h_bnd
+        have h1 : ↑(ji n) ≤ vi / a n + (1:ℝ) / 2 := by
+          rw [hji]; linarith [h_bnd.2]
+        have h2 : vi = a n * (vi / a n) := by field_simp
+        linarith [mul_le_mul_of_nonneg_left h1 ha_pos.le]
+    constructor
+    · change Tendsto (fun n => (w n).1) atTop (nhds v.1)
+      change Tendsto (fun n => a n * (j₁ n : ℝ)) atTop (nhds v.1)
+      exact h_comp v.1 j₁ (fun _ => rfl)
+    · change Tendsto (fun n => (w n).2) atTop (nhds v.2)
+      change Tendsto (fun n => a n * (j₂ n : ℝ)) atTop (nhds v.2)
+      exact h_comp v.2 j₂ (fun _ => rfl)
+  -- Step 6b': T_{w_n} f → T_v f (by continuity of translation)
+  have h_Tw_tendsto :
+      Tendsto (fun n => torusTranslation L (w n) f) atTop
+        (nhds (torusTranslation L v f)) :=
+    (torusTranslation_continuous_in_v L f).continuousAt.tendsto.comp
+      h_w_tendsto
+  -- Step 6c: p(T_v f - T_{w_n} f) → p(T_v f - T_v f) = p(0) = 0
+  have h_p_tendsto :
+      Tendsto (fun n => p (torusTranslation L v f -
+        torusTranslation L (w n) f)) atTop (nhds 0) := by
+    have h_sub_tendsto : Tendsto
+        (fun n => torusTranslation L v f - torusTranslation L (w n) f)
+        atTop (nhds (torusTranslation L v f - torusTranslation L v f)) :=
+      Filter.Tendsto.const_sub _ h_Tw_tendsto
+    rw [sub_self] at h_sub_tendsto
+    rw [← hp_zero]
+    exact hp_cont.continuousAt.tendsto.comp h_sub_tendsto
+  -- Step 7: Conclude by squeezing
+  apply squeeze_zero_norm (fun n => h_norm_bound n)
+  have : Tendsto (fun n => B * p (torusTranslation L v f -
+      torusTranslation L (w n) f)) atTop (nhds (B * 0)) :=
+    h_p_tendsto.const_mul B
+  simpa using this
+
+/-- **OS2 (translation) for an abstract weakly-convergent family.**
+
+Translation invariance of the limit measure, from per-cutoff lattice
+translation invariance (`htrans`), the uniform second moment bound (`hmom`,
+which yields uniform GF equicontinuity), and weak convergence. Family-generic
+version of `torusInteracting_os2_translation`. -/
+theorem torusFamilyOS2_translation
+    (mass : ℝ) (hmass : 0 < mass)
+    (μ : Measure (Configuration (TorusTestFunction L)))
+    [IsProbabilityMeasure μ]
+    (φ : ℕ → ℕ) (hφ : StrictMono φ)
+    (ν : ℕ → Measure (Configuration (TorusTestFunction L)))
+    [∀ n, IsProbabilityMeasure (ν n)]
+    (hmom : ∃ C : ℝ, 0 < C ∧ ∀ (f : TorusTestFunction L) (n : ℕ),
+      Integrable (fun ω : Configuration (TorusTestFunction L) => (ω f) ^ 2) (ν n) ∧
+      ∫ ω : Configuration (TorusTestFunction L), (ω f) ^ 2 ∂(ν n) ≤
+        C * torusEmbeddedTwoPoint L (φ n + 1) mass hmass f f)
+    (htrans : ∀ (n : ℕ) (j₁ j₂ : ℤ) (f : TorusTestFunction L),
+      torusGeneratingFunctional L (ν n) f =
+        torusGeneratingFunctional L (ν n) (torusTranslation L
+          (circleSpacing L (φ n + 1) * j₁, circleSpacing L (φ n + 1) * j₂) f))
+    (hconv : ∀ (g : Configuration (TorusTestFunction L) → ℝ),
+      Continuous g → (∃ C, ∀ x, |g x| ≤ C) →
+        Tendsto (fun n => ∫ ω, g ω ∂(ν n)) atTop (nhds (∫ ω, g ω ∂μ))) :
+    TorusOS2_TranslationInvariance L μ := by
+  intro v f
+  -- Z_n[T_v f] → Z[T_v f] and Z_n[f] → Z[f] by weak convergence; their
+  -- difference → 0 by the approximation lemma; uniqueness of limits concludes.
+  have hgf_tendsto : ∀ g : TorusTestFunction L, Tendsto (fun n =>
+      torusGeneratingFunctional L (ν n) g)
+      atTop (nhds (torusGeneratingFunctional L μ g)) := by
+    intro g
+    have h_re : Tendsto (fun n => (torusGeneratingFunctional L (ν n) g).re)
+        atTop (nhds (torusGeneratingFunctional L μ g).re) := by
+      simp_rw [gf_re_eq_cos_integral]
+      exact hconv _ (cosEval_continuous L g) (cosEval_bounded L g)
+    have h_im : Tendsto (fun n => (torusGeneratingFunctional L (ν n) g).im)
+        atTop (nhds (torusGeneratingFunctional L μ g).im) := by
+      simp_rw [gf_im_eq_sin_integral]
+      exact hconv _ (sinEval_continuous L g) (sinEval_bounded L g)
+    rw [show torusGeneratingFunctional L μ g =
+      ↑(torusGeneratingFunctional L μ g).re +
+      ↑(torusGeneratingFunctional L μ g).im * I from (re_add_im _).symm]
+    have h_comb := (h_re.ofReal.add (h_im.ofReal.mul_const I))
+    refine h_comb.congr (fun n => ?_)
+    exact (re_add_im _)
+  have h_Tvf := hgf_tendsto (torusTranslation L v f)
+  have h_f := hgf_tendsto f
+  have h_diff := familyGF_latticeApproximation_error_vanishes L mass hmass
+    φ hφ ν hmom htrans v f
+  have h_sub : Tendsto (fun n =>
+      torusGeneratingFunctional L (ν n) (torusTranslation L v f) -
+      torusGeneratingFunctional L (ν n) f)
+      atTop (nhds (torusGeneratingFunctional L μ (torusTranslation L v f) -
+        torusGeneratingFunctional L μ f)) := h_Tvf.sub h_f
+  have h_eq : torusGeneratingFunctional L μ (torusTranslation L v f) -
+      torusGeneratingFunctional L μ f = 0 :=
+    tendsto_nhds_unique h_sub h_diff
+  exact (sub_eq_zero.mp h_eq).symm
+
+/-- **OS2 (D4) for an abstract weakly-convergent family.**
+
+Swap and time-reflection invariance of the limit measure follows from the
+per-cutoff invariance of the family (hypotheses `hswap`, `hrefl`) and weak
+convergence. Family-generic version of `torusInteracting_os2_D4`. -/
+theorem torusFamilyOS2_D4
+    (mass : ℝ) (_hmass : 0 < mass)
+    (μ : Measure (Configuration (TorusTestFunction L)))
+    [IsProbabilityMeasure μ]
+    (_φ : ℕ → ℕ)
+    (ν : ℕ → Measure (Configuration (TorusTestFunction L)))
+    [∀ n, IsProbabilityMeasure (ν n)]
+    (hconv : ∀ (g : Configuration (TorusTestFunction L) → ℝ),
+      Continuous g → (∃ C, ∀ x, |g x| ≤ C) →
+        Tendsto (fun n => ∫ ω, g ω ∂(ν n)) atTop (nhds (∫ ω, g ω ∂μ)))
+    (hswap : ∀ (n : ℕ) (f : TorusTestFunction L),
+      torusGeneratingFunctional L (ν n) f =
+        torusGeneratingFunctional L (ν n) (torusSwap L f))
+    (hrefl : ∀ (n : ℕ) (f : TorusTestFunction L),
+      torusGeneratingFunctional L (ν n) f =
+        torusGeneratingFunctional L (ν n) (torusTimeReflection L f)) :
+    TorusOS2_D4Invariance L μ := by
+  constructor
+  · -- Swap invariance: Z_μ[f] = Z_μ[σf] for all f
+    intro f
+    apply Complex.ext
+    · -- Re part
+      rw [gf_re_eq_cos_integral L μ f, gf_re_eq_cos_integral L μ (torusSwap L f)]
+      have h_Sf := hconv _ (cosEval_continuous L (torusSwap L f))
+        (cosEval_bounded L (torusSwap L f))
+      have h_f := hconv _ (cosEval_continuous L f) (cosEval_bounded L f)
+      have h_cutoff : ∀ n, ∫ ω, Real.cos (ω (torusSwap L f)) ∂(ν n) =
+          ∫ ω, Real.cos (ω f) ∂(ν n) := by
+        intro n
+        have hgf := hswap n f
+        have hre := congr_arg Complex.re hgf
+        rw [gf_re_eq_cos_integral, gf_re_eq_cos_integral] at hre
+        exact hre.symm
+      exact tendsto_nhds_unique h_f (h_Sf.congr h_cutoff)
+    · -- Im part
+      rw [gf_im_eq_sin_integral L μ f, gf_im_eq_sin_integral L μ (torusSwap L f)]
+      have h_Sf := hconv _ (sinEval_continuous L (torusSwap L f))
+        (sinEval_bounded L (torusSwap L f))
+      have h_f := hconv _ (sinEval_continuous L f) (sinEval_bounded L f)
+      have h_cutoff : ∀ n, ∫ ω, Real.sin (ω (torusSwap L f)) ∂(ν n) =
+          ∫ ω, Real.sin (ω f) ∂(ν n) := by
+        intro n
+        have hgf := hswap n f
+        have him := congr_arg Complex.im hgf
+        rw [gf_im_eq_sin_integral, gf_im_eq_sin_integral] at him
+        exact him.symm
+      exact tendsto_nhds_unique h_f (h_Sf.congr h_cutoff)
+  · -- Time reflection invariance: Z_μ[f] = Z_μ[Θf] for all f
+    intro f
+    apply Complex.ext
+    · -- Re part
+      rw [gf_re_eq_cos_integral L μ f,
+          gf_re_eq_cos_integral L μ (torusTimeReflection L f)]
+      have h_Θf := hconv _ (cosEval_continuous L (torusTimeReflection L f))
+        (cosEval_bounded L (torusTimeReflection L f))
+      have h_f := hconv _ (cosEval_continuous L f) (cosEval_bounded L f)
+      have h_cutoff : ∀ n, ∫ ω, Real.cos (ω (torusTimeReflection L f)) ∂(ν n) =
+          ∫ ω, Real.cos (ω f) ∂(ν n) := by
+        intro n
+        have hgf := hrefl n f
+        have hre := congr_arg Complex.re hgf
+        rw [gf_re_eq_cos_integral, gf_re_eq_cos_integral] at hre
+        exact hre.symm
+      exact tendsto_nhds_unique h_f (h_Θf.congr h_cutoff)
+    · -- Im part
+      rw [gf_im_eq_sin_integral L μ f,
+          gf_im_eq_sin_integral L μ (torusTimeReflection L f)]
+      have h_Θf := hconv _ (sinEval_continuous L (torusTimeReflection L f))
+        (sinEval_bounded L (torusTimeReflection L f))
+      have h_f := hconv _ (sinEval_continuous L f) (sinEval_bounded L f)
+      have h_cutoff : ∀ n, ∫ ω, Real.sin (ω (torusTimeReflection L f)) ∂(ν n) =
+          ∫ ω, Real.sin (ω f) ∂(ν n) := by
+        intro n
+        have hgf := hrefl n f
+        have him := congr_arg Complex.im hgf
+        rw [gf_im_eq_sin_integral, gf_im_eq_sin_integral] at him
+        exact him.symm
+      exact tendsto_nhds_unique h_f (h_Θf.congr h_cutoff)
+
+/-- **The OS bundle for an abstract weakly-convergent family.**
+
+The weak limit `μ` of any family `ν` of probability measures (at cutoffs
+`N = φ n + 1`) satisfying the per-cutoff exponential moment bound (`hexp`),
+uniform second moment bound (`hmom`), and lattice symmetry invariance
+(`htrans`, `hswap`, `hrefl`) satisfies OS0–OS2. Family-generic version of
+`torusInteracting_satisfies_OS`: both the `g = 1` interacting family and the
+coupling family instantiate this. -/
+theorem torusFamily_satisfies_OS
+    (mass : ℝ) (hmass : 0 < mass)
+    (μ : Measure (Configuration (TorusTestFunction L)))
+    [IsProbabilityMeasure μ]
+    (φ : ℕ → ℕ) (hφ : StrictMono φ)
+    (ν : ℕ → Measure (Configuration (TorusTestFunction L)))
+    [∀ n, IsProbabilityMeasure (ν n)]
+    (hexp : ∃ C : ℝ, 0 < C ∧ ∀ (f : TorusTestFunction L) (n : ℕ),
+      Integrable (fun ω : Configuration (TorusTestFunction L) => Real.exp (|ω f|)) (ν n) ∧
+      ∫ ω : Configuration (TorusTestFunction L), Real.exp (|ω f|) ∂(ν n) ≤
+        C * Real.exp (torusEmbeddedTwoPoint L (φ n + 1) mass hmass f f))
+    (hmom : ∃ C : ℝ, 0 < C ∧ ∀ (f : TorusTestFunction L) (n : ℕ),
+      Integrable (fun ω : Configuration (TorusTestFunction L) => (ω f) ^ 2) (ν n) ∧
+      ∫ ω : Configuration (TorusTestFunction L), (ω f) ^ 2 ∂(ν n) ≤
+        C * torusEmbeddedTwoPoint L (φ n + 1) mass hmass f f)
+    (htrans : ∀ (n : ℕ) (j₁ j₂ : ℤ) (f : TorusTestFunction L),
+      torusGeneratingFunctional L (ν n) f =
+        torusGeneratingFunctional L (ν n) (torusTranslation L
+          (circleSpacing L (φ n + 1) * j₁, circleSpacing L (φ n + 1) * j₂) f))
+    (hswap : ∀ (n : ℕ) (f : TorusTestFunction L),
+      torusGeneratingFunctional L (ν n) f =
+        torusGeneratingFunctional L (ν n) (torusSwap L f))
+    (hrefl : ∀ (n : ℕ) (f : TorusTestFunction L),
+      torusGeneratingFunctional L (ν n) f =
+        torusGeneratingFunctional L (ν n) (torusTimeReflection L f))
+    (hconv : ∀ (g : Configuration (TorusTestFunction L) → ℝ),
+      Continuous g → (∃ C, ∀ x, |g x| ≤ C) →
+        Tendsto (fun n => ∫ ω, g ω ∂(ν n)) atTop (nhds (∫ ω, g ω ∂μ))) :
+    SatisfiesTorusOS L μ where
+  os0 := torusOS0_of_expMomentBound L mass hmass μ
+    (torusFamily_exponentialMomentBound L mass hmass μ φ hφ ν hexp hconv)
+  os1 := torusOS1_of_expMomentBound L mass hmass μ
+    (torusFamily_exponentialMomentBound L mass hmass μ φ hφ ν hexp hconv)
+  os2_translation := torusFamilyOS2_translation L mass hmass μ φ hφ ν hmom htrans hconv
+  os2_D4 := torusFamilyOS2_D4 L mass hmass μ φ ν hconv hswap hrefl
+
+end FamilyOS
 
 end Pphi2
 

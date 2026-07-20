@@ -101,11 +101,34 @@ For any even polynomial P of degree ≥ 4 bounded below, and any mass m > 0,
 there exists a probability measure μ on S'(ℝ²) satisfying all five
 Osterwalder-Schrader axioms.
 
+Since the 2026-07 strengthening of `IsPphi2Limit` (δ₀-exclusion, spec D1),
+the witness μ is forced to be an actual coupled limit of the interacting
+lattice family `continuumMeasure 2 (N k) P (a k) mass` with `N k → ∞`,
+`a k → 0`, `N k · a k → ∞` — the statement can no longer be discharged by
+the Dirac measure at 0.
+
+**Inputs (kernel axiom footprint):**
+- Existence of the limit measure: the axiom `pphi2_limit_exists`
+  (`ContinuumLimit/Convergence.lean`) — the single OPEN existence input
+  (Fröhlich 1976 / Park 1977 tightness route; the repo's own discharge route
+  is the cylinder campaign, `docs/cylinder-master-plan.md`).
+- OS0–OS4 for the limit: the 4 inheritance axioms
+  `continuum_exponential_moment_bound`, `canonical_continuumMeasure_cf_tendsto`,
+  `continuum_exponential_clustering`, `rotation_cf_defect_polylog_bound`
+  (`ContinuumLimit/AxiomInheritance.lean`, `OSProofs/OS2_WardIdentity.lean`).
+
+**Not claimed here**: interaction (non-Gaussianity, `pphi2_nonGaussianity`)
+and non-degeneracy (`pphi2_nontrivial`) are separate statements; conjoining
+them with the OS bundle into "an *interacting* φ⁴₂ QFT exists" awaits the
+weak-coupling uniqueness keystone (18) — see
+`planning/coherence-analysis.md`.
+
 The measure is constructed as the continuum limit of the lattice measures:
 1. Start with lattice Gaussian `μ_{GFF,a}` on (ℤ/Nℤ)² (from gaussian-field).
 2. Perturb: `μ_a = (1/Z_a) exp(-V_a) dμ_{GFF,a}` (Phase 1).
 3. Embed: `ν_a = (ι_a)_* μ_a` on S'(ℝ²) (Phase 4).
-4. Extract: ν_{a_n} ⇀ μ by Prokhorov (Phase 4).
+4. Extract: ν_{a_n} ⇀ μ by Prokhorov (Phase 4) — axiomatized as
+   `pphi2_limit_exists` pending the open IR/cylinder construction.
 5. Verify: μ satisfies OS0–OS4 (Phases 2–5). -/
 theorem pphi2_existence (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ (μ : Measure (Configuration (ContinuumTestFunction 2)))
@@ -115,36 +138,44 @@ theorem pphi2_existence (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < ma
 
 /-! ## Consequences -/
 
-/-- **Nontriviality of the P(Φ)₂ continuum limit.**
+/-- **Nontriviality of the P(Φ)₂ continuum limit** (about-the-limit form).
 
-The two-point function S₂(f, f) = ∫ Φ(f)² dμ > 0 for all f ≠ 0.
-This follows from the Gaussian two-point function providing a lower bound:
-⟨Φ(f)²⟩₀ = ‖f‖²_{H⁻¹} > 0 for f ≠ 0, and the interaction measure
-dominates the free field in this sense.
+Every P(Φ)₂ continuum limit measure has strictly positive two-point function:
+S₂(f, f) = ∫ Φ(f)² dμ > 0 for all f ≠ 0. Restated 2026-07 (spec D5): with the
+strengthened `IsPphi2Limit` (δ₀ excluded) this is a true statement about the
+real coupled limit, replacing the previous free-floating `∃ μ` form that was
+satisfiable by the free field alone.
 
-Reference: Simon Ch. V — correlation inequalities (Griffiths, FKG)
-show that the interacting two-point function dominates the free field
-two-point function. -/
-axiom pphi2_nontriviality (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
-    ∃ (μ : Measure (Configuration (ContinuumTestFunction 2)))
-      (_ : IsProbabilityMeasure μ),
-      ∀ (f : ContinuumTestFunction 2), f ≠ 0 →
-        0 < ∫ ω : Configuration (ContinuumTestFunction 2), (ω f) ^ 2 ∂μ
+Rating: Standard — the GRS two-point lower bound. The interacting two-point
+function dominates the free (Gaussian) one, `⟨Φ(f)²⟩ ≥ ⟨Φ(f)²⟩₀ =
+‖f‖²_{H⁻¹} > 0` for f ≠ 0, by Griffiths/FKG correlation inequalities, and the
+lower bound survives the coupled lattice limit.
+
+Reference: Simon Ch. V (correlation inequalities); Guerra–Rosen–Simon (1975).
+Strategy: lattice Griffiths inequality `⟨φ(x)φ(y)⟩ ≥ ⟨φ(x)φ(y)⟩₀` for even P,
+transferred through the embedding and the moment-convergence clause of
+`IsPphi2Limit`. (NOT VERIFIED) -/
+axiom pphi2_nontriviality (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (μ : Measure (Configuration (ContinuumTestFunction 2)))
+    (hμ : IsProbabilityMeasure μ)
+    (h_limit : IsPphi2Limit μ P mass) :
+    ∀ (f : ContinuumTestFunction 2), f ≠ 0 →
+      0 < ∫ ω : Configuration (ContinuumTestFunction 2), (ω f) ^ 2 ∂μ
 
 /-- **The P(Φ)₂ measure is nontrivial.**
 
 The continuum limit is not the delta measure at 0: for any nonzero
 f ∈ S(ℝ²), the two-point function S₂(f,f) = ∫ Φ(f)² dμ > 0.
 
-This follows from the Gaussian two-point function providing a lower
-bound (the interaction only improves the lower bound for the two-point
-function). -/
+Existential packaging of `pphi2_nontriviality` via the existence input
+`pphi2_limit_exists`. -/
 theorem pphi2_nontrivial (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ (μ : Measure (Configuration (ContinuumTestFunction 2)))
       (_ : IsProbabilityMeasure μ),
       ∀ (f : ContinuumTestFunction 2), f ≠ 0 →
-        0 < ∫ ω : Configuration (ContinuumTestFunction 2), (ω f) ^ 2 ∂μ :=
-  pphi2_nontriviality P mass hmass
+        0 < ∫ ω : Configuration (ContinuumTestFunction 2), (ω f) ^ 2 ∂μ := by
+  obtain ⟨μ, hμ, h_limit⟩ := pphi2_limit_exists P mass hmass
+  exact ⟨μ, hμ, pphi2_nontriviality P mass hmass μ hμ h_limit⟩
 
 /-- **Non-Gaussianity of the P(Φ)₂ continuum limit.**
 
@@ -154,16 +185,22 @@ S₄(f,f,f,f) - 3·S₂(f,f)² ≠ 0 for some test function f.
 Proved from `continuumLimit_nonGaussian` by providing a fixed sequence
 of lattice spacings aₙ = 1/(n+1) → 0 and extracting the limit measure.
 
+The coupling hypotheses (`isPhi4`, `IsWeakCoupling`) restrict the claim to
+the regime where it is literature-true (spec D3): at the φ⁴₂ critical point
+the connected four-point function of the limit can vanish.
+
 Reference: Simon Ch. VIII — perturbation theory shows the connected
 four-point function is O(λ) at weak coupling, hence nonzero for λ > 0. -/
-theorem pphi2_nonGaussianity (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
+theorem pphi2_nonGaussianity (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (coupling : ℝ) (hP4 : isPhi4 P coupling)
+    (hweak : IsWeakCoupling P mass coupling) :
     ∃ (μ : Measure (Configuration (ContinuumTestFunction 2)))
       (_ : IsProbabilityMeasure μ),
       ∃ (f : ContinuumTestFunction 2),
         ∫ ω : Configuration (ContinuumTestFunction 2), (ω f) ^ 4 ∂μ -
         3 * (∫ ω : Configuration (ContinuumTestFunction 2), (ω f) ^ 2 ∂μ) ^ 2 ≠ 0 := by
   -- Use a fixed sequence aₙ = 1/(n+1) → 0
-  obtain ⟨_, μ, _, hμ, f, hf⟩ := continuumLimit_nonGaussian 2 P mass hmass
+  obtain ⟨_, μ, _, hμ, f, hf⟩ := continuumLimit_nonGaussian 2 P mass hmass coupling hP4 hweak
     (fun n => 1 / (↑n + 1))
     (fun n => by positivity)
     (fun n => by
@@ -180,14 +217,16 @@ For nontrivial P, the four-point connected correlation function
   `S₄^c(f,f,f,f) = S₄(f,f,f,f) - 3·S₂(f,f)² ≠ 0`
 
 This proves the interacting theory is genuinely different from the
-free field. -/
-theorem pphi2_nonGaussian (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
+free field. Stated in the weak-coupling φ⁴ regime (spec D3). -/
+theorem pphi2_nonGaussian (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (coupling : ℝ) (hP4 : isPhi4 P coupling)
+    (hweak : IsWeakCoupling P mass coupling) :
     ∃ (μ : Measure (Configuration (ContinuumTestFunction 2)))
       (_ : IsProbabilityMeasure μ),
       ∃ (f : ContinuumTestFunction 2),
         ∫ ω : Configuration (ContinuumTestFunction 2), (ω f) ^ 4 ∂μ -
         3 * (∫ ω : Configuration (ContinuumTestFunction 2), (ω f) ^ 2 ∂μ) ^ 2 ≠ 0 :=
-  pphi2_nonGaussianity P mass hmass
+  pphi2_nonGaussianity P mass hmass coupling hP4 hweak
 
 /-- **Positive bare mass parameter from the input data.**
 
@@ -254,41 +293,14 @@ theorem pphi2_wightman (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mas
       ∃ m₀ : ℝ, 0 < m₀ :=
   pphi2_exists_os_and_massParameter_positive P mass hmass
 
-/-! ## Consistency checks -/
+/-! ## Consistency checks
 
-/-- **Mass reparametrization invariance.**
-
-The continuum limit measure depends on the total action, not on how it is
-split between the Gaussian reference measure and the interaction polynomial.
-The total lattice action is `½ φ·(−Δ+m²)·φ + Σ_x :P(φ(x)):`, where
-the Gaussian contributes `m²/2 · τ²` to the quadratic part.
-
-Shifting `mass → mass'` while compensating `P → P + mass²/2 − (mass')²/2`
-(via `shiftQuadratic`) leaves the total action unchanged at each lattice
-spacing. Therefore any continuum limit of one parametrization is also a
-continuum limit of the other. -/
-theorem mass_reparametrization_invariance
-    (P : InteractionPolynomial) (mass mass' : ℝ)
-    (_hmass : 0 < mass) (_hmass' : 0 < mass')
-    (μ : Measure FieldConfig2) [IsProbabilityMeasure μ]
-    (h_limit : IsPphi2Limit μ P mass) :
-    IsPphi2Limit μ (P.shiftQuadratic (mass ^ 2 / 2 - mass' ^ 2 / 2)) mass' :=
-  h_limit
-
-/-- **Mass reparametrization: existence form.**
-
-Corollary: for any (P, mass, mass'), the measures obtained from
-`pphi2_exists` with (P, mass) also arise as limits from the shifted
-parametrization (P.shiftQuadratic(m²/2 − m'²/2), mass'). -/
-theorem mass_reparametrization_exists
-    (P : InteractionPolynomial) (mass mass' : ℝ)
-    (hmass : 0 < mass) (hmass' : 0 < mass') :
-    ∃ (μ : Measure FieldConfig2) (_ : IsProbabilityMeasure μ),
-      IsPphi2Limit μ P mass ∧
-      IsPphi2Limit μ (P.shiftQuadratic (mass ^ 2 / 2 - mass' ^ 2 / 2)) mass' := by
-  obtain ⟨μ, hμ, hlim⟩ := pphi2_limit_exists P mass hmass
-  exact ⟨μ, hμ, hlim,
-    mass_reparametrization_invariance P mass mass' hmass hmass' μ hlim⟩
+The mass reparametrization statements (`mass_reparametrization_invariance`,
+`mass_reparametrization_exists`) were removed 2026-07 (spec D4): the previous
+`:= h_limit` proof was a vacuity artifact of the unstrengthened `IsPphi2Limit`
+(P, mass unused), and the genuine lattice reparametrization lemma is its own
+bounded project. The statements and proof strategy are recorded as deferred
+conjectures in `docs/plan.md` § "Deferred consistency checks". -/
 
 end Pphi2
 

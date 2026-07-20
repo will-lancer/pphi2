@@ -342,6 +342,16 @@ continuous observables converge weakly to `μ`, and whose reflection-positive
 matrices are already nonnegative. We also record the standard `Z₂` symmetry
 `Measure.map Neg.neg μ = μ`.
 
+**Coupled lattice approximation (δ₀-exclusion, 2026-07)**: the final conjunct
+forces the approximating measures to be the actual continuum-embedded
+interacting lattice measures `ν k = continuumMeasure 2 (N k) P (a k) mass`,
+with lattice size `N k → ∞` and physical volume `N k · a k → ∞` (UV and IR
+limits coupled). This makes `P` and `mass` genuinely used: a constant sequence
+at the Dirac measure `δ₀` no longer witnesses the predicate, so existence
+statements phrased through `IsPphi2Limit` refer to the real interacting limit.
+See `planning/ispphi2limit-strengthening-scope.md` and
+`planning/r2-honest-headline-spec.md` (D1).
+
 The definition is mirrored in `Bridge.lean` by `IsPphi2ContinuumLimit`, which
 uses the type aliases `FieldConfig` and `TestFun` for the same `d = 2`
 configuration space. This is the minimal extra structure needed to prove
@@ -349,7 +359,7 @@ configuration space. This is the minimal extra structure needed to prove
 `Embedding.lean`. -/
 def IsPphi2Limit
     (μ : Measure FieldConfig2)
-    (_P : InteractionPolynomial) (_mass : ℝ) : Prop :=
+    (P : InteractionPolynomial) (mass : ℝ) : Prop :=
   ∃ (a : ℕ → ℝ) (ν : ℕ → Measure FieldConfig2),
     (∀ k, IsProbabilityMeasure (ν k)) ∧
     Filter.Tendsto a Filter.atTop (nhds 0) ∧
@@ -395,7 +405,18 @@ def IsPphi2Limit
       0 ≤ ∑ i, ∑ j, c i * c j *
         (∫ ω : FieldConfig2,
           Complex.exp (Complex.I * ↑(ω ((f i : TestFunction2) -
-            compTimeReflection2 (f j : TestFunction2)))) ∂(ν k)).re)
+            compTimeReflection2 (f j : TestFunction2)))) ∂(ν k)).re) ∧
+    -- Coupled lattice approximation: the approximating measures are the
+    -- continuum-embedded interacting lattice measures at lattice size N k and
+    -- spacing a k, with the UV limit (N k → ∞, a k → 0) and IR limit
+    -- (physical volume N k · a k → ∞) taken jointly. Excludes δ₀ and makes
+    -- the predicate genuinely depend on P and mass.
+    (∃ N : ℕ → ℕ,
+      Filter.Tendsto N Filter.atTop Filter.atTop ∧
+      Filter.Tendsto (fun k => (N k : ℝ) * a k) Filter.atTop Filter.atTop ∧
+      ∀ k, ∃ (hN : N k ≠ 0) (hak : 0 < a k) (hm : 0 < mass),
+        ν k = (haveI : NeZero (N k) := ⟨hN⟩
+          continuumMeasure 2 (N k) P (a k) mass hak hm))
 
 end Pphi2
 

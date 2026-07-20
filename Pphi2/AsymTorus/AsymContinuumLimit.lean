@@ -19,6 +19,8 @@ Simon, *The P(φ)₂ Euclidean QFT*, Ch. VIII; Glimm–Jaffe, *Quantum Physics*,
 -/
 
 import Pphi2.AsymTorus.AsymCutoffBound
+import Pphi2.AsymTorus.AsymIsoOS
+import Pphi2.AsymTorus.AsymLinkReflectionRPLimit
 import Pphi2.AsymTorus.MomentBoundOS1
 import Pphi2.IRLimit.IRTightness
 import Pphi2.IRLimit.CylinderOS
@@ -309,6 +311,104 @@ theorem asymTorusIso_interacting_limit_exists
         ε hε)
   exact ⟨μ, hμ_prob, φ, hφ_mono, hconv⟩
 
+/-- The metric-correct heterogeneous Iso cutoff limit carries the full
+asymmetric-torus OS0--OS2 package.  OS0 and OS1 come from the Green moment
+bound; OS2 comes from the proved finite-lattice translation and
+time-reflection symmetries. -/
+theorem asymTorusIso_limit_satisfies_OS
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (K C : ℝ) (hK : 0 < K) (hC : 0 < C)
+    (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k)) (ha : ∀ k, 0 < a k)
+    (hvolt : ∀ k, (Nt k : ℝ) * a k = Lt) (hvols : ∀ k, (Ns k : ℝ) * a k = Ls)
+    (ha0 : Filter.Tendsto a Filter.atTop (nhds 0))
+    (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls)))
+    [IsProbabilityMeasure μ]
+    (φ : ℕ → ℕ) (hφ : StrictMono φ)
+    (hconv : ∀ (F : Configuration (AsymTorusTestFunction Lt Ls) → ℝ),
+      Continuous F → (∃ D, ∀ x, |F x| ≤ D) →
+        Filter.Tendsto (fun n => ∫ ω, F ω ∂(haveI := hNt (φ n); haveI := hNs (φ n)
+            asymTorusInteractingMeasureIso Lt Ls (Nt (φ n)) (Ns (φ n)) (a (φ n))
+              P mass (ha (φ n)) hmass))
+          Filter.atTop (nhds (∫ ω, F ω ∂μ)))
+    (hgreen : MeasureHasGreenMomentBound Ls mass hmass K C μ) :
+    AsymSatisfiesTorusOS Lt Ls μ := by
+  let a' : ℕ → ℝ := fun n => a (φ n)
+  let ν : ℕ → Measure (Configuration (AsymTorusTestFunction Lt Ls)) := fun n =>
+    haveI := hNt (φ n)
+    haveI := hNs (φ n)
+    asymTorusInteractingMeasureIso Lt Ls (Nt (φ n)) (Ns (φ n)) (a (φ n))
+      P mass (ha (φ n)) hmass
+  letI (n : ℕ) : IsProbabilityMeasure (ν n) := by
+    dsimp only [ν]
+    infer_instance
+  obtain ⟨Dint, hDint, hDint_bound⟩ :=
+    asymTorusIso_interacting_second_moment_density_transfer Lt Ls P mass hmass
+  obtain ⟨Dfree, hDfree, hDfree_bound⟩ :=
+    asymGaussianIso_second_moment_le_seminorm Lt Ls mass hmass
+  let p : AsymTorusTestFunction Lt Ls → ℝ :=
+    RapidDecaySeq.rapidDecaySeminorm 0
+  have hp : Continuous p :=
+    RapidDecaySeq.rapidDecay_withSeminorms.continuous_seminorm 0
+  have hp0 : p 0 = 0 := map_zero (RapidDecaySeq.rapidDecaySeminorm 0)
+  have hmoment : ∀ (f : AsymTorusTestFunction Lt Ls) (n : ℕ),
+      Integrable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) => (ω f) ^ 2) (ν n) ∧
+      ∫ ω : Configuration (AsymTorusTestFunction Lt Ls), (ω f) ^ 2 ∂(ν n) ≤
+        (Dint * Dfree) * p f ^ 2 := by
+    intro f n
+    haveI := hNt (φ n)
+    haveI := hNs (φ n)
+    refine ⟨asymTorusInteractingMeasureIso_sq_integrable Lt Ls
+      (Nt (φ n)) (Ns (φ n)) (a (φ n)) P mass (ha (φ n)) hmass f, ?_⟩
+    calc
+      ∫ ω : Configuration (AsymTorusTestFunction Lt Ls), (ω f) ^ 2 ∂(ν n) ≤
+          Dint * ∫ ω : Configuration (AsymLatticeField (Nt (φ n)) (Ns (φ n))),
+            (ω (asymLatticeTestFnIso Lt Ls (Nt (φ n)) (Ns (φ n)) (a (φ n)) f)) ^ 2
+            ∂(latticeGaussianMeasureAsym (Nt (φ n)) (Ns (φ n)) (a (φ n))
+              mass (ha (φ n)) hmass) := by
+        simpa [ν] using hDint_bound f (Nt (φ n)) (Ns (φ n)) (a (φ n))
+          (ha (φ n)) (hvolt (φ n)) (hvols (φ n))
+      _ ≤ Dint * (Dfree * p f ^ 2) :=
+        mul_le_mul_of_nonneg_left
+          (hDfree_bound (Nt (φ n)) (Ns (φ n)) (a (φ n)) (ha (φ n)) f)
+          hDint.le
+      _ = (Dint * Dfree) * p f ^ 2 := by ring
+  have ha'_pos : ∀ n, 0 < a' n := fun n => ha (φ n)
+  have ha'_zero : Filter.Tendsto a' Filter.atTop (nhds 0) :=
+    ha0.comp hφ.tendsto_atTop
+  have htrans : ∀ (n : ℕ) (j₁ j₂ : ℤ) (f : AsymTorusTestFunction Lt Ls),
+      asymTorusGeneratingFunctional Lt Ls (ν n) f =
+        asymTorusGeneratingFunctional Lt Ls (ν n)
+          (asymTorusTranslation Lt Ls (a' n * j₁, a' n * j₂) f) := by
+    intro n j₁ j₂ f
+    haveI := hNt (φ n)
+    haveI := hNs (φ n)
+    simpa [ν, a'] using
+      asymTorusInteractingMeasureIso_gf_latticeTranslation_invariant
+        Lt Ls (Nt (φ n)) (Ns (φ n)) (a (φ n)) P mass (ha (φ n)) hmass
+        (hvolt (φ n)) (hvols (φ n)) j₁ j₂ f
+  have hrefl : ∀ (n : ℕ) (f : AsymTorusTestFunction Lt Ls),
+      asymTorusGeneratingFunctional Lt Ls (ν n) f =
+        asymTorusGeneratingFunctional Lt Ls (ν n) (asymTorusTimeReflection Lt Ls f) := by
+    intro n f
+    haveI := hNt (φ n)
+    haveI := hNs (φ n)
+    simpa [ν] using asymTorusInteractingMeasureIso_gf_timeReflection_invariant
+      Lt Ls (Nt (φ n)) (Ns (φ n)) (a (φ n)) P mass (ha (φ n)) hmass f
+  have hconv' : ∀ (F : Configuration (AsymTorusTestFunction Lt Ls) → ℝ),
+      Continuous F → (∃ D, ∀ x, |F x| ≤ D) →
+        Filter.Tendsto (fun n => ∫ ω, F ω ∂(ν n)) Filter.atTop
+          (nhds (∫ ω, F ω ∂μ)) := by
+    intro F hF hF_bound
+    simpa [ν] using hconv F hF hF_bound
+  exact
+    { os0 := asymTorusOS0_of_greenMomentBound Lt Ls mass hmass K C μ hgreen
+      os1 := asymTorusOS1_of_greenMomentBound Lt Ls mass hmass K C hK hC μ hgreen
+      os2_translation := asymTorusIsoFamilyOS2_translation Lt Ls μ ν
+        (Dint * Dfree) (mul_pos hDint hDfree) p hp hp0 hmoment a' ha'_pos ha'_zero
+        htrans hconv'
+      os2_timeReflection := asymTorusIsoFamilyOS2_timeReflection Lt Ls μ ν hrefl hconv' }
+
 /-- **The isotropic UV continuum limit has the Green-controlled exponential moment bound** — from
 a cutoff bound with an explicit constant `K`.
 
@@ -399,6 +499,150 @@ theorem asymTorusIso_measureHasGreenMomentBound_of_cutoff
     (K * Real.exp (C * asymTorusContinuumGreen Lt Ls mass hmass f f)) hB_tendsto h_unif
   exact ⟨hint, hle⟩
 
+/-- The even-time-lattice UV construction carries both its Green moment bound
+and cylinder reflection positivity for every compact-span family that fits in
+the finite time period without wrapping. -/
+theorem asymTorusIso_measureHasGreenMomentBound_of_cutoff_withNoWrapRP
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (K C : ℝ) (hK_pos : 0 < K) (hC_pos : 0 < C)
+    (hcutoff : ∀ (f : AsymTorusTestFunction Lt Ls) (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+      (a : ℝ) (ha : 0 < a), (Nt : ℝ) * a = Lt → (Ns : ℝ) * a = Ls →
+      Integrable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) =>
+        Real.exp (|ω f|)) (asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass) ∧
+      ∫ ω : Configuration (AsymTorusTestFunction Lt Ls),
+        Real.exp (|ω f|) ∂(asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass) ≤
+      K * Real.exp (C * ∫ ω : Configuration (AsymLatticeField Nt Ns),
+        (ω (asymLatticeTestFnIso Lt Ls Nt Ns a f)) ^ 2
+        ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)))
+    (M Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hM : ∀ k, NeZero (M k)) (hNs : ∀ k, NeZero (Ns k)) (ha : ∀ k, 0 < a k)
+    (hvolt : ∀ k, ((2 * M k : ℕ) : ℝ) * a k = Lt)
+    (hvols : ∀ k, (Ns k : ℝ) * a k = Ls)
+    (ha0 : Filter.Tendsto a Filter.atTop (nhds 0)) :
+    ∃ (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls))),
+      IsProbabilityMeasure μ ∧
+      MeasureHasGreenMomentBound Ls mass hmass K C μ ∧
+      (∀ hμ_prob : IsProbabilityMeasure μ,
+        @AsymSatisfiesTorusOS Lt Ls hLt hLs μ hμ_prob) ∧
+      CylinderMeasureNoWrapReflectionPositive Lt Ls
+        (cylinderPullbackMeasure Lt Ls μ) := by
+  have hNt : ∀ k, NeZero (2 * M k) := fun k => by
+    letI := hM k
+    infer_instance
+  obtain ⟨μ, hμ_prob, φ, hφ_mono, hconv⟩ :=
+    asymTorusIso_interacting_limit_exists Lt Ls P mass hmass
+      (fun k => 2 * M k) Ns a hNt hNs ha hvolt hvols ha0
+  haveI := hμ_prob
+  set ν : ℕ → Measure (Configuration (AsymTorusTestFunction Lt Ls)) := fun n =>
+    haveI := hM (φ n)
+    haveI := hNs (φ n)
+    asymTorusInteractingMeasureIso Lt Ls (2 * M (φ n)) (Ns (φ n)) (a (φ n))
+      P mass (ha (φ n)) hmass with hν_def
+  have hν_prob : ∀ n, IsProbabilityMeasure (ν n) := fun n => by
+    haveI := hM (φ n)
+    haveI := hNs (φ n)
+    exact asymTorusInteractingMeasureIso_isProbability Lt Ls
+      (2 * M (φ n)) (Ns (φ n)) (a (φ n)) P mass (ha (φ n)) hmass
+  have hφ_atTop : Filter.Tendsto φ Filter.atTop Filter.atTop := hφ_mono.tendsto_atTop
+  have hbc : ∀ (g : Configuration (AsymTorusTestFunction Lt Ls) → ℝ),
+      Continuous g → (∃ D, ∀ x, |g x| ≤ D) →
+      Filter.Tendsto (fun n => ∫ ω, g ω ∂(ν n)) Filter.atTop
+        (nhds (∫ ω, g ω ∂μ)) := by
+    intro g hg_cont hg_bdd
+    simpa [ν] using hconv g hg_cont hg_bdd
+  have hμ_green : MeasureHasGreenMomentBound Ls mass hmass K C μ := by
+    intro f
+    set B : ℕ → ℝ := fun n => K * Real.exp (C *
+      haveI := hM (φ n)
+      haveI := hNs (φ n)
+      ∫ ω : Configuration (AsymLatticeField (2 * M (φ n)) (Ns (φ n))),
+        (ω (asymLatticeTestFnIso Lt Ls (2 * M (φ n)) (Ns (φ n)) (a (φ n)) f)) ^ 2
+        ∂(latticeGaussianMeasureAsym (2 * M (φ n)) (Ns (φ n)) (a (φ n))
+          mass (ha (φ n)) hmass)) with hB_def
+    have hσ2_full : Filter.Tendsto (fun k =>
+        haveI := hM k
+        haveI := hNs k
+        ∫ ω : Configuration (AsymLatticeField (2 * M k) (Ns k)),
+          (ω (asymLatticeTestFnIso Lt Ls (2 * M k) (Ns k) (a k) f)) ^ 2
+          ∂(latticeGaussianMeasureAsym (2 * M k) (Ns k) (a k) mass (ha k) hmass))
+        Filter.atTop (nhds (asymTorusContinuumGreen Lt Ls mass hmass f f)) := by
+      have heq : (fun k =>
+          haveI := hM k
+          haveI := hNs k
+          ∫ ω : Configuration (AsymLatticeField (2 * M k) (Ns k)),
+            (ω (asymLatticeTestFnIso Lt Ls (2 * M k) (Ns k) (a k) f)) ^ 2
+            ∂(latticeGaussianMeasureAsym (2 * M k) (Ns k) (a k) mass (ha k) hmass)) =
+          fun k =>
+            haveI := hM k
+            haveI := hNs k
+            covariance (latticeCovarianceAsymGJ (2 * M k) (Ns k) (a k)
+              mass (ha k) hmass)
+              (asymLatticeTestFnIso Lt Ls (2 * M k) (Ns k) (a k) f)
+              (asymLatticeTestFnIso Lt Ls (2 * M k) (Ns k) (a k) f) := by
+        funext k
+        haveI := hM k
+        haveI := hNs k
+        exact second_moment_eq_covariance _ _
+      rw [heq]
+      exact second_moment_asym_tendsto Lt Ls mass hmass
+        (fun k => 2 * M k) Ns a hNt hNs ha hvolt hvols ha0 f f
+    have hB_tendsto : Filter.Tendsto B Filter.atTop
+        (nhds (K * Real.exp (C * asymTorusContinuumGreen Lt Ls mass hmass f f))) := by
+      rw [hB_def]
+      exact ((Real.continuous_exp.tendsto _).comp
+        (((hσ2_full.comp hφ_atTop).const_mul C))).const_mul K
+    have h_unif : ∀ n, Integrable (fun ω => Real.exp (|ω f|)) (ν n) ∧
+        ∫ ω, Real.exp (|ω f|) ∂(ν n) ≤ B n := fun n => by
+      haveI := hM (φ n)
+      haveI := hNs (φ n)
+      exact hcutoff f (2 * M (φ n)) (Ns (φ n)) (a (φ n)) (ha (φ n))
+        (hvolt (φ n)) (hvols (φ n))
+    exact weakLimit_exponential_moment ν hν_prob μ hbc f B
+      (K * Real.exp (C * asymTorusContinuumGreen Lt Ls mass hmass f f))
+      hB_tendsto h_unif
+  have hμ_os : AsymSatisfiesTorusOS Lt Ls μ :=
+    asymTorusIso_limit_satisfies_OS Lt Ls P mass hmass K C hK_pos hC_pos
+      (fun k => 2 * M k) Ns a hNt hNs ha hvolt hvols ha0 μ φ hφ_mono hconv hμ_green
+  refine ⟨μ, hμ_prob, hμ_green, (fun _ => hμ_os), ?_⟩
+  · intro R hR hLtR n f c hf
+    let sigmaSq : ℕ → CylinderTestFunction Ls → ℝ := fun k h =>
+      haveI := hM (φ k)
+      haveI := hNs (φ k)
+      ∫ ω : Configuration (AsymLatticeField (2 * M (φ k)) (Ns (φ k))),
+        (ω (asymLatticeTestFnIso Lt Ls (2 * M (φ k)) (Ns (φ k)) (a (φ k))
+          (cylinderToTorusEmbed Lt Ls h))) ^ 2
+        ∂(latticeGaussianMeasureAsym (2 * M (φ k)) (Ns (φ k)) (a (φ k))
+          mass (ha (φ k)) hmass)
+    apply cylinderRPMatrixNonnegative_of_link_limit Lt Ls ν μ hν_prob hμ_prob hbc
+      (fun k => a (φ k)) (ha0.comp hφ_atTop) sigmaSq K C hK_pos hC_pos
+    · intro k h
+      dsimp [sigmaSq]
+      exact integral_nonneg fun _ => sq_nonneg _
+    · intro k t h
+      dsimp [sigmaSq]
+      exact asymCylinderLatticeSecondMoment_smul Lt Ls
+        (2 * M (φ k)) (Ns (φ k)) (a (φ k)) mass (ha (φ k)) hmass t h
+    · intro hseq hseq0
+      simpa [sigmaSq] using
+        (asymCylinderLatticeSecondMoment_tendsto_zero_of_tendsto Lt Ls mass hmass
+          (fun k => 2 * M (φ k)) (fun k => Ns (φ k)) (fun k => a (φ k))
+          (fun k => by letI := hM (φ k); infer_instance)
+          (fun k => hNs (φ k)) (fun k => ha (φ k)) hseq hseq0)
+    · intro k h
+      haveI := hM (φ k)
+      haveI := hNs (φ k)
+      obtain ⟨hint_torus, hle_torus⟩ := hcutoff
+        (cylinderToTorusEmbed Lt Ls h) (2 * M (φ k)) (Ns (φ k))
+        (a (φ k)) (ha (φ k)) (hvolt (φ k)) (hvols (φ k))
+      obtain ⟨hint_cyl, heq⟩ := cylinderPullback_expMoment_eq Ls Lt (ν k) h hint_torus
+      exact ⟨hint_cyl, heq.le.trans hle_torus⟩
+    · intro k
+      haveI := hM (φ k)
+      haveI := hNs (φ k)
+      exact asymTorusInteractingMeasureIso_cylinderLinkRPMatrix_span_noWrap
+        Lt Ls P (a (φ k)) mass (ha (φ k)) hmass (M (φ k)) (Ns (φ k))
+        (hvolt (φ k)) (hvols (φ k)) R hR hLtR n f c hf
+
 /-- `…_of_cutoff` with the cutoff bound built from a Nelson `L²` constant `Knel` via
 `…_cutoff_of_nelson`; the resulting Green-moment constant is `√(2·Knel)`. -/
 theorem asymTorusIso_measureHasGreenMomentBound_of_nelson
@@ -459,7 +703,7 @@ NB: the hypothesis is on the **interacting** moment, *not* the Nelson `L²` mome
 the latter genuinely grows like `e^{f|Λ|}` (free energy) and is never volume-uniform. -/
 theorem asymTorusIso_cylinderUniformGreenBound
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
-    (K C : ℝ) (hK_pos : 0 < K)
+    (K C : ℝ) (hK_pos : 0 < K) (hC_pos : 0 < C)
     (hUnif : ∀ (L : ℝ) [Fact (0 < L)] (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
       (Nt : ℝ) * a = L → (Ns : ℝ) * a = Ls → ∀ f : AsymTorusTestFunction L Ls,
       Integrable (fun ω : Configuration (AsymTorusTestFunction L Ls) =>
@@ -473,7 +717,11 @@ theorem asymTorusIso_cylinderUniformGreenBound
       (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))),
       Filter.Tendsto Lt Filter.atTop Filter.atTop ∧
       (∀ n, IsProbabilityMeasure (μ n)) ∧
-      AsymTorusSequenceHasUniformGreenMomentBound Ls mass hmass K C Lt hLt μ := by
+      AsymTorusSequenceHasUniformGreenMomentBound Ls mass hmass K C Lt hLt μ ∧
+      AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ ∧
+      (∀ n, letI : Fact (0 < Lt n) := hLt n
+        CylinderMeasureNoWrapReflectionPositive (Lt n) Ls
+          (cylinderPullbackMeasure (Lt n) Ls (μ n))) := by
   have hLs_pos : 0 < Ls := hLs.out
   set Lt : ℕ → ℝ := fun n => ((n : ℝ) + 1) * Ls with hLt_def
   have hLt_pos : ∀ n, 0 < Lt n := fun n => by rw [hLt_def]; positivity
@@ -481,15 +729,20 @@ theorem asymTorusIso_cylinderUniformGreenBound
   -- For each IR period Lt n, the UV continuum measure with the uniform Green bound
   have hbound : ∀ n, ∃ μ : Measure (Configuration (AsymTorusTestFunction (Lt n) Ls)),
       IsProbabilityMeasure μ ∧
-      @MeasureHasGreenMomentBound Ls _ (Lt n) (hLtfact n) mass hmass K C μ := by
+      @MeasureHasGreenMomentBound Ls _ (Lt n) (hLtfact n) mass hmass K C μ ∧
+      (∀ hμ_prob : IsProbabilityMeasure μ,
+        @AsymSatisfiesTorusOS (Lt n) Ls (hLtfact n) hLs μ hμ_prob) ∧
+      CylinderMeasureNoWrapReflectionPositive (Lt n) Ls
+        (cylinderPullbackMeasure (Lt n) Ls μ) := by
     intro n
     haveI := hLtfact n
     -- Exactly-isotropic sequence with BOTH lattice extents even (Nt_k = 2(n+1)(k+1),
     -- Ns_k = 2(k+1), a_k = Ls/(2(k+1))): even time extent Nt is required for lattice reflection
     -- positivity (the reflection plane sits cleanly between sites), keeping Lt n = (n+1)·Ls fixed.
-    exact asymTorusIso_measureHasGreenMomentBound_of_cutoff (Lt n) Ls P mass hmass K C hK_pos
+    exact asymTorusIso_measureHasGreenMomentBound_of_cutoff_withNoWrapRP
+      (Lt n) Ls P mass hmass K C hK_pos hC_pos
       (fun f Nt Ns _ _ b hb hvt hvs => hUnif (Lt n) Nt Ns b hb hvt hvs f)
-      (fun k => 2 * (n + 1) * (k + 1)) (fun k => 2 * (k + 1))
+      (fun k => (n + 1) * (k + 1)) (fun k => 2 * (k + 1))
       (fun k => Ls / (2 * ((k : ℝ) + 1)))
       (fun k => ⟨by positivity⟩) (fun k => ⟨by positivity⟩) (fun k => by positivity)
       (fun k => by rw [hLt_def]; push_cast; field_simp)
@@ -502,8 +755,11 @@ theorem asymTorusIso_cylinderUniformGreenBound
             fun k : ℕ => (Ls / 2) * (1 / ((k : ℝ) + 1)) := by
           ext k; rw [mul_one_div, div_div]
         rw [heq]; exact h2)
-  choose μ hμ_prob hμ_green using hbound
-  refine ⟨Lt, hLtfact, μ, ?_, hμ_prob, ?_⟩
+  choose μ hμ_prob hμ_green hμ_os hμ_rp using hbound
+  have hμ_os2 : AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLtfact μ :=
+    AsymTorusSequenceHasCylinderOS2Symmetry.of_torusOS
+      Ls Lt hLtfact μ hμ_prob (fun n => hμ_os n (hμ_prob n))
+  refine ⟨Lt, hLtfact, μ, ?_, hμ_prob, ?_, hμ_os2, hμ_rp⟩
   · -- Lt n = (n+1)·Ls → ∞
     rw [hLt_def]
     exact Filter.Tendsto.atTop_mul_const hLs_pos
@@ -514,13 +770,13 @@ theorem asymTorusIso_cylinderUniformGreenBound
 /-- **Route-B′ cylinder OS0/OS1/OS2/OS3 from a volume-uniform interacting exp-moment** (isotropic
 construction).
 
-The complete conditional closure: given the single volume-uniform interacting exp-moment constant
-`K` (the cluster-expansion input — see `asymTorusIso_cylinderUniformGreenBound`) plus the separate
-reflection-positivity (OS3) and OS2-symmetry inputs for the IR family it produces, the isotropic
+The complete conditional closure: given the single volume-uniform interacting exp-moment bound
+(the cluster-expansion input — see `asymTorusIso_cylinderUniformGreenBound`), the isotropic
 `Z_Nt × Z_Ns` construction yields a cylinder `S¹(Ls) × ℝ` measure satisfying OS0 (analyticity),
 OS2 (Euclidean invariance), and OS3 (reflection positivity). The uniform Green-moment bound — the
-crux that the metric-mismatched square construction never supplied — is produced by
-`asymTorusIso_cylinderUniformGreenBound`; the rest is the proved `routeBPrime_cylinder_OS`. -/
+crux that the metric-mismatched square construction never supplied — and no-wrap RP are produced by
+`asymTorusIso_cylinderUniformGreenBound`; its OS2 symmetry is proved from finite-lattice
+translation/time-reflection equivariance, and compact-span RP is density-extended at the IR limit. -/
 theorem routeBPrimeIso_cylinder_OS
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
     (K C : ℝ) (hK_pos : 0 < K) (hC_pos : 0 < C)
@@ -533,14 +789,7 @@ theorem routeBPrimeIso_cylinder_OS
       K * Real.exp (C * ∫ ω : Configuration (AsymLatticeField Nt Ns),
         (ω (asymLatticeTestFnIso L Ls Nt Ns a f)) ^ 2
         ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)))
-    (hRP : ∀ (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
-        (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))),
-        CylinderMeasureSequenceEventuallyReflectionPositive Ls
-          (fun n => letI : Fact (0 < Lt n) := hLt n; cylinderPullbackMeasure (Lt n) Ls (μ n)))
-    (hOS2 : ∀ (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
-        (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))),
-        AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ) :
-    ∃ (ν : Measure (Configuration (CylinderTestFunction Ls))),
+    : ∃ (ν : Measure (Configuration (CylinderTestFunction Ls))),
     IsProbabilityMeasure ν ∧
     (∀ (n : ℕ) (J : Fin n → CylinderTestFunction Ls),
       AnalyticOnNhd ℂ (fun z : Fin n → ℂ =>
@@ -559,11 +808,17 @@ theorem routeBPrimeIso_cylinder_OS
         ∫ ω, Complex.exp (Complex.I *
           ↑(ω ((f i : CylinderTestFunction Ls) -
             cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν).re) := by
-  obtain ⟨Lt, hLt, μ, hLt_tend, hμ_prob, hμ_green⟩ :=
-    asymTorusIso_cylinderUniformGreenBound Ls P mass hmass K C hK_pos hUnif
+  obtain ⟨Lt, hLt, μ, hLt_tend, hμ_prob, hμ_green, hμ_os2, hμ_noWrap⟩ :=
+    asymTorusIso_cylinderUniformGreenBound Ls P mass hmass K C hK_pos hC_pos hUnif
   exact routeBPrime_cylinder_OS Ls mass hmass K C
     hK_pos hC_pos Lt hLt hLt_tend μ hμ_prob hμ_green
-    (hRP Lt hLt μ) (hOS2 Lt hLt μ)
+    (fun φ ν hν_prob hφ hcf K' C' q hK' hC' hq hExp => by
+      letI : IsProbabilityMeasure ν := hν_prob
+      exact cylinderMeasureReflectionPositive_of_noWrap_limit Ls
+        (fun k => Lt (φ k)) (hLt_tend.comp hφ.tendsto_atTop)
+        (fun k => cylinderPullbackMeasure (Lt (φ k)) Ls (μ (φ k)))
+        ν hcf (fun k => hμ_noWrap (φ k)) K' C' hK' hC' q hq hExp)
+    hμ_os2
 
 /-- **Volume-uniform interacting exponential moment for P(φ)₂ on the cylinder** (textbook axiom).
 
@@ -599,8 +854,9 @@ statement is **Standard / Likely correct**; uniformity in `L` and `a` confirmed 
 + mass-gap variance domination; fixed-`Ls` quasi-1D is the safe direction. See
 `docs/cylinder-conditional-inputs-provability.md` §4.
 
-**Architecture closure verified 2026-06-02** (deep-think-vetted). This axiom is now
-provably dischargeable from two factored upstream-input axioms in
+**Architecture closure verified 2026-06-02** (deep-think-vetted; 2026-07-13:
+the closure lands in the split-seminorm form, see the final paragraph). The
+factored upstream-input axioms live in
 `Pphi2/AsymTorus/AsymExpMomentDischarge.lean`:
 
 * **Layer A** `asymInteracting_mgf_gaussianDominated`: lattice-level Newman MGF
@@ -613,11 +869,23 @@ provably dischargeable from two factored upstream-input axioms in
   `AsymPositivity.lean`).
 
 The Layer C assembly `asymInteracting_expMoment_volume_uniform_proof` (in
-`AsymExpMomentDischarge.lean`) proves the exact statement of this axiom from
-Layers A + B2. This axiom is retained pro tem (cannot be deleted from this
-file without an import refactor, as `AsymExpMomentDischarge.lean` is downstream
-of this file via `AsymVarianceBound.lean`); the structural close is
-mathematically complete. -/
+`AsymSignedSplit.lean`; moved 2026-07-13 with the sign restriction of Layer A)
+proves the **split-seminorm variant** of this statement from Layers A + B2:
+the free-variance seminorm there is `C · (Var_free(f₊) + Var_free(f₋))`, not
+this axiom's `C · Var_free(f)`. Matching this axiom's exact form additionally
+needs the entrywise nonnegativity of the free lattice covariance kernel
+(`Var_free(f₊) + Var_free(f₋) ≤ Var_free(|f|)`) plus an `|f|`-seminorm
+restatement here — see `AXIOM_AUDIT.md` (2026-07-13). This axiom is retained
+pro tem (cannot be deleted from this file without an import refactor, as the
+Layer C files are downstream of this file via `AsymVarianceBound.lean`).
+
+    UPDATE 2026-07-13: the entrywise nonnegativity is now PROVED
+    (`latticeCovarianceAsymGJ_pairing_nonneg`) and the honest thresholded
+    `|f|`-form is a THEOREM
+    (`asymInteracting_expMoment_volume_uniform_absForm_thresholded`, both in
+    `AsymCovariancePositivity.lean`). This axiom's exact `C · Var_free(f)` form
+    for signed `f` is unvetted post-sign-restriction; consumers (the routeBPrime
+    `hUnif` chain) should migrate to the thresholded `|f|`-form theorem. -/
 axiom asymInteracting_expMoment_volume_uniform
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ K C : ℝ, 0 < K ∧ 0 < C ∧
@@ -631,18 +899,14 @@ axiom asymInteracting_expMoment_volume_uniform
           (ω (asymLatticeTestFnIso L Ls Nt Ns a f)) ^ 2
           ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass))
 
-/-- **Cylinder OS0/OS1/OS2/OS3 for the isotropic P(φ)₂ construction**, unconditional in the
-volume-uniform exp-moment (now supplied by `asymInteracting_expMoment_volume_uniform`), conditional
-only on the separate reflection-positivity (OS3) and OS2-symmetry inputs. -/
+/-- **Cylinder OS0/OS1/OS2/OS3 for the isotropic P(φ)₂ construction.**
+
+The headline has no external hypotheses beyond `P`, `mass`, and `hmass`: the volume-uniform
+exp-moment is supplied by `asymInteracting_expMoment_volume_uniform`, OS2 is proved from the
+heterogeneous lattice construction, and reflection positivity is carried through the no-wrap
+limit. The historical theorem name is retained for downstream compatibility. -/
 theorem cylinderIso_OS_of_RP_OS2
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
-    (hRP : ∀ (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
-        (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))),
-        CylinderMeasureSequenceEventuallyReflectionPositive Ls
-          (fun n => letI : Fact (0 < Lt n) := hLt n; cylinderPullbackMeasure (Lt n) Ls (μ n)))
-    (hOS2 : ∀ (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
-        (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))),
-        AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ) :
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ (ν : Measure (Configuration (CylinderTestFunction Ls))),
     IsProbabilityMeasure ν ∧
     (∀ (n : ℕ) (J : Fin n → CylinderTestFunction Ls),
@@ -664,7 +928,7 @@ theorem cylinderIso_OS_of_RP_OS2
             cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν).re) := by
   obtain ⟨K, C, hK_pos, hC_pos, hUnif⟩ :=
     asymInteracting_expMoment_volume_uniform Ls P mass hmass
-  exact routeBPrimeIso_cylinder_OS Ls P mass hmass K C hK_pos hC_pos hUnif hRP hOS2
+  exact routeBPrimeIso_cylinder_OS Ls P mass hmass K C hK_pos hC_pos hUnif
 
 end Pphi2
 

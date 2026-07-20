@@ -15,11 +15,14 @@ them into the discharge of the project-level axiom
 States two clean, individually-vettable axioms:
 
 * **`asymInteracting_mgf_gaussianDominated`** — Layer A: Newman's MGF
-  Gaussian-domination of the lattice interacting measure. This is the
-  pphi2-side translation of what the proposed `lee-yang` repo will
-  produce (Newman MGF inequality applied to the asym Wick interacting
-  measure via `evenPolynomialWick_isLeeYang` + iterated Asano on the
-  lattice graph + the marginal-projection lemma).
+  Gaussian-domination of the lattice interacting measure, **sign-restricted
+  (2026-07-13)** to sitewise-nonnegative test functions (the unrestricted
+  form is FALSE for mixed-sign `f`; signed `f` is recovered by the
+  `f₊/f₋` split in `AsymSignedSplit.lean`). This is the pphi2-side
+  translation of what the proposed `lee-yang` repo will produce (Newman
+  MGF inequality applied to the asym Wick interacting measure via
+  `evenPolynomialWick_isLeeYang` + iterated Asano on the lattice graph +
+  the marginal-projection lemma).
 
 * **`asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`** —
   Layer B2 Route-A lattice output: the Lt-uniform interacting/free
@@ -27,11 +30,12 @@ States two clean, individually-vettable axioms:
   `asymInteractingVariance_le_freeVariance_Lt_uniform` is now a theorem
   obtained from this lattice output by the pushforward embedding.
 
-And proves the **Layer C assembly theorem**:
-
-* **`asymInteracting_expMoment_volume_uniform_proof`** — combines
-  Layer A + Layer B2 + the joint-↔-torus pushforward to produce the
-  full existential statement of the original project axiom.
+The **Layer C assembly theorem**
+`asymInteracting_expMoment_volume_uniform_proof` — combining Layer A +
+Layer B2 + the joint-↔-torus pushforward — lives in
+`Pphi2/AsymTorus/AsymSignedSplit.lean` (moved 2026-07-13 with the sign
+restriction of Layer A; the assembly consumes the signed-split lemma and
+its seminorm is the split form `C · (Var_free(f₊) + Var_free(f₋))`).
 
 This file is the **structural close of the discharge architecture**:
 once the two upstream axioms are discharged by their respective
@@ -62,11 +66,14 @@ discharged by their respective upstream workstreams.
 
 * Layer A axiom (`asymInteracting_mgf_gaussianDominated`): vetted
   2026-06-02 (deep-think, see `docs/asym-expmoment-discharge-via-lee-yang-vet-request.md`
-  for the architecture vet from 2026-05-31).
+  for the architecture vet from 2026-05-31); **sign-restricted 2026-07-13**
+  after the Gemini + Codex vet of 2026-07-12 found the unrestricted
+  quantifier FALSE (see `AXIOM_AUDIT.md` and
+  `planning/layer-a-lee-yang-scoping.md`).
 * Layer B2 Route-A lattice axiom
   (`asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`):
   factored 2026-06-23 as the remaining lattice assembly input.
-* Layer C theorem: proved here.
+* Layer C theorem: proved in `AsymSignedSplit.lean` (split-seminorm form).
 
 ## References
 
@@ -123,11 +130,20 @@ state and phase transitions II*, Phys. Rev. 87 (1952), 410-419.
 ✅ Vetted: deep-think-gemini (2026-06-02) — confirmed the Newman MGF
 inequality for Lee-Yang interacting measures with the K=2 / Var_int form;
 the Griffiths-Simon-Asano discharge route is the standard one (Simon §VIII,
-Glimm-Jaffe Ch. 4). -/
+Glimm-Jaffe Ch. 4).
+
+**SIGN RESTRICTION (2026-07-12/13)**: Newman domination requires same-sign
+coefficients — the unrestricted form is FALSE (2-spin mixed-sign
+counterexample; Lebowitz-κ₄ mechanism; n-pair amplification kills the K=2
+form). Hence the hypothesis `hf : ∀ x, 0 ≤ f x` (sitewise nonnegative).
+Signed `f` is recovered via the `f₊`/`f₋` split (see
+`asymInteracting_expMoment_of_signed` in `AsymSignedSplit.lean`).
+Vet: Gemini 3.1-pro + Codex GPT-5.5, 2026-07-12 — `AXIOM_AUDIT.md` entry
+(restated 2026-07-13). -/
 axiom asymInteracting_mgf_gaussianDominated
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
     (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a)
-    (f : AsymLatticeField Nt Ns) :
+    (f : AsymLatticeField Nt Ns) (hf : ∀ x, 0 ≤ f x) :
     Integrable (fun ω => Real.exp (|ω f|))
       (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) ∧
     ∫ ω, Real.exp (|ω f|)
@@ -211,7 +227,14 @@ from this lattice statement plus the already-proved pushforward identity
 asymTorusEmbedLiftIso` and pairing identity
 `(asymTorusEmbedLiftIso ω) f = ω (asymLatticeTestFnIso f)`. This keeps the
 remaining Route-A obligation at the lattice level, where Piece 4
-`interacting_second_moment_bound_to_lattice_free_covariance` is stated. -/
+`interacting_second_moment_bound_to_lattice_free_covariance` is stated.
+
+MIGRATION NOTE (2026-07-13): the thresholded form is now a THEOREM
+(`asymInteractingVariance_le_freeVariance_torus_thresholded` /
+`asymInteractingVariance_le_freeVariance_lattice_thresholded`, 5 vetted axioms);
+this all-(Lt,a) axiom remains only for the legacy Layer-C wiring and is
+over-broad at small Lt / coarse a (true but unproved there) — consumers should
+migrate to the thresholded form (planning/b2-stageB-holes-spec.md §C4 design). -/
 axiom asymInteractingVariance_le_freeVariance_lattice_Lt_uniform
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
     (Ls : ℝ) [Fact (0 < Ls)] :
@@ -273,112 +296,15 @@ theorem asymInteractingVariance_le_freeVariance_Lt_uniform
   rw [h_integrand]
   exact hC_bound Lt Nt Ns a ha hvolt hvols g
 
-/-! ## Layer C: assembly theorem -/
+/-! ## Layer C: assembly theorem
 
-/-- **Layer C assembly**: combining Layer A (Newman MGF
-Gaussian-domination on the lattice) + Layer B2 (`Lt`-uniform
-interacting-vs-free variance bound) gives the discharge of
-`asymInteracting_expMoment_volume_uniform`.
-
-The assembly is purely structural:
-1. For a torus test function `f`, push the torus integral back to the
-   lattice via `asymTorusInteractingMeasureIso = (μ_int^{lattice}).map ι`
-   where `ι = asymTorusEmbedLiftIso`.
-2. Use `(ι ω)(f) = ω(asymLatticeTestFnIso f)` to swap the torus pairing
-   for the lattice pairing.
-3. Apply Layer A on the lattice: `∫ e^{|⟨ω,g⟩|} dμ_int^{lattice} ≤ 2 ·
-   exp((1/2) · Var_int(⟨ω,g⟩))` where `g = asymLatticeTestFnIso f`.
-4. The `Var_int(⟨ω,g⟩)` at the torus level pushes back to
-   `Var_int(⟨ω_lattice, g⟩)` (same integral by the pushforward).
-5. Apply Layer B2: `Var_int(⟨ω,g⟩) ≤ C_B · Var_free(⟨ω,g⟩)` uniformly
-   in `Lt`.
-6. Combine: `≤ 2 · exp((C_B/2) · Var_free(⟨ω,g⟩))`. Set `K = 2`,
-   `C = C_B / 2`.
-
-The constant `C_B` is `Lt`-uniform by Layer B2, so the final
-`K = 2`, `C = C_B / 2` is `Lt`-uniform, exactly matching the original
-project-level assumption. -/
-theorem asymInteracting_expMoment_volume_uniform_proof
-    (Ls : ℝ) [hLs : Fact (0 < Ls)]
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
-    ∃ K C : ℝ, 0 < K ∧ 0 < C ∧
-      ∀ (L : ℝ) [Fact (0 < L)] (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
-        (a : ℝ) (ha : 0 < a),
-        (Nt : ℝ) * a = L → (Ns : ℝ) * a = Ls → ∀ f : AsymTorusTestFunction L Ls,
-        Integrable (fun ω : Configuration (AsymTorusTestFunction L Ls) =>
-            Real.exp (|ω f|))
-          (asymTorusInteractingMeasureIso L Ls Nt Ns a P mass ha hmass) ∧
-        ∫ ω : Configuration (AsymTorusTestFunction L Ls), Real.exp (|ω f|)
-          ∂(asymTorusInteractingMeasureIso L Ls Nt Ns a P mass ha hmass) ≤
-        K * Real.exp (C *
-          ∫ ω : Configuration (AsymLatticeField Nt Ns),
-            (ω (asymLatticeTestFnIso L Ls Nt Ns a f)) ^ 2
-            ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)) := by
-  obtain ⟨C_B, hC_B_pos, hC_B_bound⟩ :=
-    asymInteractingVariance_le_freeVariance_Lt_uniform P mass hmass Ls
-  refine ⟨2, C_B / 2, by norm_num, by linarith, ?_⟩
-  intro L _hL Nt Ns _ _ a ha hvolt hvols f
-  set g := asymLatticeTestFnIso L Ls Nt Ns a f
-  set μ_int_T := asymTorusInteractingMeasureIso L Ls Nt Ns a P mass ha hmass
-  set μ_int_L := interactingLatticeMeasureAsym Nt Ns P a mass ha hmass
-  set μ_free := latticeGaussianMeasureAsym Nt Ns a mass ha hmass
-  have hι : (asymTorusEmbedLiftIso L Ls Nt Ns a : _ → _) = _ := rfl
-  have hι_meas : Measurable (asymTorusEmbedLiftIso L Ls Nt Ns a) :=
-    asymTorusEmbedLiftIso_measurable L Ls Nt Ns a
-  have h_eval : ∀ ω : Configuration (AsymLatticeField Nt Ns),
-      (asymTorusEmbedLiftIso L Ls Nt Ns a ω) f = ω g :=
-    asymTorusEmbedLiftIso_eval_eq L Ls Nt Ns a f
-  obtain ⟨hA_int, hA_bound⟩ :=
-    asymInteracting_mgf_gaussianDominated P mass hmass Nt Ns a ha g
-  -- Pushforward μ_int_T = (μ_int_L).map ι and integrability transfer
-  have h_pushforward : μ_int_T =
-      Measure.map (asymTorusEmbedLiftIso L Ls Nt Ns a) μ_int_L := rfl
-  have h_F_meas :
-      AEStronglyMeasurable (fun ω : Configuration (AsymTorusTestFunction L Ls) =>
-        Real.exp (|ω f|)) μ_int_T :=
-    ((configuration_eval_measurable f).abs.exp).aestronglyMeasurable
-  have h_F_sq_meas :
-      AEStronglyMeasurable (fun ω : Configuration (AsymTorusTestFunction L Ls) =>
-        (ω f) ^ 2) μ_int_T :=
-    ((configuration_eval_measurable f).pow_const 2).aestronglyMeasurable
-  refine ⟨?_, ?_⟩
-  · -- Integrability transfers across the pushforward
-    rw [h_pushforward]
-    rw [integrable_map_measure h_F_meas hι_meas.aemeasurable]
-    refine hA_int.congr ?_
-    refine Filter.Eventually.of_forall fun ω => ?_
-    simp [h_eval ω]
-  · -- The main bound
-    rw [h_pushforward]
-    rw [integral_map hι_meas.aemeasurable h_F_meas]
-    have hint_lattice_eq :
-        ∫ ω, Real.exp (|(asymTorusEmbedLiftIso L Ls Nt Ns a ω) f|) ∂μ_int_L =
-        ∫ ω, Real.exp (|ω g|) ∂μ_int_L := by
-      apply integral_congr_ae
-      refine Filter.Eventually.of_forall fun ω => ?_
-      simp [h_eval ω]
-    rw [hint_lattice_eq]
-    -- Apply Layer A bound: ∫ exp|ωg| dμ_int ≤ 2 · exp((1/2) · Var_int(⟨ω,g⟩))
-    refine le_trans hA_bound ?_
-    -- Now: 2 · exp((1/2) · ∫(ωg)² dμ_int_L) ≤ 2 · exp((C_B/2) · ∫(ωg)² dμ_free)
-    apply mul_le_mul_of_nonneg_left _ (by norm_num : (0 : ℝ) ≤ 2)
-    apply Real.exp_le_exp.mpr
-    -- Need: (1/2) · ∫(ωg)² dμ_int_L ≤ (C_B/2) · ∫(ωg)² dμ_free
-    -- Step: pushforward identity for the lattice 2nd moment
-    have h_var_pushforward :
-        ∫ ω : Configuration (AsymLatticeField Nt Ns), (ω g) ^ 2 ∂μ_int_L =
-        ∫ ω : Configuration (AsymTorusTestFunction L Ls), (ω f) ^ 2 ∂μ_int_T := by
-      rw [h_pushforward, integral_map hι_meas.aemeasurable h_F_sq_meas]
-      apply integral_congr_ae
-      refine Filter.Eventually.of_forall fun ω => ?_
-      simp [h_eval ω]
-    rw [h_var_pushforward]
-    -- Now: (1/2) · ∫(ωf)² dμ_int_T ≤ (C_B/2) · ∫(ωg)² dμ_free
-    have hB := hC_B_bound L Nt Ns a ha hvolt hvols f
-    nlinarith [hB,
-      integral_nonneg (μ := μ_free)
-        (f := fun ω : Configuration (AsymLatticeField Nt Ns) => (ω g) ^ 2)
-        (fun ω => sq_nonneg _)]
+**Moved (2026-07-13).** The Layer C assembly theorem
+`asymInteracting_expMoment_volume_uniform_proof` now lives in
+`Pphi2/AsymTorus/AsymSignedSplit.lean`: after the sign restriction of the
+Layer A axiom (see its docstring above), signed test functions are recovered
+via the `f = f₊ − f₋` split lemma `asymInteracting_expMoment_of_signed`
+(that file), and the assembly's free-variance seminorm is stated in the
+split form `C · (Var_free(f₊) + Var_free(f₋))`. -/
 
 end Pphi2
 

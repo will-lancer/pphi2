@@ -1,4 +1,14 @@
-# FSS infrared bound — spec & vetting record (for the `Ls → ∞` step, NOT B2)
+# FSS infrared bound — spec & vetting record
+
+> **⚠ SUPERSEDED BANNER (2026-07-12).** This file's original framing ("for the `Ls → ∞` step,
+> NOT B2") is **wrong**: the 2026-07-12 Layer-B2 free-side design pass
+> ([`planning/layer-b2-freeside-designpass.md`](../planning/layer-b2-freeside-designpass.md))
+> showed the susceptibility route is lossy at high temporal frequency, so an FSS-type bound IS
+> a B2 ingredient. The B2-ready version is the **integrated quadratic form** (spacetime
+> zero-mode complement, `c₀ = 1` in GJ normalization, Gemini-vetted) — see
+> [`planning/b2-route-a-statements.md`](../planning/b2-route-a-statements.md) §S1, which
+> supersedes the schematic per-mode signature below. This file remains the record of the
+> 2026-06-03 vetting and of the eventual `Ls → ∞` spatial-IR use.
 
 **Status:** specification only. **Not yet a Lean axiom** — pphi2 has no field
 Fourier-component layer (`φ̂(k)` as a random variable on `Configuration`), so the

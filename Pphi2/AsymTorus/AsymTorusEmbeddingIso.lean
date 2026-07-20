@@ -111,6 +111,16 @@ def asymTorusInteractingMeasureIso (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
   Measure.map (asymTorusEmbedLiftIso Lt Ls Nt Ns a)
     (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass)
 
+/-- The heterogeneous interacting torus pushforward is a probability measure. -/
+instance asymTorusInteractingMeasureIso.instIsProbabilityMeasure
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a : ℝ) (P : InteractionPolynomial) (mass : ℝ) (ha : 0 < a) (hmass : 0 < mass) :
+    IsProbabilityMeasure
+      (asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass) := by
+  haveI := interactingLatticeMeasureAsym_isProbability Nt Ns P a mass ha hmass
+  exact Measure.isProbabilityMeasure_map
+    (asymTorusEmbedLiftIso_measurable Lt Ls Nt Ns a).aemeasurable
+
 /-! ## Second moment = spectral covariance, and its continuum limit -/
 
 /-- **The GJ-weight cancellation.** The lattice second moment of the embedding test functions

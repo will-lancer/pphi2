@@ -240,7 +240,38 @@ theorem continuumLimit (P : InteractionPolynomial)
 -- (also dead). continuumLimit_nontrivial was never used. The non-Gaussianity
 -- result continuumLimit_nonGaussian (below) is the live axiom used in Main.lean.
 
-/-- The continuum limit is non-Gaussian (for nontrivial P).
+/-! ### Coupling-regime predicates
+
+These predicates were introduced in `Bridge.lean` and are defined here (upstream
+of `Main.lean`) so that the regime-sensitive axioms below can carry them as
+hypotheses. See `planning/r2-honest-headline-spec.md` (D3): non-Gaussianity of
+the limit, like the spectral gap, is a weak-coupling statement — at the φ⁴₂
+critical point the axioms below are false as stated without a regime
+hypothesis. -/
+
+/-- A pphi2 `InteractionPolynomial` is a φ⁴ interaction if its polynomial is
+P(τ) = λτ⁴ for some coupling constant λ > 0. -/
+def isPhi4 (P : InteractionPolynomial) (coupling : ℝ) : Prop :=
+  P.n = 4 ∧ 0 < coupling
+  -- Full version: all coefficients match the φ⁴ interaction
+
+/-- The coupling constant is in the weak-coupling regime where the cluster
+expansion converges, guaranteeing uniqueness of the infinite-volume limit.
+
+The full condition is `coupling < l₀(P, mass)` where l₀ is the radius of
+convergence of the Glimm-Jaffe-Spencer cluster expansion.
+Reference: Glimm-Jaffe-Spencer (1974). -/
+def IsWeakCoupling (P : InteractionPolynomial) (mass coupling : ℝ) : Prop :=
+  -- The coupling constant is small enough for the Glimm-Jaffe-Spencer cluster
+  -- expansion to converge. Concretely, for P(τ) = λτ⁴ this requires λ < λ₀(m)
+  -- where λ₀(m) > 0 is a mass-dependent radius of convergence.
+  -- We state this as: there exists a positive threshold λ₀ > coupling such that
+  -- the expansion converges, ensuring uniqueness of the infinite-volume limit.
+  0 < coupling ∧ coupling < mass ^ 2 / 4
+  -- Note: the true condition is coupling < λ₀(P, mass) per Glimm-Jaffe-Spencer (1974).
+  -- We use mass² / 4 as a conservative stand-in for the convergence radius.
+
+/-- The continuum limit is non-Gaussian (for φ⁴ interactions at weak coupling).
 
 This follows from the four-point Schwinger function:
   `S₄(f,f,f,f) - 3 · S₂(f,f)² ≠ 0`
@@ -249,12 +280,20 @@ i.e., the connected four-point function (fourth cumulant) is nonzero.
 For a Gaussian measure, all connected n-point functions with n ≥ 3 vanish,
 so a nonzero fourth cumulant proves non-Gaussianity.
 
+The coupling hypotheses (`isPhi4`, `IsWeakCoupling`) restrict the statement
+to the regime where it is literature-true: at the φ⁴₂ critical point the
+connected four-point function of the scaling limit can vanish, so the
+unrestricted all-`P` form is false as stated. See
+`planning/r2-honest-headline-spec.md` (D3).
+
 Reference: Simon Ch. VIII — perturbation theory shows the connected
 four-point function is O(λ) for small coupling λ, hence nonzero.
 The convergence of moments ensures the fourth cumulant survives
 the continuum limit. -/
 axiom continuumLimit_nonGaussian (P : InteractionPolynomial)
     (mass : ℝ) (hmass : 0 < mass)
+    (coupling : ℝ) (hP4 : isPhi4 P coupling)
+    (hweak : IsWeakCoupling P mass coupling)
     (a : ℕ → ℝ) (ha_pos : ∀ n, 0 < a n) (ha_le : ∀ n, a n ≤ 1)
     (ha_lim : Filter.Tendsto a Filter.atTop (nhds 0)) :
     -- The continuum limit is non-Gaussian: the connected four-point function
@@ -269,98 +308,25 @@ axiom continuumLimit_nonGaussian (P : InteractionPolynomial)
 
 /-! ## Existence of a P(φ)₂ continuum limit -/
 
-/-- **Existence of a P(Φ)₂ continuum limit measure.**
-
-There exists a probability measure μ on S'(ℝ²) that satisfies the marker
-predicate `IsPphi2Limit μ P mass`.
-
-The current `IsPphi2Limit` marker is witnessed by a probability sequence with
-convergent moments, characteristic functionals, bounded-continuous observables,
-and continuum reflection positivity, together with Z₂ symmetry of μ.
-Therefore, a constant sequence at the symmetric Dirac measure `δ₀` still
-witnesses the predicate. -/
-theorem pphi2_limit_exists (P : InteractionPolynomial)
-    (mass : ℝ) (_hmass : 0 < mass) :
+/-- Existence of the infinite-volume P(φ)₂ continuum limit (OPEN in this repo).
+    Reference: Fröhlich, Adv. Math. 23 (1976) (tightness/compactness existence, arbitrary
+    semibounded even P, all couplings); Y.M. Park, J. Math. Phys. 18 (1977) (lattice
+    approximants: volume- and spacing-uniform moment bounds via lattice Nelson symmetry /
+    checkerboard, lattice→continuum); Glimm–Jaffe Ch. 11.
+    ⚠ NOT Guerra–Rosen–Simon: GKS/FKG monotonicity routes need the Griffiths–Simon
+    ferromagnetic class and are KNOWN to fail for general even deg ≥ 6 multi-well P
+    (Ellis–Monroe–Newman, CMP 46 (1976)); the tightness route covers the full
+    InteractionPolynomial class.
+    Strategy: the repo's own route is Route B′/A — cylinder IR limit (Lt→∞) then Ls→∞ per
+    docs/cylinder-master-plan.md; keystone 18's cluster expansion gives it with uniqueness at
+    weak coupling. Until then this is the single existence input for the ℝ² headline.
+    (NOT VERIFIED — statement Gemini-vetted 2026-07-12, see r2-honest-headline-spec.md
+    D2 vet record) -/
+axiom pphi2_limit_exists (P : InteractionPolynomial)
+    (mass : ℝ) (hmass : 0 < mass) :
     ∃ (μ : Measure (Configuration (ContinuumTestFunction 2)))
       (_ : IsProbabilityMeasure μ),
-    IsPphi2Limit μ P mass := by
-  let μ : Measure FieldConfig2 :=
-    Measure.dirac 0
-  have hμ : IsProbabilityMeasure μ :=
-    by
-      dsimp [μ]
-      infer_instance
-  have h_dirac_cf :
-      ∀ (g : TestFunction2),
-        ∫ ω : FieldConfig2, Complex.exp (Complex.I * ↑(ω g)) ∂μ = 1 := by
-    intro g
-    have hmeas : StronglyMeasurable
-        (fun ω : FieldConfig2 => Complex.exp (Complex.I * ↑(ω g))) :=
-      (Complex.measurable_exp.comp
-        ((Complex.measurable_ofReal.comp
-          (configuration_eval_measurable g)).const_mul
-          Complex.I)).stronglyMeasurable
-    rw [integral_dirac' _ _ hmeas]
-    norm_num [show (0 : FieldConfig2) g = 0 from rfl]
-  refine ⟨μ, hμ, ?_⟩
-  refine ⟨(fun k : ℕ => 1 / (k + 1 : ℝ)), (fun _ => μ), ?_, ?_, ?_, ?_⟩
-  · intro k
-    simpa using hμ
-  · simpa [Nat.cast_add, Nat.cast_one] using
-      (tendsto_one_div_add_atTop_nhds_zero_nat :
-        Tendsto (fun n : ℕ => 1 / (n + 1 : ℝ)) Filter.atTop (nhds 0))
-  · intro k
-    positivity
-  · refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-    · intro n f
-      exact (tendsto_const_nhds :
-        Filter.Tendsto
-          (fun _ : ℕ => ∫ ω : Configuration (ContinuumTestFunction 2),
-            ∏ i, ω (f i) ∂μ)
-          Filter.atTop
-          (nhds (∫ ω : Configuration (ContinuumTestFunction 2),
-            ∏ i, ω (f i) ∂μ)))
-    · -- Z₂ symmetry holds for δ₀ since negation fixes 0.
-      have hneg_meas :
-          Measurable (Neg.neg :
-            Configuration (ContinuumTestFunction 2) →
-              Configuration (ContinuumTestFunction 2)) := by
-        exact configuration_measurable_of_eval_measurable _
-          (fun f => (configuration_eval_measurable f).neg)
-      simp only [μ, Measure.map_dirac' hneg_meas, neg_zero]
-    · -- Characteristic functional convergence: constant sequence → trivial
-      intro f; exact tendsto_const_nhds
-    · -- Lattice translation invariance: trivial for Dirac at 0
-      -- Both sides = exp(0) = 1 for all k, so the eventuality holds trivially.
-      -- Trivial: ν_k = δ_0 for all k. Under δ_0, ω = 0, so ω(f) = 0 = ω(τ_v f),
-      -- hence both integrals = exp(0) = 1.
-      intro v f; exact Filter.Eventually.of_forall fun _ => by
-        rw [h_dirac_cf f, h_dirac_cf (schwartzTranslate 2 v f)]
-    · -- Weak convergence: constant sequence at δ₀ → trivial
-      intro g _ _; exact tendsto_const_nhds
-    · -- OS3 for the approximating sequence: Dirac at 0 gives a rank-one RP matrix.
-      intro k n f c
-      have hentry : ∀ i j : Fin n,
-          (∫ ω : FieldConfig2,
-            Complex.exp (Complex.I * ↑(ω ((f i : TestFunction2) -
-              compTimeReflection2 ((f j : TestFunction2))))) ∂μ).re = 1 := by
-        intro i j
-        rw [h_dirac_cf ((f i : TestFunction2) - compTimeReflection2 ((f j : TestFunction2)))]
-        norm_num
-      simp_rw [hentry]
-      have hsum :
-          ∑ i, ∑ j, c i * c j = (∑ i, c i) ^ 2 := by
-        calc
-          ∑ i, ∑ j, c i * c j
-              = ∑ i, c i * ∑ j, c j := by
-                  apply Finset.sum_congr rfl
-                  intro i _
-                  rw [Finset.mul_sum]
-          _ = (∑ i, c i) * (∑ j, c j) := by
-                rw [Finset.sum_mul]
-          _ = (∑ i, c i) ^ 2 := by
-                rw [pow_two]
-      simpa [hsum] using sq_nonneg (∑ i, c i)
+    IsPphi2Limit μ P mass
 
 end Pphi2
 

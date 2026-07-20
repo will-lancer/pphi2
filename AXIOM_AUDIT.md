@@ -1,7 +1,406 @@
 # Comprehensive Axiom Audit: pphi2 + gaussian-field + markov-semigroups + gaussian-hilbert
 
-**Last updated**: 2026-07-12.
+**Last updated**: 2026-07-14.
 
+## 2026-07-14 — Ground-isometry-one bridge PROVED (axiom discharged)
+
+* **`asymGroundStateRep_eq_groundIsometry_one`**
+  (`Pphi2/AsymTorus/AsymBridgeInstance.lean`) was converted from axiom to theorem with the
+  same statement. Proof route: `Lp.ext`/a.e. equality, `groundIsometry_coeFn` for the left
+  side, `AEStronglyMeasurable.ae_eq_mk` + `Lp.coeFn_const` for the constant-one
+  representative, `ae_withDensity_iff` through
+  `groundMeasure ν Ω = ν.withDensity (ENNReal.ofReal (Ω^2))` with the density-nonzero guard
+  and the `Ω = 0` branch, then `asymGroundVector_coeFn_eq_groundStateRep` for the right side.
+* Kernel footprint (verified 2026-07-14): `#print axioms
+  Pphi2.asymGroundStateRep_eq_groundIsometry_one` reports exactly
+  `[propext, Classical.choice, Quot.sound]` — no project axioms, no sorries.
+* **Counts:** pphi2 raw axiom count **30 → 29**, 0 sorries (verified
+  `./scripts/count_axioms.sh` 2026-07-14).
+
+## 2026-07-13 — Asym normalized-transfer contraction PROVED (axiom discharged)
+
+* **`asymTransferNormalized_contract`** (`Pphi2/AsymTorus/AsymBridgeInstance.lean`) was
+  converted from axiom to theorem with the same statement. Proof route: decompose
+  `f = ⟪Ω,f⟫ • Ω + v`, use `asymTransferNormalized_gap` on `v ⟂ Ω`, preserve
+  orthogonality by the packaged self-adjoint normalized transfer, then recombine with
+  Pythagoras.
+* Kernel footprint (verified 2026-07-13): `#print axioms Pphi2.asymTransferNormalized_contract`
+  reports exactly `[propext, Classical.choice, Quot.sound]` — no project axioms, no sorries.
+* **Counts:** pphi2 **31 raw / 29 real → 30 raw / 28 real**, 0 sorries (verified
+  `count_axioms.sh` 2026-07-13). First dormant GNS-bridge bookkeeping axiom retired via Codex.
+
+## 2026-07-13 — Torus |f|-form thresholded exp-moment THEOREM landed
+
+* **`asymInteracting_expMoment_volume_uniform_absForm_thresholded`**
+  (`Pphi2/AsymTorus/AsymCovariancePositivity.lean`) — the torus-level Piece-5 pushforward of
+  the lattice `|f|`-form exp-moment bound (`asymInteracting_expMoment_absForm_thresholded`),
+  in thresholded form. Kernel footprint (independently verified): trio + the same 6 axioms
+  {restated Layer-A `asymInteracting_mgf_gaussianDominated`, the 5 Stage-C axioms}.
+* This is the honest restatement target for the legacy torus axiom
+  `asymInteracting_expMoment_volume_uniform` (`AsymContinuumLimit.lean:626`); a migration note
+  now points its consumers (routeBPrime `hUnif` chain) at the theorem. Counts unchanged
+  (31 raw / 29 real / 0 sorries).
+* Landed by a Fable-5 agent that ran out of credits during the footprint check; finished and
+  committed by the coordinator (Opus 4.8).
+
+## 2026-07-13 — Free-covariance kernel positivity PROVED; |f|-form exp-moment composed (6 axioms)
+
+* **`latticeCovarianceAsymGJ_pairing_nonneg`** (`Pphi2/AsymTorus/AsymCovariancePositivity.lean`)
+  — entrywise/pairing nonnegativity of the free asym covariance for sitewise-nonneg test
+  vectors, proved via a discrete maximum principle (`massOperatorAsym_solution_nonneg`) +
+  the spectral Green operator (`asymMassGreen`, `massOperatorAsym_asymMassGreen`). **Bare
+  Mathlib trio.** Consequence `asymFreeVariance_posPart_add_negPart_le`
+  (`Var(f₊)+Var(f₋) ≤ Var(|f|)`) also proved.
+* **`asymInteracting_expMoment_absForm_thresholded`** — the composed lattice exp-moment bound
+  `∫e^{|ωf|}dμ_int ≤ 2·exp(2C·Var_free(|f|))`-form under the (a₀, L₀) thresholds: kernel
+  footprint = trio + {restated Layer-A `asymInteracting_mgf_gaussianDominated`, the 5
+  Stage-C axioms}. This realizes the honest lattice-level CYL-1a content and IS the
+  restatement target for the flagged torus axiom `asymInteracting_expMoment_volume_uniform`
+  (follow-up: restate that axiom in the |f|/thresholded form and derive it from this
+  theorem via the torus pushforward — closing the 2026-07-13 sign-restriction follow-up).
+* File finished by the coordinator after two agent infrastructure failures (fixes: an
+  already-consumed `Finset.mul_sum` rewrite; `hλ` is an illegal identifier — λ is the
+  lambda keyword). Build green (4059 jobs); counts unchanged **31 raw / 29 real / 0 sorries**.
+
+## 2026-07-13 — Layer A `asymInteracting_mgf_gaussianDominated` RESTATED (sign-restricted) + signed-split Layer C landed
+
+* **Restatement (closes the 2026-07-12 red flag):** the Layer A axiom
+  (`Pphi2/AsymTorus/AsymExpMomentDischarge.lean`) now carries the hypothesis
+  `hf : ∀ x, 0 ≤ f x` (sitewise nonnegative), per the 2026-07-12 Gemini 3.1-pro + Codex
+  GPT-5.5 verdict that the unrestricted quantifier is FALSE (2-spin mixed-sign
+  counterexample; Lebowitz-κ₄ mechanism; n-pair amplification kills the K=2 |·|-form).
+  **Rating upgraded: Flagged (FALSE as stated) → Standard (sign-restricted)** — the
+  same-sign form is exactly Newman's Thm 3 via Griffiths–Simon/Asano, which both external
+  vets confirmed.
+* **Signed `f` recovered (the axiom's consumer):** new theorem
+  `asymInteracting_expMoment_of_signed` (`Pphi2/AsymTorus/AsymSignedSplit.lean`) — the
+  vetted `f = f₊ − f₋` split: `|⟨ω,f⟩| ≤ |⟨ω,f₊⟩| + |⟨ω,f₋⟩|`, Cauchy–Schwarz, and the
+  restated axiom at `2f₊`/`2f₋`; conclusion
+  `∫ e^{|⟨ω,f⟩|} dμ_int ≤ 2·exp(Var_int(f₊) + Var_int(f₋))` — exactly the Codex-refined
+  constants of the 2026-07-12 entry (the `2f±` doubling cancels the `½`). Kernel footprint
+  (verified `#print axioms` 2026-07-13): trio + the restated axiom only.
+* **Layer C assembly reworked:** `asymInteracting_expMoment_volume_uniform_proof` — the
+  pre-existing in-repo consumer of the axiom, which fed it a signed `g` — moved from
+  `AsymExpMomentDischarge.lean` to `AsymSignedSplit.lean` and is now proved from the split
+  lemma + the Layer B2 lattice bound at `g₊`, `g₋`; its seminorm is the **split form**
+  `K·exp(C·(Var_free(g₊) + Var_free(g₋)))` (`K = 2`, `C = C_B`). As the 07-12 Codex entry
+  warned, `Var_free(g₊) + Var_free(g₋)` is NOT controlled by `Var_free(g)` (cross-term
+  cancellation), so the pre-restatement conclusion form `C·Var_free(g)` is not recoverable
+  without the entrywise nonnegativity of the free lattice covariance kernel
+  (→ `≤ Var_free(|g|)`), which is not formalized — no new axioms in this change. Kernel
+  footprint: trio + {restated Layer A, legacy Layer B2 lattice axiom} — the same axiom set
+  as before the restatement.
+* **Follow-up (torus-level target form):** the separate torus axiom
+  `asymInteracting_expMoment_volume_uniform` (`AsymContinuumLimit.lean`, vetted 2026-05-27)
+  retains the `C·Var_free(f)` seminorm for signed `f`; the Layer-C discharge now lands at
+  the split seminorm, so its eventual discharge needs either the covariance-kernel
+  entrywise nonnegativity + an `|f|`-form restatement, or a fresh vet of the
+  `C·Var_free(f)` form — tracked for the Layer A campaign
+  (`planning/layer-a-lee-yang-scoping.md`).
+* **Counts:** unchanged — restatement, not addition (31 raw / 29 real, 0 sorries; verified
+  `count_axioms.sh` 2026-07-13). `lake build` green.
+
+## 2026-07-13 — B2 torus-level thresholded variance THEOREM landed (additive Piece-5 migration)
+
+* **New theorem `asymInteractingVariance_le_freeVariance_torus_thresholded`**
+  (`Pphi2/AsymTorus/AsymVarianceAssembly.lean`): the torus-level interacting ≤ free variance
+  bound in the thresholded form (`∃ C L₀ a₀, … ∀ Lt ≥ L₀ … ∀ a ≤ a₀ …`), proved from the
+  Stage-C lattice master theorem `…_lattice_thresholded` by the same Piece-5 pushforward
+  (`asymTorusInteractingMeasureIso`) + pairing (`asymLatticeTestFnIso`) argument as the legacy
+  `asymInteractingVariance_le_freeVariance_Lt_uniform` — but consuming the lattice THEOREM
+  instead of the legacy axiom. Kernel footprint (verified `#print axioms` 2026-07-13):
+  trio + exactly the 5 Stage-C axioms `{fss_infrared_quadratic, asymTransferGap_uniform_fixedLs,
+  asymFinitePeriodicBridge_diagonal_bound, asymFinitePeriodicBridge_remainder_bound_uniform,
+  groundVariance_le_freeCovariance}`.
+* **Migration note added** to the legacy axiom
+  `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`
+  (`Pphi2/AsymTorus/AsymExpMomentDischarge.lean`) docstring: it remains only for the legacy
+  Layer-C wiring, is over-broad at small `Lt` / coarse `a` (true but unproved there); consumers
+  should migrate to the thresholded form (`planning/b2-stageB-holes-spec.md` §C4 design).
+* **Count note**: purely additive — no axioms added or removed; counts unchanged
+  (31 raw / 29 real, 0 sorries; verified `count_axioms.sh` 2026-07-13).
+
+## 2026-07-12 — S2 `asymTransferGap_uniform_fixedLs` introduced (B2 route (a), with hole B-I)
+
+* **New axiom** `asymTransferGap_uniform_fixedLs`
+  (`Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`): the fixed-`Ls` a-uniform spectral
+  gap of the asym transfer operator in **γ-form** — at fixed spatial circumference
+  `Ls = Ns·a` there exist `m₀ > 0`, `a₀ > 0` such that for all `(Nt, Ns, a)` with
+  `Ns·a = Ls`, `a ≤ a₀`, the normalized transfer contracts by `γ = exp(-m₀·a)` on the
+  ground-orthogonal complement. This is §S2 ("17a") of `planning/b2-route-a-statements.md`,
+  entered with the coordinator-pinned statement verbatim. The carrier is the PROVED
+  operator-norm contraction object (`asymTransferNormalized` / `asymGappedTransfer`'s
+  `hnorm` slot), NOT `exp(-a·asymMassGap)`; the coupled `Ns·a = Ls` quantifier is what the
+  removed false predecessors (`spectral_gap_uniform`, `spectral_gap_lower_bound`, PR #60)
+  lacked.
+* **Vetted statement**: Gemini 3.1-pro, 2026-07-12 (§S2 vet record in
+  `planning/b2-route-a-statements.md`; `audit/vetting/asymTransferGap_uniform_fixedLs.md`):
+  `Nt`-dependence through `wickConstantAsym` is harmless (`wickConstantAsym → c(∞, Ns, a)`
+  as `Nt → ∞`; Schrödinger eigenvalues continuous in coefficients; every finite `Nt` has a
+  positive gap, so `inf_{Nt} m_gap > 0`). Expert story: `T_a → e^{-aH(Ls)}` in
+  compact-resolvent sense (`reflection-positivity/docs/B2_UNIFORMITY_QUESTION.md`,
+  Simon *P(φ)₂* Ch. VI).
+* **Consumer (proved, same file)**: `asymSliceFamily_pathMeasure_second_moment_le_fixedLs`
+  — the `γ := exp(-m₀·a)` specialization of the hole B-I slice-family susceptibility bound
+  `asymSliceFamily_pathMeasure_second_moment_le` (steps 1–7 of the Stage-B B-I spec: parity
+  mean-zero, path-measure cyclic invariance, off-diagonal two-observable bridge, AM–GM +
+  wrap-around geometric sum, Piece-1 substitution, K→∞ DCT transfer), making `2/(1-γ)`
+  a-uniformly `≲ 2/(m₀·a)`-controlled at fixed `Ls`.
+* **B-I interface note**: the B-I theorem carries two explicitly-named finite-volume
+  hypotheses NOT derivable from the landed bricks (no new axioms for them): `hDiag`
+  (diagonal one-point ground dominance `∫A_{t,K}(ψ_t)² dμ_path ≤ groundSliceVariance +
+  C_diag·γ^Nt` — the single-slice path-measure marginal is `Z⁻¹·kPow(Nt-1)(x,x)·ν ≠ Ω²·ν`
+  at finite `Nt`) and `hRes` (a `K`-UNIFORM finite-periodic bridge residual constant — the
+  existing axiom `asymFinitePeriodicBridge_remainder_bound` yields a per-contract-pair,
+  hence `K`-dependent, constant which the K→∞ engine cannot consume). Both are `γ^Nt`-
+  remainder data in the exact shapes their discharge will produce; total remainder
+  `(C_diag·Nt + C_off·Nt²)·γ^Nt` feeds the B5b shell's abstract `rem` slot.
+* **Rating**: Standard. **Sources**: GR (Gemini 3.1-pro 2026-07-12, §S2 extraction vet),
+  LP (Glimm–Jaffe Ch. 6, 19; Simon *P(φ)₂* Ch. VI). Discharge route: norm-resolvent
+  convergence of the lattice transfer generator to the spatially cut-off circle
+  Hamiltonian `H(Ls)` + continuity of the bottom of the spectrum + per-lattice Jentzsch
+  gap for the finite-`a` tail.
+* **Count note**: +1 raw/+1 real → 28 raw / 26 real (status.md header + README counter
+  updated in the same commit).
+
+## 2026-07-13 — Asym exponential clustering PROVED (2-axiom footprint)
+
+* **`asymSliceObsTrunc_exponential_clustering_fixedLs`**
+  (`Pphi2/AsymTorus/AsymClustering.lean`, `050236a`): at fixed `Ls`, connected two-point of
+  truncated slice observables decays in PHYSICAL distance at the a-uniform rate `m₀` (two-arc
+  periodic form + `e^{−m₀(Lt−τ)}` residual tail), with the `√gSV·√gSV'` envelope. Kernel
+  footprint (independently re-verified): trio + **only**
+  `{asymTransferGap_uniform_fixedLs, asymFinitePeriodicBridge_remainder_bound_uniform}` —
+  the GNS packaged-remainder path was bypassed (`finitePeriodicBridgeResidual` is definitional,
+  so `|conn| ≤ envelope + residual` is `unfold; ring`; Piece 1 + C2 close the envelope legs).
+* This is the honest asym replacement for the removed `clustering_uniform` and the dormant
+  square axioms 14/15 (which remain true-but-dead-branch at fixed `(Ns,a)`), and the direct
+  lattice input for the eventual cylinder OS4 transfer.
+
+## 2026-07-13 — Phase 4.1: honest ℝ² headline (δ₀ vacuity closed; spec D1–D5)
+
+Implements `planning/r2-honest-headline-spec.md` (design 2026-07-12). Counter delta:
+**+1 raw / +1 real → 31 raw / 29 real, 0 sorries** (verified `count_axioms.sh` 2026-07-13;
+the +1 is `pphi2_limit_exists`, theorem → axiom; the D4 deletions were theorems, no count
+change; `continuumLimit_nonGaussian` and `pphi2_nontriviality` are restatements in place).
+
+* **D1 — `IsPphi2Limit` strengthened (δ₀ vacuity CLOSED).** Appended the coupled-lattice
+  conjunct to `IsPphi2Limit` (`Pphi2/ContinuumLimit/Embedding.lean`) and its twin
+  `IsPphi2ContinuumLimit` (`Pphi2/Bridge.lean`): `∃ N : ℕ → ℕ`, `N k → ∞`,
+  `(N k : ℝ) · a k → ∞`, and `∀ k, ν k = continuumMeasure 2 (N k) P (a k) mass` (with
+  `N k ≠ 0`, `0 < a k`, `0 < mass` carried as inner existentials so the `NeZero`/positivity
+  plumbing stays inside the conjunct). `P, mass` are now genuinely used; the previous δ₀
+  witness (`ν k ≡ dirac 0`) is excluded. 3 mechanical destructure touch-ups
+  (`CharacteristicFunctional.lean`, `OS2_WardIdentity.lean` ×2, trailing `_hcoupled`);
+  all forwarding consumers unaffected, exactly per the scope doc
+  (`planning/ispphi2limit-strengthening-scope.md`).
+* **D2 — NEW AXIOM `pphi2_limit_exists`** (`Pphi2/ContinuumLimit/Convergence.lean:325`):
+  existence of the infinite-volume P(φ)₂ continuum limit — the δ₀ proof died by D1, replaced
+  by ONE clearly-labeled OPEN existence input. Conclusion shape kept as the pre-existing
+  `∃ μ (_ : IsProbabilityMeasure μ), IsPphi2Limit μ P mass` (anonymous-constructor form,
+  so downstream `obtain ⟨μ, hμ, h_limit⟩` patterns are untouched).
+  **Vet record (Gemini 3.1-pro, 2026-07-12) — PASSED with citation correction**: (a) type/
+  shape/quantifiers confirmed; (b) strength: NOT Guerra–Rosen–Simon — GKS/FKG monotonicity
+  fails for general even deg ≥ 6 multi-well P (Ellis–Monroe–Newman, CMP 46 (1976)); cited
+  route is Fröhlich, Adv. Math. 23 (1976) + Y.M. Park, J. Math. Phys. 18 (1977) (volume- and
+  spacing-uniform lattice moment bounds via lattice Nelson symmetry/checkerboard), which
+  covers the full InteractionPolynomial class at all couplings; (c) non-vacuous; (d)
+  hypotheses sufficient. **Rating: Standard. Sources: GR, LP.** Discharge route: cylinder
+  campaign M2–M4 + keystone 18 (`docs/cylinder-master-plan.md`). Marked (NOT VERIFIED —
+  statement Gemini-vetted 2026-07-12) pending a full proof.
+* **D3 (partial) — regime hypotheses threaded into `continuumLimit_nonGaussian`**
+  (`Convergence.lean:293`): added `(coupling : ℝ) (hP4 : isPhi4 P coupling)
+  (hweak : IsWeakCoupling P mass coupling)` — the unrestricted all-`P` form is false at the
+  φ⁴₂ critical point. `isPhi4` / `IsWeakCoupling` moved upstream from `Bridge.lean` to
+  `Convergence.lean` (same `Pphi2` namespace ascent keeps Bridge call sites working).
+  Consumers `pphi2_nonGaussianity` / `pphi2_nonGaussian` (`Main.lean`) carry the same
+  hypotheses. The spectral-gap axioms named in spec D3 were already removed 2026-07-12.
+* **D4 — reparametrization artifacts DELETED**: `mass_reparametrization_invariance`
+  (`:= h_limit`, a vacuity artifact) and `mass_reparametrization_exists` (both theorems, no
+  proof-term consumers — verified by grep). Statements + strategy recorded in `docs/plan.md`
+  § "Deferred consistency checks".
+* **D5 — headline restatements**: `pphi2_existence` docstring now names its inputs explicitly
+  (existence = `pphi2_limit_exists`; OS = the 4 inheritance axioms
+  `continuum_exponential_moment_bound`, `canonical_continuumMeasure_cf_tendsto`,
+  `continuum_exponential_clustering`, `rotation_cf_defect_polylog_bound`; interaction/
+  nondegeneracy separate pending keystone 18 → `planning/coherence-analysis.md`).
+  `pphi2_nontriviality` (`Main.lean:158`) RESTATED in the about-the-limit form
+  `IsPphi2Limit μ P mass → ∀ f ≠ 0, 0 < ∫ (ω f)² ∂μ` — with D1 this is a true statement
+  about the real coupled limit (δ₀ gone). Kept as axiom; Rating: Standard (GRS two-point
+  lower bound, Simon Ch. V), (NOT VERIFIED). `pphi2_nontrivial` re-derived via
+  `pphi2_limit_exists`.
+* **Kernel footprint of the headline**: `#print axioms Pphi2.pphi2_existence` = trio +
+  {`pphi2_limit_exists`, `continuum_exponential_moment_bound`,
+  `canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering`,
+  `rotation_cf_defect_polylog_bound`} — grew 4 → 5 project axioms; **that is the honest
+  count** (the previous 4 was purchased by the δ₀ witness).
+
+## 2026-07-13 — B2 STAGE C COMPLETE: the thresholded variance bound is a THEOREM on 5 vetted axioms
+
+* **`asymInteractingVariance_le_freeVariance_lattice_thresholded`**
+  (`Pphi2/AsymTorus/AsymVarianceAssembly.lean`, commit `081ef48`): at fixed `Ls`, there are
+  `C, L₀, a₀ > 0` with `Var_int(ωG) ≤ C·Var_free(ωG)` for ALL `G` and all lattices with
+  `Ns·a = Ls`, `a ≤ a₀`, `Nt·a ≥ L₀`. Kernel footprint (independently re-verified):
+  `[trio] + {fss_infrared_quadratic, asymTransferGap_uniform_fixedLs,
+  asymFinitePeriodicBridge_diagonal_bound, asymFinitePeriodicBridge_remainder_bound_uniform,
+  groundVariance_le_freeCovariance}` — the B3/GNS/measure-factorization chain contributes
+  nothing beyond these five vetted (GR+LP) axioms.
+* **Route recap** (all 2026-07-12/13, `planning/b2-route-a-statements.md` +
+  `planning/b2-stageB-holes-spec.md`): mode-split design (FSS high branch ⊕ gap band branch)
+  after the design-pass verdict killed the oscillation-blind chain; S4 spectral toolkit;
+  S1 integrated-form FSS + proved high branch; Stage A slice-average characterization;
+  B-II band free comparison (honest zero-mode constant); B-I slice-family susceptibility
+  (parity + cyclic invariance proved; τ-form IUC bridge axioms with the fixed-physical-time
+  structure); C1 band-limitedness; C2 hInt discharged via ground-vector Gaussian-decay
+  smoothing (bare trio); C3 per-pair Cauchy–Schwarz sharp remainder; C4 assembly with the
+  pinned a-cancellations (`(2/(1−γ))·(2a/m)` etc.).
+* **Remaining for full B2 closure (wiring, owner-flagged)**: migrate Piece-5 / Layer C to the
+  thresholded (eventual-in-`Lt,a`) form; then the original all-`(Lt,a)` axiom
+  `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform` (over-broad: true-but-unproved
+  at small `Lt` / coarse `a`) can be deleted or restated. Clustering axioms 14/15 ride the
+  same trace bridge next (`planning/cyl-2a-spectral-gap.md`).
+
+## 2026-07-12 — τ-form revision of the K-uniform bridge axioms (statements strengthened in place)
+
+* `asymFinitePeriodicBridge_remainder_bound_uniform` and `_diagonal_bound` restated in the
+  **τ-form** (fixed physical reference time; `2τ ≤ Nt·a` proviso): constants now depend only
+  on `(P, mass, Ls, τ)` — **a-uniform at fixed `Ls`** — with damping `γ^(Nt − ⌈τ/a⌉)` and
+  explicit `√groundSliceVariance` observable factors. Two-step vet (Gemini 3.1-pro,
+  2026-07-12): (i) the per-step IUC constant blows up as `a → 0` (short-time kernel), so the
+  previous per-instance form was implicitly a-divergent; (ii) the τ-form with HS
+  Cauchy–Schwarz splitting (operator norm on short arcs, IUC only across a fixed-τ window,
+  `γ^{−⌈τ/a⌉} = e^{m₀τ}` at the S2 gap) is exact — full proof blueprint recorded in
+  `planning/b2-stageB-holes-spec.md` §"Item-1 upgrade". This RESOLVES Stage-C design
+  question #1 (the `a → 0` remainder corner): remainder/main ≈ `C·Lt·m₀·e^{−m₀(Lt−τ)}`,
+  bounded in `a`, decaying in `Lt`.
+* Consumers rederived: `asymSliceFamily_pathMeasure_second_moment_le'` and `…_fixedLs'`
+  (τ-form, `gSVSum`-unit remainders); the two core B-I theorems generalized to an abstract
+  remainder slot `R` (no proof change — `γ^Nt` was already opaque). Counts unchanged
+  (30 raw / 28 real). Small-`Lt` regime (`Nt·a < 2τ`) deferred to Stage C explicitly.
+
+## 2026-07-12 — K-uniform finite-periodic bridge axioms (B-I cleanup; +2)
+
+* **New axioms (2)** in `Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`:
+  `asymFinitePeriodicBridge_remainder_bound_uniform` (K-uniform family form of the GNS
+  remainder — the per-contract `asymFinitePeriodicBridge_remainder_bound` allows `C_rem` to
+  depend on `‖A_K‖_∞`, hence on `K`, which blocks the K→∞ dominated-convergence step) and
+  `asymFinitePeriodicBridge_diagonal_bound` (single-slice marginal has density
+  `Z⁻¹·kPow(Nt−1)(x,x)`, not `Ω²` — the `O(γ^Nt)` correction, K-uniform).
+* **Vetting (statement level, Gemini 3.1-pro 2026-07-12)**: intrinsic ultracontractivity
+  `T(x,y) ≤ C·Ω(x)Ω(y)` reduces all residual/diagonal trace terms to Ω-weighted `L¹/L²`
+  data, so the clamp domination `|A_K| ≤ |⟨g,·⟩|` transfers with no `‖A‖_∞` penalty.
+  Constants may depend on `(a, Ls)` — NOT claimed a-uniform (the `a→0` corner is Stage-C
+  design question #1, `planning/b2-stageB-holes-spec.md`). Rating: **Standard** /
+  Sources: GR, LP (IUC for Schrödinger semigroups with confining potentials — Davies–Simon;
+  GJ trace bounds). Old per-contract axiom retained (supersession note added) for the
+  finite-K bridge theorems; all three collapse in the trace-bridge discharge.
+* **Consumers (proved, same commit)**: `asymSliceFamily_pathMeasure_second_moment_le'`
+  (hypothesis-free hole B-I) and `asymSliceFamily_pathMeasure_second_moment_le_fixedLs'`
+  (S2-specialized, hypothesis-free).
+* **Counts**: pphi2 28 raw / 26 real → **30 raw / 28 real**, 0 sorries.
+
+## 2026-07-12 — S1 `fss_infrared_quadratic` introduced (B2 route (a))
+
+* **New axiom** `fss_infrared_quadratic` (`Pphi2/AsymTorus/AsymInfraredBound.lean`): the
+  Fröhlich–Simon–Spencer infrared bound / Gaussian domination in **integrated quadratic
+  form** — on the zero-mode complement (`∑ x, h x = 0`) the interacting second moment is
+  dominated by the massless free quadratic form `(a²)⁻¹·Σ_k (λ_k − m²)⁻¹·c_k(h)²`,
+  uniformly in `(a, Nt, Ns)` and at all couplings. This is §S1 of
+  `planning/b2-route-a-statements.md` (the B2 route (a) statement package), entered with
+  the coordinator-pinned statement verbatim.
+* **Vetted statement**: Gemini 3.1-pro, 2026-07-12 — constant `c₀ = 1` is EXACT in this GJ
+  normalization (kinetic action `½⟨φ,(−Δ_unscaled)φ⟩`, β = ½; mass and Wick terms live in
+  the single-site factor and never enter the denominator). See the §S1 vet record in
+  `planning/b2-route-a-statements.md` and `audit/vetting/fss_infrared_quadratic.md`.
+* **Consumer (proved, same file)**: `asymHighModes_variance_le_freeVariance` — the
+  high-branch comparison `Var_int(P_S G) ≤ (1 + m²/κ²)·Var_free(P_S G)` for mode sets `S`
+  with `m² + κ² ≤ λ_k`, via the proved zero-mode-complement lemma
+  `sum_asymModeProj_eq_zero` (constants are `m²`-eigenvectors; nonconstant eigenvectors
+  sum to zero by self-adjointness).
+* **Rating**: Standard. **Sources**: GR (Gemini 3.1-pro 2026-07-12), LP
+  (Fröhlich–Simon–Spencer, Comm. Math. Phys. 50 (1976) 79–95; Simon *P(φ)₂*; Glimm–Jaffe).
+  Discharge route: lattice RP over the kinetic bonds → Gaussian domination
+  `Z[h] ≤ Z[0]·exp(½⟨h,(−Δ)⁻¹h⟩)` → `t²`-expansion at the Z₂-even measure (shares the
+  Griffiths–Simon machinery with Layer A).
+* **Count note**: +1 raw/+1 real on this branch; full count reconciliation deferred until
+  PR #60 merges (the removal branch changes the same counters).
+
+## 2026-07-12 — ⚠⚠ `spectral_gap_uniform` + `spectral_gap_lower_bound` are FALSE as stated
+
+* **Finding (hand computation + Gemini 3.1-pro verification + consumer trace, 2026-07-12):**
+  both axioms (`TransferMatrix/SpectralGap.lean:89,100`) are stated at **fixed `Ns`** with
+  `a → 0` — a shrinking-volume limit in which the hard-coded 2D Wick constant is the *wrong*
+  counterterm: its zero-mode contribution `(a²N²m²)⁻¹` diverges like `a⁻²` (in the coupled
+  `N·a = L` limit it is the finite `m⁻²/L²`). The over-subtraction gives the spatial zero mode
+  a symmetric double well (minima `~ a⁻¹`, barrier `~ a⁻³`); the gap is a tunneling splitting
+  `massGap ~ (1/a)·e^{−c/a²} → 0`. This falsifies `∃ m₀ > 0` uniformly in `a` at **every**
+  coupling (every `InteractionPolynomial` has leading coefficient `1/n > 0`) — a different and
+  earlier failure than the known criticality caveat. **Rating: FALSE (was ⚠ Correct for P(Φ)₂).**
+* **Mitigation:** proof-term trace confirms both axioms and the entire lattice OS4 chain
+  (`two_point_clustering_lattice`, `general_clustering_lattice`, `clustering_uniform`,
+  `os4_lattice`, `exponential_mixing`) are a **dead branch** — zero external consumers; Main's
+  OS4 rests on the standalone `continuum_exponential_clustering`. The headline kernel trace is
+  uncontaminated. Nevertheless false axioms in the build are a standing soundness hazard.
+* **Action required (soon, small PR):** delete or restate along a coupled sequence
+  (fixed `L = N·a`, or `N·a → ∞` + `IsWeakCoupling`), per
+  `planning/cyl-2a-volume-scaling-addendum.md` (17a/17b split). The fixed-`(Ns,a)` clustering
+  axioms 14/15 are unaffected (they don't take the `a→0` limit).
+
+## 2026-07-12 — ⚠ Layer A axiom `asymInteracting_mgf_gaussianDominated` OVER-QUANTIFIED
+
+**RESOLVED 2026-07-13 — restated** (hypothesis `∀ x, 0 ≤ f x` added; signed-split lemma
+landed as its consumer in `AsymSignedSplit.lean`; rating Flagged → Standard
+(sign-restricted) — see the 2026-07-13 entry above).
+
+* **Flag (Gemini 3.1-pro vet of the Layer-A scoping, 2026-07-12; arithmetic verified by hand):**
+  the axiom (`Pphi2/AsymTorus/AsymExpMomentDischarge.lean:127`) quantifies over **all**
+  `f : AsymLatticeField Nt Ns`, but Newman/Lee–Yang Gaussian domination requires **same-sign**
+  coefficients. Counterexample mechanism: 2-spin ferromagnet, `S = σ₁ − σ₂` — the `t⁴`
+  comparison fails for `J > ½·log 2`; equivalently, mixed-sign `fᵢfⱼfₖfₗ` against
+  Lebowitz-negative `u₄` makes `κ₄(⟨ω,f⟩) > 0`. The 2026-06-02 vet confirmed the K=2/Var form
+  but not the quantifier. **Rating downgraded: Likely correct → Flagged (over-quantified).**
+* **Fix path** (campaign PR, see `planning/layer-a-lee-yang-scoping.md`): add sitewise `0 ≤ f`
+  to the axiom; recover signed `f` in Layer C via the `f = f₊ − f₋` split + Cauchy–Schwarz
+  (constants change to `K = 2`, variance `2(Var f₊ + Var f₋)` — compatible with the Layer C
+  target form). Downstream Layer C consumers must NOT feed signed `f` into Layer A directly.
+* **Codex second opinion (GPT-5.5, 2026-07-12): CONFIRMED on all points** — arithmetic verified;
+  Newman/Lee–Yang literature requires same-sign coefficients; the axiom is **positively false
+  for the P(φ)₂ class** (deep double-well single-site concentration → Ising reduction; Wick
+  ordering cannot repair it), and its `K = 2` absolute-value form falls to amplification
+  (`n` mixed-sign pairs: `n·log(1+p(cosh 2 − 1)) > n·2p + log 2`). Refined fix constants:
+  the `f = f₊ − f₋` split with Cauchy–Schwarz + Newman at `2f±` gives
+  `E e^{|⟨ω,f⟩|} ≤ 2·exp(Var(f₊) + Var(f₋))` (NOT half that — the `2f±` doubling cancels the
+  `½`). ⚠ Downstream: `V_free(f₊) + V_free(f₋)` is NOT controlled by `V_free(f)` (cross-term
+  cancellation); state the Layer C seminorm at `|f|` — sound since the free lattice covariance
+  kernel is entrywise ≥ 0 (random walk), so `V(f₊) + V(f₋) ≤ V(|f|)`. Rating stays
+  **Flagged (FALSE as stated)**; restatement in the campaign PR.
+
+## 2026-07-12 — Upstream Nelson/hypercontractivity chain is axiom-free (kernel-verified)
+
+* **Finding (Phase 1 of `planning/completion-plan-2026-07.md`):** at pphi2's current pins
+  (gaussian-hilbert `56ee09f` = its main HEAD; markov-semigroups `acf6491`), `#print axioms`
+  yields exactly `[propext, Classical.choice, Quot.sound]` for
+  `GaussianHilbert.ouSemigroupAct_eLpNorm_hypercontractive`,
+  `GaussianHilbert.bonami_nelson_chaos`, and
+  `GaussianHilbert.polynomial_chaos_concentration`. The whole
+  hypercontractivity → chaos-concentration chain feeding pphi2's `NelsonEstimate/` is
+  **theorem-backed upstream**; the Gross step routes through markov-semigroups' proved
+  `gross_lsi_implies_hypercontractive_of_hypotheses`
+  (`Instances/WorkInProgress/EuclideanHypercontractive.lean:482`), not the legacy axiom
+  `gross_lsi_implies_hypercontractive` (`Abstract/Hypercontractivity.lean:648`), and the
+  Concentration axioms (`herbst_mgf_bound`, `poincare_of_lsi`) are not in the closure.
+* **Consequence for the tables below:** the "gaussian-hilbert 1 axiom
+  (`ouSemigroupAct_eLpNorm_hypercontractive`)" row and the markov-semigroups "11 axioms"
+  row overstate the *load-bearing* debt for pphi2's Nelson chain — the remaining
+  markov-semigroups axioms (16 raw on main, incl. legacy Gross/Stroock–Varopoulos,
+  Herbst, DZ, matrix) are dormant for this chain. Cross-checked against
+  `random-fields/RandomFields` `Instances/OUDiffusion`, whose
+  `gaussian_{hypercontractive,lp_improvement,chaos_hypercontractive}` are independently
+  kernel-verified axiom-free (same DirichletMarkovSemigroup lineage).
+* **Stale-doc flag:** gaussian-hilbert `HypercontractivityFromBE.lean:21–46` ("inherits four
+  non-core axioms") predates the markov-semigroups discharges and needs updating in that repo;
+  likewise RandomFields `GrossODE.lean` carries "documented `sorry`" status prose over
+  now-complete proofs.
 ## 2026-07-12 — `spectral_gap_uniform` + `spectral_gap_lower_bound` REMOVED (false as stated)
 
 * **Finding (hand computation + Gemini 3.1-pro verification + proof-term consumer trace):**
@@ -731,21 +1130,21 @@ elementary inequality `x² ≤ 2 e^|x|` and a scaling optimization.
 eventual pullback RP predicate `CylinderMeasureSequenceEventuallyReflectionPositive`
 and proves the IR-limit OS3 transfer by characteristic-functional convergence.
 
-## Current pphi2 Axiom Inventory (26 raw / 24 real as of 2026-07-12, 0 sorries)
+## Current pphi2 Axiom Inventory (31 raw / 29 real as of 2026-07-13, 0 sorries)
 
 This table is generated from the current `./scripts/count_axioms.sh` result and
 is the source of truth for active pphi2 axioms in this audit. Historical branch
 cohorts are retained below for provenance only.
 
-### Main inventory (24 real axioms — updated 2026-07-12 after the SpectralGap removal)
+### Main inventory (29 real axioms — updated 2026-07-13 after Phase 4.1 honest-headline)
 
 | File | Active axioms | Names |
 |------|---------------|-------|
 | `Pphi2/Bridge.lean` | 2 | `schwinger_agreement`, `os2_from_phi4` |
 | `Pphi2/ContinuumLimit/AxiomInheritance.lean` | 3 | `continuum_exponential_moment_bound`, `canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering` |
-| `Pphi2/ContinuumLimit/Convergence.lean` | 1 | `continuumLimit_nonGaussian` |
+| `Pphi2/ContinuumLimit/Convergence.lean` | 2 | `continuumLimit_nonGaussian` (regime-restricted 2026-07-13), `pphi2_limit_exists` (NEW 2026-07-13, D2) |
 | `Pphi2/GaussianContinuumLimit/PropagatorConvergence.lean` | 1 | `latticeGreenBilinear_basis_tendsto_continuum` |
-| `Pphi2/Main.lean` | 1 | `pphi2_nontriviality` |
+| `Pphi2/Main.lean` | 1 | `pphi2_nontriviality` (restated about-the-limit 2026-07-13, D5) |
 | `Pphi2/OSProofs/OS2_WardIdentity.lean` | 1 | `rotation_cf_defect_polylog_bound` |
 | `Pphi2/OSProofs/OS3_RP_Lattice.lean` | 1 | `gaussian_rp_cov_perfect_square` (private) |
 | `Pphi2/OSProofs/OS4_MassGap.lean` | 2 | `two_point_clustering_from_spectral_gap`, `general_clustering_from_spectral_gap` |
@@ -755,7 +1154,9 @@ cohorts are retained below for provenance only.
 | `Pphi2/AsymTorus/AsymExpMomentDischarge.lean` | 2 | `asymInteracting_mgf_gaussianDominated`, `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform` |
 | `Pphi2/NelsonEstimate/PolynomialChaosBridge.lean` | 1 | `nelson_exponential_estimate_master_bounded` |
 | `Pphi2/AsymTorus/AsymTorusOS.lean` | 1 | `asymTorusInteracting_exponentialMomentBound` (private) |
-| **Subtotal** | **24** | |
+| `Pphi2/AsymTorus/AsymInfraredBound.lean` | 1 | `fss_infrared_quadratic` (S1, 2026-07-12) |
+| `Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean` | 3 | `asymTransferGap_uniform_fixedLs` (S2, 2026-07-12), `asymFinitePeriodicBridge_remainder_bound_uniform`, `asymFinitePeriodicBridge_diagonal_bound` (K-uniform τ-form bridge pair, 2026-07-12) |
+| **Subtotal** | **29** | |
 
 ### Historical note: isotropic `Z_Nt × Z_Ns` cylinder redesign
 

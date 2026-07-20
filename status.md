@@ -16,15 +16,42 @@ and backend-independent reconstruction rules. This keeps the current scalar
 positive-measure construction explicit while opening a path to broader
 Euclidean/Minkowski interfaces.
 
-**Current counter (`./scripts/count_axioms.sh`, 2026-07-12): pphi2 26 raw / 24 real axioms,
+**Current counter (`./scripts/count_axioms.sh`, 2026-07-14): pphi2 29 raw / 27 real axioms,
 0 sorries; gaussian-field 3 axioms, 0 sorries** (both verified via `count_axioms.sh`,
-GaussianField pinned at `5bb35e8`). The 26 raw → 24 real reconciliation: 2 lines are docstring
+GaussianField pinned at `5bb35e8`). The 29 raw → 27 real reconciliation: 2 lines are docstring
 matches of the word "axiom" (`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
 `Pphi2/NelsonEstimate/LayerCake.lean:85`).
+**2026-07-13 (Phase 4.1, honest ℝ² headline — spec `planning/r2-honest-headline-spec.md`):**
+`IsPphi2Limit` strengthened with the coupled-lattice conjunct (`ν k = continuumMeasure 2 (N k)
+P (a k) mass`, `N k → ∞`, `N k·a k → ∞`) — the δ₀ vacuity is CLOSED; the former δ₀ "proof" of
+`pphi2_limit_exists` is replaced by ONE Gemini-vetted OPEN existence axiom (**+1 axiom**,
+Fröhlich 1976 + Park 1977 tightness route, Rating Standard, **(NOT VERIFIED)** pending proof);
+`continuumLimit_nonGaussian` regime-restricted (`isPhi4` + `IsWeakCoupling` hypotheses, moved
+upstream to `Convergence.lean`); `pphi2_nontriviality` restated about-the-limit
+(`IsPphi2Limit μ P mass → ∀ f ≠ 0, S₂(f,f) > 0`, **(NOT VERIFIED)**, GRS two-point lower
+bound); the vacuous reparametrization theorems deleted (→ `docs/plan.md` § Deferred
+consistency checks). `#print axioms Pphi2.pphi2_existence` = trio + 5 project axioms
+(the 4 inheritance axioms + `pphi2_limit_exists`) — the honest count. The +2 over the pre-route-(a) base are the vetted
+B2 route-(a) axioms `fss_infrared_quadratic` (S1, AXIOM_AUDIT.md 2026-07-12 S1 entry) and
+`asymTransferGap_uniform_fixedLs` (S2, γ-form fixed-`Ls` a-uniform transfer gap,
+`Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`, AXIOM_AUDIT.md 2026-07-12 S2 entry).
 **2026-07-12: `spectral_gap_uniform` and `spectral_gap_lower_bound` were REMOVED as false**
 (fixed-`Ns` shrinking-volume regime; wrong-counterterm double-well closes the gap — see
 `AXIOM_AUDIT.md` 2026-07-12 and `planning/cyl-2a-volume-scaling-addendum.md`; they had no
-proof-term consumers). The 24 real break down as **22 architectural** (enumerated by OS-program cluster in
+proof-term consumers). **2026-07-13 (B2 Stage C): the thresholded master theorem
+`asymInteractingVariance_le_freeVariance_lattice_thresholded`
+(`Pphi2/AsymTorus/AsymVarianceAssembly.lean`) landed** — kernel footprint = trio +
+{`fss_infrared_quadratic`, `asymTransferGap_uniform_fixedLs`,
+`asymFinitePeriodicBridge_diagonal_bound`, `asymFinitePeriodicBridge_remainder_bound_uniform`,
+`groundVariance_le_freeCovariance`}; no new axioms, counts unchanged (30 raw, 0 sorries).
+**2026-07-13 (item 3a): asym exponential clustering in physical distance landed**
+(`asymSliceObsTrunc_exponential_clustering_fixedLs`,
+`Pphi2/AsymTorus/AsymClustering.lean`): at fixed `(Ls, τ)` the truncated-slice connected
+two-point decays as `C·√gSV·√gSV'·(e^{−m₀·d·a} + e^{−m₀·(Nt·a−d·a)} + e^{−m₀·(Nt·a−τ)})`,
+a-uniformly; kernel footprint = trio + {`asymTransferGap_uniform_fixedLs`,
+`asymFinitePeriodicBridge_remainder_bound_uniform`} only (the definitional
+envelope/residual split avoids the packaged GNS-bridge axioms); no new axioms, counts
+unchanged (30 raw, 0 sorries). The 24 real break down as **22 architectural** (enumerated by OS-program cluster in
 [`planning/INDEX.md`](planning/INDEX.md), the master status machine) and **2 private
 scaffolding** (`asymTorusInteracting_exponentialMomentBound` in `AsymTorusOS.lean`,
 `gaussian_rp_cov_perfect_square` in `OS3_RP_Lattice.lean`). The seven new architectural axioms
@@ -60,7 +87,26 @@ Phase 3 produces `MeasureHasGreenMomentBound` as a theorem (per `Lt`) and, via t
 reflection-positivity and OS2-symmetry inputs. The generic Gaussian exp-moment lemma
 `GaussianField.gaussian_exp_abs_moment` and the weak-limit transfer
 `GaussianField.weakLimit_exponential_moment` are theorems (0 axioms). See
-`docs/cylinder-conditional-inputs-provability.md` for the input-by-input provability map. pphi2 also depends on markov-semigroups and gaussian-hilbert (axiom counts
+`docs/cylinder-conditional-inputs-provability.md` for the input-by-input provability map.
+**Cylinder OS3 (RP) fully discharged (2026-07-20):** the `hRP` reflection-positivity hypothesis has
+been **removed** from both `cylinderIso_OS_of_RP_OS2` and `routeBPrimeIso_cylinder_OS` — cylinder OS3
+is now unconditional on any external RP input. Route: bumped the reflection-positivity dependency
+(`387b2ad→1cf7183`) for the generic GJ 6.2.2 lattice-RP theorem; **Phase 1** (`da8d134`, axiom-free)
+proved lattice RP of the asym-torus interacting measure under the link reflection `θ_L(t,x)=(Nt-1-t,x)`
+(`AsymReflectionPositivity.lean`); **A′** (`31a9677`,`33e62cc`) transported it to the finite-`n`
+cylinder link-RP matrix on no-wrap pure-tensor generators; **B′** (`dbcea6a`…`e6687f3`) is the joint
+`θ_a→θ` weak-limit closure (rescaling `∫|ωh|≤C'σ(h)` helper + a uniform seminorm-proportional
+second-moment bound giving the diagonal vanishing); **assembly** (`c33579e`…`64349cf`) instantiates
+the closure + density-extends after `Lt→∞` and drops `hRP`. `#print axioms`:
+`cylinderIso_OS_of_RP_OS2` = bare trio + `embed_l2_uniform_bound` +
+`asymInteracting_expMoment_volume_uniform` (NO new axioms). Full record:
+`planning/rp-adapter-phase2-plan.md`. **`hOS2` was also dropped** (`f5896f1`, heterogeneous Iso OS2
+gap filled in `Pphi2/AsymTorus/AsymIsoOS.lean`): `cylinderIso_OS_of_RP_OS2` now takes only
+`(P, mass, hmass)` — no external hypotheses. Verified `#print axioms` = `[propext, Classical.choice,
+Quot.sound]` + `GaussianField.embed_l2_uniform_bound` + `Pphi2.asymInteracting_expMoment_volume_uniform`.
+So cylinder `S¹(Ls)×ℝ` OS0/OS1/OS2/OS3 now rests on exactly the CYL-1a volume-uniform exp-moment
+axiom plus the pre-existing `embed_l2_uniform_bound` — nothing else. Remaining cylinder streams:
+the CYL-1a exp-moment axiom itself, and OS4 (mass gap/clustering). pphi2 also depends on markov-semigroups and gaussian-hilbert (axiom counts
 track `main` — see [`docs/AXIOM_STATUS.md`](docs/AXIOM_STATUS.md) and each repo's own
 `AXIOM_AUDIT.md`) for the upstream `polynomial_chaos_concentration` API used by Cluster A, and now
 on [`gibbs-variational`](https://github.com/mrdouglasny/gibbs-variational) (0 axioms, 1
@@ -256,10 +302,10 @@ itself is a theorem via `embeddedTwoPoint_eq_latticeGreenBilinear`.
 | 3 | `TransferMatrix/SpectralGap.lean` | 0 axioms (2 removed 2026-07-12 as false; `spectral_gap_pos` proved) |
 | 3 | `OSProofs/OS4_MassGap.lean` | 2 axioms, 0 sorries |
 | 3 | `OSProofs/OS4_Ergodicity.lean` | 0 axioms, 0 sorries |
-| 4 | `ContinuumLimit/Embedding.lean` | 0 axioms (`IsPphi2Limit` is a def) |
+| 4 | `ContinuumLimit/Embedding.lean` | 0 axioms (`IsPphi2Limit` is a def; strengthened 2026-07-13 with the coupled-lattice conjunct — δ₀ excluded) |
 | 4 | `ContinuumLimit/Hypercontractivity.lean` | 1 axiom, 0 sorries (Stage 1: `exponential_moment_bound` axiomatised — uniform-in-`a≤1` claim no longer holds via the easy pointwise lower bound under GJ-aligned wickConstant; Phase 2). `wickConstant_eq_variance` updated to use `latticeCovarianceGJ` via the bridge `latticeCovariance_GJ_eq_inv_smul_bare`. |
 | 4 | `ContinuumLimit/Tightness.lean` | **0 axioms, 0 sorries** (`continuumMeasures_tight` proved from Mitoma-Chebyshev + `interacting_moment_bound`) |
-| 4 | `ContinuumLimit/Convergence.lean` | 1 axiom, 0 sorries (`continuumLimit` and `pphi2_limit_exists` proved) |
+| 4 | `ContinuumLimit/Convergence.lean` | 2 axioms, 0 sorries (`continuumLimit` proved; `pphi2_limit_exists` is the vetted OPEN existence axiom since 2026-07-13; `continuumLimit_nonGaussian` regime-restricted) |
 | 4 | `ContinuumLimit/AxiomInheritance.lean` | **3 axioms, 0 sorries** (`continuum_exponential_moment_bound`, `canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering`; derived OS0/OS1/OS4 inheritance wrappers live here) |
 | 4 | `ContinuumLimit/CharacteristicFunctional.lean` | 0 axioms, 0 sorries (complex analyticity, complex-from-real invariance, Z₂/reality, translation continuity, ergodicity support) |
 | 4 | `ContinuumLimit/TimeReflection.lean` | 0 axioms, 0 sorries (continuum time reflection on Schwartz space and distributions) |
@@ -283,7 +329,7 @@ itself is a theorem via `embeddedTwoPoint_eq_latticeGreenBilinear`.
 | — | `OSforGFF/TimeTranslation.lean` | 0 axioms, 0 sorries (Schwartz translation continuity) |
 | 6 | `OSAxioms.lean` | 0 axioms, 0 sorries |
 | 6 | `FormulationAdapter.lean` | 0 axioms, 0 sorries (exports `Pphi2` into the shared formulation layer) |
-| 6 | `Main.lean` | 1 axiom, 0 sorries |
+| 6 | `Main.lean` | 1 axiom, 0 sorries (`pphi2_nontriviality`, restated about-the-limit 2026-07-13; reparametrization theorems removed → `docs/plan.md`) |
 | 4T | `TorusContinuumLimit/TorusEmbedding.lean` | 0 axioms, 0 sorries (`torusContinuumGreen` now `greenFunctionBilinear`) |
 | 4T | `TorusContinuumLimit/TorusPropagatorConvergence.lean` | **0 axioms**, 0 sorries (Phase 2 Cluster B partial 2026-05-08: `torusEmbeddedTwoPoint_uniform_bound` and `torus_propagator_convergence_GJ` both discharged via the `(a^d)⁻¹ · (L/N)² = 1` cancellation between `evalTorusAtSiteGJ` and `latticeCovarianceGJ`). |
 | 4T | `TorusContinuumLimit/TorusTightness.lean` | 0 axioms, 0 sorries |

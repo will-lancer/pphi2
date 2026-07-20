@@ -589,6 +589,57 @@ OSProofs/* + ContinuumLimit/AxiomInheritance ←── Main.lean
 
 ---
 
+## Deferred consistency checks
+
+Recorded conjectures, removed from `Main.lean` 2026-07 (spec
+`planning/r2-honest-headline-spec.md` D4). Their previous Lean "proofs"
+(`:= h_limit`) were vacuity artifacts of the unstrengthened `IsPphi2Limit`
+(which did not use `P` or `mass`); after the D1 coupling conjunct they become
+genuine statements requiring a real lattice reparametrization lemma — a
+plausible but bounded project of its own, not attempted in that PR.
+
+### Mass reparametrization invariance (conjecture)
+
+**Statement.** For `P : InteractionPolynomial`, `0 < mass`, `0 < mass'`, and a
+probability measure `μ` on S'(ℝ²):
+
+```
+IsPphi2Limit μ P mass →
+IsPphi2Limit μ (P.shiftQuadratic (mass ^ 2 / 2 - mass' ^ 2 / 2)) mass'
+```
+
+The continuum limit measure depends on the total action, not on how it is
+split between the Gaussian reference measure and the interaction polynomial.
+The total lattice action is `½ φ·(−Δ+m²)·φ + Σ_x :P(φ(x)):`, where the
+Gaussian contributes `m²/2 · τ²` to the quadratic part. Shifting
+`mass → mass'` while compensating `P → P + mass²/2 − (mass')²/2` (via
+`shiftQuadratic`) leaves the total action unchanged at each lattice spacing.
+
+**Strategy.** Prove the lattice-level measure equality
+`interactingLatticeMeasure d N P a mass = interactingLatticeMeasure d N
+(P.shiftQuadratic (mass²/2 − mass'²/2)) a mass'` directly from the definition
+(the Boltzmann densities agree once the Wick-ordered quadratic counterterm
+shift is matched against the Gaussian covariance change — this is the real
+content: the Wick ordering is with respect to *different* Gaussian covariances
+on the two sides, so the identity needs the Wick-reordering formula, not just
+algebra). Then the witnessing sequence of the strengthened `IsPphi2Limit`
+(with the same `N k`, `a k`) transports verbatim.
+
+### Mass reparametrization, existence form (corollary of the above)
+
+**Statement.** For any `(P, mass, mass')` with `0 < mass`, `0 < mass'`:
+
+```
+∃ (μ : Measure FieldConfig2) (_ : IsProbabilityMeasure μ),
+  IsPphi2Limit μ P mass ∧
+  IsPphi2Limit μ (P.shiftQuadratic (mass ^ 2 / 2 - mass' ^ 2 / 2)) mass'
+```
+
+**Strategy.** Immediate from `pphi2_limit_exists` plus the invariance
+conjecture above; re-derive once that lemma lands.
+
+---
+
 ## References
 
 ### P(Φ)₂ Construction
