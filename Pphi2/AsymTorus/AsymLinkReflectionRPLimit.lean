@@ -300,6 +300,55 @@ theorem asymGaussianIso_second_moment_le_seminorm
       dsimp [C]
       ring
 
+/-- The heterogeneous lattice Gaussian second moments vanish along every
+cylinder test-function sequence tending to zero. This is the diagonal
+covariance control required by the moving-reflection RP limit. -/
+theorem asymCylinderLatticeSecondMoment_tendsto_zero_of_tendsto
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (mass : ℝ) (hmass : 0 < mass)
+    (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k))
+    (ha : ∀ k, 0 < a k)
+    (hseq : ℕ → CylinderTestFunction Ls)
+    (hseq0 : Tendsto hseq atTop (nhds 0)) :
+    Tendsto (fun k =>
+      haveI := hNt k
+      haveI := hNs k
+      ∫ ω : Configuration (AsymLatticeField (Nt k) (Ns k)),
+        (ω (asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+          (cylinderToTorusEmbed Lt Ls (hseq k)))) ^ 2
+        ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k) mass (ha k) hmass))
+      atTop (nhds 0) := by
+  obtain ⟨C, hC_pos, hbound⟩ :=
+    asymGaussianIso_second_moment_le_seminorm Lt Ls mass hmass
+  have hembed : Tendsto
+      (fun k => cylinderToTorusEmbed Lt Ls (hseq k))
+      atTop (nhds 0) := by
+    have h := (cylinderToTorusEmbed Lt Ls).cont.continuousAt.tendsto.comp hseq0
+    simpa using h
+  have hp0 : Tendsto
+      (fun k => RapidDecaySeq.rapidDecaySeminorm 0
+        (cylinderToTorusEmbed Lt Ls (hseq k)))
+      atTop (nhds 0) := by
+    have h :=
+      (RapidDecaySeq.rapidDecay_withSeminorms.continuous_seminorm 0).continuousAt.tendsto.comp
+        hembed
+    convert h using 1
+    exact congrArg nhds (map_zero (RapidDecaySeq.rapidDecaySeminorm 0)).symm
+  have hupper : Tendsto
+      (fun k => C * (RapidDecaySeq.rapidDecaySeminorm 0
+        (cylinderToTorusEmbed Lt Ls (hseq k))) ^ 2)
+      atTop (nhds 0) := by
+    simpa using (hp0.pow 2).const_mul C
+  refine squeeze_zero (fun k => ?_) (fun k => ?_) hupper
+  · haveI := hNt k
+    haveI := hNs k
+    exact integral_nonneg fun _ => sq_nonneg _
+  · haveI := hNt k
+    haveI := hNs k
+    exact hbound (Nt k) (Ns k) (a k) (ha k)
+      (cylinderToTorusEmbed Lt Ls (hseq k))
+
 /-- A scaled exponential-moment bound controls the absolute first moment by
 the square root of its variance parameter.
 

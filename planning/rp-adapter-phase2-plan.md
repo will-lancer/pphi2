@@ -142,7 +142,7 @@ subsequence (`a(φn)→0`), with **bounded-continuous weak convergence `∫ g d�
 Dispatch order: A′ first (foundational, no limit, uses Phase 1 directly), then B′ (the analysis
 crux — joint measure+operator limit with distributional moment control), then assembly + 2b.
 
-## 2026-07-20 B′ limit closure landed; concrete diagonal covariance bridge remains
+## 2026-07-20 B′ limit closure and diagonal covariance bridge landed
 
 Landed in `Pphi2/AsymTorus/AsymLinkReflectionRPLimit.lean`:
 
@@ -150,12 +150,14 @@ Landed in `Pphi2/AsymTorus/AsymLinkReflectionRPLimit.lean`:
   `K * exp 1 * sqrt C * sqrt sigmaSq` bound;
 - `cylinderPullbackMeasure_cexp_tendsto_of_tendsto_bc`;
 - `cylinderRPMatrixNonnegative_of_link_limit`, the fixed-family joint weak-measure and moving-link
-  reflection closure theorem.
+  reflection closure theorem;
+- `asymTorusSiteEval_norm_sq_le_seminorm` and
+  `asymGaussianIso_second_moment_le_seminorm`, the cutoff-independent heterogeneous covariance
+  bound;
+- `asymCylinderLatticeSecondMoment_tendsto_zero_of_tendsto`, which discharges the
+  `hsigmaSq_zero` input for the concrete lattice covariance controls.
 
-The closure theorem isolates one construction-level input as `hsigmaSq_zero`: the finite-lattice
-quadratic controls must vanish on every moving test sequence tending to zero. The exact remaining
-bridge should be proved as the named lemma
-`asymCylinderLatticeSecondMoment_tendsto_zero_of_tendsto`:
+The named diagonal bridge is now proved in the exact form:
 
 ```lean
 Tendsto hseq atTop (nhds 0) →
@@ -166,10 +168,9 @@ Tendsto hseq atTop (nhds 0) →
     atTop (nhds 0)
 ```
 
-`second_moment_asym_tendsto` proves convergence only for each fixed test function, so it does not
-by itself discharge this diagonal statement. The intended proof is a uniform continuous-seminorm
-(equicontinuity) bound for the heterogeneous `(Nt, Ns, a)` covariance family, followed by
-`hseq → 0`. No axiom or conjecture declaration has been added to Lean.
+The proof uses a uniform continuous rapid-decay seminorm bound for the heterogeneous
+`(Nt, Ns, a)` covariance family and squeezes along `hseq → 0`. B′ is complete; only assembly and
+2b remain. No axiom or conjecture declaration was added to Lean.
 
 ## A′ scaffolding (salvaged from a stalled Codex run, 2026-07-20)
 A Codex attempt at A′ stalled (infra) mid-edit and was reverted, but it identified the right
