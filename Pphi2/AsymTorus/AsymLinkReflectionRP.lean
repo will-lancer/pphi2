@@ -581,23 +581,18 @@ private theorem asymLinkReflectionConfig_measurable
   rw [hEq]
   exact configuration_eval_measurable _
 
-/-- A′ no-wrap link-reflection positivity for embedded cylinder pure tensors.
-
-The hypotheses say that each positive-time cylinder test is a pure tensor with
-time factor supported in `(0, R)` and that the torus time length satisfies
-`Lt = 2*M*a > 2R`, so the embedded lattice observable lies in the positive
-link half without wrapping. -/
-theorem asymTorusInteractingMeasureIso_linkRPMatrix_noWrap
+/-- Link-reflection positivity for embedded cylinder tests whose lattice images
+vanish on the negative link half. This is the exact finite-dimensional support
+condition consumed by lattice reflection positivity. -/
+theorem asymTorusInteractingMeasureIso_linkRPMatrix_of_vanish_negative
     (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
     (M Ns : ℕ) [NeZero M] [NeZero Ns]
     (hvol_t : ((2 * M : ℕ) : ℝ) * a = Lt)
     (_hvol_s : (Ns : ℝ) * a = Ls)
-    (R : ℝ) (hR : 0 < R) (hLtR : 2 * R < Lt)
     (n : ℕ) (f : Fin n → ↥(cylinderPositiveTimeSubmodule Ls)) (c : Fin n → ℂ)
-    (hf : ∀ i, ∃ (g : SmoothMap_Circle Ls ℝ) (h : SchwartzMap ℝ ℝ),
-      h ∈ schwartzPositiveTimeSubmodule ∧
-      (∀ t, R < |t| → h t = 0) ∧
-      (f i : CylinderTestFunction Ls) = NuclearTensorProduct.pure g h) :
+    (hvanish : ∀ i (x : AsymLatticeSites (2 * M) Ns), M ≤ x.1.val →
+      asymLatticeTestFnIso Lt Ls (2 * M) Ns a
+        (cylinderToTorusEmbed Lt Ls (f i : CylinderTestFunction Ls)) x = 0) :
     AsymTorusLinkRPMatrixNonnegative Lt Ls
       (asymTorusInteractingMeasureIso Lt Ls (2 * M) Ns a P mass ha hmass)
       a n (fun i => cylinderToTorusEmbed Lt Ls (f i : CylinderTestFunction Ls)) c := by
@@ -620,11 +615,7 @@ theorem asymTorusInteractingMeasureIso_linkRPMatrix_noWrap
     intro i
     apply config_eval_measurable_asymLinkMPos_of_vanish_negative
     intro x hx
-    rcases hf i with ⟨g, h, hh, hsupp, hfi⟩
-    dsimp [G, F]
-    rw [hfi]
-    exact asymLatticeTestFnIso_cylinderPure_noWrap_vanish_negative
-      Lt Ls M Ns a R hR hLtR g h hh hsupp x hx
+    exact hvanish i x hx
   have hG_meas : ∀ i, Measurable
       (fun ω : Configuration (AsymLatticeField (2 * M) Ns) => ω (G i)) :=
     fun i => configuration_eval_measurable (G i)
@@ -694,5 +685,83 @@ theorem asymTorusInteractingMeasureIso_linkRPMatrix_noWrap
     rw [hEval_i, hEval_j]
   unfold AsymTorusLinkRPMatrixNonnegative
   simpa [F, G, hentry] using hRP_lattice
+
+/-- A′ no-wrap link-reflection positivity for embedded cylinder pure tensors.
+
+The hypotheses say that each positive-time cylinder test is a pure tensor with
+time factor supported in `(0, R)` and that the torus time length satisfies
+`Lt = 2*M*a > 2R`, so the embedded lattice observable lies in the positive
+link half without wrapping. -/
+theorem asymTorusInteractingMeasureIso_linkRPMatrix_noWrap
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (M Ns : ℕ) [NeZero M] [NeZero Ns]
+    (hvol_t : ((2 * M : ℕ) : ℝ) * a = Lt)
+    (hvol_s : (Ns : ℝ) * a = Ls)
+    (R : ℝ) (hR : 0 < R) (hLtR : 2 * R < Lt)
+    (n : ℕ) (f : Fin n → ↥(cylinderPositiveTimeSubmodule Ls)) (c : Fin n → ℂ)
+    (hf : ∀ i, ∃ (g : SmoothMap_Circle Ls ℝ) (h : SchwartzMap ℝ ℝ),
+      h ∈ schwartzPositiveTimeSubmodule ∧
+      (∀ t, R < |t| → h t = 0) ∧
+      (f i : CylinderTestFunction Ls) = NuclearTensorProduct.pure g h) :
+    AsymTorusLinkRPMatrixNonnegative Lt Ls
+      (asymTorusInteractingMeasureIso Lt Ls (2 * M) Ns a P mass ha hmass)
+      a n (fun i => cylinderToTorusEmbed Lt Ls (f i : CylinderTestFunction Ls)) c := by
+  apply asymTorusInteractingMeasureIso_linkRPMatrix_of_vanish_negative
+    Lt Ls P a mass ha hmass M Ns hvol_t hvol_s n f c
+  intro i x hx
+  rcases hf i with ⟨g, h, hh, hsupp, hfi⟩
+  rw [hfi]
+  exact asymLatticeTestFnIso_cylinderPure_noWrap_vanish_negative
+    Lt Ls M Ns a R hR hLtR g h hh hsupp x hx
+
+/-- A′ no-wrap link-reflection positivity for the real span of compact pure
+cylinder tensors with a common support radius. -/
+theorem asymTorusInteractingMeasureIso_linkRPMatrix_span_noWrap
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (M Ns : ℕ) [NeZero M] [NeZero Ns]
+    (hvol_t : ((2 * M : ℕ) : ℝ) * a = Lt)
+    (hvol_s : (Ns : ℝ) * a = Ls)
+    (R : ℝ) (hR : 0 < R) (hLtR : 2 * R < Lt)
+    (n : ℕ) (f : Fin n → ↥(cylinderPositiveTimeSubmodule Ls)) (c : Fin n → ℂ)
+    (hf : ∀ i, (f i : CylinderTestFunction Ls) ∈ Submodule.span ℝ
+      {u : CylinderTestFunction Ls | ∃ (g : SmoothMap_Circle Ls ℝ)
+          (h : SchwartzMap ℝ ℝ),
+        h ∈ schwartzPositiveTimeSubmodule ∧
+        (∀ t, R < |t| → h t = 0) ∧
+        u = NuclearTensorProduct.pure g h}) :
+    AsymTorusLinkRPMatrixNonnegative Lt Ls
+      (asymTorusInteractingMeasureIso Lt Ls (2 * M) Ns a P mass ha hmass)
+      a n (fun i => cylinderToTorusEmbed Lt Ls (f i : CylinderTestFunction Ls)) c := by
+  apply asymTorusInteractingMeasureIso_linkRPMatrix_of_vanish_negative
+    Lt Ls P a mass ha hmass M Ns hvol_t hvol_s n f c
+  intro i x hx
+  apply Submodule.span_induction (R := ℝ) (M := CylinderTestFunction Ls)
+    (s := {u : CylinderTestFunction Ls | ∃ (g : SmoothMap_Circle Ls ℝ)
+        (h : SchwartzMap ℝ ℝ),
+      h ∈ schwartzPositiveTimeSubmodule ∧
+      (∀ t, R < |t| → h t = 0) ∧
+      u = NuclearTensorProduct.pure g h})
+    (p := fun u _ =>
+      asymLatticeTestFnIso Lt Ls (2 * M) Ns a
+        (cylinderToTorusEmbed Lt Ls u) x = 0)
+  · intro u hu
+    rcases hu with ⟨g, h, hh, hsupp, rfl⟩
+    exact asymLatticeTestFnIso_cylinderPure_noWrap_vanish_negative
+      Lt Ls M Ns a R hR hLtR g h hh hsupp x hx
+  · simp [asymLatticeTestFnIso]
+  · intro u v _ _ hu hv
+    change a * evalAsymTorusAtSite Lt Ls (2 * M) Ns x
+        (cylinderToTorusEmbed Lt Ls u) = 0 at hu
+    change a * evalAsymTorusAtSite Lt Ls (2 * M) Ns x
+        (cylinderToTorusEmbed Lt Ls v) = 0 at hv
+    simp only [map_add, asymLatticeTestFnIso, evalAsymTorusAtSiteGJ_apply]
+    linarith
+  · intro r u _ hu
+    change a * evalAsymTorusAtSite Lt Ls (2 * M) Ns x
+        (cylinderToTorusEmbed Lt Ls u) = 0 at hu
+    simp only [map_smul, asymLatticeTestFnIso, evalAsymTorusAtSiteGJ_apply,
+      smul_eq_mul]
+    rw [hu, mul_zero]
+  · exact hf i
 
 end Pphi2
