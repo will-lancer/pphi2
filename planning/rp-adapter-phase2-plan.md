@@ -163,6 +163,21 @@ Named TODO from A′ scaffolding:
   cylinder nuclear tensor product. This was intentionally left out of the
   small scaffolding run to avoid expanding the task beyond the adapter defs.
 
+Named TODO from A′ conditional RP scaffold:
+- `asymTorusInteractingMeasureIso_linkRPMatrix_noWrap`: prove the `hRP`
+  premise of
+  `asymTorusInteractingMeasureIso_cylinderLinkRPMatrix_conditional`, namely
+  the torus link-reflection RP matrix for
+  `asymTorusInteractingMeasureIso Lt Ls (2*M) Ns a P mass ha hmass` and
+  `F i = cylinderToTorusEmbed Lt Ls (f i)`, assuming `Lt = (2*M)*a`,
+  `Ls = Ns*a`, and each `f i` is a compact-support positive-time cylinder
+  tensor with support in `(0,R)` and `Lt > 2R`. The proof should transport
+  `interactingLatticeMeasureAsym_isReflectionPositive_link` through
+  `asymTorusInteractingMeasureIso = Measure.map asymTorusEmbedLiftIso ...`,
+  establish the no-wrap `asymLinkMPos` measurability of the exp-character
+  observables, and pass from the real `IsReflectionPositive` form to the
+  complex characteristic-functional matrix.
+
 NOTE (reliability): Codex has stalled/crashed TWICE on the monolithic Phase-2 core (both infra
 stream stalls, not math errors). Next attempt: build the 3 aux defs above as a small standalone
 first (self-driven or a short fresh Codex session), commit green, THEN the A′ transport, THEN B′.
