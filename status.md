@@ -87,7 +87,17 @@ Phase 3 produces `MeasureHasGreenMomentBound` as a theorem (per `Lt`) and, via t
 reflection-positivity and OS2-symmetry inputs. The generic Gaussian exp-moment lemma
 `GaussianField.gaussian_exp_abs_moment` and the weak-limit transfer
 `GaussianField.weakLimit_exponential_moment` are theorems (0 axioms). See
-`docs/cylinder-conditional-inputs-provability.md` for the input-by-input provability map. pphi2 also depends on markov-semigroups and gaussian-hilbert (axiom counts
+`docs/cylinder-conditional-inputs-provability.md` for the input-by-input provability map.
+**Cylinder OS3 (RP) discharge in progress (2026-07-20):** the reflection-positivity dependency was
+bumped (`387b2ad→1cf7183`) to bring in the generic GJ 6.2.2 lattice-RP theorem
+`isReflectionPositive_of_evenNearestNeighbour`. **Phase 1 landed axiom-free** (`da8d134`,
+`Pphi2/AsymTorus/AsymReflectionPositivity.lean:interactingLatticeMeasureAsym_isReflectionPositive_link`,
+bare-trio): unconditional RP of the asym-torus interacting lattice measure under the link reflection
+`θ_L(t,x)=(Nt-1-t,x)`. The `hRP` hypothesis of `cylinderIso_OS_of_RP_OS2` was found to be
+**over-quantified over all `μ`** (unprovable as stated); fix (Gemini-vetted) = thread RP through the
+Green-bound existential + drop `hRP`. Phase-2 density leg landed (`ae848af`); remaining = the
+A′ (finite-`n` link-RP transport) + B′ (joint `θ_a→θ` weak-limit closure) core, decomposed and
+specified in `planning/rp-adapter-phase2-plan.md`. pphi2 also depends on markov-semigroups and gaussian-hilbert (axiom counts
 track `main` — see [`docs/AXIOM_STATUS.md`](docs/AXIOM_STATUS.md) and each repo's own
 `AXIOM_AUDIT.md`) for the upstream `polynomial_chaos_concentration` API used by Cluster A, and now
 on [`gibbs-variational`](https://github.com/mrdouglasny/gibbs-variational) (0 axioms, 1

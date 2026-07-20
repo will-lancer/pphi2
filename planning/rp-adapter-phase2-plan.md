@@ -142,6 +142,22 @@ subsequence (`a(φn)→0`), with **bounded-continuous weak convergence `∫ g d�
 Dispatch order: A′ first (foundational, no limit, uses Phase 1 directly), then B′ (the analysis
 crux — joint measure+operator limit with distributional moment control), then assembly + 2b.
 
+## A′ scaffolding (salvaged from a stalled Codex run, 2026-07-20)
+A Codex attempt at A′ stalled (infra) mid-edit and was reverted, but it identified the right
+auxiliary defs to build first (do these cleanly, they are self-contained):
+- `asymTorusLinkReflection (Lt) [Fact (0<Lt)] : AsymTorusTestFunction Lt Ls → AsymTorusTestFunction Lt Ls`
+  — the link reflection `t ↦ -t-a` pushed to asym-torus test functions.
+- `cylinderLinkReflection : CylinderTestFunction Ls → CylinderTestFunction Ls` — same on cylinder tests.
+- `cylinderToTorusEmbed_comp_linkReflection` — equivariance: `embed ∘ cylinderLinkReflection =
+  asymTorusLinkReflection ∘ embed` (the commuting square that lets Phase-1 lattice RP under `θ_L`
+  become the cylinder-side link-RP matrix).
+Then A′ = transport `interactingLatticeMeasureAsym_isReflectionPositive_link` through these +
+the no-wrap `mPos`-measurability of the exp-character observables.
+
+NOTE (reliability): Codex has stalled/crashed TWICE on the monolithic Phase-2 core (both infra
+stream stalls, not math errors). Next attempt: build the 3 aux defs above as a small standalone
+first (self-driven or a short fresh Codex session), commit green, THEN the A′ transport, THEN B′.
+
 ## External vet (Gemini 3.1-pro, 2026-07-20)
 Confirmed flawless on all three points: (1) strengthen-existential-then-drop-hypothesis is the
 correct pattern (can't discard the construction and reprove the property later); (2) RP is closed
