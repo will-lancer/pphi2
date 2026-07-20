@@ -3,15 +3,24 @@
 Formal construction of the P(Φ)₂ Euclidean quantum field theory in Lean 4,
 following the Glimm-Jaffe/Nelson lattice approach.
 
-> **Status at a glance** (2026-07-13). Builds green (`lake build`), **0 sorries** — the remaining
-> debt is a set of documented, mostly-vetted project axioms. Most-developed line: the **T²_L torus**
-> (OS0–OS2, axiom-free). On the **cylinder** (Route B′) the key analytic layer is now discharged:
-> the interacting≤free **variance bound** (Layer B2) and the **\|f\|-form exponential-moment bound**
-> (CYL-1a) are *theorems* resting on 5–6 vetted axioms, and **asym exponential clustering** in
-> physical distance (the OS4 lattice input) is a theorem on 2 axioms. The remaining cylinder debt is
-> the **Layer-A Lee–Yang axiom** (`asymInteracting_mgf_gaussianDominated`, now correctly
-> sign-restricted; its finite-Ising→Newman producer chain is proof-complete in the sibling
-> `lee-yang` repo) plus continuum-inheritance bridges. The **ℝ²** OS0–OS4 headline was made *honest*
+> **Status at a glance** (2026-07-21; cylinder OS3/OS2 milestone on branch `t2-conjoined-os`).
+> Builds green (`lake build`), **0 sorries** — the remaining debt is a set of documented,
+> mostly-vetted project axioms. Most-developed line: the **T²_L torus** (OS0–OS2, axiom-free). On the
+> **cylinder** (Route B′) the OS0/OS1/OS2/OS3 theorem `cylinderIso_OS_of_RP_OS2` is now
+> **hypothesis-free** (takes only `P, mass, hmass`): **reflection positivity (OS3) was fully
+> discharged** — the `hRP` gate was dropped via a link-reflection instantiation of the generic
+> GJ 6.2.2 theorem (Phase 1 lattice RP → A′ transport → B′ `θ_a→θ` weak-limit closure → assembly),
+> and `hOS2` was likewise dropped by threading OS2 of the constructed measure through the
+> existential. `#print axioms cylinderIso_OS_of_RP_OS2` = Mathlib trio + `embed_l2_uniform_bound` +
+> `asymInteracting_expMoment_volume_uniform` — so cylinder OS0–OS3 now rests on **exactly one**
+> project axiom (the CYL-1a volume-uniform exp-moment) plus one pre-existing GaussianField axiom
+> (full record: `planning/rp-adapter-phase2-plan.md`). Supporting analytic layers: the interacting≤free
+> **variance bound** (Layer B2) and the **\|f\|-form exponential-moment bound** (CYL-1a) are
+> *theorems* resting on vetted axioms, and **asym exponential clustering** in physical distance
+> (the OS4 lattice input) is a theorem on 2 axioms. The remaining cylinder debt is the CYL-1a
+> exp-moment axiom, the **Layer-A Lee–Yang axiom** (`asymInteracting_mgf_gaussianDominated`, now
+> correctly sign-restricted; its finite-Ising→Newman producer chain is proof-complete in the sibling
+> `lee-yang` repo), OS4, plus continuum-inheritance bridges. The **ℝ²** OS0–OS4 headline was made *honest*
 > (Phase 4.1): the old δ₀-vacuity loophole is closed, and `pphi2_existence` now rests on 5 named
 > axioms with existence supplied by a vetted Fröhlich 1976 / Park 1977 tightness axiom.
 > **Non-triviality** — that the theory is genuinely interacting (`u₄ ≠ 0`) — is **proved axiom-free**
@@ -147,22 +156,24 @@ The construction proceeds in two limits:
    `AsymTorusOS.lean`: OS0–OS2 complete; the remaining input is the Cluster-A asym Nelson estimate
    `asymNelson_exponential_estimate` (`AsymTorusInteractingLimit.lean`).
 
-2. **IR limit (in progress):** Take Lt → ∞ with Ls fixed. The torus measures
+2. **IR limit (OS0–OS3 now hypothesis-free):** Take Lt → ∞ with Ls fixed. The torus measures
    μ_{P,Lt,Ls} on T_{Lt,Ls} converge weakly to a measure μ_{P,Ls} on the
    cylinder S¹_{Ls} × ℝ. Tightness follows from uniform-in-Lt moment bounds
    via the **method of images** (gaussian-field `Cylinder/MethodOfImages.lean`).
-   The IR limit files are in `IRLimit/` with 0 local axioms and 0 sorries,
-   plus explicit nonlocal inputs for eventual Green moments and eventual
-   pullback reflection positivity.
-   `limit_exponential_moment` (MCT + truncation) is now fully proved.
-   OS2 (time reflection) of the limit measure is **proved** via characteristic
-   functional convergence.
+   The IR limit files are in `IRLimit/`/`AsymTorus/` with 0 local axioms and 0 sorries.
+   `limit_exponential_moment` (MCT + truncation) is fully proved. OS2 (time reflection)
+   of the limit measure is **proved** via characteristic functional convergence.
+   **OS3 reflection positivity and OS2 symmetry are now discharged internally**
+   (2026-07-21, branch `t2-conjoined-os`): `cylinderIso_OS_of_RP_OS2` no longer takes `hRP`/`hOS2`
+   hypotheses (see the OS3 bullet below and `planning/rp-adapter-phase2-plan.md`).
 
 The cylinder S¹_{Ls} × ℝ has a natural time axis ℝ, enabling:
-- **OS3 (Reflection positivity):** Time reflection Θ: t ↦ -t is a clean
-  involution on S¹_{Ls} × ℝ. The RP matrix for positive-time test functions
-  is positive semidefinite, proved from the lattice RP (transfer matrix
-  positivity) + weak limit transfer.
+- **OS3 (Reflection positivity) — DISCHARGED (2026-07-21):** The RP matrix for positive-time test
+  functions is positive semidefinite, **proved unconditionally** (no `hRP` hypothesis) from the
+  finite-lattice link-reflection RP (`interactingLatticeMeasureAsym_isReflectionPositive_link`, a
+  link-reflection instantiation of the generic GJ 6.2.2 theorem) transported to the cylinder
+  (A′) and passed through the joint `θ_a→θ` weak-limit closure (B′). Full record:
+  `planning/rp-adapter-phase2-plan.md`.
 - **Transfer matrix:** The cylinder admits a Hilbert space decomposition
   L²(S¹_{Ls}) via spatial slicing at fixed time. The transfer operator
   T = exp(-H) where H is the P(φ)₂ Hamiltonian. Spectral gap of T
@@ -176,9 +187,11 @@ interacting≤free variance bound (`asymInteractingVariance_le_freeVariance_latt
 and the `|f|`-form exp-moment (`asymInteracting_expMoment_volume_uniform_absForm_thresholded`)
 both hold on 5–6 vetted axioms (S1 FSS + S2 fixed-`Ls` gap + the τ-form bridge pair + B5b), and
 asym exponential clustering (`asymSliceObsTrunc_exponential_clustering_fixedLs`, the OS4 lattice
-input) is proved on 2 axioms. Remaining: the sign-restricted Layer-A Lee–Yang axiom
-(producer chain proof-complete in the `lee-yang` repo), OS3's eventual-pullback-RP hypothesis,
-and the Layer-C rewiring onto the thresholded forms. Design + kernel footprints:
+input) is proved on 2 axioms. **OS3 reflection positivity + OS2 symmetry are now fully discharged**
+(2026-07-21): `cylinderIso_OS_of_RP_OS2` is hypothesis-free and `#print axioms` = Mathlib trio +
+`embed_l2_uniform_bound` + `asymInteracting_expMoment_volume_uniform`. Remaining: the CYL-1a
+exp-moment axiom, the sign-restricted Layer-A Lee–Yang axiom (producer chain proof-complete in the
+`lee-yang` repo), OS4 (mass gap), and the Layer-C rewiring onto the thresholded forms. Design + kernel footprints:
 [`planning/b2-route-a-statements.md`](planning/b2-route-a-statements.md),
 [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). Discharge detail: [`docs/STATUS_HISTORY.md`](docs/STATUS_HISTORY.md).
 
