@@ -108,6 +108,40 @@ Proof obligations inside that theorem:
 4. the new compact-support density theorem above to extend from no-wrap generators to all
    `cylinderPositiveTimeSubmodule`.
 
+## Remaining core, decomposed against the actual UV chain (2026-07-20)
+
+`asymTorusIso_measureHasGreenMomentBound_of_cutoff` (`AsymContinuumLimit.lean:324`) builds μ from
+`asymTorusIso_interacting_limit_exists`: finite-lattice interacting measures
+`ν n := asymTorusInteractingMeasureIso Lt Ls (Nt(φn)) (Ns(φn)) (a(φn)) P mass …` along a UV
+subsequence (`a(φn)→0`), with **bounded-continuous weak convergence `∫ g dν n → ∫ g dμ`**
+(`hconv`/`hbc`) and a per-n Green moment bound. The `…_withRP` target splits as:
+
+- **Sub-lemma A′ (finite n, NO limit)** — for each `n` and each no-wrap compact-support cylinder
+  tensor family, `ν n` satisfies the RP matrix inequality **w.r.t. the pushed lattice LINK
+  reflection `θ_{a(φn)}`** (NOT the exact `cylinderTimeReflection`). Proof: transport Phase 1
+  `interactingLatticeMeasureAsym_isReflectionPositive_link` through the
+  `asymLatticeTestFnIso` / torus-pushforward chain; no-wrap (`Lt>2R`) means the pullback of the
+  positive-time tensor lands in the lattice positive-time half so the link split applies.
+  ⚠️ At finite n the matrix is ≥0 for `θ_{a(φn)}` only — it is NOT ≥0 for `cylinderTimeReflection`
+  (they differ by the one-spacing shift). So A′ must be stated with `θ_{a(φn)}`.
+- **Sub-lemma B′ (joint limit)** — for a FIXED cylinder tensor family,
+  `∑ᵢⱼ cᵢ c̄ⱼ ∫ exp(iω(fᵢ − cylinderTimeReflection fⱼ)) dμ`
+  `= limₙ ∑ᵢⱼ cᵢ c̄ⱼ ∫ exp(iω(fᵢ − θ_{a(φn)} fⱼ)) dν n ≥ 0`.
+  Two-part limit (Gemini's point, made precise):
+  1. `|∫ exp(iω(fᵢ−cyl fⱼ)) dν n − ∫ exp(iω(fᵢ−cyl fⱼ)) dμ| → 0` by weak convergence (fixed
+     bounded-continuous integrand);
+  2. `|∫ exp(iω(fᵢ−cyl fⱼ)) dν n − ∫ exp(iω(fᵢ−θ_{a(φn)} fⱼ)) dν n|
+      ≤ ∫ |ω((cyl−θ_{a(φn)})fⱼ)| dν n ≤ M·‖(cyl−θ_{a(φn)})fⱼ‖_seminorm → 0`
+     using `|e^{ix}−e^{iy}|≤|x−y|`, the Green MOMENT BOUND to control `∫|ω(h)|dν n` uniformly in
+     n, and `θ_{a(φn)} fⱼ → cylinderTimeReflection fⱼ` in the test-function topology.
+  A′ gives each finite matrix (w.r.t. `θ_{a(φn)}`) ≥0, so the limit is ≥0.
+- **Assembly** — B′ gives `CylinderMeasureReflectionPositive (pullback μ)` on the no-wrap
+  compact-support generators; the landed density leg
+  (`cylinderPositiveTimeSubmodule_eq_closure_span_compactPure`) extends to the full submodule.
+
+Dispatch order: A′ first (foundational, no limit, uses Phase 1 directly), then B′ (the analysis
+crux — joint measure+operator limit with distributional moment control), then assembly + 2b.
+
 ## External vet (Gemini 3.1-pro, 2026-07-20)
 Confirmed flawless on all three points: (1) strengthen-existential-then-drop-hypothesis is the
 correct pattern (can't discard the construction and reprove the property later); (2) RP is closed
