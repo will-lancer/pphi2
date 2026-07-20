@@ -100,9 +100,13 @@ second-moment bound giving the diagonal vanishing); **assembly** (`c33579e`…`6
 the closure + density-extends after `Lt→∞` and drops `hRP`. `#print axioms`:
 `cylinderIso_OS_of_RP_OS2` = bare trio + `embed_l2_uniform_bound` +
 `asymInteracting_expMoment_volume_uniform` (NO new axioms). Full record:
-`planning/rp-adapter-phase2-plan.md`. Cylinder OS0/OS1/OS2/OS3 now rest only on the CYL-1a
-exp-moment axiom, the pre-existing `embed_l2_uniform_bound`, and the separate OS2-symmetry input
-(dischargeable via `AsymTorusSequenceHasCylinderOS2Symmetry.of_torusOS`). pphi2 also depends on markov-semigroups and gaussian-hilbert (axiom counts
+`planning/rp-adapter-phase2-plan.md`. **`hOS2` was also dropped** (`f5896f1`, heterogeneous Iso OS2
+gap filled in `Pphi2/AsymTorus/AsymIsoOS.lean`): `cylinderIso_OS_of_RP_OS2` now takes only
+`(P, mass, hmass)` — no external hypotheses. Verified `#print axioms` = `[propext, Classical.choice,
+Quot.sound]` + `GaussianField.embed_l2_uniform_bound` + `Pphi2.asymInteracting_expMoment_volume_uniform`.
+So cylinder `S¹(Ls)×ℝ` OS0/OS1/OS2/OS3 now rests on exactly the CYL-1a volume-uniform exp-moment
+axiom plus the pre-existing `embed_l2_uniform_bound` — nothing else. Remaining cylinder streams:
+the CYL-1a exp-moment axiom itself, and OS4 (mass gap/clustering). pphi2 also depends on markov-semigroups and gaussian-hilbert (axiom counts
 track `main` — see [`docs/AXIOM_STATUS.md`](docs/AXIOM_STATUS.md) and each repo's own
 `AXIOM_AUDIT.md`) for the upstream `polynomial_chaos_concentration` API used by Cluster A, and now
 on [`gibbs-variational`](https://github.com/mrdouglasny/gibbs-variational) (0 axioms, 1
