@@ -1,5 +1,17 @@
 # OS3 (reflection positivity) discharge plan — isotropic cylinder construction
 
+> **⚠ SUPERSEDED PATH (2026-07-20).** The ~2000-line bespoke asym-lattice RP port described
+> below is superseded by the generic **`isReflectionPositive_of_evenNearestNeighbour`** (Glimm–
+> Jaffe 6.2.2) now designed in the sibling `reflection-positivity` repo
+> (`docs/lattice-rp-design.md`, Gemini-vetted). Plan: prove that ONE generic theorem there
+> (Route A; crossing perfect-square **axiom-free** via per-edge Hubbard–Stratonovich), then a
+> THIN pphi2 adapter instantiates it (`Λ = AsymLatticeSites`, time-reflection `r`, `J = 1/a²` NN
+> ferromagnetic, `V = a²:P:`, `Nt` even) to discharge `hRP` in `cylinderIso_OS_of_RP_OS2`. Bonus:
+> the same generic theorem **retires pphi2's `gaussian_rp_cov_perfect_square` axiom**. The
+> RP-inheritance half (`rp_closed_under_weak_limit`) generalizes to
+> `IsReflectionPositive.weak_limit` there. Read that design doc first.
+
+
 *2026-05-27. How to discharge the `hRP` hypothesis of `cylinderIso_OS_of_RP_OS2`
 (`Pphi2/AsymTorus/AsymContinuumLimit.lean`) — i.e. prove reflection positivity for the isotropic
 `Z_Nt × Z_Ns` interacting measures, rather than assuming it. Confirmed feasible by external review
