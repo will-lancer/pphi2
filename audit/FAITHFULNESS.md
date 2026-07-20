@@ -109,9 +109,10 @@ limit already witnesses this `∃μ` — see the coherence analysis for why the
 (blocked, ★★★).
 
 ### `Pphi2.cylinderIso_OS_of_RP_OS2`
-Cylinder `S¹(Lₛ) × ℝ` φ⁴₂ OS0–OS3 assembly, conditional on the separate
-reflection-positivity and OS2-symmetry inputs and the uniform exponential-moment
-axiom (`asymInteracting_expMoment_volume_uniform`). Also pulls in the upstream
+Cylinder `S¹(Lₛ) × ℝ` φ⁴₂ OS0–OS3 assembly with no external RP or OS2
+hypothesis. The explicit inputs are only `P`, `mass`, and `hmass`; the two
+nonlogical textbook dependencies are the uniform exponential-moment axiom
+`asymInteracting_expMoment_volume_uniform` and the upstream
 `GaussianField.embed_l2_uniform_bound` from `gaussian-field`.
 
 ---

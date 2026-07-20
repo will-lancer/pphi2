@@ -88,10 +88,14 @@ The assembly now follows the valid order:
 - `routeBPrimeIso_cylinder_OS` and `cylinderIso_OS_of_RP_OS2` no longer take an
   `hRP` hypothesis. Cylinder OS3 is unconditional on an external RP input.
 
-Thus Phase 2 assembly is complete. The remaining headline assumption is the
-separate OS2-symmetry family input; the pre-existing volume-uniform interacting
-exponential-moment axiom remains the textbook input used by
-`cylinderIso_OS_of_RP_OS2`.
+Thus Phase 2 assembly is complete. A follow-up on the same date also removed
+the remaining OS2-family hypothesis: the heterogeneous Iso cutoff measure is
+proved translation- and time-reflection-invariant, the resulting
+`AsymSatisfiesTorusOS` package is threaded through the Green-bound existential,
+and `AsymTorusSequenceHasCylinderOS2Symmetry.of_torusOS` supplies the sequence
+input internally. The headline now has only `P`, `mass`, and `hmass` as explicit
+inputs; its two nonlogical textbook dependencies are
+`asymInteracting_expMoment_volume_uniform` and `embed_l2_uniform_bound`.
 
 ## 2026-07-20 partial landed (green)
 
