@@ -68,6 +68,46 @@ already establishes characteristic-functional convergence. So:
   *parallel* application of the generic GJ 6.2.2 theorem, orthogonal to the cylinder discharge.
   Do NOT bundle it into Phase 2.
 
+## 2026-07-20 partial landed (green)
+
+Landed in `Pphi2/IRLimit/CylinderOS.lean`:
+
+- `cylinderPositiveTimeCompactPureTensors`
+- `schwartzCutoffCLM_mem_positiveTime`
+- `pure_mem_cylinderPositiveTimeSubmodule`
+- `cylinderPositiveTimeSubmodule_eq_closure_span_compactPure`
+
+This closes the **density/compact-support** leg of Phase 2a: the full cylinder positive-time
+submodule is now the closure of the span of pure tensors whose temporal factors are both
+positive-time and compactly supported. That is the exact no-wrap class needed for the finite-`Lt`
+adapter (`Lt > 2R`).
+
+What is **still missing** is the UV/link-RP closure theorem that produces RP for the concrete
+UV-limit torus measure. The clean statement to target next is:
+
+```lean
+theorem asymTorusIso_measureHasGreenMomentBound_of_cutoff_withRP
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (K C : ℝ) (_hK_pos : 0 < K)
+    (hcutoff : ...)
+    (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k)) (ha : ∀ k, 0 < a k)
+    (hvolt : ∀ k, (Nt k : ℝ) * a k = Lt) (hvols : ∀ k, (Ns k : ℝ) * a k = Ls)
+    (ha0 : Filter.Tendsto a Filter.atTop (nhds 0)) :
+    ∃ (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls))),
+      IsProbabilityMeasure μ ∧
+      MeasureHasGreenMomentBound Ls mass hmass K C μ ∧
+      CylinderMeasureReflectionPositive Ls (cylinderPullbackMeasure Lt Ls μ)
+```
+
+Proof obligations inside that theorem:
+
+1. finite-lattice/link RP for the no-wrap compact-support pure tensors;
+2. one-step time-translation bridge from link reflection to exact cylinder reflection;
+3. UV weak-limit closure that explicitly passes the reflection-operator limit `θ_a → θ`;
+4. the new compact-support density theorem above to extend from no-wrap generators to all
+   `cylinderPositiveTimeSubmodule`.
+
 ## External vet (Gemini 3.1-pro, 2026-07-20)
 Confirmed flawless on all three points: (1) strengthen-existential-then-drop-hypothesis is the
 correct pattern (can't discard the construction and reprove the property later); (2) RP is closed

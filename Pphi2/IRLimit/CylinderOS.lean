@@ -20,6 +20,7 @@ pullback sequence.
 
 import Pphi2.IRLimit.IRTightness
 import Pphi2.IRLimit.UniformExponentialMoment
+import Pphi2.GeneralResults.SchwartzCutoff
 import Pphi2.GeneralResults.ComplexAnalysis
 import Cylinder.Symmetry
 import Cylinder.PositiveTime
@@ -121,6 +122,89 @@ theorem cylinderPullback_timeReflection_invariant
   simp only [cylinderPullback_eval]
   simp_rw [cylinderToTorusEmbed_comp_timeReflection]
   exact hμ_refl (cylinderToTorusEmbed Lt Ls f)
+
+/-! ## Positive-time compact-support density
+
+The Stage 2 RP adapter needs compactly supported positive-time cylinder tests:
+for `Lt > 2R`, their periodizations do not wrap around the finite time circle.
+The lemmas below isolate the density step promised in the Route B' comments.
+-/
+
+/-- Pure cylinder tensors whose temporal factor is both positive-time and compactly
+supported in a symmetric interval. These are the no-wrap test functions used in the
+finite-`Lt` RP adapter. -/
+def cylinderPositiveTimeCompactPureTensors :
+    Set (CylinderTestFunction Ls) :=
+  {f | ∃ (g : SmoothMap_Circle Ls ℝ) (h : SchwartzMap ℝ ℝ) (T : ℝ),
+      0 < T ∧ h ∈ schwartzPositiveTimeSubmodule ∧
+      (∀ t, T < |t| → h t = 0) ∧
+      f = NuclearTensorProduct.pure g h}
+
+/-- Symmetric Schwartz cutoffs preserve the positive-time condition because the temporal
+factor already vanishes on `(-∞, 0]`. -/
+theorem schwartzCutoffCLM_mem_positiveTime
+    (N : ℕ) {h : SchwartzMap ℝ ℝ}
+    (hh : h ∈ schwartzPositiveTimeSubmodule) :
+    schwartzCutoffCLM N h ∈ schwartzPositiveTimeSubmodule := by
+  intro x hx
+  rw [schwartzCutoffCLM_apply]
+  simp [hh x hx]
+
+/-- A pure tensor with positive-time temporal factor belongs to the cylinder positive-time
+submodule. -/
+theorem pure_mem_cylinderPositiveTimeSubmodule
+    (g : SmoothMap_Circle Ls ℝ) (h : SchwartzMap ℝ ℝ)
+    (hh : h ∈ schwartzPositiveTimeSubmodule) :
+    NuclearTensorProduct.pure g h ∈ cylinderPositiveTimeSubmodule Ls := by
+  unfold cylinderPositiveTimeSubmodule
+  refine subset_closure ?_
+  apply Submodule.subset_span
+  exact ⟨g, h, hh, rfl⟩
+
+/-- The full cylinder positive-time submodule is the closure of the span of pure tensors
+whose temporal factors are positive-time and compactly supported. This packages the
+compact-support density step needed to reduce RP to the no-wrap regime. -/
+theorem cylinderPositiveTimeSubmodule_eq_closure_span_compactPure :
+    cylinderPositiveTimeSubmodule Ls =
+      (Submodule.span ℝ (cylinderPositiveTimeCompactPureTensors Ls)).topologicalClosure := by
+  let K : Set (CylinderTestFunction Ls) := cylinderPositiveTimeCompactPureTensors Ls
+  have hK_subset : K ⊆ cylinderPositiveTimeSubmodule Ls := by
+    intro f hf
+    rcases hf with ⟨g, h, T, hT, hh, hsupp, rfl⟩
+    exact pure_mem_cylinderPositiveTimeSubmodule Ls g h hh
+  apply le_antisymm
+  · unfold cylinderPositiveTimeSubmodule
+    refine Submodule.topologicalClosure_minimal (Submodule.span ℝ _) ?_ ?_
+    · refine Submodule.span_le.mpr ?_
+      intro x hx
+      rcases hx with ⟨g, h, hh, rfl⟩
+      let approx : ℕ → CylinderTestFunction Ls := fun N =>
+        NuclearTensorProduct.pure g (schwartzCutoffCLM N h)
+      have happrox_mem : ∀ N, approx N ∈ (Submodule.span ℝ K).topologicalClosure := by
+        intro N
+        refine subset_closure ?_
+        apply Submodule.subset_span
+        refine ⟨g, schwartzCutoffCLM N h, 2 * ((N : ℝ) + 1), by positivity, ?_, ?_, rfl⟩
+        · exact schwartzCutoffCLM_mem_positiveTime N hh
+        · intro t ht
+          exact schwartzCutoffCLM_eq_zero_of_two_mul_lt_abs N h ht
+      have happrox_tend : Tendsto approx atTop (nhds (NuclearTensorProduct.pure g h)) := by
+        have hpure_tend :
+            Tendsto
+              (fun u : SchwartzMap ℝ ℝ => NuclearTensorProduct.pure g u)
+              (nhds h) (nhds (NuclearTensorProduct.pure g h)) :=
+          (NuclearTensorProduct.pureCLM_right
+            (E₁ := SmoothMap_Circle Ls ℝ) (E₂ := SchwartzMap ℝ ℝ) g).continuous.continuousAt.tendsto
+        exact hpure_tend.comp (schwartzCutoffCLM_tendsto h)
+      exact (Submodule.isClosed_topologicalClosure (Submodule.span ℝ K)).mem_of_tendsto
+        happrox_tend (Filter.Eventually.of_forall happrox_mem)
+    · exact Submodule.isClosed_topologicalClosure (Submodule.span ℝ K)
+  · have hclosed :
+        IsClosed (cylinderPositiveTimeSubmodule Ls : Set (CylinderTestFunction Ls)) := by
+      unfold cylinderPositiveTimeSubmodule
+      exact Submodule.isClosed_topologicalClosure _
+    exact Submodule.topologicalClosure_minimal (Submodule.span ℝ K)
+      (Submodule.span_le.mpr hK_subset) hclosed
 
 /-! ## OS0: Analyticity (PROVED)
 
