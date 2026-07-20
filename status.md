@@ -88,16 +88,21 @@ reflection-positivity and OS2-symmetry inputs. The generic Gaussian exp-moment l
 `GaussianField.gaussian_exp_abs_moment` and the weak-limit transfer
 `GaussianField.weakLimit_exponential_moment` are theorems (0 axioms). See
 `docs/cylinder-conditional-inputs-provability.md` for the input-by-input provability map.
-**Cylinder OS3 (RP) discharge in progress (2026-07-20):** the reflection-positivity dependency was
-bumped (`387b2ad→1cf7183`) to bring in the generic GJ 6.2.2 lattice-RP theorem
-`isReflectionPositive_of_evenNearestNeighbour`. **Phase 1 landed axiom-free** (`da8d134`,
-`Pphi2/AsymTorus/AsymReflectionPositivity.lean:interactingLatticeMeasureAsym_isReflectionPositive_link`,
-bare-trio): unconditional RP of the asym-torus interacting lattice measure under the link reflection
-`θ_L(t,x)=(Nt-1-t,x)`. The `hRP` hypothesis of `cylinderIso_OS_of_RP_OS2` was found to be
-**over-quantified over all `μ`** (unprovable as stated); fix (Gemini-vetted) = thread RP through the
-Green-bound existential + drop `hRP`. Phase-2 density leg landed (`ae848af`); remaining = the
-A′ (finite-`n` link-RP transport) + B′ (joint `θ_a→θ` weak-limit closure) core, decomposed and
-specified in `planning/rp-adapter-phase2-plan.md`. pphi2 also depends on markov-semigroups and gaussian-hilbert (axiom counts
+**Cylinder OS3 (RP) fully discharged (2026-07-20):** the `hRP` reflection-positivity hypothesis has
+been **removed** from both `cylinderIso_OS_of_RP_OS2` and `routeBPrimeIso_cylinder_OS` — cylinder OS3
+is now unconditional on any external RP input. Route: bumped the reflection-positivity dependency
+(`387b2ad→1cf7183`) for the generic GJ 6.2.2 lattice-RP theorem; **Phase 1** (`da8d134`, axiom-free)
+proved lattice RP of the asym-torus interacting measure under the link reflection `θ_L(t,x)=(Nt-1-t,x)`
+(`AsymReflectionPositivity.lean`); **A′** (`31a9677`,`33e62cc`) transported it to the finite-`n`
+cylinder link-RP matrix on no-wrap pure-tensor generators; **B′** (`dbcea6a`…`e6687f3`) is the joint
+`θ_a→θ` weak-limit closure (rescaling `∫|ωh|≤C'σ(h)` helper + a uniform seminorm-proportional
+second-moment bound giving the diagonal vanishing); **assembly** (`c33579e`…`64349cf`) instantiates
+the closure + density-extends after `Lt→∞` and drops `hRP`. `#print axioms`:
+`cylinderIso_OS_of_RP_OS2` = bare trio + `embed_l2_uniform_bound` +
+`asymInteracting_expMoment_volume_uniform` (NO new axioms). Full record:
+`planning/rp-adapter-phase2-plan.md`. Cylinder OS0/OS1/OS2/OS3 now rest only on the CYL-1a
+exp-moment axiom, the pre-existing `embed_l2_uniform_bound`, and the separate OS2-symmetry input
+(dischargeable via `AsymTorusSequenceHasCylinderOS2Symmetry.of_torusOS`). pphi2 also depends on markov-semigroups and gaussian-hilbert (axiom counts
 track `main` — see [`docs/AXIOM_STATUS.md`](docs/AXIOM_STATUS.md) and each repo's own
 `AXIOM_AUDIT.md`) for the upstream `polynomial_chaos_concentration` API used by Cluster A, and now
 on [`gibbs-variational`](https://github.com/mrdouglasny/gibbs-variational) (0 axioms, 1
