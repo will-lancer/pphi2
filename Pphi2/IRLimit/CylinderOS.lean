@@ -341,6 +341,42 @@ private theorem limit_exponential_moment
     exact (ENNReal.ofReal_le_ofReal_iff hB_nn).mp hlint_le
   exact ⟨hint, hint_le⟩
 
+/-- Exponential moments pass to a weak limit when the common bound holds on
+an eventual tail of the approximating sequence. -/
+private theorem limit_exponential_moment_of_eventual_bound
+    (νseq : ℕ → Measure (Configuration (CylinderTestFunction Ls)))
+    (hνseq_prob : ∀ n, IsProbabilityMeasure (νseq n))
+    (ν : Measure (Configuration (CylinderTestFunction Ls)))
+    [IsProbabilityMeasure ν]
+    (hbc : ∀ (g : Configuration (CylinderTestFunction Ls) → ℝ),
+      Continuous g → (∃ B, ∀ x, |g x| ≤ B) →
+      Tendsto (fun n => ∫ ω, g ω ∂(νseq n))
+        atTop (nhds (∫ ω, g ω ∂ν)))
+    (K C : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls))
+    (h_exp : CylinderSequenceHasUniformExponentialMomentBound
+      Ls K C q νseq) :
+    ∀ f : CylinderTestFunction Ls,
+      Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
+        Real.exp (|ω f|)) ν ∧
+      ∫ ω : Configuration (CylinderTestFunction Ls),
+        Real.exp (|ω f|) ∂ν ≤ K * Real.exp (C * q f ^ 2) := by
+  rcases eventually_atTop.1 h_exp with ⟨N0, hN0⟩
+  intro f
+  let νtail : ℕ → Measure (Configuration (CylinderTestFunction Ls)) :=
+    fun n => νseq (n + N0)
+  have hνtail_prob : ∀ n, IsProbabilityMeasure (νtail n) :=
+    fun n => hνseq_prob (n + N0)
+  have hbc_tail : ∀ (g : Configuration (CylinderTestFunction Ls) → ℝ),
+      Continuous g → (∃ B, ∀ x, |g x| ≤ B) →
+      Tendsto (fun n => ∫ ω, g ω ∂(νtail n))
+        atTop (nhds (∫ ω, g ω ∂ν)) := by
+    intro g hg_cont hg_bdd
+    simpa [νtail] using (tendsto_add_atTop_iff_nat N0).mpr
+      (hbc g hg_cont hg_bdd)
+  exact limit_exponential_moment Ls νtail hνtail_prob ν hbc_tail f
+    (K * Real.exp (C * q f ^ 2))
+    (fun n => hN0 (n + N0) (Nat.le_add_left _ _) f)
+
 /-- On a compact set K ⊆ (Fin n → ℂ), imaginary parts are uniformly bounded. -/
 private lemma cylinderCompact_im_bound {n : ℕ} {K : Set (Fin n → ℂ)} (hK : IsCompact K) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ z ∈ K, ∀ i : Fin n, |Complex.im (z i)| ≤ C := by
@@ -541,14 +577,15 @@ Green-controlled exponential moment bound, and a callback proving RP for the
 extracted limit from its characteristic convergence and final exponential
 bound. This allows concrete adapters to perform compact-support density only
 after the time periods tend to infinity. -/
-theorem routeBPrime_cylinder_OS
-    (mass : ℝ) (hmass : 0 < mass)
-    (KG CG : ℝ) (hKG_pos : 0 < KG) (hCG_pos : 0 < CG)
+theorem routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment
+    (K C : ℝ) (hK : 0 < K) (hC : 0 < C)
+    (q : Seminorm ℝ (CylinderTestFunction Ls)) (hq_cont : Continuous q)
     (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
     (hLt_tend : Tendsto Lt atTop atTop)
     (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls)))
     (hμ_prob : ∀ n, IsProbabilityMeasure (μ n))
-    (hμ_green : AsymTorusSequenceHasUniformGreenMomentBound Ls mass hmass KG CG Lt hLt μ)
+    (hμ_exp : AsymTorusSequenceHasUniformCylinderExpMomentBound
+      Ls K C q Lt hLt μ)
     (hμ_rp : ∀ (φ : ℕ → ℕ)
       (ν : Measure (Configuration (CylinderTestFunction Ls))),
       IsProbabilityMeasure ν → StrictMono φ →
@@ -590,8 +627,8 @@ theorem routeBPrime_cylinder_OS
           ↑(ω ((f i : CylinderTestFunction Ls) -
             cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν).re) := by
   have ⟨φ, ν, hφ, rest⟩ :=
-    cylinderIRLimit_exists Ls mass hmass KG CG hKG_pos hCG_pos Lt hLt hLt_tend μ
-      hμ_prob hμ_green
+    cylinderIRLimit_exists_of_uniform_cylinderExpMoment
+      Ls K C hK hC q Lt hLt μ hμ_prob hμ_exp
   haveI : IsProbabilityMeasure ν := rest.1
   have hν_bc_and_cf := rest.2
   have hν_bc := hν_bc_and_cf.1
@@ -603,68 +640,36 @@ theorem routeBPrime_cylinder_OS
         atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν)) := by
     intro f
     simpa [νseqφ] using hν_conv f
-  obtain ⟨K, C, q, hK, hC, hq_cont, h_exp⟩ :=
-    cylinderIR_uniform_exponential_moment Ls mass hmass KG CG hKG_pos hCG_pos
-  -- Exponential moments of the limit measure: from uniform exp moment bound
-  -- on the pullback measures + BC weak convergence + truncation/MCT.
+  have hνseqφ_prob : ∀ k, IsProbabilityMeasure (νseqφ k) := by
+    intro k
+    dsimp [νseqφ]
+    haveI : Fact (0 < Lt (φ k)) := hLt (φ k)
+    haveI : IsProbabilityMeasure (μ (φ k)) := hμ_prob (φ k)
+    have hmeas : Measurable (cylinderPullback (Lt (φ k)) Ls) :=
+      configuration_measurable_of_eval_measurable _
+        (fun g => configuration_eval_measurable _)
+    exact Measure.isProbabilityMeasure_map hmeas.aemeasurable
+  have hμ_exp_raw : ∀ᶠ n in atTop,
+      @MeasureHasCylinderExpMomentBound Ls _ (Lt n) (hLt n) K C q (μ n) := by
+    simpa [AsymTorusSequenceHasUniformCylinderExpMomentBound] using hμ_exp
+  have hνseqφ_exp : CylinderSequenceHasUniformExponentialMomentBound
+      Ls K C q νseqφ := by
+    have hsub := hφ.tendsto_atTop.eventually hμ_exp_raw
+    simpa [CylinderSequenceHasUniformExponentialMomentBound,
+      MeasureHasCylinderExpMomentBound, νseqφ] using hsub
+  have hνseqφ_bc : ∀ (g : Configuration (CylinderTestFunction Ls) → ℝ),
+      Continuous g → (∃ B, ∀ x, |g x| ≤ B) →
+      Tendsto (fun k => ∫ ω, g ω ∂(νseqφ k))
+        atTop (nhds (∫ ω, g ω ∂ν)) := by
+    intro g hg_cont hg_bdd
+    simpa [νseqφ] using hν_bc g hg_cont hg_bdd
   have h_exp_limit : ∀ f : CylinderTestFunction Ls,
       Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
         Real.exp (|ω f|)) ν ∧
       ∫ ω : Configuration (CylinderTestFunction Ls), Real.exp (|ω f|) ∂ν ≤
-        K * Real.exp (C * q f ^ 2) := by
-    intro f
-    -- Step 2: Get N0 such that ∀ n ≥ N0, 1 ≤ Lt n (from hLt_tend).
-    have hLt_ge_one : ∀ᶠ n in atTop, 1 ≤ Lt n := tendsto_atTop.1 hLt_tend 1
-    have h_green_tail : ∀ᶠ n in atTop,
-        @MeasureHasGreenMomentBound Ls _ (Lt n) (hLt n) mass hmass KG CG (μ n) := by
-      simpa [AsymTorusSequenceHasUniformGreenMomentBound] using hμ_green
-    have h_tail : ∀ᶠ n in atTop,
-        1 ≤ Lt n ∧
-          @MeasureHasGreenMomentBound Ls _ (Lt n) (hLt n) mass hmass KG CG (μ n) :=
-      hLt_ge_one.and h_green_tail
-    obtain ⟨N0, hN0⟩ := eventually_atTop.1 h_tail
-    -- Step 3: Use shifted sequence n ↦ φ (n + N0) so the tail Green bound
-    -- and Lt ≥ 1 hold for all n.
-    -- φ strictly mono implies φ m ≥ m, so φ (n + N0) ≥ n + N0 ≥ N0.
-    have h_tail_shift : ∀ n,
-        1 ≤ Lt (φ (n + N0)) ∧
-          @MeasureHasGreenMomentBound Ls _ (Lt (φ (n + N0))) (hLt (φ (n + N0)))
-            mass hmass KG CG (μ (φ (n + N0))) :=
-      fun n => hN0 (φ (n + N0)) ((Nat.le_add_left N0 n).trans (hφ.id_le (n + N0)))
-    have hLt_shift : ∀ n, 1 ≤ Lt (φ (n + N0)) := fun n => (h_tail_shift n).1
-    -- Step 4: Define the shifted measure sequence.
-    let νseq' : ℕ → Measure (Configuration (CylinderTestFunction Ls)) :=
-      fun n => cylinderPullbackMeasure (Lt (φ (n + N0))) Ls (μ (φ (n + N0)))
-    -- Step 5: νseq' n is a probability measure for all n.
-    have hνseq'_prob : ∀ n, IsProbabilityMeasure (νseq' n) := by
-      intro n
-      simp only [νseq', cylinderPullbackMeasure]
-      haveI : Fact (0 < Lt (φ (n + N0))) := hLt (φ (n + N0))
-      haveI : IsProbabilityMeasure (μ (φ (n + N0))) := hμ_prob (φ (n + N0))
-      have hmeas : Measurable (cylinderPullback (Lt (φ (n + N0))) Ls) :=
-        configuration_measurable_of_eval_measurable _
-          (fun g => configuration_eval_measurable _)
-      exact Measure.isProbabilityMeasure_map hmeas.aemeasurable
-    -- Step 6: νseq' → ν in BC sense (from hν_bc via shift by N0).
-    have hbc' : ∀ (g : Configuration (CylinderTestFunction Ls) → ℝ),
-        Continuous g → (∃ C', ∀ x, |g x| ≤ C') →
-        Tendsto (fun n => ∫ ω, g ω ∂(νseq' n)) atTop (nhds (∫ ω, g ω ∂ν)) := by
-      intro g hg_cont hg_bdd
-      exact (tendsto_add_atTop_iff_nat N0).mpr (hν_bc g hg_cont hg_bdd)
-    -- Step 7: Apply the uniform exp moment bound for all n in νseq' (since Lt ≥ 1).
-    have h_unif : ∀ n,
-        Integrable (fun ω => Real.exp (|ω f|)) (νseq' n) ∧
-        ∫ ω : Configuration (CylinderTestFunction Ls),
-          Real.exp (|ω f|) ∂(νseq' n) ≤ K * Real.exp (C * q f ^ 2) := by
-      intro n
-      simp only [νseq']
-      haveI : Fact (0 < Lt (φ (n + N0))) := hLt (φ (n + N0))
-      haveI : IsProbabilityMeasure (μ (φ (n + N0))) := hμ_prob (φ (n + N0))
-      exact h_exp (Lt (φ (n + N0))) (hLt_shift n) (μ (φ (n + N0)))
-        (h_tail_shift n).2 f
-    -- Step 8: Apply limit_exponential_moment.
-    exact limit_exponential_moment Ls νseq' hνseq'_prob ν hbc' f
-      (K * Real.exp (C * q f ^ 2)) h_unif
+        K * Real.exp (C * q f ^ 2) :=
+    limit_exponential_moment_of_eventual_bound Ls νseqφ hνseqφ_prob ν
+      hνseqφ_bc K C q hνseqφ_exp
   have h_os3_limit : CylinderMeasureReflectionPositive Ls ν :=
     hμ_rp φ ν inferInstance hφ hν_conv K C q hK hC hq_cont h_exp_limit
   refine ⟨ν, inferInstance, ?_, ?_, ?_, ?_, ?_⟩
@@ -797,5 +802,70 @@ theorem routeBPrime_cylinder_OS
     exact tendsto_nhds_unique hL (hR.congr (fun n => (h_eq n).symm))
   · -- OS3: reflection positivity transfers from the pullback sequence.
     exact h_os3_limit
+
+/-- Compatibility wrapper for the Green-controlled Route B' input.  The
+method-of-images estimate first produces the direct cylinder seminorm bound,
+after which the source-independent route above performs tightness, OS0, OS2,
+and OS3 transfer. -/
+theorem routeBPrime_cylinder_OS
+    (mass : ℝ) (hmass : 0 < mass)
+    (KG CG : ℝ) (hKG_pos : 0 < KG) (hCG_pos : 0 < CG)
+    (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
+    (hLt_tend : Tendsto Lt atTop atTop)
+    (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls)))
+    (hμ_prob : ∀ n, IsProbabilityMeasure (μ n))
+    (hμ_green : AsymTorusSequenceHasUniformGreenMomentBound
+      Ls mass hmass KG CG Lt hLt μ)
+    (hμ_rp : ∀ (φ : ℕ → ℕ)
+      (ν : Measure (Configuration (CylinderTestFunction Ls))),
+      IsProbabilityMeasure ν → StrictMono φ →
+      (∀ f : CylinderTestFunction Ls,
+        Tendsto (fun k => ∫ ω, Complex.exp (Complex.I * ↑(ω f))
+          ∂(cylinderPullbackMeasure (Lt (φ k)) Ls (μ (φ k))))
+          atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν))) →
+      ∀ (K C : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls)),
+        0 < K → 0 < C → Continuous q →
+        (∀ f : CylinderTestFunction Ls,
+          Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
+            Real.exp (|ω f|)) ν ∧
+          ∫ ω : Configuration (CylinderTestFunction Ls),
+            Real.exp (|ω f|) ∂ν ≤ K * Real.exp (C * q f ^ 2)) →
+        CylinderMeasureReflectionPositive Ls ν)
+    (hμ_os2 : AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ) :
+    ∃ (ν : Measure (Configuration (CylinderTestFunction Ls))),
+    IsProbabilityMeasure ν ∧
+    (∀ (n : ℕ) (J : Fin n → CylinderTestFunction Ls),
+      AnalyticOnNhd ℂ (fun z : Fin n → ℂ =>
+        ∫ ω, Complex.exp (∑ i, Complex.I * z i * ↑(ω (J i))) ∂ν) Set.univ) ∧
+    (∀ (f : CylinderTestFunction Ls),
+      ∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν =
+      ∫ ω, Complex.exp (Complex.I * ↑(ω (cylinderTimeReflection Ls f))) ∂ν) ∧
+    (∀ (τ : ℝ) (f : CylinderTestFunction Ls),
+      ∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν =
+      ∫ ω, Complex.exp (Complex.I * ↑(ω (cylinderTranslation Ls 0 τ f))) ∂ν) ∧
+    (∀ (v : ℝ) (f : CylinderTestFunction Ls),
+      ∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν =
+      ∫ ω, Complex.exp (Complex.I * ↑(ω (cylinderSpatialTranslation Ls v f))) ∂ν) ∧
+    (∀ (n : ℕ) (f : Fin n → ↥(cylinderPositiveTimeSubmodule Ls)) (c : Fin n → ℂ),
+      0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
+        ∫ ω, Complex.exp (Complex.I *
+          ↑(ω ((f i : CylinderTestFunction Ls) -
+            cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν).re) := by
+  obtain ⟨K, C, q, hK, hC, hq_cont, hbound⟩ :=
+    cylinderIR_uniform_exponential_moment Ls mass hmass KG CG hKG_pos hCG_pos
+  have hLt_ge_one : ∀ᶠ n in atTop, 1 ≤ Lt n := tendsto_atTop.1 hLt_tend 1
+  have hμ_green_raw : ∀ᶠ n in atTop,
+      @MeasureHasGreenMomentBound Ls _ (Lt n) (hLt n)
+        mass hmass KG CG (μ n) := by
+    simpa [AsymTorusSequenceHasUniformGreenMomentBound] using hμ_green
+  have hμ_exp : AsymTorusSequenceHasUniformCylinderExpMomentBound
+      Ls K C q Lt hLt μ := by
+    rw [AsymTorusSequenceHasUniformCylinderExpMomentBound]
+    filter_upwards [hLt_ge_one, hμ_green_raw] with n hLt_one hgreen
+    haveI : Fact (0 < Lt n) := hLt n
+    haveI : IsProbabilityMeasure (μ n) := hμ_prob n
+    exact hbound (Lt n) hLt_one (μ n) hgreen
+  exact routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment
+    Ls K C hK hC q hq_cont Lt hLt hLt_tend μ hμ_prob hμ_exp hμ_rp hμ_os2
 
 end Pphi2

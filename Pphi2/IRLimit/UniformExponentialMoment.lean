@@ -71,6 +71,21 @@ theorem cylinderIR_uniform_exponential_moment
   intro Lt _ hLt μ _ hμ_green f
   exact hbound Lt hLt μ hμ_green f
 
+/-- A direct exponential-moment bound on a torus measure after pullback to the
+cylinder.  This is the source-independent interface used by the IR limit:
+the constants and continuous seminorm can be supplied by a Green comparison,
+by a finite-lattice estimate, or by another honest analytic input. -/
+def MeasureHasCylinderExpMomentBound
+    {Lt : ℝ} [Fact (0 < Lt)]
+    (K C : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls))
+    (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls))) : Prop :=
+  ∀ f : CylinderTestFunction Ls,
+    Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
+      Real.exp (|ω f|)) (cylinderPullbackMeasure Lt Ls μ) ∧
+    ∫ ω : Configuration (CylinderTestFunction Ls),
+      Real.exp (|ω f|) ∂(cylinderPullbackMeasure Lt Ls μ) ≤
+    K * Real.exp (C * q f ^ 2)
+
 /-- Elementary inequality `x² ≤ 2 e^|x|`, used to extract a polynomial
     moment from the exponential moment. -/
 private lemma sq_le_two_mul_exp_abs (x : ℝ) : x ^ 2 ≤ 2 * Real.exp |x| := by
@@ -117,27 +132,23 @@ the pointwise bound `(ω f)² ≤ 2 · Real.exp |ω f|` (the `λ = 1` case of
 the same helper) and `Integrable.mono'` against the AE-strong
 measurability of `(· f) ^ 2` (composition of `configuration_eval_measurable`
 with `pow_const 2`), `(ω f)²` is integrable. -/
-theorem cylinderIR_uniform_second_moment
-    (mass : ℝ) (hmass : 0 < mass)
-    (KG CG : ℝ) (hKG_pos : 0 < KG) (hCG_pos : 0 < CG) :
-    ∃ (C₁ C₂ : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls)),
-    0 < C₁ ∧ 0 < C₂ ∧ Continuous q ∧
-    ∀ (Lt : ℝ) [Fact (0 < Lt)] (_ : 1 ≤ Lt)
-      (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls)))
-      [IsProbabilityMeasure μ]
-      (_ : MeasureHasGreenMomentBound Ls mass hmass KG CG μ)
-      (f : CylinderTestFunction Ls),
+theorem cylinder_uniform_second_moment_of_expMoment
+    (K C : ℝ) (hK : 0 < K) (hC : 0 < C)
+    (q : Seminorm ℝ (CylinderTestFunction Ls))
+    (ν : Measure (Configuration (CylinderTestFunction Ls)))
+    (hbound : ∀ f : CylinderTestFunction Ls,
+      Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
+        Real.exp (|ω f|)) ν ∧
+      ∫ ω : Configuration (CylinderTestFunction Ls),
+        Real.exp (|ω f|) ∂ν ≤ K * Real.exp (C * q f ^ 2)) :
+    ∀ f : CylinderTestFunction Ls,
     Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
-      (ω f) ^ 2) (cylinderPullbackMeasure Lt Ls μ) ∧
+      (ω f) ^ 2) ν ∧
     ∫ ω : Configuration (CylinderTestFunction Ls),
-      (ω f) ^ 2 ∂(cylinderPullbackMeasure Lt Ls μ) ≤
-    C₁ * q f ^ 2 + C₂ := by
-  obtain ⟨K, C, q, hK, hC, hq_cont, hbound⟩ :=
-    cylinderIR_uniform_exponential_moment Ls mass hmass KG CG hKG_pos hCG_pos
-  refine ⟨2 * K * C * Real.exp 1, 2 * K * C * Real.exp 1, q,
-    by positivity, by positivity, hq_cont, ?_⟩
-  intro Lt _ hLt μ _ hμ_green f
-  set ν := cylinderPullbackMeasure Lt Ls μ with hν_def
+      (ω f) ^ 2 ∂ν ≤
+    (2 * K * C * Real.exp 1) * q f ^ 2 +
+      (2 * K * C * Real.exp 1) := by
+  intro f
   set s : ℝ := q f with hs_def
   have hs_nn : 0 ≤ s := apply_nonneg q f
   -- Choose scaling: λ² = 1 / (C (s² + 1))
@@ -150,9 +161,9 @@ theorem cylinderIR_uniform_second_moment
     Real.sq_sqrt (one_div_pos.mpr hα_pos).le
   have hlam2_pos : (0:ℝ) < lam ^ 2 := by positivity
   -- Apply exp moment at λ = 1 (for integrability of (ωf)²)
-  obtain ⟨h_int_one, _⟩ := hbound Lt hLt μ hμ_green f
+  obtain ⟨h_int_one, _⟩ := hbound f
   -- Apply exp moment to (lam • f) (for the moment bound)
-  obtain ⟨h_int_lam, h_bd_lam⟩ := hbound Lt hLt μ hμ_green (lam • f)
+  obtain ⟨h_int_lam, h_bd_lam⟩ := hbound (lam • f)
   -- AE-strong measurability of (ω f)² via configuration_eval_measurable
   have h_meas_sq : AEStronglyMeasurable
       (fun ω : Configuration (CylinderTestFunction Ls) => (ω f) ^ 2) ν :=
@@ -241,5 +252,31 @@ theorem cylinderIR_uniform_second_moment
     _ = 2 * K * C * (s ^ 2 + 1) * Real.exp 1 := by
         rw [hα_def]; ring
     _ = 2 * K * C * Real.exp 1 * s ^ 2 + 2 * K * C * Real.exp 1 := by ring
+
+/-- The Green-controlled route supplies the generic cylinder exponential
+moment interface, hence the same additive uniform second-moment estimate as
+before. -/
+theorem cylinderIR_uniform_second_moment
+    (mass : ℝ) (hmass : 0 < mass)
+    (KG CG : ℝ) (hKG_pos : 0 < KG) (hCG_pos : 0 < CG) :
+    ∃ (C₁ C₂ : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls)),
+    0 < C₁ ∧ 0 < C₂ ∧ Continuous q ∧
+    ∀ (Lt : ℝ) [Fact (0 < Lt)] (_ : 1 ≤ Lt)
+      (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls)))
+      [IsProbabilityMeasure μ]
+      (_ : MeasureHasGreenMomentBound Ls mass hmass KG CG μ)
+      (f : CylinderTestFunction Ls),
+    Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
+      (ω f) ^ 2) (cylinderPullbackMeasure Lt Ls μ) ∧
+    ∫ ω : Configuration (CylinderTestFunction Ls),
+      (ω f) ^ 2 ∂(cylinderPullbackMeasure Lt Ls μ) ≤
+    C₁ * q f ^ 2 + C₂ := by
+  obtain ⟨K, C, q, hK, hC, hq_cont, hbound⟩ :=
+    cylinderIR_uniform_exponential_moment Ls mass hmass KG CG hKG_pos hCG_pos
+  refine ⟨2 * K * C * Real.exp 1, 2 * K * C * Real.exp 1, q,
+    by positivity, by positivity, hq_cont, ?_⟩
+  intro Lt _ hLt μ _ hμ_green f
+  exact cylinder_uniform_second_moment_of_expMoment Ls K C hK hC q
+    (cylinderPullbackMeasure Lt Ls μ) (hbound Lt hLt μ hμ_green) f
 
 end Pphi2
