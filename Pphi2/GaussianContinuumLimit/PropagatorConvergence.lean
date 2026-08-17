@@ -476,6 +476,15 @@ private lemma one_d_zmod_bound (a : ℝ) (ha : 0 < a)
             simpa [g] using one_d_shift_sum_bound a ha N
           linarith
 
+/-- Centered one-dimensional lattice samples of the integrable decay
+`(1 + |x|)⁻²` have a mesh-uniform Riemann-sum bound.  This public wrapper is
+the summability input for periodized-cylinder sampling estimates. -/
+theorem centeredZMod_decay_sum_le_three
+    (N : ℕ) [NeZero N] (a : ℝ) (ha : 0 < a) (ha1 : a ≤ 1) :
+    ∑ n : ZMod N,
+      a / (1 + a * ((signedVal N n).natAbs : ℝ)) ^ 2 ≤ 3 :=
+  one_d_zmod_bound N a ha ha1
+
 /-! ### Schwartz Riemann sum bound -/
 
 private def schwartzSeminormWindow (d : ℕ) : Finset (ℕ × ℕ) :=
@@ -565,7 +574,7 @@ private theorem schwartz_riemann_sum_bound_of_majorant
           (fun i _ => Finset.sum_nonneg
             (fun n _ => div_nonneg
               (le_of_lt ha) (sq_nonneg _)))
-          (fun i _ => one_d_zmod_bound N a ha ha1)
+          (fun i _ => centeredZMod_decay_sum_le_three N a ha ha1)
 
 /-- **Schwartz Riemann sum bound.**
 
