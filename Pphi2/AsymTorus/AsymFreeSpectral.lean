@@ -26,6 +26,7 @@ measure `latticeGaussianMeasureAsym` and the proved Hermitian eigenbasis
 -/
 
 import Pphi2.AsymTorus.AsymWickVariance
+import Pphi2.AsymTorus.AsymEnergyFactorization
 
 noncomputable section
 
@@ -112,6 +113,109 @@ theorem asymFreeVariance_eq_sum_modeCoeff_sq (Nt Ns : ℕ) [NeZero Nt] [NeZero N
       (a ^ 2 : ℝ)⁻¹ * ∑ k : AsymLatticeSites Nt Ns,
         (massEigenvaluesAsym Nt Ns a mass k)⁻¹ * (asymModeCoeff Nt Ns a mass k G) ^ 2 :=
   asymFreeVariance_eq_spectral_sum Nt Ns a mass ha hmass G
+
+/-- Every eigenvalue of the asymmetric massive lattice operator is at least
+`mass²`.  The two bond contributions in its quadratic form are nonnegative. -/
+theorem massEigenvaluesAsym_ge_mass_sq
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a mass : ℝ) (k : AsymLatticeSites Nt Ns) :
+    mass ^ 2 ≤ massEigenvaluesAsym Nt Ns a mass k := by
+  let e : AsymLatticeField Nt Ns :=
+    massEigenvectorBasisAsym Nt Ns a mass k
+  have he_norm : ∑ x : AsymLatticeSites Nt Ns, e x ^ 2 = 1 := by
+    simpa [e] using massEigenvectorBasisAsym_norm_sq_eq_one Nt Ns a mass k
+  have hQe : massOperatorAsym Nt Ns a mass e =
+      massEigenvaluesAsym Nt Ns a mass k • e := by
+    ext x
+    rw [massOperatorAsym_eq_matrix_mulVec Nt Ns a mass e x]
+    simpa [massEigenvaluesAsym, massEigenvectorBasisAsym, e] using
+      congrFun (Matrix.IsHermitian.mulVec_eigenvectorBasis
+        (hA := massOperatorMatrixAsym_isHermitian Nt Ns a mass) k) x
+  have hquad := massOperatorAsym_quadratic_form_bonds
+    (Nt := Nt) (Ns := Ns) a mass e
+  rw [hQe] at hquad
+  have htime_nonneg : 0 ≤ a⁻¹ ^ 2 *
+      ∑ x : AsymLatticeSites Nt Ns,
+        (e (x + ((1 : ZMod Nt), (0 : ZMod Ns))) - e x) ^ 2 :=
+    mul_nonneg (sq_nonneg _) (Finset.sum_nonneg fun x _ => sq_nonneg _)
+  have hspace_nonneg : 0 ≤ a⁻¹ ^ 2 *
+      ∑ x : AsymLatticeSites Nt Ns,
+        (e (x + ((0 : ZMod Nt), (1 : ZMod Ns))) - e x) ^ 2 :=
+    mul_nonneg (sq_nonneg _) (Finset.sum_nonneg fun x _ => sq_nonneg _)
+  simp only [Pi.smul_apply, smul_eq_mul] at hquad
+  have hleft : ∑ x : AsymLatticeSites Nt Ns,
+      e x * (massEigenvaluesAsym Nt Ns a mass k * e x) =
+      massEigenvaluesAsym Nt Ns a mass k := by
+    calc
+      ∑ x : AsymLatticeSites Nt Ns,
+          e x * (massEigenvaluesAsym Nt Ns a mass k * e x) =
+          massEigenvaluesAsym Nt Ns a mass k * ∑ x, e x ^ 2 := by
+        rw [Finset.mul_sum]
+        exact Finset.sum_congr rfl fun x _ => by ring
+      _ = massEigenvaluesAsym Nt Ns a mass k := by rw [he_norm, mul_one]
+  rw [hleft, he_norm, mul_one] at hquad
+  linarith
+
+/-- The free asymmetric-lattice variance is bounded by the counting `ℓ²`
+norm with the exact GJ factor `(a²)⁻¹` and the massive spectral factor
+`mass⁻²`. -/
+theorem asymFreeVariance_le_mass_inv_sq
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (G : AsymLatticeField Nt Ns) :
+    ∫ ω : Configuration (AsymLatticeField Nt Ns),
+        (ω G) ^ 2 ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) ≤
+      (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
+        ∑ x : AsymLatticeSites Nt Ns, G x ^ 2 := by
+  rw [asymFreeVariance_eq_sum_modeCoeff_sq
+    (Nt := Nt) (Ns := Ns) a mass ha hmass G]
+  have hinv_le : ∀ k : AsymLatticeSites Nt Ns,
+      (massEigenvaluesAsym Nt Ns a mass k)⁻¹ ≤ mass⁻¹ ^ 2 := by
+    intro k
+    rw [inv_pow, ← one_div, ← one_div]
+    exact div_le_div_of_nonneg_left zero_le_one (sq_pos_of_pos hmass)
+      (massEigenvaluesAsym_ge_mass_sq Nt Ns a mass k)
+  calc
+    (a ^ 2 : ℝ)⁻¹ * ∑ k : AsymLatticeSites Nt Ns,
+        (massEigenvaluesAsym Nt Ns a mass k)⁻¹ *
+          (asymModeCoeff Nt Ns a mass k G) ^ 2 ≤
+      (a ^ 2 : ℝ)⁻¹ * ∑ k : AsymLatticeSites Nt Ns,
+        mass⁻¹ ^ 2 * (asymModeCoeff Nt Ns a mass k G) ^ 2 := by
+      apply mul_le_mul_of_nonneg_left
+      · exact Finset.sum_le_sum fun k _ =>
+          mul_le_mul_of_nonneg_right (hinv_le k) (sq_nonneg _)
+      · exact inv_nonneg.mpr (sq_nonneg a)
+    _ = (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
+        ∑ k : AsymLatticeSites Nt Ns,
+          (asymModeCoeff Nt Ns a mass k G) ^ 2 := by
+      rw [Finset.mul_sum]
+      ring
+    _ = (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
+        ∑ x : AsymLatticeSites Nt Ns, G x ^ 2 := by
+      rw [sum_asymModeCoeff_sq (Nt := Nt) (Ns := Ns) a mass G]
+
+/-- Sitewise absolute value does not change the counting `ℓ²` norm, so the
+same massive bound applies without identifying `|G|` with a smooth test
+function. -/
+theorem asymFreeVariance_sitewiseAbs_le_mass_inv_sq
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (G : AsymLatticeField Nt Ns) :
+    ∫ ω : Configuration (AsymLatticeField Nt Ns),
+        (ω (fun x => |G x|)) ^ 2
+        ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) ≤
+      (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
+        ∑ x : AsymLatticeSites Nt Ns, G x ^ 2 := by
+  calc
+    ∫ ω : Configuration (AsymLatticeField Nt Ns),
+        (ω (fun x => |G x|)) ^ 2
+        ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) ≤
+      (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
+        ∑ x : AsymLatticeSites Nt Ns, |G x| ^ 2 :=
+      asymFreeVariance_le_mass_inv_sq Nt Ns a mass ha hmass (fun x => |G x|)
+    _ = (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
+        ∑ x : AsymLatticeSites Nt Ns, G x ^ 2 := by
+      simp_rw [sq_abs]
 
 /-! ## Spectral projections onto mode sets -/
 
