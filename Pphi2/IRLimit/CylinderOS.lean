@@ -591,7 +591,8 @@ theorem routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment
       IsProbabilityMeasure ν → StrictMono φ →
       (∀ f : CylinderTestFunction Ls,
         Tendsto (fun k => ∫ ω, Complex.exp (Complex.I * ↑(ω f))
-          ∂(cylinderPullbackMeasure (Lt (φ k)) Ls (μ (φ k))))
+          ∂(@cylinderPullbackMeasure (Lt (φ k)) Ls
+            (hLt (φ k)) hLs (μ (φ k))))
           atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν))) →
       ∀ (K C : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls)),
         0 < K → 0 < C → Continuous q →
@@ -634,7 +635,8 @@ theorem routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment
   have hν_bc := hν_bc_and_cf.1
   have hν_conv := hν_bc_and_cf.2
   let νseqφ : ℕ → Measure (Configuration (CylinderTestFunction Ls)) := fun k =>
-    cylinderPullbackMeasure (Lt (φ k)) Ls (μ (φ k))
+    @cylinderPullbackMeasure (Lt (φ k)) Ls
+      (hLt (φ k)) hLs (μ (φ k))
   have hνseqφ_conv : ∀ f : CylinderTestFunction Ls,
       Tendsto (fun k => ∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂(νseqφ k))
         atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν)) := by
@@ -749,9 +751,11 @@ theorem routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment
     -- But Z_{Lt_n}(f) = Z_{Lt_n}(Θf) at each finite Lt_n (exact reflection invariance)
     have h_eq : ∀ n,
         (∫ ω, Complex.exp (Complex.I * ↑(ω f))
-          ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n)))) =
+          ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+            (hLt (φ n)) hLs (μ (φ n)))) =
         (∫ ω, Complex.exp (Complex.I * ↑(ω (cylinderTimeReflection Ls f)))
-          ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n)))) := by
+          ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+            (hLt (φ n)) hLs (μ (φ n)))) := by
       intro n
       exact @cylinderPullback_timeReflection_invariant Ls _ (Lt (φ n)) (hLt (φ n))
         (μ (φ n)) (hμ_prob (φ n))
@@ -765,9 +769,11 @@ theorem routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment
     have hR := hν_conv (cylinderTranslation Ls 0 τ f)
     have h_eq : ∀ n,
         (∫ ω, Complex.exp (Complex.I * ↑(ω f))
-          ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n)))) =
+          ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+            (hLt (φ n)) hLs (μ (φ n)))) =
         (∫ ω, Complex.exp (Complex.I * ↑(ω (cylinderTranslation Ls 0 τ f)))
-          ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n)))) := by
+          ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+            (hLt (φ n)) hLs (μ (φ n)))) := by
       intro n
       exact @cylinderPullback_timeTranslation_invariant Ls _ (Lt (φ n)) (hLt (φ n))
         (μ (φ n)) (hμ_prob (φ n))
@@ -780,9 +786,11 @@ theorem routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment
     have hR := hν_conv (cylinderSpatialTranslation Ls v f)
     have h_eq : ∀ n,
         (∫ ω, Complex.exp (Complex.I * ↑(ω f))
-          ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n)))) =
+          ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+            (hLt (φ n)) hLs (μ (φ n)))) =
         (∫ ω, Complex.exp (Complex.I * ↑(ω (cylinderSpatialTranslation Ls v f)))
-          ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n)))) := by
+          ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+            (hLt (φ n)) hLs (μ (φ n)))) := by
       intro n
       unfold cylinderPullbackMeasure
       have hmeas : Measurable (cylinderPullback (Lt (φ n)) Ls) :=
@@ -821,7 +829,8 @@ theorem routeBPrime_cylinder_OS
       IsProbabilityMeasure ν → StrictMono φ →
       (∀ f : CylinderTestFunction Ls,
         Tendsto (fun k => ∫ ω, Complex.exp (Complex.I * ↑(ω f))
-          ∂(cylinderPullbackMeasure (Lt (φ k)) Ls (μ (φ k))))
+          ∂(@cylinderPullbackMeasure (Lt (φ k)) Ls
+            (hLt (φ k)) hLs (μ (φ k))))
           atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν))) →
       ∀ (K C : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls)),
         0 < K → 0 < C → Continuous q →

@@ -168,13 +168,15 @@ theorem cylinderIRLimit_exists
     (∀ (g : Configuration (CylinderTestFunction Ls) → ℝ),
       Continuous g → (∃ C, ∀ x, |g x| ≤ C) →
       Tendsto (fun n =>
-        ∫ ω, g ω ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n))))
+        ∫ ω, g ω ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+          (hLt (φ n)) hLs (μ (φ n))))
         atTop (nhds (∫ ω, g ω ∂ν))) ∧
     -- Characteristic functional convergence
     (∀ (f : CylinderTestFunction Ls),
     Tendsto (fun n =>
       ∫ ω, Complex.exp (Complex.I * ↑(ω f))
-        ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n))))
+        ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+          (hLt (φ n)) hLs (μ (φ n))))
       atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν))) := by
   -- Step 1: Uniform second moment bound from cylinderIR_uniform_second_moment
   -- (additive form `C₁ q(f)² + C₂`, derived from the Green-moment input)
@@ -192,7 +194,8 @@ theorem cylinderIRLimit_exists
     hLt_ge_one.and h_green_tail
   rcases (eventually_atTop.1 h_tail) with ⟨N0, hN0⟩
   let νseq : ℕ → Measure (Configuration (CylinderTestFunction Ls)) := fun n =>
-    cylinderPullbackMeasure (Lt (n + N0)) Ls (μ (n + N0))
+    @cylinderPullbackMeasure (Lt (n + N0)) Ls
+      (hLt (n + N0)) hLs (μ (n + N0))
   have hν_prob : ∀ n, IsProbabilityMeasure (νseq n) := by
     intro n
     dsimp [νseq]
@@ -503,16 +506,17 @@ theorem cylinderIRLimit_exists_of_uniform_cylinderExpMoment
     (∀ (g : Configuration (CylinderTestFunction Ls) → ℝ),
       Continuous g → (∃ B, ∀ x, |g x| ≤ B) →
       Tendsto (fun n =>
-        ∫ ω, g ω ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n))))
+        ∫ ω, g ω ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+          (hLt (φ n)) hLs (μ (φ n))))
         atTop (nhds (∫ ω, g ω ∂ν))) ∧
     (∀ f : CylinderTestFunction Ls,
       Tendsto (fun n =>
         ∫ ω, Complex.exp (Complex.I * ↑(ω f))
-          ∂(cylinderPullbackMeasure (Lt (φ n)) Ls (μ (φ n))))
+          ∂(@cylinderPullbackMeasure (Lt (φ n)) Ls
+            (hLt (φ n)) hLs (μ (φ n))))
         atTop (nhds (∫ ω, Complex.exp (Complex.I * ↑(ω f)) ∂ν))) := by
   let νseq : ℕ → Measure (Configuration (CylinderTestFunction Ls)) := fun n =>
-    letI : Fact (0 < Lt n) := hLt n
-    cylinderPullbackMeasure (Lt n) Ls (μ n)
+    @cylinderPullbackMeasure (Lt n) Ls (hLt n) hLs (μ n)
   have hν_prob : ∀ n, IsProbabilityMeasure (νseq n) := by
     intro n
     dsimp [νseq]

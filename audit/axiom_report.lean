@@ -38,6 +38,13 @@ Secondary regression targets (not in `formalization.yaml`):
 * `Pphi2.asymInteracting_expMoment_of_signed` — the signed-split recovery
   lemma (sole direct consumer of the sign-restricted Layer A axiom).
 
+Part-A regression targets:
+
+* the direct cylinder exponential-moment predicates, second-moment extractor,
+  Prokhorov adapters, and OS compatibility route;
+* the massive asymmetric-lattice free-variance bounds, including the
+  sitewise-absolute form used by the thresholded cylinder adapter.
+
 **Usage**:
 
 ```
@@ -59,3 +66,15 @@ filename per the hub convention.
 #print axioms Pphi2.asymInteractingVariance_le_freeVariance_Lt_uniform
 #print axioms Pphi2.asymInteracting_expMoment_volume_uniform_proof
 #print axioms Pphi2.asymInteracting_expMoment_of_signed
+#print axioms Pphi2.MeasureHasCylinderExpMomentBound
+#print axioms Pphi2.cylinder_uniform_second_moment_of_expMoment
+#print axioms Pphi2.cylinderIR_uniform_second_moment
+#print axioms Pphi2.CylinderSequenceHasUniformExponentialMomentBound
+#print axioms Pphi2.AsymTorusSequenceHasUniformCylinderExpMomentBound
+#print axioms Pphi2.cylinderIRLimit_exists_of_eventual_expMoment
+#print axioms Pphi2.cylinderIRLimit_exists_of_uniform_cylinderExpMoment
+#print axioms Pphi2.routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment
+#print axioms Pphi2.routeBPrime_cylinder_OS
+#print axioms Pphi2.massEigenvaluesAsym_ge_mass_sq
+#print axioms Pphi2.asymFreeVariance_le_mass_inv_sq
+#print axioms Pphi2.asymFreeVariance_sitewiseAbs_le_mass_inv_sq

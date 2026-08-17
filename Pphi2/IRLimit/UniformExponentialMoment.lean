@@ -248,7 +248,7 @@ theorem cylinder_uniform_second_moment_of_expMoment
         exact mul_le_mul_of_nonneg_left h_exp_le this
     _ = 2 * K * α * Real.exp 1 := by
         rw [hlam_sq]
-        field_simp
+        field_simp [ne_of_gt hα_pos]
     _ = 2 * K * C * (s ^ 2 + 1) * Real.exp 1 := by
         rw [hα_def]; ring
     _ = 2 * K * C * Real.exp 1 * s ^ 2 + 2 * K * C * Real.exp 1 := by ring
