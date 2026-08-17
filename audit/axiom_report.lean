@@ -79,3 +79,9 @@ filename per the hub convention.
 #print axioms Pphi2.asymFreeVariance_le_mass_inv_sq
 #print axioms Pphi2.asymFreeVariance_sitewiseAbs_le_mass_inv_sq
 #print axioms Pphi2.asymInteractingVariance_le_freeVariance_torus
+#print axioms Pphi2.cylinderPullbackMeasure_exponential_moment_of_tendsto_bc
+#print axioms Pphi2.asymTorusIso_measureHasCylinderExpMomentBound_of_cutoff
+#print axioms Pphi2.asymTorusIso_limit_satisfies_OS2
+#print axioms Pphi2.asymTorusIso_measureHasCylinderExpMomentBound_of_cutoff_withNoWrapRP
+#print axioms Pphi2.asymTorusIso_cylinderUniformCylinderExpMomentBound_of_cutoffFamily
+#print axioms Pphi2.routeBPrimeIso_cylinder_OS_of_cutoffFamily
