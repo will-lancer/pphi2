@@ -446,6 +446,61 @@ theorem asymTorusIso_measureHasCylinderExpMomentBound_of_cutoff
   haveI := hNs (φ n)
   simpa [ν] using hcutoff (φ n) f
 
+/-- Convert the thresholded torus absolute-variance estimate into the direct
+cylinder-seminorm estimate once the finite-grid variance has been bounded by
+that seminorm.  This lemma contains only pushforward and monotonicity algebra;
+the sampling estimate remains an explicit premise. -/
+theorem asymTorusInteractingMeasureIso_cylinderExpMoment_of_absVarianceBound
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a)
+    (K C D : ℝ) (hK : 0 ≤ K) (hC : 0 ≤ C) (hD : 0 ≤ D)
+    (q : Seminorm ℝ (CylinderTestFunction Ls))
+    (f : CylinderTestFunction Ls)
+    (hTorus :
+      Integrable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) ⇒
+        Real.exp (|ω (cylinderToTorusEmbed Lt Ls f)|))
+        (asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass) ∧
+      ∫ ω : Configuration (AsymTorusTestFunction Lt Ls),
+        Real.exp (|ω (cylinderToTorusEmbed Lt Ls f)|)
+          ∂(asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass) ≤
+        K * Real.exp (C *
+          ∫ ω : Configuration (AsymLatticeField Nt Ns),
+            (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls Nt Ns a
+              (cylinderToTorusEmbed Lt Ls f) x|)) ^ 2
+            ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)))
+    (hVariance :
+      ∫ ω : Configuration (AsymLatticeField Nt Ns),
+          (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls Nt Ns a
+            (cylinderToTorusEmbed Lt Ls f) x|)) ^ 2
+          ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) ≤
+        D * q f ^ 2) :
+    Integrable (fun ω : Configuration (CylinderTestFunction Ls) ⇒
+      Real.exp (|ω f|))
+      (cylinderPullbackMeasure Lt Ls
+        (asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass)) ∧
+    ∫ ω : Configuration (CylinderTestFunction Ls),
+      Real.exp (|ω f|) ∂(cylinderPullbackMeasure Lt Ls
+        (asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass)) ≤
+      K * Real.exp ((C * D) * q f ^ 2) := by
+  let μ := asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass
+  letI : IsProbabilityMeasure μ :=
+    asymTorusInteractingMeasureIso_isProbability Lt Ls Nt Ns a P mass ha hmass
+  obtain ⟨hint_cyl, heq⟩ :=
+    cylinderPullback_expMoment_eq Ls Lt μ f hTorus.1
+  refine ⟨hint_cyl, heq.le.trans ?_⟩
+  calc
+    ∫ ω : Configuration (AsymTorusTestFunction Lt Ls),
+        Real.exp (|ω (cylinderToTorusEmbed Lt Ls f)|) ∂μ ≤
+        K * Real.exp (C *
+          ∫ ω : Configuration (AsymLatticeField Nt Ns),
+            (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls Nt Ns a
+              (cylinderToTorusEmbed Lt Ls f) x|)) ^ 2
+            ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)) := hTorus.2
+    _ ≤ K * Real.exp (C * (D * q f ^ 2)) := by
+      exact mul_le_mul_of_nonneg_left
+        (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hVariance hC)) hK
+    _ = K * Real.exp ((C * D) * q f ^ 2) := by ring
+
 /-- Translation and time-reflection symmetry of the isotropic UV limit use
 only cutoff symmetries, fixed-volume second-moment control, and weak
 convergence.  The cylinder-moment route calls this narrower projection
