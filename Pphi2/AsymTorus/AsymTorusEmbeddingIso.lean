@@ -38,6 +38,91 @@ namespace Pphi2
 
 variable (Lt Ls : ℝ) [hLt : Fact (0 < Lt)] [hLs : Fact (0 < Ls)]
 
+/-- Restricting a normalized circle Fourier mode gives the corresponding
+normalized real lattice Fourier mode, at every mode index. -/
+theorem circleRestriction_fourierBasis_eq_latticeFourierBasisFun
+    (L : ℝ) [hL : Fact (0 < L)] (N : ℕ) [NeZero N]
+    (m : ℕ) (z : ZMod N) :
+    circleRestriction L N (SmoothMap_Circle.fourierBasis m) z =
+      latticeFourierBasisFun N m z := by
+  have hN_pos : (0 : ℝ) < N := Nat.cast_pos.mpr (NeZero.pos N)
+  have hL' : L ≠ 0 := ne_of_gt hL.out
+  have hN_ne : (N : ℝ) ≠ 0 := ne_of_gt hN_pos
+  have sqrt_factor (c : ℝ) (_hc : 0 ≤ c) :
+      Real.sqrt (L / ↑N) * Real.sqrt (c / L) =
+        Real.sqrt (c / ↑N) := by
+    have hprod : L / ↑N * (c / L) = c / ↑N := by
+      field_simp
+    rw [← Real.sqrt_mul (div_nonneg hL.out.le hN_pos.le), hprod]
+  have arg_eq (k : ℕ) :
+      2 * π * ↑k * (ZMod.val z : ℝ) / ↑N =
+        2 * π * ↑k * circlePoint L N z / L := by
+    simp only [circlePoint]
+    field_simp
+  cases m with
+  | zero =>
+      simp only [circleRestriction_apply, circleSpacing_eq,
+        SmoothMap_Circle.fourierBasis_apply, latticeFourierBasisFun,
+        SmoothMap_Circle.fourierBasisFun]
+      have h1 : (1 : ℝ) / Real.sqrt L = Real.sqrt (1 / L) := by
+        rw [one_div, one_div, ← Real.sqrt_inv]
+      have h2 : (1 : ℝ) / Real.sqrt (N : ℝ) =
+          Real.sqrt (1 / (N : ℝ)) := by
+        rw [one_div, one_div, ← Real.sqrt_inv]
+      rw [h1, h2, sqrt_factor 1 (by norm_num)]
+  | succ n =>
+      simp only [circleRestriction_apply, circleSpacing_eq,
+        SmoothMap_Circle.fourierBasis_apply, latticeFourierBasisFun,
+        SmoothMap_Circle.fourierBasisFun]
+      split_ifs with h
+      · rw [arg_eq]
+        calc
+          Real.sqrt (L / ↑N) *
+              (Real.sqrt (2 / L) *
+                Real.cos (2 * π * ↑(n / 2 + 1) *
+                  circlePoint L N z / L)) =
+              (Real.sqrt (L / ↑N) * Real.sqrt (2 / L)) *
+                Real.cos (2 * π * ↑(n / 2 + 1) *
+                  circlePoint L N z / L) := by ring
+          _ = Real.sqrt (2 / ↑N) *
+                Real.cos (2 * π * ↑(n / 2 + 1) *
+                  circlePoint L N z / L) := by
+            rw [sqrt_factor 2 (by norm_num)]
+      · rw [arg_eq]
+        calc
+          Real.sqrt (L / ↑N) *
+              (Real.sqrt (2 / L) *
+                Real.sin (2 * π * ↑(n / 2 + 1) *
+                  circlePoint L N z / L)) =
+              (Real.sqrt (L / ↑N) * Real.sqrt (2 / L)) *
+                Real.sin (2 * π * ↑(n / 2 + 1) *
+                  circlePoint L N z / L) := by ring
+          _ = Real.sqrt (2 / ↑N) *
+                Real.sin (2 * π * ↑(n / 2 + 1) *
+                  circlePoint L N z / L) := by
+            rw [sqrt_factor 2 (by norm_num)]
+
+/-- Asymmetric-torus site evaluation of a DMS basis vector factors into the
+two normalized circle restrictions indexed by `Nat.unpair`. -/
+theorem evalAsymTorusAtSite_basisVec
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (x : AsymLatticeSites Nt Ns) (m : ℕ) :
+    evalAsymTorusAtSite Lt Ls Nt Ns x (RapidDecaySeq.basisVec m) =
+      circleRestriction Lt Nt
+        (DyninMityaginSpace.basis (E := SmoothMap_Circle Lt ℝ)
+          (Nat.unpair m).1) x.1 *
+      circleRestriction Ls Ns
+        (DyninMityaginSpace.basis (E := SmoothMap_Circle Ls ℝ)
+          (Nat.unpair m).2) x.2 := by
+  unfold evalAsymTorusAtSite
+  rw [NuclearTensorProduct.basisVec_eq_pure
+    (DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis
+      (E := SmoothMap_Circle Lt ℝ))
+    (DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis
+      (E := SmoothMap_Circle Ls ℝ)) m]
+  rw [NuclearTensorProduct.evalCLM_pure]
+  simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.proj_apply]
+
 /-- GJ-weighted isotropic site evaluation: `a • evalAsymTorusAtSite`. The single spacing `a`
 plays the role of the (former) geometric-mean weight, giving per-site weight `a²`. -/
 noncomputable def evalAsymTorusAtSiteGJ (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
