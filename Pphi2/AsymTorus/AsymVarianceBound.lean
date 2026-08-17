@@ -28,10 +28,9 @@ density-transfer + Gaussian-4th-moment chain through the Nelson
 exp-moment bound (now a theorem after UNIT 7's discharge of
 `asymChaosCutoffDecomposition`).
 
-Specifically: `asymTorusIso_interacting_second_moment_density_transfer`
-(`Pphi2/AsymTorus/AsymContinuumLimit.lean:48`) already proves the bound
-in essentially the form Layer B1 wants. This file wraps that theorem
-in the explicit Layer-B1 packaging and documents the relationship.
+The lattice density-transfer proof below packages this estimate directly.
+The torus statement is obtained by pushing the lattice theorem through
+`asymTorusEmbedLiftIso`.
 
 The transfer-matrix spectral work in Phases 1-3 is **not deadweight** —
 it is the foundation that Layer B2 (UV uniformity of `C(Lt, Ls)` as
@@ -74,8 +73,10 @@ To assemble the full
   — overall axiom-discharge architecture.
 -/
 
-import Pphi2.AsymTorus.AsymPositivity
-import Pphi2.AsymTorus.AsymContinuumLimit
+import Pphi2.AsymTorus.AsymTorusEmbeddingIso
+import Pphi2.AsymTorus.AsymNelson
+import Pphi2.AsymTorus.AsymWickMean
+import GaussianField.HypercontractiveNat
 
 noncomputable section
 
@@ -202,9 +203,8 @@ theorem asymInteractingVariance_le_freeVariance_lattice
     _ = 3 * Real.sqrt K * ∫ ω, (ω g) ^ 2 ∂μ_GFF := by ring
 
 /-- **Layer B1 variance bound at the torus test-function level**. The
-form the eventual Layer C assembly will consume. Wrapper of
-`asymTorusIso_interacting_second_moment_density_transfer` (in
-`AsymContinuumLimit.lean`) restated as a Layer-B1 variance bound. -/
+form the eventual Layer C assembly will consume.  This is the lattice theorem
+above transported through `asymTorusEmbedLiftIso`. -/
 theorem asymInteractingVariance_le_freeVariance_torus
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ C : ℝ, 0 < C ∧
@@ -215,8 +215,26 @@ theorem asymInteractingVariance_le_freeVariance_torus
           (ω f) ^ 2 ∂(asymTorusInteractingMeasureIso Lt Ls Nt Ns a P mass ha hmass) ≤
         C * ∫ ω : Configuration (AsymLatticeField Nt Ns),
           (ω (asymLatticeTestFnIso Lt Ls Nt Ns a f)) ^ 2
-            ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) :=
-  asymTorusIso_interacting_second_moment_density_transfer Lt Ls P mass hmass
+            ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) := by
+  obtain ⟨C, hC, hC_bound⟩ :=
+    asymInteractingVariance_le_freeVariance_lattice Lt Ls P mass hmass
+  refine ⟨C, hC, ?_⟩
+  intro f Nt Ns _ _ a ha hvolt hvols
+  set μ_int := interactingLatticeMeasureAsym Nt Ns P a mass ha hmass
+  set μ_GFF := latticeGaussianMeasureAsym Nt Ns a mass ha hmass
+  set ι := asymTorusEmbedLiftIso Lt Ls Nt Ns a
+  set g := asymLatticeTestFnIso Lt Ls Nt Ns a f
+  have hι_meas : AEMeasurable ι μ_int :=
+    (asymTorusEmbedLiftIso_measurable Lt Ls Nt Ns a).aemeasurable
+  change ∫ ω, (ω f) ^ 2 ∂(Measure.map ι μ_int) ≤
+    C * ∫ ω : Configuration (AsymLatticeField Nt Ns), (ω g) ^ 2 ∂μ_GFF
+  rw [integral_map hι_meas
+    ((configuration_eval_measurable f).pow_const 2).aestronglyMeasurable]
+  have h_eval : ∀ ω : Configuration (AsymLatticeField Nt Ns),
+      (ι ω) f = ω g :=
+    fun ω => asymTorusEmbedLiftIso_eval_eq Lt Ls Nt Ns a f ω
+  simp_rw [h_eval]
+  exact hC_bound Nt Ns a ha hvolt hvols g
 
 end Pphi2
 

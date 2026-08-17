@@ -78,3 +78,4 @@ filename per the hub convention.
 #print axioms Pphi2.massEigenvaluesAsym_ge_mass_sq
 #print axioms Pphi2.asymFreeVariance_le_mass_inv_sq
 #print axioms Pphi2.asymFreeVariance_sitewiseAbs_le_mass_inv_sq
+#print axioms Pphi2.asymInteractingVariance_le_freeVariance_torus
