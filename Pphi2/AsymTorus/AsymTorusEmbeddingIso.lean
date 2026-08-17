@@ -79,6 +79,22 @@ def asymLatticeTestFnIso (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ)
     (f : AsymTorusTestFunction Lt Ls) : AsymLatticeField Nt Ns :=
   fun x => evalAsymTorusAtSiteGJ Lt Ls Nt Ns a x f
 
+/-- Removing the GJ covariance prefactor from the squared lattice pullback
+leaves the counting-isometric asymmetric-torus restriction norm. -/
+theorem asymLatticeTestFnIso_scaled_sq_sum_eq_evalAsymTorusAtSite_sq_sum
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a : ℝ) (ha : 0 < a)
+    (f : AsymTorusTestFunction Lt Ls) :
+    (a ^ 2 : ℝ)⁻¹ *
+        ∑ x : AsymLatticeSites Nt Ns,
+          (asymLatticeTestFnIso Lt Ls Nt Ns a f x) ^ 2 =
+      ∑ x : AsymLatticeSites Nt Ns,
+        (evalAsymTorusAtSite Lt Ls Nt Ns x f) ^ 2 := by
+  have ha0 : a ≠ 0 := ne_of_gt ha
+  simp_rw [asymLatticeTestFnIso, evalAsymTorusAtSiteGJ_apply, mul_pow]
+  rw [← Finset.mul_sum, ← mul_assoc,
+    inv_mul_cancel₀ (pow_ne_zero 2 ha0), one_mul]
+
 theorem asymLatticeTestFnIso_expand (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ)
     (f : AsymTorusTestFunction Lt Ls) :
     asymLatticeTestFnIso Lt Ls Nt Ns a f =
