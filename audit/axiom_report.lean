@@ -81,6 +81,7 @@ filename per the hub convention.
 #print axioms Pphi2.centeredZMod_decay_sum_le_three
 #print axioms Pphi2.asymInteractingVariance_le_freeVariance_torus
 #print axioms Pphi2.cylinderPullbackMeasure_exponential_moment_of_tendsto_bc
+#print axioms Pphi2.asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling
 #print axioms Pphi2.asymTorusIso_measureHasCylinderExpMomentBound_of_cutoff
 #print axioms Pphi2.asymTorusInteractingMeasureIso_cylinderExpMoment_of_absVarianceBound
 #print axioms Pphi2.asymTorusIso_limit_satisfies_OS2

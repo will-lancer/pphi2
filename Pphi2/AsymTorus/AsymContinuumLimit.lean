@@ -385,6 +385,159 @@ theorem cylinderPullbackMeasure_exponential_moment_of_tendsto_bc
     cylinderPullback_expMoment_eq Ls Lt μ f hint_torus
   exact ⟨hint_cyl, heq.le.trans hle_torus⟩
 
+/-! ## Bridge: raw fixed-period sampling bound ⟹ cylinder bound -/
+
+/-- A raw finite-grid sampling limit turns the sitewise massive variance estimate
+into a cylinder exponential-moment bound after the UV weak limit.  The cutoff
+estimate is supplied on the selected sequence; the sampling premise is the
+only finite-grid convergence input consumed here. -/
+theorem asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling
+    (mass : ℝ) (hmass : 0 < mass)
+    (K C : ℝ) (hK : 0 ≤ K) (hC : 0 ≤ C)
+    (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k))
+    (ha : ∀ k, 0 < a k)
+    (ν : ℕ → Measure (Configuration (AsymTorusTestFunction Lt Ls)))
+    (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls)))
+    (hν_prob : ∀ k, IsProbabilityMeasure (ν k))
+    (hμ_prob : IsProbabilityMeasure μ)
+    (hbc : ∀ (g : Configuration (AsymTorusTestFunction Lt Ls) → ℝ),
+      Continuous g → (∃ B, ∀ x, |g x| ≤ B) →
+      Filter.Tendsto (fun k ⇒ ∫ ω, g ω ∂(ν k)) Filter.atTop
+        (nhds (∫ ω, g ω ∂μ)))
+    (hcutoff : ∀ k,
+      letI : NeZero (Nt k) := hNt k
+      letI : NeZero (Ns k) := hNs k
+      ∀ F : AsymTorusTestFunction Lt Ls,
+        Integrable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) ⇒
+          Real.exp (|ω F|)) (ν k) ∧
+        ∫ ω : Configuration (AsymTorusTestFunction Lt Ls),
+          Real.exp (|ω F|) ∂(ν k) ≤
+          K * Real.exp (C *
+            ∫ ω : Configuration (AsymLatticeField (Nt k) (Ns k)),
+              (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k) F x|)) ^ 2
+              ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k)
+                mass (ha k) hmass)))
+    (hraw : ∀ f : CylinderTestFunction Ls,
+      Filter.Tendsto
+        (fun k ⇒
+          letI : NeZero (Nt k) := hNt k
+          letI : NeZero (Ns k) := hNs k
+          (a k ^ 2 : ℝ)⁻¹ *
+            ∑ x : AsymLatticeSites (Nt k) (Ns k),
+              (asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+                (cylinderToTorusEmbed Lt Ls f) x) ^ 2)
+        Filter.atTop
+        (nhds (l2InnerProduct
+          (cylinderToTorusEmbed Lt Ls f)
+          (cylinderToTorusEmbed Lt Ls f))))
+    (hLt1 : 1 ≤ Lt) :
+    ∃ q : Seminorm ℝ (CylinderTestFunction Ls), Continuous q ∧
+      MeasureHasCylinderExpMomentBound Ls K (C * mass⁻¹ ^ 2) q μ := by
+  obtain ⟨q, hq_cont, hq_bound⟩ :=
+    GaussianField.embed_l2_uniform_bound (Ls := Ls)
+  refine ⟨q, hq_cont, ?_⟩
+  intro f
+  let F : AsymTorusTestFunction Lt Ls := cylinderToTorusEmbed Lt Ls f
+  let R : ℕ → ℝ := fun k ⇒
+    letI : NeZero (Nt k) := hNt k
+    letI : NeZero (Ns k) := hNs k
+    (a k ^ 2 : ℝ)⁻¹ *
+      ∑ x : AsymLatticeSites (Nt k) (Ns k),
+        (asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k) F x) ^ 2
+  have hR : Filter.Tendsto R Filter.atTop
+      (nhds (l2InnerProduct F F)) := by
+    simpa [R, F] using hraw f
+  let D : ℝ := C * mass⁻¹ ^ 2
+  let B : ℕ → ℝ := fun k ⇒ K * Real.exp (D * R k)
+  let Binf : ℝ := K * Real.exp (D * l2InnerProduct F F)
+  have hB : Filter.Tendsto B Filter.atTop (nhds Binf) := by
+    dsimp [B, Binf]
+    exact ((Real.continuous_exp.tendsto _).comp (hR.const_mul D)).const_mul K
+  have h_unif : ∀ k,
+      Integrable (fun ω : Configuration (CylinderTestFunction Ls) ⇒
+        Real.exp (|ω f|)) (cylinderPullbackMeasure Lt Ls (ν k)) ∧
+      ∫ ω : Configuration (CylinderTestFunction Ls),
+        Real.exp (|ω f|) ∂(cylinderPullbackMeasure Lt Ls (ν k)) ≤ B k := by
+    intro k
+    letI : NeZero (Nt k) := hNt k
+    letI : NeZero (Ns k) := hNs k
+    letI : IsProbabilityMeasure (ν k) := hν_prob k
+    obtain ⟨hT_int, hT_bound⟩ := hcutoff k F
+    have hT_int' :
+        Integrable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) ⇒
+          Real.exp (|ω (cylinderToTorusEmbed Lt Ls f)|)) (ν k) := by
+      simpa [F] using hT_int
+    have hT_bound' :
+        ∫ ω : Configuration (AsymTorusTestFunction Lt Ls),
+            Real.exp (|ω (cylinderToTorusEmbed Lt Ls f)|) ∂(ν k) ≤
+          K * Real.exp (C *
+            ∫ ω : Configuration (AsymLatticeField (Nt k) (Ns k)),
+              (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+                (cylinderToTorusEmbed Lt Ls f) x|)) ^ 2
+              ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k)
+                mass (ha k) hmass)) := by
+      simpa [F] using hT_bound
+    obtain ⟨hCyl_int, hEq⟩ :=
+      cylinderPullback_expMoment_eq Ls Lt (ν k) f hT_int'
+    have hvar :
+        (∫ ω : Configuration (AsymLatticeField (Nt k) (Ns k)),
+          (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+            (cylinderToTorusEmbed Lt Ls f) x|)) ^ 2
+          ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k)
+            mass (ha k) hmass)) ≤
+        mass⁻¹ ^ 2 * R k := by
+      calc
+        _ ≤ (a k ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
+            ∑ x : AsymLatticeSites (Nt k) (Ns k),
+              (asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+                (cylinderToTorusEmbed Lt Ls f) x) ^ 2 :=
+          asymFreeVariance_sitewiseAbs_le_mass_inv_sq
+            (Nt k) (Ns k) (a k) mass (ha k) hmass
+            (asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+              (cylinderToTorusEmbed Lt Ls f))
+        _ = mass⁻¹ ^ 2 * R k := by
+          dsimp [R, F]
+          ring
+    refine ⟨hCyl_int, hEq.le.trans ?_⟩
+    calc
+      ∫ ω : Configuration (AsymTorusTestFunction Lt Ls),
+          Real.exp (|ω (cylinderToTorusEmbed Lt Ls f)|) ∂(ν k) ≤
+          K * Real.exp (C *
+            ∫ ω : Configuration (AsymLatticeField (Nt k) (Ns k)),
+              (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+                (cylinderToTorusEmbed Lt Ls f) x|)) ^ 2
+              ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k)
+                mass (ha k) hmass)) := hT_bound'
+      _ ≤ K * Real.exp (D * R k) := by
+        apply mul_le_mul_of_nonneg_left _ hK
+        apply Real.exp_le_exp.mpr
+        calc
+          C * _ ≤ C * (mass⁻¹ ^ 2 * R k) :=
+            mul_le_mul_of_nonneg_left hvar hC
+          _ = D * R k := by
+            dsimp [D]
+            ring
+      _ = B k := by rfl
+  obtain ⟨hint_cyl, hle_cyl⟩ :=
+    cylinderPullbackMeasure_exponential_moment_of_tendsto_bc
+      Lt Ls ν μ hν_prob hμ_prob hbc f B Binf hB h_unif
+  have hL2 : l2InnerProduct F F ≤ q f ^ 2 := by
+    simpa [F, Pphi2.cylinderToTorusEmbed,
+      GaussianField.cylinderToTorusEmbed] using hq_bound Lt hLt1 f
+  refine ⟨hint_cyl, ?_⟩
+  calc
+    ∫ ω : Configuration (CylinderTestFunction Ls),
+        Real.exp (|ω f|) ∂(cylinderPullbackMeasure Lt Ls μ) ≤ Binf := hle_cyl
+    _ ≤ K * Real.exp (D * q f ^ 2) := by
+      have hD : 0 ≤ D := by
+        dsimp [D]
+        exact mul_nonneg hC (sq_nonneg mass⁻¹)
+      apply mul_le_mul_of_nonneg_left _ hK
+      exact Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hL2 hD)
+    _ = K * Real.exp ((C * mass⁻¹ ^ 2) * q f ^ 2) := by
+      simp [D]
+
 /-- A sequence-level cylinder exponential-moment estimate passes through the
 isotropic UV weak limit with the same constants and seminorm.
 
