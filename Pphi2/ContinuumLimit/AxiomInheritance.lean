@@ -318,14 +318,14 @@ existence of some approximating sequence. For the Ward-identity step we need a
 stronger statement tying `μ` to the specific continuum-embedded lattice measures
 appearing in the formalized anomaly estimate.
 
-The bridge asserted here is intentionally explicit about its scope: there are
-canonical sequences of lattice sizes `N_n` and spacings `a_n` with
+The bridge is derived from the coupled sequence stored in `IsPphi2Limit`.
+After discarding a finite prefix, there are sequences of lattice sizes `N_n` and spacings `a_n` with
 `a_n → 0`, `N_n → ∞`, and physical volume `N_n * a_n → ∞`, such that the
 corresponding coupled UV/IR family `continuumMeasure 2 (N_n) P (a_n) mass`
 converges to `μ` in characteristic functionals. This is the bridge where the
 abstract limit marker is tied back to the concrete `P(Φ)₂` approximants used in
 the Ward estimate. -/
-axiom canonical_continuumMeasure_cf_tendsto (P : InteractionPolynomial)
+theorem canonical_continuumMeasure_cf_tendsto (P : InteractionPolynomial)
     (mass : ℝ) (hmass : 0 < mass)
     (μ : Measure FieldConfig2) [IsProbabilityMeasure μ]
     (h_limit : IsPphi2Limit μ P mass) :
@@ -342,7 +342,57 @@ axiom canonical_continuumMeasure_cf_tendsto (P : InteractionPolynomial)
               Complex.exp (Complex.I * ↑(ω f)) ∂
                 (continuumMeasure 2 (N n) P (a n) mass (ha_pos n) hmass))
           Filter.atTop
-          (nhds (EuclideanOS.generatingFunctional (B := plane2Background) μ f))
+          (nhds (EuclideanOS.generatingFunctional (B := plane2Background) μ f)) := by
+  rcases h_limit with
+    ⟨a₀, ν, _hprob, ha₀_tend, ha₀_pos, _hmom, _hneg, hcf, _hlat, _hweakconv,
+      _happrox_os3, hcoupled⟩
+  rcases hcoupled with ⟨N₀, hN₀_tend, hN₀a₀_tend, hν_coupled⟩
+  have ha₀_le_one_eventually : ∀ᶠ n in Filter.atTop, a₀ n ≤ 1 := by
+    have hmem : Set.Iic (1 : ℝ) ∈ nhds (0 : ℝ) :=
+      Iic_mem_nhds (show (0 : ℝ) < 1 by norm_num)
+    exact ha₀_tend hmem
+  obtain ⟨K, hK⟩ := Filter.eventually_atTop.1 ha₀_le_one_eventually
+  let a : ℕ → ℝ := fun n => a₀ (n + K)
+  let N : ℕ → ℕ := fun n => N₀ (n + K)
+  have hN_pos : ∀ n, 0 < N n := by
+    intro n
+    obtain ⟨hN, _ha, _hmass, _hν⟩ := hν_coupled (n + K)
+    simpa [N] using Nat.pos_of_ne_zero hN
+  have ha_pos : ∀ n, 0 < a n := fun n => by
+    simpa [a] using ha₀_pos (n + K)
+  have ha_le_one : ∀ n, a n ≤ 1 := fun n => by
+    simpa [a] using hK (n + K) (Nat.le_add_left K n)
+  have hshift :
+      Filter.Tendsto (fun n : ℕ => n + K) Filter.atTop Filter.atTop :=
+    tendsto_add_atTop_nat K
+  have ha_tend : Filter.Tendsto a Filter.atTop (nhds 0) := by
+    simpa [a] using ha₀_tend.comp hshift
+  have hN_tend : Filter.Tendsto N Filter.atTop Filter.atTop := by
+    simpa [N] using hN₀_tend.comp hshift
+  have hNa_tend :
+      Filter.Tendsto (fun n => (N n : ℝ) * a n) Filter.atTop Filter.atTop := by
+    simpa [N, a] using hN₀a₀_tend.comp hshift
+  have hν_eq : ∀ n,
+      ν (n + K) =
+        (haveI : NeZero (N n) := ⟨Nat.ne_of_gt (hN_pos n)⟩
+          continuumMeasure 2 (N n) P (a n) mass (ha_pos n) hmass) := by
+    intro n
+    obtain ⟨_hN, _ha, _hmass, hν⟩ := hν_coupled (n + K)
+    simpa [N, a] using hν
+  refine ⟨N, a, hN_pos, ha_pos, ha_le_one, ha_tend, hN_tend, hNa_tend, ?_⟩
+  intro f
+  have hseq :
+      (fun n =>
+        letI : NeZero (N n) := ⟨Nat.ne_of_gt (hN_pos n)⟩
+        ∫ ω : FieldConfig2,
+          Complex.exp (Complex.I * ↑(ω f)) ∂
+            (continuumMeasure 2 (N n) P (a n) mass (ha_pos n) hmass)) =
+      (fun n =>
+        ∫ ω : FieldConfig2, Complex.exp (Complex.I * ↑(ω f)) ∂(ν (n + K))) := by
+    funext n
+    rw [hν_eq n]
+  rw [hseq]
+  simpa only [EuclideanOS.generatingFunctional] using (hcf f).comp hshift
 
 /-- **Exponential clustering of the continuum limit** from spectral gap.
 
