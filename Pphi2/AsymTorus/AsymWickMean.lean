@@ -240,6 +240,100 @@ theorem partitionFunctionAsym_ge_one (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
     _ ≤ ∫ ω, Real.exp (-V ω) ∂μ := h_jensen
     _ = partitionFunctionAsym Nt Ns P a mass ha hmass := rfl
 
+/-! ## Source-tilted exponential moment -/
+
+/-- **Finite source-tilt bound.**  If the source exponent minus the interaction is bounded
+pointwise by `C`, then its normalized interacting exponential moment is at most `exp C`.
+
+The integrability assertion is supplied by the finite density argument in
+`AsymLatticeMeasure`.  The numerical bound uses the same density representation together with
+`partitionFunctionAsym_ge_one`: the unnormalised source-weighted density is pointwise bounded by
+`exp C`, while division by the partition function can only decrease a nonnegative integral. -/
+theorem interactingLatticeMeasureAsym_exp_moment_le_exp_of_sub_interaction_le
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (g : AsymLatticeField Nt Ns) (C : ℝ)
+    (hbound : ∀ ω : Configuration (AsymLatticeField Nt Ns),
+      (ω g) ^ P.n / (P.n : ℝ) -
+          interactionFunctionalAsym Nt Ns P a mass ω ≤ C) :
+    Integrable
+      (fun ω : Configuration (AsymLatticeField Nt Ns) =>
+        Real.exp ((ω g) ^ P.n / (P.n : ℝ)))
+      (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) ∧
+    ∫ ω, Real.exp ((ω g) ^ P.n / (P.n : ℝ))
+      ∂(interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) ≤ Real.exp C := by
+  have h_integrable :=
+    interactingLatticeMeasureAsym_integrable_exp_of_sub_interaction_le
+      Nt Ns P a mass ha hmass g C hbound
+  refine ⟨h_integrable, ?_⟩
+  let μG := latticeGaussianMeasureAsym Nt Ns a mass ha hmass
+  let bw := boltzmannWeightAsym Nt Ns P a mass
+  let Z := partitionFunctionAsym Nt Ns P a mass ha hmass
+  let F : Configuration (AsymLatticeField Nt Ns) → ℝ := fun ω =>
+    Real.exp ((ω g) ^ P.n / (P.n : ℝ))
+  letI : IsProbabilityMeasure μG :=
+    latticeGaussianMeasureAsym_isProbability Nt Ns a mass ha hmass
+  have hZ_pos : 0 < Z := partitionFunctionAsym_pos Nt Ns P a mass ha hmass
+  have hZ_ge : (1 : ℝ) ≤ Z := partitionFunctionAsym_ge_one Nt Ns P a mass ha hmass
+  have hF_meas : Measurable F := by
+    exact Real.measurable_exp.comp
+      (((configuration_eval_measurable g).pow_const P.n).div measurable_const)
+  have hbw_meas : Measurable bw :=
+    (interactionFunctionalAsym_measurable Nt Ns P a mass).neg.exp
+  have hprod_meas : Measurable (fun ω => bw ω * F ω) := hbw_meas.mul hF_meas
+  have hprod_bound : ∀ ω : Configuration (AsymLatticeField Nt Ns),
+      bw ω * F ω ≤ Real.exp C := by
+    intro ω
+    simp only [bw, boltzmannWeightAsym, F]
+    rw [← Real.exp_add]
+    exact Real.exp_le_exp.mpr (by linarith [hbound ω])
+  have hprod_nonneg : ∀ ω : Configuration (AsymLatticeField Nt Ns),
+      0 ≤ bw ω * F ω := by
+    intro ω
+    exact mul_nonneg (Real.exp_pos _).le (Real.exp_pos _).le
+  have hprod_int : Integrable (fun ω => bw ω * F ω) μG := by
+    apply Integrable.of_bound (C := Real.exp C)
+    · exact hprod_meas.aestronglyMeasurable
+    · exact Filter.Eventually.of_forall fun ω => by
+        rw [Real.norm_eq_abs, abs_of_nonneg (hprod_nonneg ω)]
+        exact hprod_bound ω
+  have hconst_int : Integrable
+      (fun _ : Configuration (AsymLatticeField Nt Ns) => Real.exp C) μG :=
+    integrable_const _
+  have hprod_integral_le :
+      ∫ ω, bw ω * F ω ∂μG ≤ Real.exp C := by
+    have hmono := integral_mono hprod_int hconst_int hprod_bound
+    rw [integral_const, smul_eq_mul, probReal_univ] at hmono
+    exact hmono
+  have bw_nn : Configuration (AsymLatticeField Nt Ns) → ℝ≥0 :=
+    fun ω => Real.toNNReal (bw ω)
+  have hbw_nn_meas : Measurable bw_nn := Measurable.real_toNNReal hbw_meas
+  change ∫ ω, F ω ∂(interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) ≤
+    Real.exp C
+  unfold interactingLatticeMeasureAsym
+  rw [integral_smul_measure]
+  have wd_eq :
+      ∫ ω, F ω ∂(μG.withDensity (fun ω => ENNReal.ofReal (bw ω))) =
+        ∫ ω, bw ω * F ω ∂μG := by
+    change ∫ ω, F ω ∂(μG.withDensity (fun ω => ↑(bw_nn ω))) = _
+    rw [integral_withDensity_eq_integral_smul hbw_nn_meas]
+    congr 1
+    ext ω
+    simp only [bw_nn, NNReal.smul_def, smul_eq_mul]
+    rw [Real.coe_toNNReal _ (le_of_lt (boltzmannWeightAsym_pos Nt Ns P a mass ω))]
+  rw [wd_eq]
+  have hc_real : ((ENNReal.ofReal Z)⁻¹).toReal = Z⁻¹ := by
+    simp [ENNReal.toReal_inv, ENNReal.toReal_ofReal hZ_pos.le]
+  rw [hc_real]
+  have hZinv_le : Z⁻¹ ≤ 1 := inv_le_one_of_one_le₀ hZ_ge
+  have hprod_integral_nn : 0 ≤ ∫ ω, bw ω * F ω ∂μG :=
+    integral_nonneg fun ω => hprod_nonneg ω
+  calc
+    Z⁻¹ * ∫ ω, bw ω * F ω ∂μG ≤
+        1 * ∫ ω, bw ω * F ω ∂μG :=
+      mul_le_mul_of_nonneg_right hZinv_le hprod_integral_nn
+    _ ≤ Real.exp C := by simpa using hprod_integral_le
+
 /-- **Cauchy–Schwarz density transfer bound** (heterogeneous lattice): any nonnegative `F` with
 finite Gaussian `L²` norm satisfies
 
