@@ -21,8 +21,10 @@ reused for the isotropic UV continuum limit on the asymmetric torus.
 -/
 
 import GaussianField.Construction
+import Mathlib.Analysis.Convex.Integral
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Integral.Lebesgue.Basic
+import Mathlib.MeasureTheory.Measure.Tilted
 
 noncomputable section
 
@@ -137,6 +139,73 @@ theorem weakLimit_exponential_moment
     rw [← heq] at hlint_le
     exact (ENNReal.ofReal_le_ofReal_iff hB_nn).mp hlint_le
   exact ⟨hint, hint_le⟩
+
+/-- **Entropy/Jensen variational bound for an exponential tilt.**
+
+If `μ` is a probability measure, `exp F` is integrable, and `F` is integrable
+under the normalized tilted measure `μ.tilted F`, then
+
+`∫ exp F dμ ≤ exp (∫ F d(μ.tilted F))`.
+
+This is the finite-measure form of the variational inequality used in DDJ
+Lemma 7.2.  The proof applies Jensen to `exp (-F)` under the tilted measure;
+the tilted exponential integral is `1 / ∫ exp F dμ`.
+-/
+theorem integral_exp_le_exp_integral_tilted
+    {α : Type*} [MeasurableSpace α]
+    (μ : Measure α) [IsProbabilityMeasure μ]
+    (F : α → ℝ)
+    (hF : Integrable (fun x => Real.exp (F x)) μ)
+    (hF_tilt : Integrable F (μ.tilted F)) :
+    ∫ x, Real.exp (F x) ∂μ ≤
+      Real.exp (∫ x, F x ∂(μ.tilted F)) := by
+  let ν : Measure α := μ.tilted F
+  letI : IsProbabilityMeasure ν := by
+    dsimp [ν]
+    exact isProbabilityMeasure_tilted hF
+  have hF_tilt' : Integrable F ν := by
+    simpa [ν] using hF_tilt
+  have h_exp_neg_tilt : Integrable (fun x : α => Real.exp (-F x)) ν := by
+    rw [show ν = μ.tilted F by rfl, integrable_tilted_iff hF]
+    convert (integrable_const (1 : ℝ) : Integrable (fun _ : α => (1 : ℝ)) μ) using 1
+    ext x
+    simp [smul_eq_mul, ← Real.exp_add]
+  have h_jensen :
+      Real.exp (∫ x, (-F x) ∂ν) ≤
+        ∫ x, Real.exp (-F x) ∂ν := by
+    have h_conv := convexOn_exp
+    have h_cont := Real.continuous_exp.continuousOn (s := Set.univ)
+    have h_closed := isClosed_univ (X := ℝ)
+    have h_mem : ∀ᵐ x ∂ν, (-F x) ∈ Set.univ :=
+      ae_of_all _ (fun _ => Set.mem_univ _)
+    exact h_conv.map_integral_le h_cont h_closed h_mem
+      hF_tilt'.neg h_exp_neg_tilt
+  have h_neg_exp :
+      ∫ x, Real.exp (-F x) ∂ν =
+        1 / (∫ x, Real.exp (F x) ∂μ) := by
+    dsimp [ν]
+    rw [integral_exp_tilted]
+    simp [Pi.add_apply, probReal_univ]
+  have h_exp_neg_le :
+      Real.exp (-(∫ x, F x ∂ν)) ≤
+        1 / (∫ x, Real.exp (F x) ∂μ) := by
+    simpa only [integral_neg] using h_jensen.trans_eq h_neg_exp
+  have hZ_pos : 0 < ∫ x, Real.exp (F x) ∂μ := integral_exp_pos hF
+  have h_mul :
+      Real.exp (-(∫ x, F x ∂ν)) * (∫ x, Real.exp (F x) ∂μ) ≤ 1 :=
+    (le_div_iff₀ hZ_pos).mp h_exp_neg_le
+  have h_final :
+      ∫ x, Real.exp (F x) ∂μ ≤ Real.exp (∫ x, F x ∂ν) := by
+    calc
+      ∫ x, Real.exp (F x) ∂μ =
+          Real.exp (∫ x, F x ∂ν) *
+            (Real.exp (-(∫ x, F x ∂ν)) *
+              (∫ x, Real.exp (F x) ∂μ)) := by
+        rw [← mul_assoc, ← Real.exp_add, add_neg_cancel, Real.exp_zero, one_mul]
+      _ ≤ Real.exp (∫ x, F x ∂ν) * 1 :=
+        mul_le_mul_of_nonneg_left h_mul (Real.exp_pos _).le
+      _ = Real.exp (∫ x, F x ∂ν) := mul_one _
+  simpa [ν] using h_final
 
 end GaussianField
 
