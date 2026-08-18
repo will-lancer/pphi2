@@ -143,3 +143,6 @@ filename per the hub convention.
 #print axioms Pphi2.AsymDDJSourceBall
 #print axioms Pphi2.asymDDJSourceBall_of_centered_decay
 #print axioms Pphi2.interactingLatticeMeasureAsym_evalMapAsym_pushforward_eq_coordinateDensity
+#print axioms Pphi2.integral_fderiv_mul_exp_neg_eq_integral_mul_fderiv_exp_neg
+#print axioms Pphi2.hasDerivAt_integral_exp_mul_of_local_dom
+#print axioms Pphi2.hasDerivAt_log_integral_exp_mul_of_local_dom

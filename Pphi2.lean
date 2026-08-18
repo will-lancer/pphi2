@@ -8,6 +8,8 @@ import Pphi2.Backgrounds.EuclideanPlane
 import Pphi2.EuclideanOS
 import Pphi2.EuclideanComplex
 import Pphi2.GeneralResults.GaussianHermiteMean
+import Pphi2.GeneralResults.FiniteIBP
+import Pphi2.GeneralResults.TiltPartitionDerivative
 
 -- Phase 1: Wick ordering
 import Pphi2.WickOrdering.WickPolynomial
