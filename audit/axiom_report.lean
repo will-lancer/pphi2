@@ -117,6 +117,9 @@ filename per the hub convention.
 #print axioms Pphi2.finiteLaplacianAsymFun_asymRawSource_apply
 #print axioms Pphi2.periodizeCLM_circlePoint_centered_decay
 #print axioms Pphi2.periodizeCLM_circlePoint_centered_second_diff_decay
+#print axioms Pphi2.centeredSecondDiffSeminorm
+#print axioms Pphi2.centeredSecondDiffSeminorm_continuous
+#print axioms Pphi2.schwartz_centered_second_diff_decay
 #print axioms Pphi2.asymSourceControl_of_weightedLpPow
 #print axioms Pphi2.interactingLatticeMeasureAsym_integrable_exp_of_weightedLpPow
 #print axioms Pphi2.interactingLatticeMeasureAsym_exp_moment_le_two_of_weightedLpPow_and_tiltedMoment

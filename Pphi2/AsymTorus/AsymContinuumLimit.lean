@@ -29,6 +29,7 @@ import Pphi2.AsymTorus.AsymLinkReflectionRPLimit
 import Pphi2.AsymTorus.MomentBoundOS1
 import Pphi2.IRLimit.IRTightness
 import Pphi2.IRLimit.CylinderOS
+import Pphi2.IRLimit.DDJSchwartzSecondDifference
 import Pphi2.GeneralResults.WeakLimitMoment
 import GaussianField.HypercontractiveNat
 import GaussianField.Tightness
