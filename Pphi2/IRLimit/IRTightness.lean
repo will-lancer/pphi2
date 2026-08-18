@@ -98,6 +98,45 @@ def AsymTorusSequenceHasUniformCylinderExpMomentBound
   ∀ᶠ n in atTop,
     @MeasureHasCylinderExpMomentBound Ls _ (Lt n) (hLt n) K C q (μ n)
 
+/-- Eventual local degree-`n` exponential control for an asymmetric-torus
+family, expressed after pullback to the fixed cylinder.  The period-dependent
+`Fact` instance is kept in the predicate so that the eventual statement has
+the same elaborated shape as the direct exponential-moment input. -/
+def AsymTorusSequenceHasUniformLocalCylinderNthExpMomentBound
+    (n : ℕ) (r : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls))
+    (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
+    (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls))) : Prop :=
+  ∀ᶠ k in atTop,
+    @MeasureHasLocalCylinderNthExpMomentBound Ls _ n r q
+      (@cylinderPullbackMeasure (Lt k) Ls (hLt k) hLs (μ k))
+
+/-- A local degree-`n` bound yields the fixed quadratic exponential interface
+pointwise along the same eventual torus family.  The constants are those of
+`measureHasCylinderExpMomentBound_of_localNth`, and therefore are fixed before
+the eventual filter is taken. -/
+theorem AsymTorusSequenceHasUniformCylinderExpMomentBound.of_localNth
+    (n : ℕ) (hn_even : Even n) (hn4 : 4 ≤ n)
+    (r : ℝ) (hr : 0 < r)
+    (q : Seminorm ℝ (CylinderTestFunction Ls))
+    (Lt : ℕ → ℝ) (hLt : ∀ n, Fact (0 < Lt n))
+    (μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (Lt n) Ls)))
+    (hlocal : AsymTorusSequenceHasUniformLocalCylinderNthExpMomentBound
+      Ls n r q Lt hLt μ) :
+    AsymTorusSequenceHasUniformCylinderExpMomentBound Ls
+      (2 * Real.exp ((n : ℝ) / 4 + 1 / (n : ℝ)))
+      ((n : ℝ) / (4 * r ^ 2)) q Lt hLt μ := by
+  change ∀ᶠ k in atTop,
+    @MeasureHasCylinderExpMomentBound Ls _ (Lt k) (hLt k)
+      (2 * Real.exp ((n : ℝ) / 4 + 1 / (n : ℝ)))
+      ((n : ℝ) / (4 * r ^ 2)) q (μ k)
+  change ∀ᶠ k in atTop,
+    @MeasureHasLocalCylinderNthExpMomentBound Ls _ n r q
+      (@cylinderPullbackMeasure (Lt k) Ls (hLt k) hLs (μ k)) at hlocal
+  exact hlocal.mono (fun k hk =>
+    letI : Fact (0 < Lt k) := hLt k
+    measureHasCylinderExpMomentBound_of_localNth Ls n hn_even hn4 r hr q
+      (μ k) hk)
+
 private lemma cylinderExpEval_integrable
     (μ : Measure (Configuration (CylinderTestFunction Ls)))
     [IsProbabilityMeasure μ] (g : CylinderTestFunction Ls) :

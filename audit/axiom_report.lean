@@ -67,10 +67,14 @@ filename per the hub convention.
 #print axioms Pphi2.asymInteracting_expMoment_volume_uniform_proof
 #print axioms Pphi2.asymInteracting_expMoment_of_signed
 #print axioms Pphi2.MeasureHasCylinderExpMomentBound
+#print axioms Pphi2.MeasureHasLocalCylinderNthExpMomentBound
+#print axioms Pphi2.measureHasCylinderExpMomentBound_of_localNth
 #print axioms Pphi2.cylinder_uniform_second_moment_of_expMoment
 #print axioms Pphi2.cylinderIR_uniform_second_moment
 #print axioms Pphi2.CylinderSequenceHasUniformExponentialMomentBound
 #print axioms Pphi2.AsymTorusSequenceHasUniformCylinderExpMomentBound
+#print axioms Pphi2.AsymTorusSequenceHasUniformLocalCylinderNthExpMomentBound
+#print axioms Pphi2.AsymTorusSequenceHasUniformCylinderExpMomentBound.of_localNth
 #print axioms Pphi2.cylinderIRLimit_exists_of_eventual_expMoment
 #print axioms Pphi2.cylinderIRLimit_exists_of_uniform_cylinderExpMoment
 #print axioms Pphi2.routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment

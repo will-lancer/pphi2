@@ -86,6 +86,267 @@ def MeasureHasCylinderExpMomentBound
       Real.exp (|ω f|) ∂(cylinderPullbackMeasure Lt Ls μ) ≤
     K * Real.exp (C * q f ^ 2)
 
+/-- A local exponential moment bound for an even polynomial degree.
+
+The local bound is stated on the cylinder configuration space itself.  It is
+the form supplied by a local `P(Φ)₂` estimate: on the seminorm ball
+`q f ≤ r`, the normalized degree-`n` exponential has moment at most `2`.
+The parity and lower-bound hypotheses on `n`, together with positivity of
+`r`, are kept as hypotheses of the adapter below so that this predicate can
+also be used by source-specific producers without carrying redundant proof
+fields in every instance. -/
+def MeasureHasLocalCylinderNthExpMomentBound
+    (n : ℕ) (r : ℝ) (q : Seminorm ℝ (CylinderTestFunction Ls))
+    (ν : Measure (Configuration (CylinderTestFunction Ls))) : Prop :=
+  ∀ f : CylinderTestFunction Ls, q f ≤ r →
+    Integrable (fun ω : Configuration (CylinderTestFunction Ls) =>
+      Real.exp ((ω f) ^ n / (n : ℝ))) ν ∧
+    ∫ ω : Configuration (CylinderTestFunction Ls),
+      Real.exp ((ω f) ^ n / (n : ℝ)) ∂ν ≤ 2
+
+/-- Elementary polynomial Young bound used by the local-to-global adapter.
+
+For `t ≥ 1` and `y ≥ 0`, the degree-`n` term absorbs the linear term.  The
+extra `1 / n` makes the estimate uniform across the small-`y` region. -/
+private lemma local_nth_young
+    (n : ℕ) (hn_even : Even n) (hn4 : 4 ≤ n)
+    {t y : ℝ} (ht : 1 ≤ t) (hy : 0 ≤ y) :
+    t * y ≤ y ^ n / (n : ℝ) + (n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ) := by
+  have hn_pos : 0 < n := by omega
+  have hnR_pos : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn_pos
+  obtain ⟨k, hk⟩ := hn_even
+  have hk2 : 2 ≤ k := by omega
+  have ht0 : 0 ≤ t := by linarith
+  by_cases hy1 : y ≤ 1
+  · have hty : t * y ≤ t := by
+      have h := mul_le_mul_of_nonneg_left hy1 ht0
+      simpa using h
+    have ht_sq : t ≤ t ^ 2 := by
+      have hprod : 0 ≤ (t - 1) * t :=
+        mul_nonneg (sub_nonneg.mpr ht) ht0
+      nlinarith
+    have hn4R : (1 : ℝ) ≤ (n : ℝ) / 4 := by
+      have hn4R' : (4 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn4
+      nlinarith
+    have ht_bound : t ≤ (n : ℝ) / 4 * t ^ 2 := by
+      have hprod : 0 ≤ ((n : ℝ) / 4 - 1) * t ^ 2 :=
+        mul_nonneg (sub_nonneg.mpr hn4R) (sq_nonneg t)
+      nlinarith
+    calc
+      t * y ≤ t := hty
+      _ ≤ (n : ℝ) / 4 * t ^ 2 := ht_bound
+      _ ≤ y ^ n / (n : ℝ) + (n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ) := by
+        have hy_pow : 0 ≤ y ^ n / (n : ℝ) :=
+          div_nonneg (pow_nonneg hy n) hnR_pos.le
+        have hn_inv : 0 ≤ 1 / (n : ℝ) := by positivity
+        linarith
+  · have hy1' : 1 ≤ y := le_of_lt (lt_of_not_ge hy1)
+    have hyk : y ≤ y ^ k := by
+      have hpow : y ^ (1 : ℕ) ≤ y ^ k :=
+        pow_le_pow_right₀ hy1' (by omega)
+      simpa using hpow
+    let b : ℝ := y ^ k
+    have htb : t * y ≤ t * b :=
+      mul_le_mul_of_nonneg_left hyk ht0
+    have hsq : 0 ≤ (2 * b - (n : ℝ) * t) ^ 2 := sq_nonneg _
+    have hyoung : t * b ≤ b ^ 2 / (n : ℝ) + (n : ℝ) / 4 * t ^ 2 := by
+      calc
+        t * b ≤
+            (b ^ 2 + (n : ℝ) ^ 2 / 4 * t ^ 2) / (n : ℝ) := by
+          apply (le_div_iff₀ hnR_pos).2
+          nlinarith [hsq]
+        _ = b ^ 2 / (n : ℝ) + (n : ℝ) / 4 * t ^ 2 := by
+          have hnR_ne : (n : ℝ) ≠ 0 := ne_of_gt hnR_pos
+          field_simp [hnR_ne] <;> ring
+    have hb_sq : b ^ 2 = y ^ n := by
+      dsimp [b]
+      rw [← pow_mul]
+      congr 1
+      omega
+    calc
+      t * y ≤ t * b := htb
+      _ ≤ b ^ 2 / (n : ℝ) + (n : ℝ) / 4 * t ^ 2 := hyoung
+      _ = y ^ n / (n : ℝ) + (n : ℝ) / 4 * t ^ 2 := by rw [hb_sq]
+      _ ≤ y ^ n / (n : ℝ) + (n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ) := by
+        have hn_inv : 0 ≤ 1 / (n : ℝ) := by positivity
+        linarith
+
+/-- Convert a local even-degree cylinder estimate into the quadratic
+exponential-moment interface consumed by the existing IR and OS adapters.
+
+For an arbitrary `f`, put `t = max 1 (q f / r)` and `λ = 1 / t`.  Then
+`λ • f` lies in the local ball and
+`|ω f| = t |ω (λ • f)|`.  Applying `local_nth_young` and integrating gives
+the safe constants
+`K = 2 exp(n / 4 + 1 / n)` and `C = n / (4 r²)`.
+-/
+theorem measureHasCylinderExpMomentBound_of_localNth
+    (n : ℕ) (hn_even : Even n) (hn4 : 4 ≤ n)
+    (r : ℝ) (hr : 0 < r)
+    (q : Seminorm ℝ (CylinderTestFunction Ls))
+    {Lt : ℝ} [Fact (0 < Lt)]
+    (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls)))
+    (hlocal : MeasureHasLocalCylinderNthExpMomentBound Ls n r q
+      (cylinderPullbackMeasure Lt Ls μ)) :
+    MeasureHasCylinderExpMomentBound Ls
+      (2 * Real.exp ((n : ℝ) / 4 + 1 / (n : ℝ)))
+      ((n : ℝ) / (4 * r ^ 2)) q μ := by
+  unfold MeasureHasCylinderExpMomentBound
+  intro f
+  let s : ℝ := q f
+  have hs : 0 ≤ s := by
+    dsimp [s]
+    exact apply_nonneg q f
+  let t : ℝ := max 1 (s / r)
+  have ht1 : 1 ≤ t := by
+    dsimp [t]
+    exact le_max_left _ _
+  have ht_pos : 0 < t := lt_of_lt_of_le zero_lt_one ht1
+  let lam : ℝ := 1 / t
+  have hlam_pos : 0 < lam := by
+    dsimp [lam]
+    exact one_div_pos.mpr ht_pos
+  have hsr : s / r ≤ t := by
+    dsimp [t]
+    exact le_max_right _ _
+  have hs_le : s ≤ r * t := by
+    have h := (div_le_iff₀ hr).1 hsr
+    nlinarith
+  have hq_lam : q (lam • f) ≤ r := by
+    have hq_eq : q (lam • f) = s / t := by
+      rw [map_smul_eq_mul q lam f, Real.norm_eq_abs, abs_of_pos hlam_pos]
+      dsimp [lam, s]
+      rw [one_div]
+      ring
+    rw [hq_eq]
+    exact (div_le_iff₀ ht_pos).2 (by nlinarith [hs_le])
+  unfold MeasureHasLocalCylinderNthExpMomentBound at hlocal
+  obtain ⟨hlocal_int, hlocal_bound⟩ := hlocal (lam • f) hq_lam
+  have h_eval : ∀ ω : Configuration (CylinderTestFunction Ls),
+      ω (lam • f) = lam * ω f := by
+    intro ω
+    simp [map_smul]
+  have h_recover : ∀ ω : Configuration (CylinderTestFunction Ls),
+      t * ω (lam • f) = ω f := by
+    intro ω
+    calc
+      t * ω (lam • f) = t * (lam * ω f) := by rw [h_eval ω]
+      _ = (t * (1 / t)) * ω f := by
+        dsimp [lam]
+        ring
+      _ = ω f := by
+        rw [one_div, mul_inv_cancel₀ (ne_of_gt ht_pos), one_mul]
+  let A : ℝ := Real.exp ((n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ))
+  have h_point : ∀ ω : Configuration (CylinderTestFunction Ls),
+      Real.exp (|ω f|) ≤
+        A * Real.exp ((ω (lam • f)) ^ n / (n : ℝ)) := by
+    intro ω
+    have hyoung := local_nth_young n hn_even hn4 ht1 (abs_nonneg (ω (lam • f)))
+    have harg : |ω f| ≤
+        ((n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ)) +
+          (ω (lam • f)) ^ n / (n : ℝ) := by
+      calc
+        |ω f| = t * |ω (lam • f)| := by
+          calc
+            |ω f| = |t * ω (lam • f)| :=
+              congrArg abs (h_recover ω).symm
+            _ = |t| * |ω (lam • f)| := by rw [abs_mul]
+            _ = t * |ω (lam • f)| := by rw [abs_of_nonneg ht1.le]
+        _ ≤ |ω (lam • f)| ^ n / (n : ℝ) +
+              (n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ) := hyoung
+        _ = ((n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ)) +
+              (ω (lam • f)) ^ n / (n : ℝ) := by
+          rw [hn_even.pow_abs]
+          ring
+    dsimp [A]
+    rw [← Real.exp_add]
+    exact Real.exp_le_exp.mpr harg
+  have h_dom_int : Integrable
+      (fun ω : Configuration (CylinderTestFunction Ls) =>
+        A * Real.exp ((ω (lam • f)) ^ n / (n : ℝ)))
+      (cylinderPullbackMeasure Lt Ls μ) := hlocal_int.const_mul A
+  have h_target_meas : AEStronglyMeasurable
+      (fun ω : Configuration (CylinderTestFunction Ls) => Real.exp (|ω f|))
+      (cylinderPullbackMeasure Lt Ls μ) :=
+    ((configuration_eval_measurable f).abs.exp).aestronglyMeasurable
+  have h_target_int : Integrable
+      (fun ω : Configuration (CylinderTestFunction Ls) => Real.exp (|ω f|))
+      (cylinderPullbackMeasure Lt Ls μ) := by
+    refine h_dom_int.mono' h_target_meas (ae_of_all _ fun ω => ?_)
+    rw [Real.norm_of_nonneg (Real.exp_pos _).le]
+    rw [Real.norm_of_nonneg (mul_nonneg (Real.exp_pos _).le (Real.exp_pos _).le)]
+    exact h_point ω
+  have h_integral_le :
+      ∫ ω : Configuration (CylinderTestFunction Ls), Real.exp (|ω f|)
+          ∂(cylinderPullbackMeasure Lt Ls μ) ≤
+        ∫ ω : Configuration (CylinderTestFunction Ls),
+          A * Real.exp ((ω (lam • f)) ^ n / (n : ℝ))
+            ∂(cylinderPullbackMeasure Lt Ls μ) := by
+    apply integral_mono_of_nonneg
+    · exact ae_of_all _ (fun ω => (Real.exp_pos _).le)
+    · exact h_dom_int
+    · exact ae_of_all _ h_point
+  have h_integral_bound :
+      ∫ ω : Configuration (CylinderTestFunction Ls), Real.exp (|ω f|)
+          ∂(cylinderPullbackMeasure Lt Ls μ) ≤ 2 * A := by
+    calc
+      ∫ ω : Configuration (CylinderTestFunction Ls), Real.exp (|ω f|)
+          ∂(cylinderPullbackMeasure Lt Ls μ) ≤
+          ∫ ω : Configuration (CylinderTestFunction Ls),
+            A * Real.exp ((ω (lam • f)) ^ n / (n : ℝ))
+              ∂(cylinderPullbackMeasure Lt Ls μ) := h_integral_le
+      _ = A * (∫ ω : Configuration (CylinderTestFunction Ls),
+            Real.exp ((ω (lam • f)) ^ n / (n : ℝ))
+              ∂(cylinderPullbackMeasure Lt Ls μ)) := by
+        rw [integral_const_mul]
+      _ ≤ A * 2 :=
+        mul_le_mul_of_nonneg_left hlocal_bound (Real.exp_pos _).le
+      _ = 2 * A := by ring
+  have ht_sq_le : t ^ 2 ≤ 1 + (s / r) ^ 2 := by
+    by_cases h : 1 ≤ s / r
+    · dsimp [t]
+      rw [max_eq_right h]
+      nlinarith [sq_nonneg (s / r)]
+    · have h' : s / r ≤ 1 := le_of_not_ge h
+      dsimp [t]
+      rw [max_eq_left h']
+      nlinarith [sq_nonneg (s / r)]
+  have h_arg_bound :
+      (n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ) ≤
+        ((n : ℝ) / 4 + 1 / (n : ℝ)) +
+          ((n : ℝ) / (4 * r ^ 2)) * s ^ 2 := by
+    calc
+      (n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ) ≤
+          (n : ℝ) / 4 * (1 + (s / r) ^ 2) + 1 / (n : ℝ) := by
+            exact add_le_add_right
+              (mul_le_mul_of_nonneg_left ht_sq_le (by positivity)) _
+      _ = ((n : ℝ) / 4 + 1 / (n : ℝ)) +
+          ((n : ℝ) / (4 * r ^ 2)) * s ^ 2 := by
+            have hnR_pos : (0 : ℝ) < (n : ℝ) := by
+              exact_mod_cast (show 0 < n by omega)
+            have hnR_ne : (n : ℝ) ≠ 0 := ne_of_gt hnR_pos
+            have hr_ne : r ≠ 0 := ne_of_gt hr
+            have hr2_ne : r ^ 2 ≠ 0 := pow_ne_zero 2 hr_ne
+            field_simp [hnR_ne, hr_ne, hr2_ne] <;> ring
+  have hA_bound : A ≤
+      Real.exp (((n : ℝ) / 4 + 1 / (n : ℝ)) +
+        ((n : ℝ) / (4 * r ^ 2)) * s ^ 2) := by
+    dsimp [A]
+    exact Real.exp_le_exp.mpr h_arg_bound
+  have h_final : 2 * A ≤
+      (2 * Real.exp ((n : ℝ) / 4 + 1 / (n : ℝ))) *
+        Real.exp (((n : ℝ) / (4 * r ^ 2)) * s ^ 2) := by
+    calc
+      2 * A ≤ 2 * Real.exp (((n : ℝ) / 4 + 1 / (n : ℝ)) +
+          ((n : ℝ) / (4 * r ^ 2)) * s ^ 2) :=
+        mul_le_mul_of_nonneg_left hA_bound (by norm_num)
+      _ = (2 * Real.exp ((n : ℝ) / 4 + 1 / (n : ℝ))) *
+          Real.exp (((n : ℝ) / (4 * r ^ 2)) * s ^ 2) := by
+        rw [Real.exp_add]
+        ring
+  refine ⟨h_target_int, ?_⟩
+  simpa [s] using h_integral_bound.trans h_final
+
 /-- Elementary inequality `x² ≤ 2 e^|x|`, used to extract a polynomial
     moment from the exponential moment. -/
 private lemma sq_le_two_mul_exp_abs (x : ℝ) : x ^ 2 ≤ 2 * Real.exp |x| := by
