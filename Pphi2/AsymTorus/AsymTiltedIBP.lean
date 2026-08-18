@@ -159,8 +159,8 @@ theorem interactionFunctionalAsym_hasDerivAt_coordinateShift
     intro x hx
     have harg := (hasDerivAt_const t ((evalMapAsym Nt Ns ω) x)).add
       ((hasDerivAt_id t).mul_const (v x))
-    exact (wickPolynomial_hasDerivAt P (wickConstantAsym Nt Ns a mass)
-      ((evalMapAsym Nt Ns ω) x + t * v x)).comp t harg
+    convert (wickPolynomial_hasDerivAt P (wickConstantAsym Nt Ns a mass)
+      ((evalMapAsym Nt Ns ω) x + t * v x)).comp t harg using 1 <;> ring
   have hscaled := hsum.const_mul (a ^ 2)
   convert hscaled using 1
   · funext s
@@ -236,5 +236,271 @@ theorem asymTiltedDensityIntegrand_hasDerivAt_coordinateShift
   have hexp := (hsource.sub hinteraction).exp
   have hprod := hH.mul hexp
   convert hprod using 1 <;> ring
+
+/-! ## Coordinate density and score calculus -/
+
+/-- The finite massive quadratic form in coordinate variables. -/
+def asymQuadraticForm
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a mass : ℝ) (φ : AsymLatticeField Nt Ns) : ℝ :=
+  ∑ x : AsymLatticeSites Nt Ns,
+    φ x * (massOperatorAsym Nt Ns a mass φ) x
+
+/-- The coordinate source pairing. -/
+def asymCoordinateSourcePairing
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (g φ : AsymLatticeField Nt Ns) : ℝ :=
+  ∑ x : AsymLatticeSites Nt Ns, g x * φ x
+
+/-- The Wick interaction after passing from configurations to coordinates. -/
+def asymCoordinateWickAction
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ)
+    (φ : AsymLatticeField Nt Ns) : ℝ :=
+  a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+    wickPolynomial P (wickConstantAsym Nt Ns a mass) (φ x)
+
+/-- Coordinate form of the source exponent, with an explicit source strength
+`κ`. -/
+def asymCoordinateSourceExponent
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (κ : ℝ) (g φ : AsymLatticeField Nt Ns) : ℝ :=
+  κ * (asymCoordinateSourcePairing Nt Ns g φ) ^ P.n / (P.n : ℝ)
+
+/-- The complete finite Gaussian density after adding a Wick interaction and
+the source `κ · (φ(g))^n/n`. -/
+def asymGaussianSourceTiltExponent
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass κ : ℝ)
+    (g φ : AsymLatticeField Nt Ns) : ℝ :=
+  -(a ^ 2 / 2 : ℝ) * asymQuadraticForm Nt Ns a mass φ -
+      asymCoordinateWickAction Nt Ns P a mass φ +
+      asymCoordinateSourceExponent Nt Ns P κ g φ
+
+noncomputable def asymGaussianSourceTiltDensity
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass κ : ℝ)
+    (g φ : AsymLatticeField Nt Ns) : ℝ :=
+  Real.exp (asymGaussianSourceTiltExponent Nt Ns P a mass κ g φ)
+
+/-- The complete coordinate density factors into the Gaussian density, the
+Wick Boltzmann factor, and the source factor. -/
+theorem asymGaussianSourceTiltDensity_eq_product
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass κ : ℝ)
+    (g φ : AsymLatticeField Nt Ns) :
+    asymGaussianSourceTiltDensity Nt Ns P a mass κ g φ =
+      gaussianDensityAsym Nt Ns a mass φ *
+        Real.exp (-asymCoordinateWickAction Nt Ns P a mass φ +
+          asymCoordinateSourceExponent Nt Ns P κ g φ) := by
+  unfold asymGaussianSourceTiltDensity asymGaussianSourceTiltExponent
+    asymQuadraticForm asymCoordinateWickAction
+    gaussianDensityAsym
+  rw [← Real.exp_add]
+  congr 1
+  ring
+
+/-- The coordinate Wick action agrees with the existing configuration action
+after applying the inverse evaluation map. -/
+theorem asymCoordinateWickAction_eq_interactionFunctionalAsym
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ)
+    (φ : AsymLatticeField Nt Ns) :
+    asymCoordinateWickAction Nt Ns P a mass φ =
+      interactionFunctionalAsym Nt Ns P a mass (evalMapAsymInv Nt Ns φ) := by
+  simpa [asymCoordinateWickAction] using
+    (interactionFunctionalAsym_evalMapAsymInv Nt Ns P a mass φ).symm
+
+/-- Derivative of the coordinate source pairing along a field shift. -/
+theorem asymCoordinateSourcePairing_hasDerivAt_fieldShift
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (g φ v : AsymLatticeField Nt Ns) (t : ℝ) :
+    HasDerivAt
+      (fun s => asymCoordinateSourcePairing Nt Ns g (φ + s • v))
+      (∑ x : AsymLatticeSites Nt Ns, g x * v x) t := by
+  have hsum : HasDerivAt
+      (fun s : ℝ => ∑ x : AsymLatticeSites Nt Ns,
+        g x * (φ x + s * v x))
+      (∑ x : AsymLatticeSites Nt Ns, g x * v x) t := by
+    apply HasDerivAt.fun_sum
+    intro x hx
+    have harg := (hasDerivAt_const t (φ x)).add
+      ((hasDerivAt_id t).mul_const (v x))
+    have hterm := harg.const_mul (g x)
+    convert hterm using 1 <;> ring
+  simpa [asymCoordinateSourcePairing, Pi.add_apply, Pi.smul_apply,
+    smul_eq_mul] using hsum
+
+/-- Derivative of the coordinate Wick action along a field shift. -/
+theorem asymCoordinateWickAction_hasDerivAt_fieldShift
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ)
+    (φ v : AsymLatticeField Nt Ns) (t : ℝ) :
+    HasDerivAt
+      (fun s => asymCoordinateWickAction Nt Ns P a mass (φ + s • v))
+      (a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+        wickPolynomialDerivative P (wickConstantAsym Nt Ns a mass)
+          (φ x + t * v x) * v x) t := by
+  have hsum : HasDerivAt
+      (fun s : ℝ => ∑ x : AsymLatticeSites Nt Ns,
+        wickPolynomial P (wickConstantAsym Nt Ns a mass) (φ x + s * v x))
+      (∑ x : AsymLatticeSites Nt Ns,
+        wickPolynomialDerivative P (wickConstantAsym Nt Ns a mass)
+          (φ x + t * v x) * v x) t := by
+    apply HasDerivAt.fun_sum
+    intro x hx
+    have harg := (hasDerivAt_const t (φ x)).add
+      ((hasDerivAt_id t).mul_const (v x))
+    convert (wickPolynomial_hasDerivAt P (wickConstantAsym Nt Ns a mass)
+      (φ x + t * v x)).comp t harg using 1 <;> ring
+  have hscaled := hsum.const_mul (a ^ 2)
+  simpa [asymCoordinateWickAction, Pi.add_apply, Pi.smul_apply,
+    smul_eq_mul] using hscaled
+
+/-- Derivative of the quadratic form.  The second term in the product rule is
+rewritten with `massOperatorAsym_selfAdjoint`. -/
+theorem asymQuadraticForm_hasDerivAt_fieldShift
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a mass : ℝ) (φ v : AsymLatticeField Nt Ns) (t : ℝ) :
+    HasDerivAt
+      (fun s => asymQuadraticForm Nt Ns a mass (φ + s • v))
+      (2 * ∑ x : AsymLatticeSites Nt Ns,
+        v x * (massOperatorAsym Nt Ns a mass (φ + t • v)) x) t := by
+  let Q := massOperatorAsym Nt Ns a mass
+  have hsum : HasDerivAt
+      (fun s : ℝ => ∑ x : AsymLatticeSites Nt Ns,
+        (φ x + s * v x) *
+          (Q φ x + s * (Q v) x))
+      (∑ x : AsymLatticeSites Nt Ns,
+        v x * (Q φ x + t * (Q v) x) +
+          (φ x + t * v x) * (Q v) x) t := by
+    apply HasDerivAt.fun_sum
+    intro x hx
+    have hφ := (hasDerivAt_const t (φ x)).add
+      ((hasDerivAt_id t).mul_const (v x))
+    have hQ := (hasDerivAt_const t (Q φ x)).add
+      ((hasDerivAt_id t).mul_const (Q v x))
+    convert hφ.mul hQ using 1 <;> ring
+  have hself :
+      ∑ x : AsymLatticeSites Nt Ns,
+        (φ + t • v) x * (Q v) x =
+      ∑ x : AsymLatticeSites Nt Ns,
+        v x * (Q (φ + t • v)) x := by
+    have h := massOperatorAsym_selfAdjoint Nt Ns a mass v (φ + t • v)
+    calc
+      ∑ x : AsymLatticeSites Nt Ns, (φ + t • v) x * (Q v) x =
+          ∑ x : AsymLatticeSites Nt Ns, (Q v) x * (φ + t • v) x := by
+            apply Finset.sum_congr rfl
+            intro x hx
+            ring
+      _ = ∑ x : AsymLatticeSites Nt Ns,
+          v x * (Q (φ + t • v)) x := h.symm
+  have hscaled := hsum
+  unfold asymQuadraticForm
+  convert hscaled using 1
+  · funext s
+    simp only [Q, massOperatorAsym, map_add, map_smul, Pi.add_apply,
+      Pi.smul_apply, smul_eq_mul]
+  · simp only [Q, massOperatorAsym, map_add, map_smul, Pi.add_apply,
+      Pi.smul_apply, smul_eq_mul]
+    have hself' :
+        ∑ x : AsymLatticeSites Nt Ns,
+          (φ x + t * v x) * (Q v) x =
+        ∑ x : AsymLatticeSites Nt Ns,
+          v x * (Q φ x + t * (Q v) x) := by
+      simpa [Q, map_add, map_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+        using hself
+    rw [← hself', Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro x hx
+    ring
+
+/-- Directional derivative of the source exponent with explicit strength `κ`. -/
+theorem asymCoordinateSourceExponent_hasDerivAt_fieldShift
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (κ : ℝ) (g φ v : AsymLatticeField Nt Ns)
+    (t : ℝ) :
+    HasDerivAt
+      (fun s => asymCoordinateSourceExponent Nt Ns P κ g (φ + s • v))
+      (κ * (asymCoordinateSourcePairing Nt Ns g (φ + t • v)) ^ (P.n - 1) *
+        (∑ x : AsymLatticeSites Nt Ns, g x * v x)) t := by
+  have hpair := asymCoordinateSourcePairing_hasDerivAt_fieldShift
+    Nt Ns g φ v t
+  have hpow := (hasDerivAt_pow P.n
+      (asymCoordinateSourcePairing Nt Ns g (φ + t • v))).comp t hpair
+  have hsource := (hpow.const_mul κ).div_const (P.n : ℝ)
+  have hn_pos : 0 < (P.n : ℝ) := by
+    have hn : 0 < P.n := by have := P.hn_ge; omega
+    exact_mod_cast hn
+  have hn_ne : (P.n : ℝ) ≠ 0 := ne_of_gt hn_pos
+  unfold asymCoordinateSourceExponent
+  convert hsource using 1
+  · simp [asymCoordinateSourcePairing, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+  · field_simp [hn_ne]
+    ring
+
+/-- Directional derivative of the full Gaussian source-tilt exponent. -/
+def asymGaussianSourceTiltScore
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass κ : ℝ)
+    (g φ v : AsymLatticeField Nt Ns) : ℝ :=
+  -(a ^ 2) * ∑ x : AsymLatticeSites Nt Ns,
+      v x * (massOperatorAsym Nt Ns a mass φ) x -
+    a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+      wickPolynomialDerivative P (wickConstantAsym Nt Ns a mass) (φ x) * v x +
+    κ * (asymCoordinateSourcePairing Nt Ns g φ) ^ (P.n - 1) *
+      (∑ x : AsymLatticeSites Nt Ns, g x * v x)
+
+theorem asymGaussianSourceTiltExponent_hasDerivAt_fieldShift
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass κ : ℝ)
+    (g φ v : AsymLatticeField Nt Ns) (t : ℝ) :
+    HasDerivAt
+      (fun s => asymGaussianSourceTiltExponent Nt Ns P a mass κ g (φ + s • v))
+      (asymGaussianSourceTiltScore Nt Ns P a mass κ g (φ + t • v) v) t := by
+  have hQ := asymQuadraticForm_hasDerivAt_fieldShift Nt Ns a mass φ v t
+  have hW := asymCoordinateWickAction_hasDerivAt_fieldShift
+    Nt Ns P a mass φ v t
+  have hS := asymCoordinateSourceExponent_hasDerivAt_fieldShift
+    Nt Ns P κ g φ v t
+  unfold asymGaussianSourceTiltExponent asymGaussianSourceTiltScore
+  have h := (hQ.const_mul (-(a ^ 2 / 2 : ℝ))).sub hW
+  have h := h.add hS
+  convert h using 1 <;>
+    simp [asymQuadraticForm, asymCoordinateWickAction, asymCoordinateSourceExponent,
+      asymCoordinateSourcePairing, Pi.add_apply, Pi.smul_apply, smul_eq_mul] <;>
+    ring
+
+/-- Directional derivative of the complete Gaussian source-tilt density. -/
+theorem asymGaussianSourceTiltDensity_hasDerivAt_fieldShift
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass κ : ℝ)
+    (g φ v : AsymLatticeField Nt Ns) (t : ℝ) :
+    HasDerivAt
+      (fun s => asymGaussianSourceTiltDensity Nt Ns P a mass κ g (φ + s • v))
+      (asymGaussianSourceTiltDensity Nt Ns P a mass κ g (φ + t • v) *
+        asymGaussianSourceTiltScore Nt Ns P a mass κ g (φ + t • v) v) t := by
+  have h := (asymGaussianSourceTiltExponent_hasDerivAt_fieldShift
+    Nt Ns P a mass κ g φ v t).exp
+  unfold asymGaussianSourceTiltDensity
+  convert h using 1 <;> ring
+
+/-- Product rule for a test function times the complete source-tilt density. -/
+theorem asymGaussianSourceTiltWeightedDensity_hasDerivAt_fieldShift
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass κ : ℝ)
+    (g φ v : AsymLatticeField Nt Ns) (t : ℝ)
+    (H : AsymLatticeField Nt Ns → ℝ) (dH : ℝ)
+    (hH : HasDerivAt (fun s => H (φ + s • v)) dH t) :
+    HasDerivAt
+      (fun s => H (φ + s • v) *
+        asymGaussianSourceTiltDensity Nt Ns P a mass κ g (φ + s • v))
+      ((dH + H (φ + t • v) *
+          asymGaussianSourceTiltScore Nt Ns P a mass κ g (φ + t • v) v) *
+        asymGaussianSourceTiltDensity Nt Ns P a mass κ g (φ + t • v)) t := by
+  have hρ := asymGaussianSourceTiltDensity_hasDerivAt_fieldShift
+    Nt Ns P a mass κ g φ v t
+  have h := hH.mul hρ
+  convert h using 1 <;> ring
 
 end Pphi2
