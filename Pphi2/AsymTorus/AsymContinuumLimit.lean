@@ -23,6 +23,7 @@ import Pphi2.AsymTorus.AsymDDJSource
 import Pphi2.AsymTorus.AsymDDJLocalMoment
 import Pphi2.AsymTorus.AsymDDJSourceSampling
 import Pphi2.AsymTorus.AsymDDJSourceLp
+import Pphi2.AsymTorus.AsymDDJSourceBall
 import Pphi2.AsymTorus.AsymDDJTiltedIntegrability
 import Pphi2.AsymTorus.AsymDDJWeightedDecay
 import Pphi2.AsymTorus.AsymIsoOS

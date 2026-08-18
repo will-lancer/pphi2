@@ -139,3 +139,6 @@ filename per the hub convention.
 #print axioms Pphi2.interactionFunctionalAsym_hasDerivAt_coordinateShift
 #print axioms Pphi2.sourceExponent_hasDerivAt_coordinateShift
 #print axioms Pphi2.asymTiltedDensityIntegrand_hasDerivAt_coordinateShift
+#print axioms Pphi2.asymFiniteLaplacianRawSource_pointwise_centered_decay
+#print axioms Pphi2.AsymDDJSourceBall
+#print axioms Pphi2.asymDDJSourceBall_of_centered_decay
