@@ -109,5 +109,9 @@ filename per the hub convention.
 #print axioms Pphi2.interactingLatticeMeasureAsym_integrable_exp_of_source_control
 #print axioms Pphi2.interactingLatticeMeasureAsym_exp_moment_le_exp_of_sub_interaction_le
 #print axioms Pphi2.asymWeightedPairing_pow_le
+#print axioms Pphi2.asymWeightedLpPow_le_of_sup_of_weightedL1
+#print axioms Pphi2.finiteLaplacianAsym_map_smul
+#print axioms Pphi2.finiteLaplacianAsymFun_asymRawSource_apply
 #print axioms Pphi2.asymSourceControl_of_weightedLpPow
 #print axioms Pphi2.interactingLatticeMeasureAsym_integrable_exp_of_weightedLpPow
+#print axioms Pphi2.interactingLatticeMeasureAsym_exp_moment_le_two_of_weightedLpPow_and_tiltedMoment

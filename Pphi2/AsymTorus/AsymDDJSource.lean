@@ -38,6 +38,71 @@ def asymWeightedLpPow {Nt Ns : ℕ} [NeZero Nt] [NeZero Ns]
     (p a : ℝ) (h : AsymLatticeField Nt Ns) : ℝ :=
   a ^ 2 * ∑ x : AsymLatticeSites Nt Ns, Real.rpow |h x| p
 
+/-- A finite weighted interpolation estimate.  The weight is the cell area
+`a²`; the hypothesis at exponent one is the corresponding weighted `L¹`
+bound.  This is the elementary bridge used when a pointwise source estimate
+and a weighted decay estimate are available separately. -/
+theorem asymWeightedLpPow_le_of_sup_of_weightedL1
+    {Nt Ns : ℕ} [NeZero Nt] [NeZero Ns]
+    (p a M L : ℝ) (h : AsymLatticeField Nt Ns)
+    (hp : 1 ≤ p) (hM : 0 ≤ M)
+    (hsup : ∀ x : AsymLatticeSites Nt Ns, |h x| ≤ M)
+    (hL : asymWeightedLpPow 1 a h ≤ L) :
+    asymWeightedLpPow p a h ≤ Real.rpow M (p - 1) * L := by
+  have hp_sub : 0 ≤ p - 1 := sub_nonneg.mpr hp
+  have hpoint : ∀ x : AsymLatticeSites Nt Ns,
+      Real.rpow |h x| p ≤ Real.rpow M (p - 1) * |h x| := by
+    intro x
+    calc
+      Real.rpow |h x| p =
+          Real.rpow |h x| (p - 1) * Real.rpow |h x| 1 := by
+        rw [← Real.rpow_add' (abs_nonneg _) (by linarith)]
+        congr 1
+        ring
+      _ = Real.rpow |h x| (p - 1) * |h x| := by
+        rw [Real.rpow_one]
+      _ ≤ Real.rpow M (p - 1) * |h x| := by
+        exact mul_le_mul_of_nonneg_right
+          (Real.rpow_le_rpow (abs_nonneg _) (hsup x) hp_sub)
+          (abs_nonneg _)
+  have hsum :
+      ∑ x : AsymLatticeSites Nt Ns, Real.rpow |h x| p ≤
+        ∑ x : AsymLatticeSites Nt Ns,
+          Real.rpow M (p - 1) * |h x| :=
+    Finset.sum_le_sum fun x _ => hpoint x
+  have ha2 : 0 ≤ a ^ 2 := sq_nonneg a
+  calc
+    asymWeightedLpPow p a h =
+        a ^ 2 * ∑ x : AsymLatticeSites Nt Ns, Real.rpow |h x| p := rfl
+    _ ≤ a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+        Real.rpow M (p - 1) * |h x| :=
+      mul_le_mul_of_nonneg_left hsum ha2
+    _ = Real.rpow M (p - 1) * asymWeightedLpPow 1 a h := by
+      simp only [asymWeightedLpPow, Real.rpow_one]
+      change a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+          Real.rpow M (p - 1) * |h x| =
+        Real.rpow M (p - 1) *
+          (a ^ 2 * ∑ x : AsymLatticeSites Nt Ns, |h x|)
+      calc
+        a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+              Real.rpow M (p - 1) * |h x| =
+            ∑ x : AsymLatticeSites Nt Ns,
+              a ^ 2 * (Real.rpow M (p - 1) * |h x|) := by
+          rw [Finset.mul_sum]
+        _ = ∑ x : AsymLatticeSites Nt Ns,
+              (a ^ 2 * |h x|) * Real.rpow M (p - 1) := by
+          apply Finset.sum_congr rfl
+          intro x hx
+          ring
+        _ = Real.rpow M (p - 1) *
+              (a ^ 2 * ∑ x : AsymLatticeSites Nt Ns, |h x|) := by
+          simp only [Finset.mul_sum, Finset.sum_mul]
+          apply Finset.sum_congr rfl
+          intro x hx
+          ring
+    _ ≤ Real.rpow M (p - 1) * L :=
+      mul_le_mul_of_nonneg_left hL (Real.rpow_nonneg hM _)
+
 /-! ## The finite weighted Hölder bridge -/
 
 /-- Weighted finite-dimensional Hölder in the normalization used by the lattice source.
@@ -204,6 +269,28 @@ theorem asymRawSource_asymLatticeTestFnIso_apply
   simp only [asymRawSource, Pi.smul_apply, smul_eq_mul,
     asymLatticeTestFnIso, evalAsymTorusAtSiteGJ_apply]
   field_simp [ha0, ha2] <;> ring
+
+/-- The finite Laplacian is linear at the continuous-linear-map level.  Keeping
+this identity named makes the scalar normalization of a raw source available
+without unfolding the stencil at every use site. -/
+theorem finiteLaplacianAsym_map_smul
+    {Nt Ns : ℕ} [NeZero Nt] [NeZero Ns]
+    (a c : ℝ) (g : AsymLatticeField Nt Ns) :
+    finiteLaplacianAsym Nt Ns a (c • g) =
+      c • finiteLaplacianAsym Nt Ns a g := by
+  exact (finiteLaplacianAsym Nt Ns a).map_smul c g
+
+/-- Pointwise form of `finiteLaplacianAsym_map_smul` for the source
+normalization used in this file. -/
+theorem finiteLaplacianAsymFun_asymRawSource_apply
+    {Nt Ns : ℕ} [NeZero Nt] [NeZero Ns]
+    (a : ℝ) (g : AsymLatticeField Nt Ns)
+    (x : AsymLatticeSites Nt Ns) :
+    finiteLaplacianAsymFun Nt Ns a (asymRawSource a g) x =
+      (a ^ 2 : ℝ)⁻¹ * finiteLaplacianAsymFun Nt Ns a g x := by
+  simp only [asymRawSource, Pi.smul_apply, smul_eq_mul,
+    finiteLaplacianAsymFun]
+  ring
 
 /-- The finite lattice pairing of a configuration with a GJ pullback can be
 written using the physical cell-area pairing and `asymRawSource`. -/
