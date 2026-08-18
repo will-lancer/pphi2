@@ -410,6 +410,99 @@ theorem wickPolynomial_bounded_below (P : InteractionPolynomial) (c : ℝ) :
     apply div_pos one_pos
     exact_mod_cast (show (0 : ℕ) < P.n by have := P.hn_ge; omega)
 
+/--
+The leading coefficient can be retained with an arbitrary fixed loss.  This
+is the coercive form used by finite-volume source estimates: for every
+`0 < η < 1`, the Wick polynomial dominates `(1 - η) · x^n / n` up to an
+additive constant.  The constant may depend on `P`, `c`, and `η`.
+*/
+theorem wickPolynomial_coercive (P : InteractionPolynomial) (c η : ℝ)
+    (hη_pos : 0 < η) (hη_lt_one : η < 1) :
+    ∃ B : ℝ, 0 ≤ B ∧ ∀ t : ℝ,
+      ((1 - η) / (P.n : ℝ)) * |t| ^ P.n - B ≤ wickPolynomial P c t := by
+  have hn_nat : 0 < P.n := by
+    have h := P.hn_ge
+    omega
+  have hn_real : 0 < (P.n : ℝ) := by
+    exact_mod_cast hn_nat
+  let p : ℝ[X] := wickPolynomialPoly P c
+  have hp_nat : p.natDegree = P.n := by
+    dsimp [p]
+    exact wickPolynomialPoly_natDegree P c
+  have hp_lc : p.leadingCoeff = 1 / (P.n : ℝ) := by
+    dsimp [p]
+    exact wickPolynomialPoly_leadingCoeff P c
+  have hp_ne : p ≠ 0 := by
+    intro hp_zero
+    have hzero : (0 : ℝ) = 1 / (P.n : ℝ) := by
+      simpa [hp_zero] using hp_lc
+    exact (ne_of_gt (div_pos (by norm_num) hn_real)) hzero.symm
+  let q : ℝ[X] :=
+    p.eraseLead + C (η / (P.n : ℝ)) * X ^ P.n
+  have hηn_pos : 0 < η / (P.n : ℝ) := div_pos hη_pos hn_real
+  have hηn_ne : η / (P.n : ℝ) ≠ 0 := ne_of_gt hηn_pos
+  have hterm_nat :
+      (C (η / (P.n : ℝ)) * X ^ P.n).natDegree = P.n := by
+    exact natDegree_C_mul_X_pow _ _ hηn_ne
+  have herase_nat_lt : p.eraseLead.natDegree < P.n := by
+    have hle := eraseLead_natDegree_le p
+    rw [hp_nat] at hle
+    omega
+  have hq_nat : q.natDegree = P.n := by
+    have hlt : p.eraseLead.natDegree <
+        (C (η / (P.n : ℝ)) * X ^ P.n).natDegree := by
+      rw [hterm_nat]
+      exact herase_nat_lt
+    dsimp [q]
+    rw [natDegree_add_eq_right_of_natDegree_lt hlt, hterm_nat]
+  have hterm_degree :
+      (C (η / (P.n : ℝ)) * X ^ P.n).degree = (P.n : WithBot ℕ) := by
+    exact degree_C_mul_X_pow _ hηn_ne
+  have herase_degree_lt : p.eraseLead.degree <
+      (C (η / (P.n : ℝ)) * X ^ P.n).degree := by
+    calc
+      p.eraseLead.degree < p.degree := degree_eraseLead_lt hp_ne
+      _ = (P.n : WithBot ℕ) := by
+        rw [degree_eq_natDegree hp_ne, hp_nat]
+      _ = (C (η / (P.n : ℝ)) * X ^ P.n).degree := hterm_degree.symm
+  have hq_lc : q.leadingCoeff = η / (P.n : ℝ) := by
+    dsimp [q]
+    rw [leadingCoeff_add_of_degree_lt herase_degree_lt,
+      leadingCoeff_C_mul_X_pow]
+  obtain ⟨B, hB_pos, hq_bound⟩ :=
+    poly_even_degree_bounded_below q
+      (by rw [hq_nat]; exact hn_nat)
+      (by rw [hq_nat]; exact P.hn_even)
+      (by rw [hq_lc]; exact hηn_pos)
+  have hdecomp :
+      p.eraseLead + C (1 / (P.n : ℝ)) * X ^ P.n = p := by
+    have h := eraseLead_add_C_mul_X_pow p
+    rw [hp_nat, hp_lc] at h
+    exact h
+  have hq_poly :
+      q = p - C ((1 - η) / (P.n : ℝ)) * X ^ P.n := by
+    dsimp [q]
+    calc
+      p.eraseLead + C (η / (P.n : ℝ)) * X ^ P.n =
+          (p.eraseLead + C (1 / (P.n : ℝ)) * X ^ P.n) -
+            C ((1 - η) / (P.n : ℝ)) * X ^ P.n := by
+        rw [add_sub_assoc]
+        congr 1
+        rw [← sub_mul, ← map_sub]
+        congr 1
+        ring
+      _ = p - C ((1 - η) / (P.n : ℝ)) * X ^ P.n := by
+        rw [hdecomp]
+  refine ⟨B, le_of_lt hB_pos, ?_⟩
+  intro t
+  have hbound := hq_bound t
+  rw [hq_poly, eval_sub, eval_mul, eval_C, eval_pow] at hbound
+  change -B ≤ (wickPolynomialPoly P c).eval t -
+      ((1 - η) / (P.n : ℝ)) * t ^ P.n at hbound
+  rw [wickPolynomialPoly_eval] at hbound
+  rw [(P.hn_even.pow_abs t).symm] at hbound
+  linarith
+
 /-! ## Joint continuity in (c, x) -/
 
 /-- Wick monomials are jointly continuous in (c, x). -/

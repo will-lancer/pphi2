@@ -231,6 +231,115 @@ theorem interactingLatticeMeasureAsym_isProbability (Nt Ns : ℕ) [NeZero Nt] [N
   simp only [smul_eq_mul]
   exact ENNReal.inv_mul_cancel hZ_ne hZ_ne_top
 
+/-! ## Source-tilted exponential integrability -/
+
+/-- A pointwise upper bound on the source exponent after subtracting the interaction
+implies integrability under the normalized interacting lattice measure.  The proof only
+uses the density representation of that measure: the product of the source exponential
+and the Boltzmann weight is bounded by `exp C` under the free Gaussian measure. -/
+theorem interactingLatticeMeasureAsym_integrable_exp_of_sub_interaction_le
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (g : AsymLatticeField Nt Ns) (C : ℝ)
+    (hbound : ∀ ω : Configuration (AsymLatticeField Nt Ns),
+      (ω g) ^ P.n / (P.n : ℝ) -
+          interactionFunctionalAsym Nt Ns P a mass ω ≤ C) :
+    Integrable
+      (fun ω : Configuration (AsymLatticeField Nt Ns) =>
+        Real.exp ((ω g) ^ P.n / (P.n : ℝ)))
+      (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) := by
+  let μG := latticeGaussianMeasureAsym Nt Ns a mass ha hmass
+  let bw := boltzmannWeightAsym Nt Ns P a mass
+  have hZ : 0 < partitionFunctionAsym Nt Ns P a mass ha hmass :=
+    partitionFunctionAsym_pos Nt Ns P a mass ha hmass
+  have hF_meas : Measurable (fun ω : Configuration (AsymLatticeField Nt Ns) =>
+      Real.exp ((ω g) ^ P.n / (P.n : ℝ))) := by
+    exact Real.measurable_exp.comp
+      (((configuration_eval_measurable g).pow_const P.n).div measurable_const)
+  have hbw_meas : Measurable (fun ω : Configuration (AsymLatticeField Nt Ns) =>
+      ENNReal.ofReal (bw ω)) := by
+    exact ENNReal.measurable_ofReal.comp
+      ((interactionFunctionalAsym_measurable Nt Ns P a mass).neg.exp)
+  have hbw_pos : ∀ ω : Configuration (AsymLatticeField Nt Ns), 0 < bw ω := by
+    intro ω
+    exact boltzmannWeightAsym_pos Nt Ns P a mass ω
+  have hbw_simp : ∀ ω : Configuration (AsymLatticeField Nt Ns),
+      (ENNReal.ofReal (bw ω)).toReal = bw ω := by
+    intro ω
+    exact ENNReal.toReal_ofReal (le_of_lt (hbw_pos ω))
+  have hF_wd : Integrable
+      (fun ω : Configuration (AsymLatticeField Nt Ns) =>
+        Real.exp ((ω g) ^ P.n / (P.n : ℝ)))
+      (μG.withDensity (fun ω => ENNReal.ofReal (bw ω))) := by
+    apply (integrable_withDensity_iff hbw_meas
+      (Filter.Eventually.of_forall (fun _ => ENNReal.ofReal_lt_top))).mpr
+    simp_rw [hbw_simp]
+    apply Integrable.of_bound (C := Real.exp C)
+    · exact hF_meas.aestronglyMeasurable.mul
+        ((interactionFunctionalAsym_measurable Nt Ns P a mass).neg.exp.aestronglyMeasurable)
+    · apply Filter.Eventually.of_forall
+      intro ω
+      simp only [Real.norm_eq_abs, bw, boltzmannWeightAsym]
+      rw [abs_of_nonneg (mul_nonneg (Real.exp_pos _).le
+          (Real.exp_pos _).le), abs_of_nonneg (Real.exp_pos C).le]
+      rw [← Real.exp_add]
+      apply Real.exp_le_exp.mpr
+      simpa [sub_eq_add_neg] using hbound ω
+  unfold interactingLatticeMeasureAsym
+  exact hF_wd.smul_measure
+    (ENNReal.inv_ne_top.mpr ((ENNReal.ofReal_pos.mpr hZ).ne'))
+
+/-- A finite source-control inequality together with Wick coercivity supplies the pointwise
+bound used by `interactingLatticeMeasureAsym_integrable_exp_of_sub_interaction_le`.
+The source-control hypothesis is deliberately explicit: proving it uniformly in the lattice
+parameters is the analytic finite-volume input, while the density transfer is elementary. -/
+theorem interactingLatticeMeasureAsym_integrable_exp_of_source_control
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (g : AsymLatticeField Nt Ns) (η : ℝ) (hη_pos : 0 < η) (hη_lt_one : η < 1)
+    (hsource : ∀ ω : Configuration (AsymLatticeField Nt Ns),
+      (ω g) ^ P.n / (P.n : ℝ) ≤
+        a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+          ((1 - η) / (P.n : ℝ)) *
+            |ω (asymLatticeDelta Nt Ns x)| ^ P.n) :
+    Integrable
+      (fun ω : Configuration (AsymLatticeField Nt Ns) =>
+        Real.exp ((ω g) ^ P.n / (P.n : ℝ)))
+      (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) := by
+  obtain ⟨B, _hB_nonneg, hcoercive⟩ :=
+    wickPolynomial_coercive P (wickConstantAsym Nt Ns a mass) η hη_pos hη_lt_one
+  apply interactingLatticeMeasureAsym_integrable_exp_of_sub_interaction_le
+    Nt Ns P a mass ha hmass g (a ^ 2 * Fintype.card (AsymLatticeSites Nt Ns) * B)
+  intro ω
+  have hsum :
+      a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+          (((1 - η) / (P.n : ℝ)) *
+            |ω (asymLatticeDelta Nt Ns x)| ^ P.n - B) ≤
+        a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+          wickPolynomial P (wickConstantAsym Nt Ns a mass)
+            (ω (asymLatticeDelta Nt Ns x)) := by
+    apply mul_le_mul_of_nonneg_left _ (sq_nonneg a)
+    exact Finset.sum_le_sum (fun x _ => hcoercive _)
+  calc
+    (ω g) ^ P.n / (P.n : ℝ) -
+          interactionFunctionalAsym Nt Ns P a mass ω ≤
+        a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+          ((1 - η) / (P.n : ℝ)) *
+            |ω (asymLatticeDelta Nt Ns x)| ^ P.n -
+          interactionFunctionalAsym Nt Ns P a mass ω := by
+      exact sub_le_sub_right (hsource ω) _
+    _ = a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
+          (((1 - η) / (P.n : ℝ)) *
+            |ω (asymLatticeDelta Nt Ns x)| ^ P.n - B) +
+          a ^ 2 * Fintype.card (AsymLatticeSites Nt Ns) * B -
+          interactionFunctionalAsym Nt Ns P a mass ω := by
+      simp only [interactionFunctionalAsym]
+      rw [Finset.sum_sub_distrib]
+      simp [Finset.sum_const, mul_comm] <;> ring
+    _ ≤ a ^ 2 * Fintype.card (AsymLatticeSites Nt Ns) * B := by
+      simp only [interactionFunctionalAsym]
+      linarith [hsum]
+
 end Pphi2
 
 end
