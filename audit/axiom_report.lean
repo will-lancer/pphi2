@@ -103,6 +103,7 @@ filename per the hub convention.
 #print axioms Pphi2.asymTorusIso_cylinderUniformCylinderExpMomentBound_of_cutoffFamily
 #print axioms Pphi2.routeBPrimeIso_cylinder_OS_of_cutoffFamily
 #print axioms GaussianField.integral_exp_le_exp_integral_tilted
+#print axioms Pphi2.integral_exp_pow_div_nat_le_two_of_tilted_moment
 #print axioms Pphi2.wickPolynomial_coercive
 #print axioms Pphi2.interactingLatticeMeasureAsym_integrable_exp_of_sub_interaction_le
 #print axioms Pphi2.interactingLatticeMeasureAsym_integrable_exp_of_source_control

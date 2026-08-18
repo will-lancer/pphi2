@@ -325,6 +325,7 @@ theorem interactingLatticeMeasureAsym_exp_moment_le_exp_of_sub_interaction_le
   have hc_real : ((ENNReal.ofReal Z)⁻¹).toReal = Z⁻¹ := by
     simp [ENNReal.toReal_inv, ENNReal.toReal_ofReal hZ_pos.le]
   rw [hc_real]
+  rw [smul_eq_mul]
   have hZinv_le : Z⁻¹ ≤ 1 := inv_le_one_of_one_le₀ hZ_ge
   have hprod_integral_nn : 0 ≤ ∫ ω, bw ω * F ω ∂μG :=
     integral_nonneg fun ω => hprod_nonneg ω
