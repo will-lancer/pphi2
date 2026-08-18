@@ -162,3 +162,4 @@ filename per the hub convention.
 #print axioms Pphi2.asymGaussianSourceTiltExponent_hasDerivAt_fieldShift
 #print axioms Pphi2.asymGaussianSourceTiltDensity_hasDerivAt_fieldShift
 #print axioms Pphi2.asymGaussianSourceTiltWeightedDensity_hasDerivAt_fieldShift
+#print axioms Pphi2.interactingLatticeMeasureAsym_hasDerivAt_log_source_partition
