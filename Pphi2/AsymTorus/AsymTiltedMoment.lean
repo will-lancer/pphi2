@@ -76,4 +76,3 @@ theorem integral_exp_pow_div_nat_le_two_of_tilted_moment
       norm_num
 
 end Pphi2
-
