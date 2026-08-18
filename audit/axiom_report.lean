@@ -124,3 +124,9 @@ filename per the hub convention.
 #print axioms Pphi2.asymSourceControl_of_weightedLpPow
 #print axioms Pphi2.interactingLatticeMeasureAsym_integrable_exp_of_weightedLpPow
 #print axioms Pphi2.interactingLatticeMeasureAsym_exp_moment_le_two_of_weightedLpPow_and_tiltedMoment
+#print axioms Pphi2.asymWeightedLpPow_smul
+#print axioms Pphi2.interactingLatticeMeasureAsym_tilted_integrable_pow_of_weightedLpPow
+#print axioms Pphi2.integrable_tilted_first_moment_le_of_exp_two
+#print axioms Pphi2.integrable_tilted_first_moment_le_of_log_exp_two
+#print axioms Pphi2.integrable_tilted_pow_le_of_exp_two
+#print axioms Pphi2.integrable_tilted_pow_le_of_log_exp_two
