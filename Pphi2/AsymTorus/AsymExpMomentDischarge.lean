@@ -2,78 +2,67 @@
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Discharge of `asymInteracting_expMoment_volume_uniform` from two upstream-input axioms
+# Layer A / Layer B2 input axioms for the volume-uniform exp-moment
 
-**Architecture-closing file.** Defines the two upstream-input axioms
-that the proposed `lee-yang` and `reflection-positivity` workstreams
-will discharge, and proves the Layer C assembly theorem that combines
-them into the discharge of the project-level axiom
-`asymInteracting_expMoment_volume_uniform`.
+Defines two upstream-input axioms consumed by the Layer C assembly. Layer A
+is restricted to `P.n = 4` with `hf : ∀ x, 0 ≤ f x`; the old all-`P` type is
+**FALSE** (one-site sextic) and must not be restored or discharged. The torus
+Layer B2 wrapper does not discharge the lattice axiom. The Layer C assembly
+inherits both footprints.
 
 ## What this file does
 
 States two clean, individually-vettable axioms:
 
-* **`asymInteracting_mgf_gaussianDominated`** — Layer A: Newman's MGF
-  Gaussian-domination of the lattice interacting measure, **sign-restricted
-  (2026-07-13)** to sitewise-nonnegative test functions (the unrestricted
-  form is FALSE for mixed-sign `f`; signed `f` is recovered by the
-  `f₊/f₋` split in `AsymSignedSplit.lean`). This is the pphi2-side
-  translation of what the proposed `lee-yang` repo will produce (Newman
-  MGF inequality applied to the asym Wick interacting measure via
-  `evenPolynomialWick_isLeeYang` + iterated Asano on the lattice graph +
-  the marginal-projection lemma).
+* **`asymInteracting_mgf_gaussianDominated`** — Layer A Newman MGF
+  comparison, restricted to `P.n = 4` with `hf : ∀ x, 0 ≤ f x`. The
+  old all-`InteractionPolynomial` type is **FALSE**: a one-site sextic
+  (Simon–Griffiths double-well family, nonnegative source) reverses the
+  claimed `K = 2` bound. Do **not** discharge this axiom; do not restore
+  the all-`P` quantifier. Signed `f` is recovered only as a consumer of
+  this quartic axiom (`AsymSignedSplit.lean`).
 
 * **`asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`** —
   Layer B2 Route-A lattice output: the Lt-uniform interacting/free
-  variance bound on the lattice. The torus statement
-  `asymInteractingVariance_le_freeVariance_Lt_uniform` is now a theorem
-  obtained from this lattice output by the pushforward embedding.
+  variance bound on the lattice. The torus wrapper
+  `asymInteractingVariance_le_freeVariance_Lt_uniform` is a pushforward
+  theorem whose axiom footprint is exactly this lattice axiom; it does
+  not discharge the mathematical content.
 
 The **Layer C assembly theorem**
 `asymInteracting_expMoment_volume_uniform_proof` — combining Layer A +
 Layer B2 + the joint-↔-torus pushforward — lives in
-`Pphi2/AsymTorus/AsymSignedSplit.lean` (moved 2026-07-13 with the sign
-restriction of Layer A; the assembly consumes the signed-split lemma and
-its seminorm is the split form `C · (Var_free(f₊) + Var_free(f₋))`).
+`Pphi2/AsymTorus/AsymSignedSplit.lean`. It **inherits** the quartic Layer A
+axiom; do not treat the assembly as a Newman discharge.
 
-This file is the **structural close of the discharge architecture**:
-once the two upstream axioms are discharged by their respective
-workstreams, the original project axiom drops automatically with no
-additional pphi2 work needed.
+## Why these are pphi2 axioms
 
-## Why state these here as pphi2 axioms?
-
-Per CLAUDE.md axiom protocol, this is a "vetted provable theorem with
-a vetted discharge plan." Defining the upstream inputs as pphi2-internal
-axioms lets us:
-
-1. Verify the Layer C assembly closes the discharge **before**
-   investing weeks in `lee-yang` Phase 1 or the chessboard workstream.
-2. Provide a clean interface contract: the upstream repos can be
-   developed independently, with this file as the consumer spec.
-3. Use deep-think vetting to catch architectural gaps now, not later.
+These are interface contracts, not a claim that Layer A is a vetted
+provable theorem on the full even-polynomial class. The all-`P` Newman
+statement is false (see Status). The Layer C wiring can still be checked
+against the live quartic types.
 
 **Net axiom-count impact**: the original
-`asymInteracting_expMoment_volume_uniform` axiom is replaced by the
-two new axioms (Layer A + Layer B2), net **+1 axiom raw** for
-clearer factorization. Each new axiom is individually shallower than
-the original (Newman MGF is a textbook result; chessboard mass-gap
-variance bound is the standard FSS argument). Both are independently
-discharged by their respective upstream workstreams.
+`asymInteracting_expMoment_volume_uniform` axiom sits alongside the
+two factored axioms (Layer A + Layer B2). Layer A is **not** a textbook
+Newman instance on general even `P` (the all-`P` type is false; see Status).
+Layer B2 remains an open lattice axiom; the torus wrapper below does not
+remove it.
 
 ## Status
 
-* Layer A axiom (`asymInteracting_mgf_gaussianDominated`): vetted
-  2026-06-02 (deep-think, see `docs/asym-expmoment-discharge-via-lee-yang-vet-request.md`
-  for the architecture vet from 2026-05-31); **sign-restricted 2026-07-13**
-  after the Gemini + Codex vet of 2026-07-12 found the unrestricted
-  quantifier FALSE (see `AXIOM_AUDIT.md` and
-  `planning/layer-a-lee-yang-scoping.md`).
+* Layer A axiom (`asymInteracting_mgf_gaussianDominated`): live type is
+  `P.n = 4` with `hf : ∀ x, 0 ≤ f x`. The old all-`P` type is **FALSE**
+  (one-site sextic, 2026-08). Sign-restricted 2026-07-13 after the
+  mixed-sign quantifier was found FALSE. Do not discharge; do not
+  restore all-`P`. See `AXIOM_AUDIT.md` and
+  `planning/layer-a-lee-yang-scoping.md`.
 * Layer B2 Route-A lattice axiom
   (`asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`):
-  factored 2026-06-23 as the remaining lattice assembly input.
-* Layer C theorem: proved in `AsymSignedSplit.lean` (split-seminorm form).
+  factored 2026-06-23 as the remaining lattice assembly input; still an
+  axiom.
+* Layer C theorem: proved in `AsymSignedSplit.lean` as a wrapper
+  (split-seminorm form); axiom footprint includes quartic Layer A and Layer B2.
 
 ## References
 
@@ -95,53 +84,35 @@ namespace Pphi2
 
 /-! ## Layer A axiom (lee-yang adapter output) -/
 
-/-- **Layer A: Newman's MGF Gaussian-domination of the asym interacting measure**.
+/-- **Layer A: Newman MGF Gaussian-domination, quartic only.**
 
-For every `(Nt, Ns, a, P, mass)` with the standard positivity constraints, the
-moment-generating function of the interacting measure
-`interactingLatticeMeasureAsym` for a linear functional `⟨ω, f⟩` is Gaussian-
-dominated by `2 · exp((1/2) · Var_int(⟨ω, f⟩))`. The `K = 2` constant is the
-universal `|·|`-form of Newman's inequality: `e^|x| ≤ e^x + e^{-x}` plus the
-two-sided Newman MGF bound at `t = ±1`.
+Live type: `P.n = 4` and sitewise-nonnegative source `hf : ∀ x, 0 ≤ f x`.
+Do **not** discharge this axiom. Do not restore the all-`P` quantifier.
 
-**Mathematical content** (Newman 1975, Comm. Math. Phys. 41, Thm 3): if the
-joint distribution of `(ω(x))_{x ∈ Λ}` under the interacting measure lies in
-the **Lee-Yang class** (characteristic function has zeros confined to the
-imaginary axis), then for any real linear functional `S = ⟨ω, f⟩`,
-`E[e^{tS}] ≤ exp(t² · Var(S) / 2)`. The hypothesis is satisfied for the
-P(φ)₂ Wick-ordered interacting measure on the asym lattice via the
-Griffiths-Simon Asano-Ising approximation of the single-site Wick measure
-`exp(-a²:P(φ):_{wickConstantAsym})` combined with iterated Asano on the
-nearest-neighbour coupling structure (which is ferromagnetic for even monic
-P with positive leading coefficient).
+Newman (1975) compares the MGF to a Gaussian with the *interacting*
+variance, but only for measures in the Lee–Yang class. Simon–Griffiths
+supply that class for quartic site laws `exp(-a s^4 - b s^2)`, not for
+the repository's full even-polynomial family.
 
-**Upstream discharge plan**: this is the pphi2-side instantiation that the
-proposed `lee-yang` repo's Phase 1 (`Measure/Newman.lean` and
-`Measure/GriffithsSimon.lean`) plus a pphi2 adapter file
-(`AsymInteractingLeeYang.lean`, ~200-400 lines) will produce. See
-`docs/asym-expmoment-discharge-via-lee-yang-vet-request.md` for the full
-deep-think-vetted plan (2026-05-31).
+**The unrestricted (all-`P`) type is FALSE.** A one-site sextic
+(Simon–Griffiths double-well family, nonnegative source) reverses the
+claimed `K = 2` bound: take `Nt = Ns = 1`, `mass = 1`, and an admissible
+`P` with `P.n = 6`. The unique field coordinate has a normalized
+even-sextic law whose `q → ∞` limit is `ν = (δ₋₁ + 16 δ₀ + δ₁)/18`. For
+the sitewise-nonnegative source `f(*) = 9`,
+`E_ν exp(9|X|) ≰ 2 exp((81/2) E_ν X²)`. Finite large-`q` models are exact
+instances of `interactingLatticeMeasureAsym`. Thus `hf : ∀ x, 0 ≤ f x`
+does **not** save `n ≥ 6`.
 
-**Reference**: C. M. Newman, *Inequalities for Ising models and field
-theories which obey the Lee-Yang theorem*, Comm. Math. Phys. 41 (1975), 1-9,
-Theorem 3. T. D. Lee and C. N. Yang, *Statistical theory of equations of
-state and phase transitions II*, Phys. Rev. 87 (1952), 410-419.
+**SIGN RESTRICTION (2026-07-12/13)** remains: the unrestricted
+quantifier over mixed-sign `f` is separately FALSE (2-spin counterexample;
+Lebowitz-κ₄). Signed consumers in `AsymSignedSplit.lean` inherit this
+quartic axiom at `f₊`, `f₋` and are not a discharge.
 
-✅ Vetted: deep-think-gemini (2026-06-02) — confirmed the Newman MGF
-inequality for Lee-Yang interacting measures with the K=2 / Var_int form;
-the Griffiths-Simon-Asano discharge route is the standard one (Simon §VIII,
-Glimm-Jaffe Ch. 4).
-
-**SIGN RESTRICTION (2026-07-12/13)**: Newman domination requires same-sign
-coefficients — the unrestricted form is FALSE (2-spin mixed-sign
-counterexample; Lebowitz-κ₄ mechanism; n-pair amplification kills the K=2
-form). Hence the hypothesis `hf : ∀ x, 0 ≤ f x` (sitewise nonnegative).
-Signed `f` is recovered via the `f₊`/`f₋` split (see
-`asymInteracting_expMoment_of_signed` in `AsymSignedSplit.lean`).
-Vet: Gemini 3.1-pro + Codex GPT-5.5, 2026-07-12 — `AXIOM_AUDIT.md` entry
-(restated 2026-07-13). -/
+**Reference**: C. M. Newman, Comm. Math. Phys. 41 (1975), Theorem 3;
+Simon–Griffiths, Comm. Math. Phys. 33 (1973). -/
 axiom asymInteracting_mgf_gaussianDominated
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass)
     (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a)
     (f : AsymLatticeField Nt Ns) (hf : ∀ x, 0 ≤ f x) :
     Integrable (fun ω => Real.exp (|ω f|))
@@ -221,12 +192,14 @@ whose `1/a` cancellation is essential — a naive `Var_int ≤ 1/(1−γ)·Var_f
 is `a`-non-uniform and WRONG.
 
 **Piece-5 factoring note (2026-06-23).** The former torus-level axiom
-`asymInteractingVariance_le_freeVariance_Lt_uniform` is discharged below
-from this lattice statement plus the already-proved pushforward identity
+`asymInteractingVariance_le_freeVariance_Lt_uniform` is a **pushforward
+wrapper** of this lattice axiom (via
 `asymTorusInteractingMeasureIso = (interactingLatticeMeasureAsym).map
-asymTorusEmbedLiftIso` and pairing identity
-`(asymTorusEmbedLiftIso ω) f = ω (asymLatticeTestFnIso f)`. This keeps the
-remaining Route-A obligation at the lattice level, where Piece 4
+asymTorusEmbedLiftIso` and
+`(asymTorusEmbedLiftIso ω) f = ω (asymLatticeTestFnIso f)`). The lattice
+axiom remains in the torus theorem's axiom footprint; this is not a
+discharge of the interacting-vs-free bound. The remaining Route-A
+obligation stays at the lattice level, where Piece 4
 `interacting_second_moment_bound_to_lattice_free_covariance` is stated.
 
 MIGRATION NOTE (2026-07-13): the thresholded form is now a THEOREM
@@ -249,10 +222,10 @@ axiom asymInteractingVariance_le_freeVariance_lattice_Lt_uniform
             (ω G) ^ 2
               ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)
 
-/-- **Layer B2 torus assembly theorem.** The torus variance bound follows from
-the lattice Route-A output by pushing the torus interacting measure back along
-`asymTorusEmbedLiftIso` and rewriting the torus pairing as the lattice pairing
-against `asymLatticeTestFnIso`. -/
+/-- **Layer B2 torus pushforward wrapper.** Same bound as the lattice axiom
+`asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`, transported
+along `asymTorusEmbedLiftIso`. Not a discharge: the mathematical content
+is exactly that axiom. -/
 theorem asymInteractingVariance_le_freeVariance_Lt_uniform
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
     (Ls : ℝ) [Fact (0 < Ls)] :
@@ -300,11 +273,11 @@ theorem asymInteractingVariance_le_freeVariance_Lt_uniform
 
 **Moved (2026-07-13).** The Layer C assembly theorem
 `asymInteracting_expMoment_volume_uniform_proof` now lives in
-`Pphi2/AsymTorus/AsymSignedSplit.lean`: after the sign restriction of the
-Layer A axiom (see its docstring above), signed test functions are recovered
-via the `f = f₊ − f₋` split lemma `asymInteracting_expMoment_of_signed`
-(that file), and the assembly's free-variance seminorm is stated in the
-split form `C · (Var_free(f₊) + Var_free(f₋))`. -/
+`Pphi2/AsymTorus/AsymSignedSplit.lean`. It consumes the quartic
+Layer A axiom (see its docstring above) via the signed split
+`asymInteracting_expMoment_of_signed`; do not discharge Layer A there.
+The assembly's free-variance seminorm is the split form
+`C · (Var_free(f₊) + Var_free(f₋))`. -/
 
 end Pphi2
 

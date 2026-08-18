@@ -667,7 +667,27 @@ theorem asymTorusSiteEval_sq_tendsto
       (fun N => l2InnerProduct (fN N) (fN N)) atTop
       (nhds (l2InnerProduct f f)) := by
     have hs := (l2InnerProduct_summable f f).hasSum.tendsto_sum_nat
-    simpa [hl2_fN, l2InnerProduct] using hs
+    have hfun : (fun N => l2InnerProduct (fN N) (fN N)) =
+        fun N => ∑ m ∈ Finset.range N, (DyninMityaginSpace.coeff m f) ^ 2 :=
+      funext hl2_fN
+    rw [hfun]
+    have hsq :
+        (fun N => ∑ m ∈ Finset.range N, (DyninMityaginSpace.coeff m f) ^ 2) =
+          fun N => ∑ m ∈ Finset.range N,
+            DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff m f := by
+      ext N
+      refine Finset.sum_congr rfl fun m _ => (pow_two _).symm
+    rw [hsq]
+    -- `l2InnerProduct` is defeq to the bilinear tsum; do not unfold it
+    -- (the expansion is a private name).
+    change Tendsto
+        (fun N => ∑ m ∈ Finset.range N,
+          DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff m f)
+        atTop
+        (nhds
+          (∑' r, DyninMityaginSpace.coeff r f *
+            DyninMityaginSpace.coeff r f))
+    exact hs
   let S : ℕ → AsymTorusTestFunction Lt Ls → ℝ := fun k h =>
     letI : NeZero (Nt k) := hNt k
     letI : NeZero (Ns k) := hNs k
@@ -1462,9 +1482,9 @@ theorem asymTorusIso_cylinderUniformCylinderExpMomentBound_of_cutoffFamily
       (∀ n, IsProbabilityMeasure (μ n)) ∧
       AsymTorusSequenceHasUniformCylinderExpMomentBound Ls K C q Lt hLt μ ∧
       AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ ∧
-      (∀ n, letI : Fact (0 < Lt n) := hLt n
+      (∀ n,
         CylinderMeasureNoWrapReflectionPositive (Lt n) Ls
-          (cylinderPullbackMeasure (Lt n) Ls (μ n))) := by
+          (@cylinderPullbackMeasure (Lt n) Ls (hLt n) hLs (μ n))) := by
   have hbound : ∀ n,
       letI : Fact (0 < Lt n) := hLt n
       ∃ μ : Measure (Configuration (AsymTorusTestFunction (Lt n) Ls)),
@@ -1474,7 +1494,7 @@ theorem asymTorusIso_cylinderUniformCylinderExpMomentBound_of_cutoffFamily
           @AsymTorusOS2_TranslationInvariance (Lt n) Ls (hLt n) hLs μ hμ_prob ∧
           @AsymTorusOS2_TimeReflectionInvariance (Lt n) Ls (hLt n) hLs μ hμ_prob) ∧
         CylinderMeasureNoWrapReflectionPositive (Lt n) Ls
-          (cylinderPullbackMeasure (Lt n) Ls μ) := by
+          (@cylinderPullbackMeasure (Lt n) Ls (hLt n) hLs μ) := by
     intro n
     letI : Fact (0 < Lt n) := hLt n
     exact asymTorusIso_measureHasCylinderExpMomentBound_of_cutoff_withNoWrapRP
@@ -2019,9 +2039,9 @@ theorem asymTorusIso_cylinderUniformGreenBound
       (∀ n, IsProbabilityMeasure (μ n)) ∧
       AsymTorusSequenceHasUniformGreenMomentBound Ls mass hmass K C Lt hLt μ ∧
       AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ ∧
-      (∀ n, letI : Fact (0 < Lt n) := hLt n
+      (∀ n,
         CylinderMeasureNoWrapReflectionPositive (Lt n) Ls
-          (cylinderPullbackMeasure (Lt n) Ls (μ n))) := by
+          (@cylinderPullbackMeasure (Lt n) Ls (hLt n) hLs (μ n))) := by
   have hLs_pos : 0 < Ls := hLs.out
   set Lt : ℕ → ℝ := fun n => ((n : ℝ) + 1) * Ls with hLt_def
   have hLt_pos : ∀ n, 0 < Lt n := fun n => by rw [hLt_def]; positivity
@@ -2033,7 +2053,7 @@ theorem asymTorusIso_cylinderUniformGreenBound
       (∀ hμ_prob : IsProbabilityMeasure μ,
         @AsymSatisfiesTorusOS (Lt n) Ls (hLtfact n) hLs μ hμ_prob) ∧
       CylinderMeasureNoWrapReflectionPositive (Lt n) Ls
-        (cylinderPullbackMeasure (Lt n) Ls μ) := by
+        (@cylinderPullbackMeasure (Lt n) Ls (hLtfact n) hLs μ) := by
     intro n
     haveI := hLtfact n
     -- Exactly-isotropic sequence with BOTH lattice extents even (Nt_k = 2(n+1)(k+1),
@@ -2089,9 +2109,9 @@ theorem asymTorusIso_cylinderUniformGreenBound_withUVFamily
       (∀ n, IsProbabilityMeasure (μ n)) ∧
       AsymTorusSequenceHasUniformGreenMomentBound Ls mass hmass K C Lt hLt μ ∧
       AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ ∧
-      (∀ n, letI : Fact (0 < Lt n) := hLt n
+      (∀ n,
         CylinderMeasureNoWrapReflectionPositive (Lt n) Ls
-          (cylinderPullbackMeasure (Lt n) Ls (μ n))) ∧
+          (@cylinderPullbackMeasure (Lt n) Ls (hLt n) hLs (μ n))) ∧
       (∃ (Nt Ns : ℕ → ℕ → ℕ) (a : ℕ → ℕ → ℝ) (φ : ℕ → ℕ → ℕ)
           (hNt : ∀ n k, NeZero (Nt n k))
           (hNs : ∀ n k, NeZero (Ns n k))
@@ -2162,7 +2182,7 @@ theorem asymTorusIso_cylinderUniformGreenBound_withUVFamily
       (∀ hμ_prob : IsProbabilityMeasure μ,
         @AsymSatisfiesTorusOS (Lt n) Ls (hLtfact n) hLs μ hμ_prob) ∧
       CylinderMeasureNoWrapReflectionPositive (Lt n) Ls
-        (cylinderPullbackMeasure (Lt n) Ls μ) ∧
+        (@cylinderPullbackMeasure (Lt n) Ls (hLtfact n) hLs μ) ∧
       (∃ (ψ : ℕ → ℕ), StrictMono ψ ∧
         (∀ (F : Configuration (AsymTorusTestFunction (Lt n) Ls) → ℝ),
           Continuous F → (∃ D, ∀ x, |F x| ≤ D) →
@@ -2268,11 +2288,18 @@ theorem routeBPrimeIso_cylinder_OS
       letI : IsProbabilityMeasure ν := hν_prob
       exact cylinderMeasureReflectionPositive_of_noWrap_limit Ls
         (fun k => Lt (φ k)) (hLt_tend.comp hφ.tendsto_atTop)
-        (fun k => cylinderPullbackMeasure (Lt (φ k)) Ls (μ (φ k)))
+        (fun k => @cylinderPullbackMeasure (Lt (φ k)) Ls
+          (hLt (φ k)) hLs (μ (φ k)))
         ν hcf (fun k => hμ_noWrap (φ k)) K' C' hK' hC' q hq hExp)
     hμ_os2
 
-/-- **Volume-uniform interacting exponential moment for P(φ)₂ on the cylinder** (textbook axiom).
+/-- **Volume-uniform interacting exponential moment — quartic only.**
+
+Restricted to `P.n = 4`. The all-`InteractionPolynomial` type is **false**:
+the intended Newman producer `asymInteracting_mgf_gaussianDominated` fails for
+an admissible one-site sextic, and the 2026-07-13 sign restriction does not
+save `n ≥ 6`. Do **not** discharge this axiom. Do not restore the all-`P`
+quantifier.
 
 There exist constants `K, C > 0` (depending on `P`, `mass`, `Ls`, but **uniform in the time period
 `L` and in the lattice `(Nt, Ns, a)`**) such that every isotropic-lattice interacting measure
@@ -2280,66 +2307,24 @@ There exist constants `K, C > 0` (depending on `P`, `mass`, `Ls`, but **uniform 
 
   `∫ exp(|ω f|) dμ_int ≤ K · exp(C · σ²(f))`,    `σ²(f) = ∫ (ω·asymLatticeTestFnIso f)² dμ_{GFF}`.
 
-This is *the* central uniform bound of constructive P(φ)₂: the finite-volume interacting measures
-have exponential moments bounded uniformly in the volume `L·Ls` (and the UV cutoff `a`). It is the
-input the metric-mismatched square construction never supplied; it discharges the `hUnif` hypothesis
-of `asymTorusIso_cylinderUniformGreenBound` / `routeBPrimeIso_cylinder_OS`.
+This is retained as the `hUnif` input of `asymTorusIso_cylinderUniformGreenBound` /
+`routeBPrimeIso_cylinder_OS`. It is not a textbook Newman instance on general even `P`.
 
-Reference: Glimm–Jaffe, *Quantum Physics*, Ch. 18–19; Simon, *P(φ)₂ Euclidean QFT*, Ch. V, VIII;
-Newman (1975), *Comm. Math. Phys.* 41 (Lee–Yang / Gaussian-domination of the MGF);
-Glimm–Jaffe–Spencer (cluster expansion).
-Strategy: the lattice action for Wick-ordered even `P` is ferromagnetic with single-site measure in
-the Simon–Griffiths (Lee–Yang) class, so by Newman's theorem the interacting MGF is dominated by the
-Gaussian with the *interacting* variance, `E[e^{ω f}]_int ≤ e^{½⟨(ω f)²⟩_int}` (giving `K = 2` via
-`e^{|x|} ≤ e^x + e^{-x}`); the interacting two-point function is bounded by `C₀·(free)` via the
-strict mass gap (Källén–Lehmann / lattice sum rule), so `⟨(ω f)²⟩_int ≤ C₀·σ²(f)` and `C = C₀/2`.
-**Cylinder shortcut (avoids the full spatial cluster expansion):** with `Ls` fixed and `L → ∞` this
-is a *1D* thermodynamic limit — no phase transition — and the transfer matrix `T = e^{-aH_{Ls}}` has
-a strictly isolated, non-degenerate maximal eigenvalue by the (infinite-dim) Perron–Frobenius
-theorem, so the cylinder mass gap `m₁ > 0` is unconditional and the susceptibility stays bounded.
-The bound is then discharged via chessboard estimates (Fröhlich–Simon–Spencer) + the transfer-matrix
-spectral radius, not a spatial cluster expansion.
-
-✅ Vetted: deep-think-gemini (2026-05-27): with the `C·σ²` exponent (coefficient `C`, **not** `1` —
-`1` is false in infinite volume since the interacting susceptibility can exceed `2/m²`) the
-statement is **Standard / Likely correct**; uniformity in `L` and `a` confirmed via the Newman bound
-+ mass-gap variance domination; fixed-`Ls` quasi-1D is the safe direction. See
-`docs/cylinder-conditional-inputs-provability.md` §4.
-
-**Architecture closure verified 2026-06-02** (deep-think-vetted; 2026-07-13:
-the closure lands in the split-seminorm form, see the final paragraph). The
-factored upstream-input axioms live in
-`Pphi2/AsymTorus/AsymExpMomentDischarge.lean`:
-
-* **Layer A** `asymInteracting_mgf_gaussianDominated`: lattice-level Newman MGF
-  Gaussian-domination (upstream discharge: proposed `lee-yang` repo Phase 1 +
-  pphi2 adapter).
-* **Layer B2** `asymInteractingVariance_le_freeVariance_Lt_uniform`: Lt-uniform
-  interacting-vs-free variance bound (upstream discharge: proposed
-  `reflection-positivity` repo + the cylinder transfer-matrix infrastructure
-  in `Pphi2/AsymTorus/AsymL2Operator.lean`, `AsymJentzsch.lean`,
-  `AsymPositivity.lean`).
-
-The Layer C assembly `asymInteracting_expMoment_volume_uniform_proof` (in
-`AsymSignedSplit.lean`; moved 2026-07-13 with the sign restriction of Layer A)
-proves the **split-seminorm variant** of this statement from Layers A + B2:
-the free-variance seminorm there is `C · (Var_free(f₊) + Var_free(f₋))`, not
-this axiom's `C · Var_free(f)`. Matching this axiom's exact form additionally
-needs the entrywise nonnegativity of the free lattice covariance kernel
-(`Var_free(f₊) + Var_free(f₋) ≤ Var_free(|f|)`) plus an `|f|`-seminorm
-restatement here — see `AXIOM_AUDIT.md` (2026-07-13). This axiom is retained
-pro tem (cannot be deleted from this file without an import refactor, as the
-Layer C files are downstream of this file via `AsymVarianceBound.lean`).
+Layer A (`asymInteracting_mgf_gaussianDominated`) is quartic-only; Layer B2
+(`asymInteractingVariance_le_freeVariance_Lt_uniform`) is a torus wrapper of a
+lattice axiom, not a discharge. The Layer C assembly in `AsymSignedSplit.lean`
+inherits both and does not make this axiom a theorem.
 
     UPDATE 2026-07-13: the entrywise nonnegativity is now PROVED
-    (`latticeCovarianceAsymGJ_pairing_nonneg`) and the honest thresholded
+    (`latticeCovarianceAsymGJ_pairing_nonneg`) and the thresholded
     `|f|`-form is a THEOREM
     (`asymInteracting_expMoment_volume_uniform_absForm_thresholded`, both in
-    `AsymCovariancePositivity.lean`). This axiom's exact `C · Var_free(f)` form
-    for signed `f` is unvetted post-sign-restriction; consumers (the routeBPrime
-    `hUnif` chain) should migrate to the thresholded `|f|`-form theorem. -/
+    `AsymCovariancePositivity.lean`). That theorem still inherits the quartic
+    Layer A axiom. This axiom's exact `C · Var_free(f)` form for signed `f`
+    remains unrecovered; consumers should not treat either as a Newman
+    discharge. -/
 axiom asymInteracting_expMoment_volume_uniform
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass) :
     ∃ K C : ℝ, 0 < K ∧ 0 < C ∧
       ∀ (L : ℝ) [Fact (0 < L)] (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
         (Nt : ℝ) * a = L → (Ns : ℝ) * a = Ls → ∀ f : AsymTorusTestFunction L Ls,
@@ -2351,14 +2336,16 @@ axiom asymInteracting_expMoment_volume_uniform
           (ω (asymLatticeTestFnIso L Ls Nt Ns a f)) ^ 2
           ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass))
 
-/-- **Cylinder OS0/OS1/OS2/OS3 for the isotropic P(φ)₂ construction.**
+/-- **Cylinder OS0/OS1/OS2/OS3 for the isotropic quartic P(φ)₂ construction.**
 
-The headline has no external hypotheses beyond `P`, `mass`, and `hmass`: the volume-uniform
-exp-moment is supplied by `asymInteracting_expMoment_volume_uniform`, OS2 is proved from the
-heterogeneous lattice construction, and reflection positivity is carried through the no-wrap
-limit. The historical theorem name is retained for downstream compatibility. -/
+Quartic-only (`P.n = 4`). Consumes `asymInteracting_expMoment_volume_uniform`
+at that restriction. This is not a Newman or DDJ producer; the historical
+theorem name is retained for downstream compatibility. The all-`P` form would
+call an inapplicable axiom (sextic counterexample). OS2 is
+proved from the heterogeneous lattice construction, and reflection positivity
+is carried through the no-wrap limit. -/
 theorem cylinderIso_OS_of_RP_OS2
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass) :
     ∃ (ν : Measure (Configuration (CylinderTestFunction Ls))),
     IsProbabilityMeasure ν ∧
     (∀ (n : ℕ) (J : Fin n → CylinderTestFunction Ls),
@@ -2379,7 +2366,7 @@ theorem cylinderIso_OS_of_RP_OS2
           ↑(ω ((f i : CylinderTestFunction Ls) -
             cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν).re) := by
   obtain ⟨K, C, hK_pos, hC_pos, hUnif⟩ :=
-    asymInteracting_expMoment_volume_uniform Ls P mass hmass
+    asymInteracting_expMoment_volume_uniform Ls P hP mass hmass
   exact routeBPrimeIso_cylinder_OS Ls P mass hmass K C hK_pos hC_pos hUnif
 
 end Pphi2

@@ -37,8 +37,8 @@ definiteness (the cross term is `≤ 0` since off-diagonal `Q ≤ 0` and
 - `asymInteracting_expMoment_absForm_thresholded` — the `|f|`-form exp-moment
   corollary: signed-split Layer A + thresholded Layer B2 + kernel positivity
   give `∫ e^{|⟨ω,f⟩|} dμ_int ≤ 2·exp(C·Var_free(|f|))` under the Stage-C
-  thresholds. This is the honest `|f|`-seminorm restatement target flagged in
-  `AXIOM_AUDIT.md` (2026-07-13).
+  thresholds. **Inherits** the quartic Layer A axiom
+  (`asymInteracting_mgf_gaussianDominated` at `P.n = 4`); not a Newman discharge.
 
 ## References
 
@@ -351,11 +351,16 @@ at fixed `Ls = Ns·a`, there are `C, L₀, a₀ > 0` such that for all lattices 
 
 `∫ e^{|⟨ω,f⟩|} dμ_int ≤ 2·exp(C·Var_free(|f|))`.
 
-This is the honest `|f|`-seminorm form of the pre-2026-07-13 conclusion
+**Inherits** `asymInteracting_mgf_gaussianDominated` (quartic: `P.n = 4`;
+the all-`P` type is FALSE — one-site sextic still kills `n ≥ 6`).
+Kernel positivity does not repair that Layer A counterexample. Not a
+Newman discharge.
+
+This is the `|f|`-seminorm form of the pre-2026-07-13 conclusion
 `C·Var_free(f)` — the split variances collapse into the single `|f|`-variance
 via `Var_free(f₊) + Var_free(f₋) ≤ Var_free(|f|)`. -/
 theorem asymInteracting_expMoment_absForm_thresholded
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass)
     (Ls : ℝ) (hLs : 0 < Ls) :
     ∃ C L₀ a₀ : ℝ, 0 < C ∧ 0 < L₀ ∧ 0 < a₀ ∧
       ∀ (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
@@ -371,11 +376,11 @@ theorem asymInteracting_expMoment_absForm_thresholded
               (ω (fun x => |f x|)) ^ 2
               ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)) := by
   obtain ⟨C, L₀, a₀, hC, hL₀, ha₀, hB⟩ :=
-    asymInteractingVariance_le_freeVariance_lattice_thresholded P mass hmass Ls hLs
+    asymInteractingVariance_le_freeVariance_lattice_thresholded P hP mass hmass Ls hLs
   refine ⟨C, L₀, a₀, hC, hL₀, ha₀, ?_⟩
   intro Nt Ns _ _ a ha hvols haa hLta f
   obtain ⟨hint, hbound⟩ :=
-    asymInteracting_expMoment_of_signed Nt Ns P mass hmass a ha f
+    asymInteracting_expMoment_of_signed Nt Ns P hP mass hmass a ha f
   refine ⟨hint, hbound.trans ?_⟩
   apply mul_le_mul_of_nonneg_left _ (by norm_num : (0 : ℝ) ≤ 2)
   apply Real.exp_le_exp.mpr
@@ -407,8 +412,10 @@ theorem asymInteracting_expMoment_absForm_thresholded
 
 /-! ## The torus-level `|f|`-form exp-moment (Piece-5 pushforward) -/
 
-/-- **Torus-level `|f|`-form exp-moment bound, thresholded.** The honest thresholded
-`|f|`-seminorm restatement of the legacy torus axiom
+/-- **Torus-level `|f|`-form exp-moment bound, thresholded.** Pushforward of
+`asymInteracting_expMoment_absForm_thresholded`. **Inherits** the quartic
+Layer A axiom; do not discharge. The honest thresholded `|f|`-seminorm
+restatement of the legacy torus axiom
 `asymInteracting_expMoment_volume_uniform` (`AsymContinuumLimit.lean`): there are
 `K, C, L₀, a₀ > 0` — depending only on `(P, mass, Ls)`, uniform in the time period `Lt`
 and the lattice `(Nt, Ns, a)` — such that for every asymmetric torus with `Nt·a = Lt ≥ L₀`,
@@ -420,16 +427,13 @@ where `Var_free(|g|)` is the free lattice second moment at the **sitewise absolu
 of the pulled-back lattice test vector. Compared to the legacy axiom the differences are
 (i) the `(a₀, L₀)` Stage-C thresholds and (ii) the `|g|`-seminorm on the right (the exact
 `C·Var_free(g)` form for signed `g` is not recoverable from the signed split — cross-term
-cancellation; see `AXIOM_AUDIT.md` 2026-07-13).
+cancellation).
 
 Proved from the lattice theorem `asymInteracting_expMoment_absForm_thresholded` by the
 same Piece-5 pushforward + pairing argument as
-`asymInteractingVariance_le_freeVariance_torus_thresholded` (push the torus interacting
-measure back along `asymTorusEmbedLiftIso` via `integral_map`/`integrable_map_measure`
-and rewrite the torus pairing as the lattice pairing against `asymLatticeTestFnIso`),
-applied to the exp-integrand instead of the square. -/
+`asymInteractingVariance_le_freeVariance_torus_thresholded`. -/
 theorem asymInteracting_expMoment_volume_uniform_absForm_thresholded
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass)
     (Ls : ℝ) [Fact (0 < Ls)] :
     ∃ K C L₀ a₀ : ℝ, 0 < K ∧ 0 < C ∧ 0 < L₀ ∧ 0 < a₀ ∧
       ∀ (Lt : ℝ) [Fact (0 < Lt)]
@@ -445,7 +449,7 @@ theorem asymInteracting_expMoment_volume_uniform_absForm_thresholded
             (ω (fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a f x|)) ^ 2
             ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)) := by
   obtain ⟨C, L₀, a₀, hC, hL₀, ha₀, hLat⟩ :=
-    asymInteracting_expMoment_absForm_thresholded P mass hmass Ls Fact.out
+    asymInteracting_expMoment_absForm_thresholded P hP mass hmass Ls Fact.out
   refine ⟨2, C, L₀, a₀, by norm_num, hC, hL₀, ha₀, ?_⟩
   intro Lt _hLt Nt Ns _ _ a ha hvolt hvols haa hLtb f
   have hLta' : L₀ ≤ (Nt : ℝ) * a := by rw [hvolt]; exact hLtb

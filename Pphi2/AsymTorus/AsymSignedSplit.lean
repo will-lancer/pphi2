@@ -9,11 +9,13 @@ import Pphi2.AsymTorus.AsymExpMomentDischarge
 # Signed test functions via the `f = f₊ − f₋` split (Layer C recovery)
 
 The Layer A axiom `asymInteracting_mgf_gaussianDominated`
-(`AsymExpMomentDischarge.lean`) is sign-restricted: Newman/Lee-Yang Gaussian
-domination holds only for sitewise same-sign test functions (the unrestricted
-form is FALSE — 2-spin mixed-sign counterexample, Lebowitz-κ₄ mechanism; see
-`AXIOM_AUDIT.md`, 2026-07-12/13). This file recovers **signed** lattice test
-functions:
+(`AsymExpMomentDischarge.lean`) is restricted to `P.n = 4` with
+`hf : ∀ x, 0 ≤ f x`. The old all-`InteractionPolynomial` type is **FALSE**:
+the 2026-07-13 sitewise-nonnegative restriction kills mixed-sign `f`
+but does **not** save `n ≥ 6` (one-site sextic counterexample). Theorems
+in this file inherit the quartic axiom; they are not a Newman discharge.
+Signed lattice test functions are recovered only as consumers of that
+live type:
 
 * **`asymInteracting_expMoment_of_signed`** — for any `f`, writing
   `f = f₊ − f₋` with `f₊ = max f 0`, `f₋ = max (−f) 0` (both sitewise `≥ 0`),
@@ -46,18 +48,20 @@ namespace Pphi2
 
 /-- **Signed test functions from the sign-restricted Newman bound.**
 
+**Inherits** `asymInteracting_mgf_gaussianDominated` (quartic: `P.n = 4`
+with `hf : ∀ x, 0 ≤ f x`; the all-`P` type is FALSE — one-site sextic
+still kills `n ≥ 6`).
+This is not a discharge of Layer A.
+
 For an arbitrary (mixed-sign) lattice test function `f`, split `f = f₊ − f₋`
 into its sitewise nonnegative and nonpositive parts. Then `|⟨ω,f⟩| ≤
 |⟨ω,f₊⟩| + |⟨ω,f₋⟩|`, and Cauchy-Schwarz together with the sign-restricted
 Layer A axiom `asymInteracting_mgf_gaussianDominated` applied at `2f₊` and
 `2f₋` yields the exp-moment bound with the split variance seminorm:
-`∫ e^{|⟨ω,f⟩|} dμ_int ≤ 2 · exp(Var_int(⟨ω,f₊⟩) + Var_int(⟨ω,f₋⟩))`.
-
-This is the vetted Layer-C recovery of signed `f` (AXIOM_AUDIT.md,
-2026-07-12/13; Gemini 3.1-pro + Codex GPT-5.5). -/
+`∫ e^{|⟨ω,f⟩|} dμ_int ≤ 2 · exp(Var_int(⟨ω,f₊⟩) + Var_int(⟨ω,f₋⟩))`. -/
 theorem asymInteracting_expMoment_of_signed
     (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) (a : ℝ) (ha : 0 < a)
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass) (a : ℝ) (ha : 0 < a)
     (f : AsymLatticeField Nt Ns) :
     Integrable (fun ω => Real.exp (|ω f|))
       (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) ∧
@@ -100,9 +104,9 @@ theorem asymInteracting_expMoment_of_signed
     rw [map_smul, smul_eq_mul]
   -- Layer A (sign-restricted) at the doubled positive/negative parts
   obtain ⟨hint_p, hbound_p⟩ :=
-    asymInteracting_mgf_gaussianDominated P mass hmass Nt Ns a ha ((2 : ℝ) • fp) h2fp
+    asymInteracting_mgf_gaussianDominated P hP mass hmass Nt Ns a ha ((2 : ℝ) • fp) h2fp
   obtain ⟨hint_m, hbound_m⟩ :=
-    asymInteracting_mgf_gaussianDominated P mass hmass Nt Ns a ha ((2 : ℝ) • fm) h2fm
+    asymInteracting_mgf_gaussianDominated P hP mass hmass Nt Ns a ha ((2 : ℝ) • fm) h2fm
   -- exp|⟨ω,2f±⟩| is the square of exp|⟨ω,f±⟩|
   have hu_sq : ∀ ω : Configuration (AsymLatticeField Nt Ns),
       Real.exp (|ω ((2 : ℝ) • fp)|) = Real.exp (|ω fp|) ^ 2 := fun ω => by
@@ -231,13 +235,13 @@ theorem asymInteracting_expMoment_of_signed
 
 /-! ## Layer C: assembly theorem (moved from `AsymExpMomentDischarge.lean`) -/
 
-/-- **Layer C assembly**: combining Layer A (sign-restricted Newman MGF
-Gaussian-domination on the lattice, via the signed-split lemma
-`asymInteracting_expMoment_of_signed`) + Layer B2 (`Lt`-uniform
-interacting-vs-free variance bound) gives the volume-uniform exp-moment
-bound with the **split free-variance seminorm**.
+/-- **Layer C assembly** (not a Newman discharge). Combines the quartic
+Layer A axiom (via `asymInteracting_expMoment_of_signed`) with the Layer B2
+lattice variance axiom. The conclusion inherits both axiom footprints; do not
+treat this theorem as discharging `asymInteracting_mgf_gaussianDominated`.
+The all-`P` Newman type remains false (sextic).
 
-The assembly is purely structural:
+The wiring is structural:
 1. For a torus test function `f`, push the torus integral back to the
    lattice via `asymTorusInteractingMeasureIso = (μ_int^{lattice}).map ι`
    where `ι = asymTorusEmbedLiftIso`.
@@ -250,21 +254,14 @@ The assembly is purely structural:
 5. Combine: `≤ 2 · exp(C_B · (Var_free(⟨ω,g₊⟩) + Var_free(⟨ω,g₋⟩)))`.
    Set `K = 2`, `C = C_B`.
 
-The constant `C_B` is `Lt`-uniform by Layer B2, so `K = 2`, `C = C_B` is
-`Lt`-uniform.
-
-**Seminorm form (2026-07-13).** Before the sign restriction of Layer A this
-theorem carried the seminorm `C · Var_free(⟨ω,g⟩)`; that form is NOT
-recoverable from the sign-restricted axiom, since
-`Var_free(g₊) + Var_free(g₋)` is not controlled by `Var_free(g)`
-(cross-term cancellation). Matching the original form would additionally
-need the entrywise nonnegativity of the free lattice covariance kernel
-(`Var_free(g₊) + Var_free(g₋) ≤ Var_free(|g|)`) plus an `|f|`-seminorm
-restatement of the torus-level target — tracked in `AXIOM_AUDIT.md`
-(2026-07-13). -/
+**Seminorm form (2026-07-13).** The pre-sign-restriction seminorm
+`C · Var_free(⟨ω,g⟩)` is NOT recoverable from the sign-restricted axiom
+(cross-term cancellation). Matching that form would additionally need
+kernel positivity `Var_free(g₊) + Var_free(g₋) ≤ Var_free(|g|)`. That
+does not repair the sextic counterexample on Layer A. -/
 theorem asymInteracting_expMoment_volume_uniform_proof
     (Ls : ℝ) [hLs : Fact (0 < Ls)]
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass) :
     ∃ K C : ℝ, 0 < K ∧ 0 < C ∧
       ∀ (L : ℝ) [Fact (0 < L)] (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
         (a : ℝ) (ha : 0 < a),
@@ -296,7 +293,7 @@ theorem asymInteracting_expMoment_volume_uniform_proof
     asymTorusEmbedLiftIso_eval_eq L Ls Nt Ns a f
   -- Signed-split Layer A bound at the lattice level
   obtain ⟨hA_int, hA_bound⟩ :=
-    asymInteracting_expMoment_of_signed Nt Ns P mass hmass a ha g
+    asymInteracting_expMoment_of_signed Nt Ns P hP mass hmass a ha g
   -- Pushforward μ_int_T = (μ_int_L).map ι and integrability transfer
   have h_pushforward : μ_int_T =
       Measure.map (asymTorusEmbedLiftIso L Ls Nt Ns a) μ_int_L := rfl

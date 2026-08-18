@@ -11,6 +11,7 @@ the entropy adapter in `AsymTiltedMoment.lean`.
 
 The tilted estimate remains an explicit hypothesis.  This declaration records
 the exact finite-grid consumer for a future uniform analytic producer.
+It does **not** prove Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 import Pphi2.AsymTorus.AsymDDJSource
@@ -30,6 +31,7 @@ imply the local degree-`P.n` exponential moment bound with constant `2`.
 The hypothesis `h_tilted_moment` is the finite source-tilted energy input.  It
 is stated against the normalized tilt of the interacting lattice measure, so
 the entropy step applies without any density rewrite at this layer.
+This does not prove DDJ 5.3/6.1.
 -/
 theorem interactingLatticeMeasureAsym_exp_moment_le_two_of_weightedLpPow_and_tiltedMoment
     (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]

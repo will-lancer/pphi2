@@ -244,32 +244,48 @@ theorem continuumLimit (P : InteractionPolynomial)
 
 These predicates were introduced in `Bridge.lean` and are defined here (upstream
 of `Main.lean`) so that the regime-sensitive axioms below can carry them as
-hypotheses. See `planning/r2-honest-headline-spec.md` (D3): non-Gaussianity of
-the limit, like the spectral gap, is a weak-coupling statement — at the φ⁴₂
-critical point the axioms below are false as stated without a regime
-hypothesis. -/
+hypotheses. The live bodies are **weak stamps**: `isPhi4` is `P.n = 4` plus a
+detached positive `coupling`, and `IsWeakCoupling` is the `mass^2/4`
+placeholder (`IsPlaceholderWeakCoupling`). They do not pin `P(τ) = λτ⁴` and
+do not encode GJS uniqueness. See `planning/r2-honest-headline-spec.md` (D3). -/
 
-/-- A pphi2 `InteractionPolynomial` is a φ⁴ interaction if its polynomial is
-P(τ) = λτ⁴ for some coupling constant λ > 0. -/
+/-- Degree-4 stamp with a detached positive coupling.
+
+**Body:** `P.n = 4 ∧ 0 < coupling`. This is **not** the statement
+`P(τ) = λτ⁴`: lower coefficients of `P` are unpinned, the leading term of
+`InteractionPolynomial.eval` is `(1/n)τ^n` rather than `λτ^n`, and
+`coupling` is not a field of `P`. Downstream consumers that take `isPhi4`
+inherit this weak stamp, not a monomial φ⁴ interaction.
+
+For a coefficient pin see `IsPhi4Coefficient`. -/
 def isPhi4 (P : InteractionPolynomial) (coupling : ℝ) : Prop :=
   P.n = 4 ∧ 0 < coupling
-  -- Full version: all coefficients match the φ⁴ interaction
 
-/-- The coupling constant is in the weak-coupling regime where the cluster
-expansion converges, guaranteeing uniqueness of the infinite-volume limit.
+/-- Coefficient pin for a monomial φ⁴ interaction.
 
-The full condition is `coupling < l₀(P, mass)` where l₀ is the radius of
-convergence of the Glimm-Jaffe-Spencer cluster expansion.
-Reference: Glimm-Jaffe-Spencer (1974). -/
-def IsWeakCoupling (P : InteractionPolynomial) (mass coupling : ℝ) : Prop :=
-  -- The coupling constant is small enough for the Glimm-Jaffe-Spencer cluster
-  -- expansion to converge. Concretely, for P(τ) = λτ⁴ this requires λ < λ₀(m)
-  -- where λ₀(m) > 0 is a mass-dependent radius of convergence.
-  -- We state this as: there exists a positive threshold λ₀ > coupling such that
-  -- the expansion converges, ensuring uniqueness of the infinite-volume limit.
+`InteractionPolynomial.eval` is `P(τ) = (1/n)τ^n + Σ_{m<n} coeff_m τ^m`,
+so after `n = 4` and vanishing non-constant lower coefficients one still
+has `P.eval τ = (1/4)τ⁴ + P.coeff 0`, **not** `P(τ) = λτ⁴`. The detached
+`coupling` argument of `isPhi4` is unused here. -/
+def IsPhi4Coefficient (P : InteractionPolynomial) : Prop :=
+  P.n = 4 ∧ ∀ m : Fin P.n, (m : ℕ) ≠ 0 → P.coeff m = 0
+
+/-- Placeholder stand-in for a weak-coupling regime.
+
+**Body:** `0 < coupling ∧ coupling < mass^2 / 4`. The polynomial `P` is
+unused. This is **not** `coupling < λ₀(P, mass)` from the Glimm–Jaffe–Spencer
+cluster expansion (GJS 1974), and it does not encode uniqueness of the
+infinite-volume limit. Historical name: `IsWeakCoupling`. -/
+def IsPlaceholderWeakCoupling (P : InteractionPolynomial) (mass coupling : ℝ) :
+    Prop :=
   0 < coupling ∧ coupling < mass ^ 2 / 4
-  -- Note: the true condition is coupling < λ₀(P, mass) per Glimm-Jaffe-Spencer (1974).
-  -- We use mass² / 4 as a conservative stand-in for the convergence radius.
+
+/-- Historical name for `IsPlaceholderWeakCoupling`.
+
+The body is the `mass^2/4` placeholder, not the GJS radius. Consumers that
+take `IsWeakCoupling` inherit that placeholder stamp, not GJS uniqueness. -/
+abbrev IsWeakCoupling (P : InteractionPolynomial) (mass coupling : ℝ) : Prop :=
+  IsPlaceholderWeakCoupling P mass coupling
 
 /-- The continuum limit is non-Gaussian (for φ⁴ interactions at weak coupling).
 
@@ -280,11 +296,12 @@ i.e., the connected four-point function (fourth cumulant) is nonzero.
 For a Gaussian measure, all connected n-point functions with n ≥ 3 vanish,
 so a nonzero fourth cumulant proves non-Gaussianity.
 
-The coupling hypotheses (`isPhi4`, `IsWeakCoupling`) restrict the statement
-to the regime where it is literature-true: at the φ⁴₂ critical point the
-connected four-point function of the scaling limit can vanish, so the
-unrestricted all-`P` form is false as stated. See
-`planning/r2-honest-headline-spec.md` (D3).
+The coupling hypotheses (`isPhi4`, `IsWeakCoupling`) are the **weak
+stamps** above (`P.n = 4` and the `mass^2/4` placeholder), not a monomial
+φ⁴ pin and not GJS uniqueness. At the φ⁴₂ critical point the connected
+four-point function of the scaling limit can vanish, so the unrestricted
+all-`P` form is false as stated. See `planning/r2-honest-headline-spec.md`
+(D3).
 
 Reference: Simon Ch. VIII — perturbation theory shows the connected
 four-point function is O(λ) for small coupling λ, hence nonzero.

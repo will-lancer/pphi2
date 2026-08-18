@@ -414,7 +414,8 @@ theorem wickPolynomial_bounded_below (P : InteractionPolynomial) (c : ℝ) :
 The leading coefficient can be retained with an arbitrary fixed loss.  This
 is the coercive form used by finite-volume source estimates: for every
 `0 < η < 1`, the Wick polynomial dominates `(1 - η) · x^n / n` up to an
-additive constant.  The constant may depend on `P`, `c`, and `η`.
+additive constant.  The constant may depend on `P`, `c`, and `η`; `B` is
+not claimed uniform as the Wick constant `c` varies with the UV cutoff.
 */
 theorem wickPolynomial_coercive (P : InteractionPolynomial) (c η : ℝ)
     (hη_pos : 0 < η) (hη_lt_one : η < 1) :

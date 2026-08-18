@@ -6,17 +6,25 @@ Authors: Michael R. Douglas
 import Pphi2
 
 /-!
-# Kernel axiom certificate generator for pphi2
+# Kernel axiom certificate generator for pphi2 (A×D compose)
 
-Runs `#print axioms` on the headline theorems and prints the result. The
-output is the kernel-authoritative axiom set: anything that does NOT appear
-in this trace cannot have leaked through the build, so this is the single
-source of truth for "what does the headline depend on".
+Runs `#print axioms` on the composed A×D target list: Part D Checkpoint-0
+names, then Part A's regression block. This is a union of the two generators,
+not an ours/theirs pick of either side. The output is the
+kernel-authoritative axiom set for this composed list: anything that does
+NOT appear in this trace cannot have leaked through the printed targets.
 
-**Targets**: the five entries in `formalization.yaml` → `main_results`,
-plus one secondary regression target.
+Checkpoint-0 names (Part D):
 
-`main_results` (5):
+* `Pphi2.pphi2_existence`
+* `Pphi2.pphi2_nontriviality`
+* `Pphi2.continuumLimit_nonGaussian`
+* `Pphi2.schwinger_agreement`
+
+Part-A regression block (kept in full after the four names;
+`Pphi2.pphi2_existence` is printed once, as the first Checkpoint-0 name):
+
+`main_results` (5) from `formalization.yaml`:
 
 * `Pphi2.pphi2_existence` — ∃ μ on S'(ℝ²) satisfying OS0–OS4 (conditional).
 * `Pphi2.pphi2_main` — a P(Φ)₂ continuum-limit measure satisfies the OS bundle.
@@ -38,12 +46,15 @@ Secondary regression targets (not in `formalization.yaml`):
 * `Pphi2.asymInteracting_expMoment_of_signed` — the signed-split recovery
   lemma (sole direct consumer of the sign-restricted Layer A axiom).
 
-Part-A regression targets:
+Further Part-A regression targets:
 
 * the direct cylinder exponential-moment predicates, second-moment extractor,
   Prokhorov adapters, and OS compatibility route;
 * the massive asymmetric-lattice free-variance bounds, including the
   sitewise-absolute form used by the thresholded cylinder adapter.
+
+`pphi2_limit_unique` and `pphi2_interacting_qft_exists` are absent and are
+not printed.
 
 **Usage**:
 
@@ -54,10 +65,14 @@ lake env lean audit/axiom_report.lean > audit/axiom-report.txt
 The committed `audit/axiom-report.txt` is the **golden trace**; CI diffs the
 fresh run against it (when wired). The two-file split is deliberate:
 generator vs. golden output, with the underscore/hyphen difference in the
-filename per the hub convention.
+filename per the hub convention. Do not regenerate the golden in this
+compose (no `#print axioms` run).
 -/
 
 #print axioms Pphi2.pphi2_existence
+#print axioms Pphi2.pphi2_nontriviality
+#print axioms Pphi2.continuumLimit_nonGaussian
+#print axioms Pphi2.schwinger_agreement
 #print axioms Pphi2.pphi2_main
 #print axioms Pphi2.pphi2_nonGaussianity
 #print axioms Pphi2.pphi2_nontrivial
