@@ -387,16 +387,596 @@ theorem cylinderPullbackMeasure_exponential_moment_of_tendsto_bc
 
 /-! ## Bridge: raw fixed-period sampling bound ⟹ cylinder bound -/
 
+/-! ### Raw finite-grid sampling -/
+
+private theorem asym_zmod_sum_eq_range (N : ℕ) [NeZero N] (g : ℕ → ℝ) :
+    ∑ x : ZMod N, g (ZMod.val x) = ∑ n ∈ Finset.range N, g n := by
+  rw [show ∑ x : ZMod N, g (ZMod.val x) = ∑ n : Fin N, g n.val
+    from Fintype.sum_bijective
+      (fun (x : ZMod N) =>
+        (⟨ZMod.val x, ZMod.val_lt x⟩ : Fin N))
+      ⟨fun a b h => ZMod.val_injective N (Fin.mk.inj h),
+       fun ⟨n, hn⟩ =>
+        ⟨(n : ZMod N), by
+          ext; exact ZMod.val_natCast_of_lt hn⟩⟩
+      _ _ (fun _ => rfl),
+    ← Finset.sum_range (f := g)]
+
+private theorem asym_circleRestriction_inner_tendsto
+    (L : ℝ) [Fact (0 < L)]
+    (N : ℕ → ℕ) (hN : ∀ k, NeZero (N k))
+    (hNtop : Tendsto N atTop atTop)
+    (f g : SmoothMap_Circle L ℝ) :
+    Tendsto
+      (fun k =>
+        letI : NeZero (N k) := hN k
+        ∑ z : ZMod (N k),
+          circleRestriction L (N k) f z * circleRestriction L (N k) g z)
+      atTop (nhds (∫ x in Set.Icc 0 L, f x * g x)) := by
+  have hN1 : Tendsto (fun k => N k - 1) atTop atTop := by
+    rw [tendsto_atTop_atTop]
+    intro b
+    obtain ⟨K, hK⟩ := tendsto_atTop_atTop.mp hNtop (b + 1)
+    exact ⟨K, fun k hk => by
+      have hkb := hK k hk
+      omega⟩
+  have hNsucc : ∀ k, (N k - 1) + 1 = N k := fun k =>
+    Nat.succ_pred_eq_of_pos (Nat.pos_of_ne_zero (hN k).out)
+  let hfg : ℝ → ℝ := fun x => f x * g x
+  have hfg_cont : Continuous hfg := f.continuous.mul g.continuous
+  have hfg_per : Function.Periodic hfg L := f.periodic.mul g.periodic
+  have hriem := riemann_sum_periodic_tendsto L hfg hfg_cont hfg_per
+  have hcomp := hriem.comp hN1
+  have hrewrite :
+      (fun k =>
+        letI : NeZero (N k) := hN k
+        ∑ z : ZMod (N k),
+          circleRestriction L (N k) f z * circleRestriction L (N k) g z) =
+      (fun k =>
+        ∑ n ∈ Finset.range (N k - 1 + 1),
+          (L / (↑(N k - 1 + 1) : ℝ)) *
+            hfg ((n : ℝ) * L / (↑(N k - 1 + 1) : ℝ))) := by
+    funext k
+    letI : NeZero (N k) := hN k
+    rw [hNsucc k]
+    calc
+      ∑ z : ZMod (N k),
+          circleRestriction L (N k) f z * circleRestriction L (N k) g z =
+          ∑ z : ZMod (N k),
+            (L / (N k : ℝ)) *
+              (f (circlePoint L (N k) z) * g (circlePoint L (N k) z)) := by
+        apply Finset.sum_congr rfl
+        intro z hz
+        simp only [circleRestriction_apply, circleSpacing_eq]
+        have hLN : 0 ≤ L / (N k : ℝ) :=
+          (div_pos (Fact.out : (0 : ℝ) < L)
+            (Nat.cast_pos.mpr (NeZero.pos (N k)))).le
+        rw [show Real.sqrt (L / (N k : ℝ)) * f (circlePoint L (N k) z) *
+              (Real.sqrt (L / (N k : ℝ)) * g (circlePoint L (N k) z)) =
+            (Real.sqrt (L / (N k : ℝ)) * Real.sqrt (L / (N k : ℝ))) *
+              (f (circlePoint L (N k) z) * g (circlePoint L (N k) z)) by ring,
+          Real.mul_self_sqrt hLN]
+      _ = ∑ n ∈ Finset.range (N k),
+          (L / (N k : ℝ)) *
+            hfg ((n : ℝ) * L / (N k : ℝ)) := by
+        rw [asym_zmod_sum_eq_range]
+        apply Finset.sum_congr rfl
+        intro n hn
+        simp [hfg, circlePoint]
+      _ = ∑ n ∈ Finset.range (N k - 1 + 1),
+          (L / (↑(N k - 1 + 1) : ℝ)) *
+            hfg ((n : ℝ) * L / (↑(N k - 1 + 1) : ℝ)) := by
+        rw [hNsucc k]
+  rw [hrewrite]
+  simpa only [Function.comp_def] using hcomp
+
+private theorem asym_basis_pair_tendsto
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k))
+    (hNt_top : Tendsto Nt atTop atTop)
+    (hNs_top : Tendsto Ns atTop atTop)
+    (m n : ℕ) :
+    Tendsto
+      (fun k =>
+        letI : NeZero (Nt k) := hNt k
+        letI : NeZero (Ns k) := hNs k
+        ∑ x : AsymLatticeSites (Nt k) (Ns k),
+          evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+              (RapidDecaySeq.basisVec m) *
+            evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+              (RapidDecaySeq.basisVec n))
+      atTop (nhds (if m = n then 1 else 0)) := by
+  let mt := (Nat.unpair m).1
+  let ms := (Nat.unpair m).2
+  let nt := (Nat.unpair n).1
+  let ns := (Nat.unpair n).2
+  let bt : SmoothMap_Circle Lt ℝ := DyninMityaginSpace.basis mt
+  let bs : SmoothMap_Circle Ls ℝ := DyninMityaginSpace.basis ms
+  let ct : SmoothMap_Circle Lt ℝ := DyninMityaginSpace.basis nt
+  let cs : SmoothMap_Circle Ls ℝ := DyninMityaginSpace.basis ns
+  have htime0 :
+      (∫ x in Set.Icc 0 Lt, bt x * ct x) =
+        if mt = nt then 1 else 0 := by
+    rw [show bt = SmoothMap_Circle.fourierBasis mt from
+          dm_basis_eq_fourierBasis (L := Lt) mt,
+      show ct = SmoothMap_Circle.fourierBasis nt from
+          dm_basis_eq_fourierBasis (L := Lt) nt]
+    rw [show (∫ x in Set.Icc 0 Lt,
+        SmoothMap_Circle.fourierBasis mt x *
+          SmoothMap_Circle.fourierBasis nt x) =
+        ∫ x in Set.Icc 0 Lt,
+          SmoothMap_Circle.fourierBasis nt x *
+            SmoothMap_Circle.fourierBasis mt x by
+          congr 1; funext x; ring]
+    exact SmoothMap_Circle.fourierCoeffReal_fourierBasis (L := Lt) mt nt
+  have hspace0 :
+      (∫ x in Set.Icc 0 Ls, bs x * cs x) =
+        if ms = ns then 1 else 0 := by
+    rw [show bs = SmoothMap_Circle.fourierBasis ms from
+          dm_basis_eq_fourierBasis (L := Ls) ms,
+      show cs = SmoothMap_Circle.fourierBasis ns from
+          dm_basis_eq_fourierBasis (L := Ls) ns]
+    rw [show (∫ x in Set.Icc 0 Ls,
+        SmoothMap_Circle.fourierBasis ms x *
+          SmoothMap_Circle.fourierBasis ns x) =
+        ∫ x in Set.Icc 0 Ls,
+          SmoothMap_Circle.fourierBasis ns x *
+            SmoothMap_Circle.fourierBasis ms x by
+          congr 1; funext x; ring]
+    exact SmoothMap_Circle.fourierCoeffReal_fourierBasis (L := Ls) ms ns
+  have htime := asym_circleRestriction_inner_tendsto Lt Nt hNt hNt_top bt ct
+  have hspace := asym_circleRestriction_inner_tendsto Ls Ns hNs hNs_top bs cs
+  have htime' : Tendsto
+      (fun k =>
+        letI : NeZero (Nt k) := hNt k
+        ∑ z : ZMod (Nt k), circleRestriction Lt (Nt k) bt z *
+          circleRestriction Lt (Nt k) ct z)
+      atTop (nhds (if mt = nt then 1 else 0)) := by
+    simpa [htime0] using htime
+  have hspace' : Tendsto
+      (fun k =>
+        letI : NeZero (Ns k) := hNs k
+        ∑ z : ZMod (Ns k), circleRestriction Ls (Ns k) bs z *
+          circleRestriction Ls (Ns k) cs z)
+      atTop (nhds (if ms = ns then 1 else 0)) := by
+    simpa [hspace0] using hspace
+  have hprod :
+      (fun k =>
+        letI : NeZero (Nt k) := hNt k
+        letI : NeZero (Ns k) := hNs k
+        ∑ x : AsymLatticeSites (Nt k) (Ns k),
+          evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+              (RapidDecaySeq.basisVec m) *
+            evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+              (RapidDecaySeq.basisVec n)) =
+      (fun k =>
+        (letI : NeZero (Nt k) := hNt k
+         ∑ z : ZMod (Nt k), circleRestriction Lt (Nt k) bt z *
+           circleRestriction Lt (Nt k) ct z) *
+        (letI : NeZero (Ns k) := hNs k
+         ∑ z : ZMod (Ns k), circleRestriction Ls (Ns k) bs z *
+           circleRestriction Ls (Ns k) cs z)) := by
+    funext k
+    letI : NeZero (Nt k) := hNt k
+    letI : NeZero (Ns k) := hNs k
+    simp_rw [evalAsymTorusAtSite_basisVec]
+    rw [Fintype.sum_prod_type]
+    calc
+      (∑ x : ZMod (Nt k), ∑ y : ZMod (Ns k),
+          (circleRestriction Lt (Nt k) bt x * circleRestriction Ls (Ns k) bs y) *
+            (circleRestriction Lt (Nt k) ct x * circleRestriction Ls (Ns k) cs y)) =
+        ∑ x : ZMod (Nt k), ∑ y : ZMod (Ns k),
+          (circleRestriction Lt (Nt k) bt x * circleRestriction Lt (Nt k) ct x) *
+            (circleRestriction Ls (Ns k) bs y * circleRestriction Ls (Ns k) cs y) := by
+              apply Finset.sum_congr rfl
+              intro x hx
+              apply Finset.sum_congr rfl
+              intro y hy
+              ring
+      _ = (∑ x : ZMod (Nt k),
+          circleRestriction Lt (Nt k) bt x * circleRestriction Lt (Nt k) ct x) *
+          (∑ y : ZMod (Ns k),
+          circleRestriction Ls (Ns k) bs y * circleRestriction Ls (Ns k) cs y) := by
+            rw [Finset.sum_mul_sum]
+  rw [hprod]
+  have hdelta :
+      (if mt = nt then 1 else 0) * (if ms = ns then 1 else 0) =
+        (if m = n then 1 else 0) := by
+    by_cases hmn : m = n
+    · subst n
+      simp
+    by_cases hmt : mt = nt
+    · by_cases hms : ms = ns
+      · have hmn' : m = n := by
+          rw [← Nat.pair_unpair m, ← Nat.pair_unpair n, hmt, hms]
+        simp [hmn']
+      · simp [hmt, hms, hmn]
+    · simp [hmt, hmn]
+  convert htime'.mul hspace' using 1 <;> simp [hdelta]
+
+theorem asymTorusSiteEval_sq_tendsto
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k))
+    (ha : ∀ k, 0 < a k)
+    (hLt : ∀ k, (Nt k : ℝ) * a k = Lt)
+    (hLs : ∀ k, (Ns k : ℝ) * a k = Ls)
+    (ha0 : Tendsto a atTop (nhds 0))
+    (f : AsymTorusTestFunction Lt Ls) :
+    Tendsto
+      (fun k =>
+        letI : NeZero (Nt k) := hNt k
+        letI : NeZero (Ns k) := hNs k
+        ∑ x : AsymLatticeSites (Nt k) (Ns k),
+          (evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x f) ^ 2)
+      atTop (nhds (l2InnerProduct f f)) := by
+  have ha0' : Tendsto a atTop (nhdsWithin 0 (Set.Ioi 0)) :=
+    tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within a ha0
+      (Filter.Eventually.of_forall fun k => ha k)
+  have hinv : Tendsto (fun k => (a k)⁻¹) atTop atTop :=
+    tendsto_inv_nhdsGT_zero.comp ha0'
+  have hNt_top : Tendsto Nt atTop atTop := by
+    rw [← tendsto_natCast_atTop_iff (R := ℝ)]
+    refine (hinv.const_mul_atTop (Fact.out : (0 : ℝ) < Lt)).congr fun k => ?_
+    rw [← div_eq_mul_inv, div_eq_iff (ne_of_gt (ha k))]
+    exact (hLt k).symm
+  have hNs_top : Tendsto Ns atTop atTop := by
+    rw [← tendsto_natCast_atTop_iff (R := ℝ)]
+    refine (hinv.const_mul_atTop (Fact.out : (0 : ℝ) < Ls)).congr fun k => ?_
+    rw [← div_eq_mul_inv, div_eq_iff (ne_of_gt (ha k))]
+    exact (hLs k).symm
+  let fN : ℕ → AsymTorusTestFunction Lt Ls := fun N =>
+    ∑ m ∈ Finset.range N,
+      DyninMityaginSpace.coeff m f • RapidDecaySeq.basisVec m
+  have hfN : Tendsto fN atTop (nhds f) := by
+    simpa [fN] using
+      (DyninMityaginSpace.hasSum_basis (E := AsymTorusTestFunction Lt Ls) f).tendsto_sum_nat
+  have hcoeff_fN : ∀ (N r : ℕ),
+      DyninMityaginSpace.coeff r (fN N) =
+        if r ∈ Finset.range N then DyninMityaginSpace.coeff r f else 0 := by
+    intro N r
+    simp [fN, map_sum, map_smul,
+      DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis]
+  have hl2_fN : ∀ N,
+      l2InnerProduct (fN N) (fN N) =
+        ∑ m ∈ Finset.range N, (DyninMityaginSpace.coeff m f) ^ 2 := by
+    intro N
+    rw [l2InnerProduct]
+    have houtside : ∀ r, r ∉ Finset.range N →
+        DyninMityaginSpace.coeff r (fN N) *
+            DyninMityaginSpace.coeff r (fN N) = 0 := by
+      intro r hr
+      simp [hcoeff_fN, hr]
+    change (∑' r, DyninMityaginSpace.coeff r (fN N) *
+      DyninMityaginSpace.coeff r (fN N)) = _
+    rw [tsum_eq_sum (s := Finset.range N) houtside]
+    apply Finset.sum_congr rfl
+    intro r hr
+    simp [hcoeff_fN, hr]
+  have hl2_tendsto : Tendsto
+      (fun N => l2InnerProduct (fN N) (fN N)) atTop
+      (nhds (l2InnerProduct f f)) := by
+    have hs := (l2InnerProduct_summable f f).hasSum.tendsto_sum_nat
+    simpa [hl2_fN, l2InnerProduct] using hs
+  let S : ℕ → AsymTorusTestFunction Lt Ls → ℝ := fun k h =>
+    letI : NeZero (Nt k) := hNt k
+    letI : NeZero (Ns k) := hNs k
+    ∑ x : AsymLatticeSites (Nt k) (Ns k),
+      (evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h) ^ 2
+  have hfixed : ∀ N, Tendsto (fun k => S k (fN N)) atTop
+      (nhds (l2InnerProduct (fN N) (fN N))) := by
+    intro N
+    have hS_expand : ∀ k,
+        S k (fN N) =
+          ∑ m ∈ Finset.range N, ∑ n ∈ Finset.range N,
+            DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff n f *
+              (letI : NeZero (Nt k) := hNt k
+               letI : NeZero (Ns k) := hNs k
+               ∑ x : AsymLatticeSites (Nt k) (Ns k),
+                 evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+                   (RapidDecaySeq.basisVec m) *
+                 evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+                   (RapidDecaySeq.basisVec n)) := by
+      intro k
+      dsimp [S, fN]
+      simp only [Finset.sum_apply, map_sum, map_smul, Pi.smul_apply, smul_eq_mul,
+        pow_two]
+      rw [Finset.sum_mul_sum]
+      rw [Finset.sum_comm]
+      apply Finset.sum_congr rfl
+      intro m hm
+      rw [Finset.sum_comm]
+      apply Finset.sum_congr rfl
+      intro n hn
+      apply Finset.sum_congr rfl
+      intro x hx
+      ring
+    rw [show (fun k => S k (fN N)) =
+        (fun k => ∑ m ∈ Finset.range N, ∑ n ∈ Finset.range N,
+          DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff n f *
+            (letI : NeZero (Nt k) := hNt k
+             letI : NeZero (Ns k) := hNs k
+             ∑ x : AsymLatticeSites (Nt k) (Ns k),
+               evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+                 (RapidDecaySeq.basisVec m) *
+               evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+                 (RapidDecaySeq.basisVec n))) by
+          funext k; exact hS_expand k]
+    have hsum : Tendsto
+        (fun k => ∑ m ∈ Finset.range N, ∑ n ∈ Finset.range N,
+          DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff n f *
+            (letI : NeZero (Nt k) := hNt k
+             letI : NeZero (Ns k) := hNs k
+             ∑ x : AsymLatticeSites (Nt k) (Ns k),
+               evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+                 (RapidDecaySeq.basisVec m) *
+               evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+                 (RapidDecaySeq.basisVec n))) atTop
+        (nhds (∑ m ∈ Finset.range N, ∑ n ∈ Finset.range N,
+          DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff n f *
+            (if m = n then 1 else 0))) := by
+      apply tendsto_finset_sum
+      intro m hm
+      apply tendsto_finset_sum
+      intro n hn
+      simpa [mul_assoc, mul_left_comm, mul_comm] using
+        ((asym_basis_pair_tendsto Lt Ls Nt Ns a hNt hNs hNt_top hNs_top m n).const_mul
+          (DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff n f))
+    have hdiag :
+        (∑ m ∈ Finset.range N, ∑ n ∈ Finset.range N,
+        DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff n f *
+          (if m = n then 1 else 0)) =
+        l2InnerProduct (fN N) (fN N) := by
+      rw [hl2_fN N]
+      apply Finset.sum_congr rfl
+      intro m hm
+      rw [Finset.sum_eq_single m]
+      · simp [pow_two]
+      · intro b hb hbm
+        simp [hbm]
+      · intro hmN
+        exact (hmN hm).elim
+    rw [hdiag] at hsum
+    exact hsum
+  have hpdiff : Tendsto
+      (fun N => RapidDecaySeq.rapidDecaySeminorm 0 (fN N - f)) atTop (nhds 0) := by
+    have hdiff : Tendsto (fun N => fN N - f) atTop (nhds 0) := by
+      simpa using hfN.sub tendsto_const_nhds
+    have hp :=
+      (RapidDecaySeq.rapidDecay_withSeminorms.continuous_seminorm 0).continuousAt.tendsto.comp
+        hdiff
+    convert hp using 1
+    exact congrArg nhds
+      (map_zero (RapidDecaySeq.rapidDecaySeminorm 0)).symm
+  obtain ⟨C₀t, hC₀t_pos, hC₀t_bound⟩ :=
+    SmoothMap_Circle.sobolevSeminorm_fourierBasis_le (L := Lt) 0
+  obtain ⟨C₀s, hC₀s_pos, hC₀s_bound⟩ :=
+    SmoothMap_Circle.sobolevSeminorm_fourierBasis_le (L := Ls) 0
+  let C₀ := Lt * Ls * C₀t ^ 2 * C₀s ^ 2
+  have hC₀_pos : 0 < C₀ := by
+    dsimp [C₀]
+    positivity
+  have hsample_bound : ∀ k (h : AsymTorusTestFunction Lt Ls),
+      ‖WithLp.toLp 2 (fun x : AsymLatticeSites (Nt k) (Ns k) =>
+          evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h)‖ ≤
+        Real.sqrt C₀ * RapidDecaySeq.rapidDecaySeminorm 0 h := by
+    intro k h
+    letI : NeZero (Nt k) := hNt k
+    letI : NeZero (Ns k) := hNs k
+    have hsquare := asymTorusSiteEval_norm_sq_le_seminorm Lt Ls
+      C₀t hC₀t_pos (fun m => by
+        simpa only [pow_zero, mul_one] using hC₀t_bound m)
+      C₀s hC₀s_pos (fun m => by
+        simpa only [pow_zero, mul_one] using hC₀s_bound m) h (Nt k) (Ns k)
+    have hsquare' :
+        ‖WithLp.toLp 2 (fun x : AsymLatticeSites (Nt k) (Ns k) =>
+          evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h)‖ ^ 2 ≤
+          C₀ * (RapidDecaySeq.rapidDecaySeminorm 0 h) ^ 2 := by
+      rw [EuclideanSpace.real_norm_sq_eq]
+      simpa [C₀, Real.norm_eq_abs, sq_abs] using hsquare
+    have hp : 0 ≤ RapidDecaySeq.rapidDecaySeminorm 0 h := apply_nonneg _ _
+    have hsqrt : 0 ≤ Real.sqrt C₀ := Real.sqrt_nonneg _
+    nlinarith [Real.sq_sqrt hC₀_pos.le, norm_nonneg
+      (WithLp.toLp 2 (fun x : AsymLatticeSites (Nt k) (Ns k) =>
+        evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h))]
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  let p : AsymTorusTestFunction Lt Ls → ℝ :=
+    RapidDecaySeq.rapidDecaySeminorm 0
+  let A : ℝ := Real.sqrt C₀
+  let d : ℝ := p f
+  have hden : 0 < 3 * A ^ 2 * (2 * d + 1) := by
+    dsimp [A, d]
+    have hd : 0 ≤ p f := apply_nonneg _ _
+    positivity
+  have htarget : ∀ᶠ N in atTop,
+      |l2InnerProduct (fN N) (fN N) - l2InnerProduct f f| < ε / 3 := by
+    have h := (Metric.tendsto_atTop.mp hl2_tendsto) (ε / 3) (by positivity)
+    simpa [Real.dist_eq] using h
+  have hsmall : ∀ᶠ N in atTop,
+      p (fN N - f) < min 1 (ε / (3 * A ^ 2 * (2 * d + 1))) := by
+    have hmin : 0 < min 1 (ε / (3 * A ^ 2 * (2 * d + 1))) := by
+      rw [lt_min_iff]
+      exact ⟨by norm_num, div_pos hε hden⟩
+    have h := (Metric.tendsto_atTop.mp hpdiff)
+      (min 1 (ε / (3 * A ^ 2 * (2 * d + 1)))) hmin
+    simpa [Real.dist_eq, abs_of_nonneg (apply_nonneg _ _)] using h
+  rcases eventually_atTop.1 (htarget.and hsmall) with ⟨N₀, hN₀⟩
+  have hNtarget := hN₀ N₀ le_rfl |>.1
+  have hNsmall := hN₀ N₀ le_rfl |>.2
+  obtain ⟨K, hK⟩ := (Metric.tendsto_atTop.mp (hfixed N₀)) (ε / 3) (by positivity)
+  refine ⟨K, fun k hk => ?_⟩
+  have hfixed_k := hK k hk
+  rw [Real.dist_eq] at hfixed_k ⊢
+  let vf : EuclideanSpace ℝ (AsymLatticeSites (Nt k) (Ns k)) :=
+    WithLp.toLp 2 (fun x =>
+      evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x f)
+  let vn : EuclideanSpace ℝ (AsymLatticeSites (Nt k) (Ns k)) :=
+    WithLp.toLp 2 (fun x =>
+      evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x (fN N₀))
+  let vd : EuclideanSpace ℝ (AsymLatticeSites (Nt k) (Ns k)) :=
+    WithLp.toLp 2 (fun x =>
+      evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x (f - fN N₀))
+  have hvd : vd = vf - vn := by
+    ext x
+    simp [vd, vf, vn, map_sub]
+  have hnorm_f := hsample_bound k f
+  have hnorm_n := hsample_bound k (fN N₀)
+  have hnorm_d := hsample_bound k (f - fN N₀)
+  have hpfn : p (fN N₀) ≤ d + 1 := by
+    have hdecomp : (fN N₀ - f) + f = fN N₀ := by abel
+    have htriangle := (RapidDecaySeq.rapidDecaySeminorm 0).add_le'
+      (fN N₀ - f) f
+    have hdiff' := hNsmall.trans_le (min_le_left _ _)
+    calc
+      p (fN N₀) = p ((fN N₀ - f) + f) := by rw [hdecomp]
+      _ ≤ p (fN N₀ - f) + p f := htriangle
+      _ ≤ 1 + d := by
+        have hdiff'' : p (fN N₀ - f) ≤ 1 := hdiff'.le
+        dsimp [d]
+        linarith
+      _ = d + 1 := by ring
+  have hnorm_sum : ‖vf‖ + ‖vn‖ ≤ A * (2 * d + 1) := by
+    have h1 := hnorm_f
+    have h2 := hnorm_n
+    dsimp [A, p, d] at *
+    have hpf : 0 ≤ RapidDecaySeq.rapidDecaySeminorm 0 f := apply_nonneg _ _
+    have hpn : 0 ≤ RapidDecaySeq.rapidDecaySeminorm 0 (fN N₀) := apply_nonneg _ _
+    have hA : 0 ≤ A := by
+      dsimp [A]
+      exact Real.sqrt_nonneg _
+    nlinarith
+  have hnorm_diff : ‖vf - vn‖ ≤ A * p (fN N₀ - f) := by
+    rw [← hvd]
+    have := hsample_bound k (f - fN N₀)
+    have heq : p (f - fN N₀) = p (fN N₀ - f) := by
+      rw [show f - fN N₀ = -(fN N₀ - f) by abel,
+        map_neg_eq_map]
+    rw [heq] at this
+    exact this
+  have hsqdiff :
+      |S k f - S k (fN N₀)| ≤
+        (‖vf‖ + ‖vn‖) * ‖vf - vn‖ := by
+    dsimp [S, vf, vn]
+    rw [← EuclideanSpace.real_norm_sq_eq, ← EuclideanSpace.real_norm_sq_eq]
+    rw [show ‖vf‖ ^ 2 - ‖vn‖ ^ 2 =
+        (‖vf‖ - ‖vn‖) * (‖vf‖ + ‖vn‖) by ring, abs_mul]
+    simpa [mul_comm] using
+      mul_le_mul_of_nonneg_right (abs_norm_sub_norm_le vf vn)
+        (add_nonneg (norm_nonneg _) (norm_nonneg _))
+  have hsqdiff' : |S k f - S k (fN N₀)| < ε / 3 := by
+    calc
+      |S k f - S k (fN N₀)| ≤
+          (‖vf‖ + ‖vn‖) * ‖vf - vn‖ := hsqdiff
+      _ ≤ A * (2 * d + 1) * (A * p (fN N₀ - f)) := by
+        have hA : 0 ≤ A := by
+          dsimp [A]
+          exact Real.sqrt_nonneg _
+        have hd : 0 ≤ d := by
+          dsimp [d]
+          exact apply_nonneg _ _
+        have hsumfac : 0 ≤ A * (2 * d + 1) := by positivity
+        calc
+          (‖vf‖ + ‖vn‖) * ‖vf - vn‖ ≤
+              A * (2 * d + 1) * ‖vf - vn‖ :=
+            mul_le_mul_of_nonneg_right hnorm_sum (norm_nonneg _)
+          _ ≤ A * (2 * d + 1) * (A * p (fN N₀ - f)) :=
+            mul_le_mul_of_nonneg_left hnorm_diff hsumfac
+      _ < ε / 3 := by
+        have hsmall' := hNsmall.trans_le (min_le_right _ _)
+        have heq : A * (2 * d + 1) * (A * p (fN N₀ - f)) =
+            A ^ 2 * (2 * d + 1) * p (fN N₀ - f) := by ring
+        rw [heq]
+        have hcoef : 0 < A ^ 2 * (2 * d + 1) := by
+          nlinarith [hden]
+        have hmul := mul_lt_mul_of_pos_left hsmall' hcoef
+        calc
+          A ^ 2 * (2 * d + 1) * p (fN N₀ - f) <
+              A ^ 2 * (2 * d + 1) *
+                (ε / (3 * A ^ 2 * (2 * d + 1))) := hmul
+          _ = ε / 3 := by
+            field_simp [ne_of_gt hden, ne_of_gt hcoef]
+  calc
+    |S k f - l2InnerProduct f f| ≤
+        |S k f - S k (fN N₀)| +
+          |S k (fN N₀) - l2InnerProduct (fN N₀) (fN N₀)| +
+          |l2InnerProduct (fN N₀) (fN N₀) - l2InnerProduct f f| := by
+      calc
+        |S k f - l2InnerProduct f f| ≤
+            |S k f - S k (fN N₀)| +
+              |S k (fN N₀) - l2InnerProduct f f| := abs_sub_le _ _ _
+        _ ≤ |S k f - S k (fN N₀)| +
+              (|S k (fN N₀) - l2InnerProduct (fN N₀) (fN N₀)| +
+                |l2InnerProduct (fN N₀) (fN N₀) - l2InnerProduct f f|) :=
+          add_le_add_left (abs_sub_le _ _ _) _
+        _ = _ := by ring
+    _ < ε / 3 + ε / 3 + ε / 3 := by
+      gcongr
+    _ = ε := by ring
+
+/-- The normalized squared lattice pullback converges to the asymmetric-torus
+`L²` coefficient norm along every fixed-physical-size UV sequence. -/
+theorem asymTorusIso_raw_sampling_tendsto_of_siteEval
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k))
+    (ha : ∀ k, 0 < a k)
+    (hLt_phys : ∀ k, (Nt k : ℝ) * a k = Lt)
+    (hLs_phys : ∀ k, (Ns k : ℝ) * a k = Ls)
+    (ha0 : Filter.Tendsto a Filter.atTop (nhds 0)) :
+    ∀ f : CylinderTestFunction Ls,
+      Filter.Tendsto
+        (fun k ⇒
+          letI : NeZero (Nt k) := hNt k
+          letI : NeZero (Ns k) := hNs k
+          (a k ^ 2 : ℝ)⁻¹ *
+            ∑ x : AsymLatticeSites (Nt k) (Ns k),
+              (asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+                (cylinderToTorusEmbed Lt Ls f) x) ^ 2)
+        Filter.atTop
+        (nhds (l2InnerProduct (cylinderToTorusEmbed Lt Ls f)
+          (cylinderToTorusEmbed Lt Ls f))) := by
+  intro f
+  have hsite :=
+    asymTorusSiteEval_sq_tendsto Lt Ls Nt Ns a hNt hNs ha
+      hLt_phys hLs_phys ha0 (cylinderToTorusEmbed Lt Ls f)
+  have hscale :
+      (fun k ⇒
+        letI : NeZero (Nt k) := hNt k
+        letI : NeZero (Ns k) := hNs k
+        (a k ^ 2 : ℝ)⁻¹ *
+          ∑ x : AsymLatticeSites (Nt k) (Ns k),
+            (asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+              (cylinderToTorusEmbed Lt Ls f) x) ^ 2) =
+      (fun k ⇒
+        letI : NeZero (Nt k) := hNt k
+        letI : NeZero (Ns k) := hNs k
+        ∑ x : AsymLatticeSites (Nt k) (Ns k),
+          (evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+            (cylinderToTorusEmbed Lt Ls f)) ^ 2) := by
+    funext k
+    letI : NeZero (Nt k) := hNt k
+    letI : NeZero (Ns k) := hNs k
+    exact asymLatticeTestFnIso_scaled_sq_sum_eq_evalAsymTorusAtSite_sq_sum
+      Lt Ls (Nt k) (Ns k) (a k) (ha k)
+        (cylinderToTorusEmbed Lt Ls f)
+  rw [hscale]
+  simpa using hsite
+
 /-- A raw finite-grid sampling limit turns the sitewise massive variance estimate
 into a cylinder exponential-moment bound after the UV weak limit.  The cutoff
-estimate is supplied on the selected sequence; the sampling premise is the
-only finite-grid convergence input consumed here. -/
+estimate is supplied on the selected sequence; the physical mesh identities
+and `a → 0` now discharge the sampling limit internally. -/
 theorem asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling
     (mass : ℝ) (hmass : 0 < mass)
     (K C : ℝ) (hK : 0 ≤ K) (hC : 0 ≤ C)
     (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
     (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k))
     (ha : ∀ k, 0 < a k)
+    (hLt_phys : ∀ k, (Nt k : ℝ) * a k = Lt)
+    (hLs_phys : ∀ k, (Ns k : ℝ) * a k = Ls)
+    (ha0 : Filter.Tendsto a Filter.atTop (nhds 0))
     (ν : ℕ → Measure (Configuration (AsymTorusTestFunction Lt Ls)))
     (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls)))
     (hν_prob : ∀ k, IsProbabilityMeasure (ν k))
@@ -418,22 +998,11 @@ theorem asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling
               (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k) F x|)) ^ 2
               ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k)
                 mass (ha k) hmass)))
-    (hraw : ∀ f : CylinderTestFunction Ls,
-      Filter.Tendsto
-        (fun k ⇒
-          letI : NeZero (Nt k) := hNt k
-          letI : NeZero (Ns k) := hNs k
-          (a k ^ 2 : ℝ)⁻¹ *
-            ∑ x : AsymLatticeSites (Nt k) (Ns k),
-              (asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
-                (cylinderToTorusEmbed Lt Ls f) x) ^ 2)
-        Filter.atTop
-        (nhds (l2InnerProduct
-          (cylinderToTorusEmbed Lt Ls f)
-          (cylinderToTorusEmbed Lt Ls f))))
     (hLt1 : 1 ≤ Lt) :
     ∃ q : Seminorm ℝ (CylinderTestFunction Ls), Continuous q ∧
       MeasureHasCylinderExpMomentBound Ls K (C * mass⁻¹ ^ 2) q μ := by
+  have hraw := asymTorusIso_raw_sampling_tendsto_of_siteEval
+    Lt Ls Nt Ns a hNt hNs ha hLt_phys hLs_phys ha0
   obtain ⟨q, hq_cont, hq_bound⟩ :=
     GaussianField.embed_l2_uniform_bound (Ls := Ls)
   refine ⟨q, hq_cont, ?_⟩

@@ -85,6 +85,8 @@ filename per the hub convention.
 #print axioms Pphi2.circleRestriction_fourierBasis_eq_latticeFourierBasisFun
 #print axioms Pphi2.evalAsymTorusAtSite_basisVec
 #print axioms Pphi2.asymLatticeTestFnIso_scaled_sq_sum_eq_evalAsymTorusAtSite_sq_sum
+#print axioms Pphi2.asymTorusSiteEval_sq_tendsto
+#print axioms Pphi2.asymTorusIso_raw_sampling_tendsto_of_siteEval
 #print axioms Pphi2.centeredZMod_decay_sum_le_three
 #print axioms Pphi2.asymInteractingVariance_le_freeVariance_torus
 #print axioms Pphi2.cylinderPullbackMeasure_exponential_moment_of_tendsto_bc
