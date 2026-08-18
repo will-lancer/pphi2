@@ -112,6 +112,7 @@ filename per the hub convention.
 #print axioms Pphi2.asymWeightedLpPow_le_of_sup_of_weightedL1
 #print axioms Pphi2.asymWeightedLpPow_le_of_centered_temporal_decay
 #print axioms Pphi2.asymRawSource_pointwise_centered_decay
+#print axioms Pphi2.asymRawSource_weightedLpPow_le_of_centered_decay
 #print axioms Pphi2.finiteLaplacianAsym_map_smul
 #print axioms Pphi2.finiteLaplacianAsymFun_asymRawSource_apply
 #print axioms Pphi2.periodizeCLM_circlePoint_centered_decay
