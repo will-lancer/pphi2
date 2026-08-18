@@ -181,18 +181,23 @@ private lemma centered_second_diff_of_second_deriv_bound
       add_le_add hplus_bound hminus_bound
     _ = M * a ^ 2 := by ring
 
+theorem centeredSecondDiffSeminorm_second_diff_decay
+    (h : SchwartzMap ℝ ℝ) (a x : ℝ) (ha : 0 < a) (ha1 : a ≤ 1) :
+    |h (x + a) + h (x - a) - 2 * h x| ≤
+      16 * a ^ 2 * centeredSecondDiffSeminorm h / (1 + |x|) ^ 2 := by
+  have hsecond := centeredSecondDiffSeminorm_second_deriv_bound h x a ha ha1
+  exact (centered_second_diff_of_second_deriv_bound h x a
+    (16 * centeredSecondDiffSeminorm h / (1 + |x|) ^ 2) ha hsecond).trans_eq
+    (by ring)
+
 theorem schwartz_centered_second_diff_decay :
     ∃ q : Seminorm ℝ (SchwartzMap ℝ ℝ), Continuous q ∧
       ∀ (h : SchwartzMap ℝ ℝ) (a x : ℝ),
         0 < a → a ≤ 1 →
         |h (x + a) + h (x - a) - 2 * h x| ≤
           16 * a ^ 2 * q h / (1 + |x|) ^ 2 := by
-  refine ⟨centeredSecondDiffSeminorm,
-    centeredSecondDiffSeminorm_continuous, ?_⟩
-  intro h a x ha ha1
-  have hsecond := centeredSecondDiffSeminorm_second_deriv_bound h x a ha ha1
-  exact (centered_second_diff_of_second_deriv_bound h x a
-    (16 * centeredSecondDiffSeminorm h / (1 + |x|) ^ 2) ha hsecond).trans_eq
-    (by ring)
+  exact ⟨centeredSecondDiffSeminorm,
+    centeredSecondDiffSeminorm_continuous,
+    centeredSecondDiffSeminorm_second_diff_decay⟩
 
 end Pphi2
