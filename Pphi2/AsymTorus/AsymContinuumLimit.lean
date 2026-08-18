@@ -21,6 +21,7 @@ Simon, *The P(φ)₂ Euclidean QFT*, Ch. VIII; Glimm–Jaffe, *Quantum Physics*,
 import Pphi2.AsymTorus.AsymCutoffBound
 import Pphi2.AsymTorus.AsymDDJSource
 import Pphi2.AsymTorus.AsymDDJLocalMoment
+import Pphi2.AsymTorus.AsymDDJSourceSampling
 import Pphi2.AsymTorus.AsymDDJWeightedDecay
 import Pphi2.AsymTorus.AsymIsoOS
 import Pphi2.AsymTorus.AsymLinkReflectionRPLimit
