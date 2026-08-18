@@ -130,3 +130,12 @@ filename per the hub convention.
 #print axioms Pphi2.integrable_tilted_first_moment_le_of_log_exp_two
 #print axioms Pphi2.integrable_tilted_pow_le_of_exp_two
 #print axioms Pphi2.integrable_tilted_pow_le_of_log_exp_two
+#print axioms Pphi2.wickMonomial_hasDerivAt_all
+#print axioms Pphi2.wickPolynomialDerivative
+#print axioms Pphi2.wickPolynomial_hasDerivAt
+#print axioms Pphi2.asymCoordinateShift
+#print axioms Pphi2.asymCoordinateShift_eval_delta
+#print axioms Pphi2.configuration_pairing_hasDerivAt_coordinateShift
+#print axioms Pphi2.interactionFunctionalAsym_hasDerivAt_coordinateShift
+#print axioms Pphi2.sourceExponent_hasDerivAt_coordinateShift
+#print axioms Pphi2.asymTiltedDensityIntegrand_hasDerivAt_coordinateShift
