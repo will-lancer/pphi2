@@ -14,6 +14,7 @@ finite source estimate.  They do not assert that such an estimate holds.
 import Mathlib.Analysis.MeanInequalities
 import Pphi2.AsymTorus.AsymTiltedMoment
 import Pphi2.AsymTorus.AsymTorusEmbeddingIso
+import Pphi2.IRLimit.DDJPeriodizationBound
 
 noncomputable section
 
