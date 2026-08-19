@@ -188,7 +188,9 @@ theorem asymFreeVariance_le_mass_inv_sq
     _ = (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
         ∑ k : AsymLatticeSites Nt Ns,
           (asymModeCoeff Nt Ns a mass k G) ^ 2 := by
-      rw [Finset.mul_sum]
+      rw [Finset.mul_sum, Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_
+      intro k _
       ring
     _ = (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
         ∑ x : AsymLatticeSites Nt Ns, G x ^ 2 := by

@@ -304,8 +304,8 @@ theorem interactingLatticeMeasureAsym_exp_moment_le_exp_of_sub_interaction_le
       ∫ ω, bw ω * F ω ∂μG ≤ Real.exp C := by
     have hmono := integral_mono hprod_int hconst_int hprod_bound
     rw [integral_const, smul_eq_mul, probReal_univ] at hmono
-    exact hmono
-  have bw_nn : Configuration (AsymLatticeField Nt Ns) → ℝ≥0 :=
+    simpa only [one_mul] using hmono
+  have bw_nn : Configuration (AsymLatticeField Nt Ns) → NNReal :=
     fun ω => Real.toNNReal (bw ω)
   have hbw_nn_meas : Measurable bw_nn := Measurable.real_toNNReal hbw_meas
   change ∫ ω, F ω ∂(interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) ≤

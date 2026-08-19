@@ -32,7 +32,7 @@ import Pphi2.AsymTorus.AsymTorusEmbedding
 
 noncomputable section
 
-open GaussianField MeasureTheory Filter Topology
+open GaussianField MeasureTheory Filter Topology Real
 
 namespace Pphi2
 

@@ -57,7 +57,6 @@ private lemma tsum_invIntSq :
   simp only [nsmul_eq_mul]
   rw [tsum_pnat_eq_tsum_succ (f := fun n : ℕ => invIntSq (n : ℤ))]
   congr 1
-  funext n
   simp [invIntSq]
 
 private lemma summable_intZeroIndicator :
@@ -368,9 +367,8 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
     rw [Real.norm_eq_abs]
     by_cases hk : k = 0
     · subst hk
-      simp only [d, u, intZeroIndicator, if_pos, invIntSq, A, B]
-      rw [zero_mul, add_zero]
-      simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hdd t
+      simpa [d, u, intZeroIndicator, invIntSq, A, B, sub_eq_add_neg,
+        add_comm, add_left_comm, add_assoc] using hdd t
     · have hk_abs_pos : 0 < (k.natAbs : ℝ) := by
         exact_mod_cast (Int.natAbs_pos.mpr hk)
       have hdist' := hdist k hk
@@ -388,7 +386,7 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
           (0 : ℝ) < 1 + |t + (k : ℝ) * L|))] at hsource
         have hsource' : |d k| *
             (1 + |t + (k : ℝ) * L|) ^ 2 ≤ 16 * a ^ 2 * S := by
-          simpa [d, mul_comm, add_comm, add_left_comm, add_assoc] using hsource
+          simpa [d, sub_eq_add_neg, mul_comm, add_comm, add_left_comm, add_assoc] using hsource
         rw [le_div_iff₀ (mul_pos (sq_pos_of_pos hk_abs_pos)
           (sq_pos_of_pos hLt_pos))]
         calc
@@ -414,8 +412,7 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
                 (1 / (k.natAbs : ℝ) ^ 2) =
               144 * a ^ 2 * S /
                 ((k.natAbs : ℝ) ^ 2 * (1 + |t|) ^ 2) := by
-          field_simp [hk2, hden_pos.ne']
-          ring
+          field_simp [hk2, hden_pos.ne'] <;> ring
         rw [htail_rhs]
         rw [le_div_iff₀ (mul_pos hk2 hden_pos)]
         calc
@@ -431,8 +428,7 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
               64 * a ^ 2 * S / ((k.natAbs : ℝ) ^ 2 * L ^ 2) *
                   ((k.natAbs : ℝ) ^ 2 * (1 + |t|) ^ 2) =
                 (64 * a ^ 2 * S * (1 + |t|) ^ 2) / L ^ 2 := by
-                  field_simp [hk2, sq_pos_of_pos hLt_pos]
-                  ring
+                  field_simp [hk2, sq_pos_of_pos hLt_pos] <;> ring
               _ ≤ (64 * a ^ 2 * S * ((9 / 4 : ℝ) * L ^ 2)) / L ^ 2 := by
                 exact div_le_div_of_nonneg_right hscaled
                   (le_of_lt (sq_pos_of_pos hLt_pos))
@@ -463,10 +459,6 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
     rw [periodizeCLM_apply, periodizeCLM_apply, periodizeCLM_apply]
     rw [← hsumPlus.tsum_add hsumMinus, ← tsum_mul_left,
       ← (hsumPlus.add hsumMinus).tsum_sub (hsumZero.mul_left 2)]
-    congr 1
-    funext k
-    dsimp [d]
-    ring
   rw [hrewrite]
   rw [abs_mul, abs_of_nonneg (inv_nonneg.mpr (sq_nonneg a))]
   have hle := le_trans hnorm ((hsum_d.norm.tsum_le_tsum hpoint hsum_u))
@@ -480,8 +472,7 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
         (inv_nonneg.mpr (sq_nonneg a))
     _ = (16 + 288 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) * S /
           (1 + |t|) ^ 2 := by
-      field_simp [ne_of_gt ha, hden_pos.ne']
-      ring
+      field_simp [ne_of_gt ha, hden_pos.ne'] <;> ring
 
 theorem periodizeCLM_circlePoint_centered_second_diff_decay
     (h : SchwartzMap ℝ ℝ)
@@ -636,7 +627,6 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
         (periodizeCLM L h).periodic' (t - a)
   rw [circleRestriction_apply, circleRestriction_apply, circleRestriction_apply]
   rw [hcenter_eq, hsucc, hpred, hcenter_shift, hcenter_shift']
-  simp only [ha_eq]
   have hsqrt : Real.sqrt (L / (N : ℝ)) = Real.sqrt a := by rw [ha_eq]
   rw [hsqrt]
   have hsq : 0 ≤ Real.sqrt a := Real.sqrt_nonneg _
