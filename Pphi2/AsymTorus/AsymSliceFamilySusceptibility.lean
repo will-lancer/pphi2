@@ -5,6 +5,7 @@ Authors: Michael R. Douglas
 -/
 import Pphi2.AsymTorus.AsymB5bSingleSlice
 import GaussianField.Symmetry
+import Mathlib.Algebra.Order.Chebyshev
 
 /-!
 # Layer-B2 Stage B, hole B-I: slice-family susceptibility bound
