@@ -464,11 +464,11 @@ theorem wickPolynomial_coercive (P : InteractionPolynomial) (c η : ℝ)
     exact degree_C_mul_X_pow _ hηn_ne
   have herase_degree_lt : p.eraseLead.degree <
       (C (η / (P.n : ℝ)) * X ^ P.n).degree := by
+    rw [hterm_degree]
     calc
       p.eraseLead.degree < p.degree := degree_eraseLead_lt hp_ne
       _ = (P.n : WithBot ℕ) := by
         rw [degree_eq_natDegree hp_ne, hp_nat]
-      _ = (C (η / (P.n : ℝ)) * X ^ P.n).degree := hterm_degree.symm
   have hq_lc : q.leadingCoeff = η / (P.n : ℝ) := by
     dsimp [q]
     rw [leadingCoeff_add_of_degree_lt herase_degree_lt,
@@ -501,9 +501,8 @@ theorem wickPolynomial_coercive (P : InteractionPolynomial) (c η : ℝ)
   intro t
   have hbound := hq_bound t
   rw [hq_poly, eval_sub, eval_mul, eval_C, eval_pow] at hbound
-  change -B ≤ (wickPolynomialPoly P c).eval t -
-      ((1 - η) / (P.n : ℝ)) * t ^ P.n at hbound
-  rw [wickPolynomialPoly_eval] at hbound
+  dsimp [p] at hbound
+  rw [wickPolynomialPoly_eval, eval_X] at hbound
   rw [(P.hn_even.pow_abs t).symm] at hbound
   linarith
 

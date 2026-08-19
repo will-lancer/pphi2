@@ -50,7 +50,7 @@ theorem hasDerivAt_integral_exp_mul_of_local_dom
       (∫ x, f x * Real.exp (κ * f x) ∂μ) κ := by
   let G : ℝ → α → ℝ := fun t x => Real.exp (t * f x)
   let G' : ℝ → α → ℝ := fun t x => f x * Real.exp (t * f x)
-  have hG_meas : ∀ᶠ t in 𝓝 κ, AEStronglyMeasurable (G t) μ := by
+  have hG_meas : ∀ᶠ t in nhds κ, AEStronglyMeasurable (G t) μ := by
     exact Filter.Eventually.of_forall fun t => by
       simpa [G] using (hf_meas.const_mul t).exp.aestronglyMeasurable
   have hG'_meas : AEStronglyMeasurable (G' κ) μ := by
@@ -67,8 +67,8 @@ theorem hasDerivAt_integral_exp_mul_of_local_dom
     have ht_abs : |t| ≤ |κ| + ε := by
       calc
         |t| = |(t - κ) + κ| := by congr 1 <;> ring
-        _ ≤ |t - κ| + |κ| := abs_add _ _
-        _ ≤ ε + |κ| := add_le_add_right (le_of_lt ht_dist) _
+        _ ≤ |t - κ| + |κ| := abs_add_le _ _
+        _ ≤ ε + |κ| := add_le_add (le_of_lt ht_dist) le_rfl
         _ = |κ| + ε := by ring
     have harg : t * f x ≤ (|κ| + ε) * |f x| := by
       calc
