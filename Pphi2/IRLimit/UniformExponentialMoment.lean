@@ -1,7 +1,12 @@
 /-
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Michael R. Douglas
+-/
 
+import Pphi2.AsymTorus.MomentBoundOS1
+
+/-!
 # Uniform Exponential Moment Bound for Cylinder Pullback
 
 Provides the uniform-in-Lt exponential moment bound
@@ -23,8 +28,6 @@ Combined: `E_{ν_Lt}[exp(|ω(f)|)] ≤ K · exp(C · q(f)²)` uniformly in Lt.
 Together with bounded-continuous convergence of the extracted limit, this is
 sufficient for the dominated integral proof of OS0 analyticity.
 -/
-
-import Pphi2.AsymTorus.MomentBoundOS1
 
 noncomputable section
 
@@ -251,7 +254,7 @@ theorem measureHasCylinderExpMomentBound_of_localNth
             |ω f| = |t * ω (lam • f)| :=
               congrArg abs (h_recover ω).symm
             _ = |t| * |ω (lam • f)| := by rw [abs_mul]
-            _ = t * |ω (lam • f)| := by rw [abs_of_nonneg ht1.le]
+            _ = t * |ω (lam • f)| := by rw [abs_of_nonneg (le_of_lt ht_pos)]
         _ ≤ |ω (lam • f)| ^ n / (n : ℝ) +
               (n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ) := hyoung
         _ = ((n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ)) +
@@ -274,7 +277,6 @@ theorem measureHasCylinderExpMomentBound_of_localNth
       (cylinderPullbackMeasure Lt Ls μ) := by
     refine h_dom_int.mono' h_target_meas (ae_of_all _ fun ω => ?_)
     rw [Real.norm_of_nonneg (Real.exp_pos _).le]
-    rw [Real.norm_of_nonneg (mul_nonneg (Real.exp_pos _).le (Real.exp_pos _).le)]
     exact h_point ω
   have h_integral_le :
       ∫ ω : Configuration (CylinderTestFunction Ls), Real.exp (|ω f|)
@@ -318,8 +320,8 @@ theorem measureHasCylinderExpMomentBound_of_localNth
     calc
       (n : ℝ) / 4 * t ^ 2 + 1 / (n : ℝ) ≤
           (n : ℝ) / 4 * (1 + (s / r) ^ 2) + 1 / (n : ℝ) := by
-            exact add_le_add_right
-              (mul_le_mul_of_nonneg_left ht_sq_le (by positivity)) _
+            exact add_le_add
+              (mul_le_mul_of_nonneg_left ht_sq_le (by positivity)) le_rfl
       _ = ((n : ℝ) / 4 + 1 / (n : ℝ)) +
           ((n : ℝ) / (4 * r ^ 2)) * s ^ 2 := by
             have hnR_pos : (0 : ℝ) < (n : ℝ) := by

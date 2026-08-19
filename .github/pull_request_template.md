@@ -4,5 +4,5 @@
 
 ## Checklist
 
-- [ ] `lake build` succeeds locally
+- [ ] Remote `lake build` succeeds in CI
 - [ ] If you added/changed axioms: updated `status.md`, `AXIOM_AUDIT.md` (and `README.md` counts if applicable)

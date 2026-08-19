@@ -1,7 +1,13 @@
 /-
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Michael R. Douglas
+-/
 
+import Pphi2.IRLimit.Periodization
+import Pphi2.ContinuumLimit.Embedding
+
+/-!
 # Uniform centered bounds for periodized Schwartz functions
 
 The periodization map is defined in the GaussianField dependency by
@@ -10,9 +16,6 @@ periodized temporal Schwartz function is sampled on a finite circle.  The
 bound is uniform for periods `L ≥ 1`; the decay variable is the centered
 physical coordinate, rather than the uncentered representative `val z`.
 -/
-
-import Pphi2.IRLimit.Periodization
-import Pphi2.ContinuumLimit.Embedding
 
 noncomputable section
 
@@ -51,7 +54,8 @@ private lemma tsum_invIntSq :
   rw [tsum_int_eq_zero_add_two_mul_tsum_pnat invIntSq_even hs]
   have hzero : invIntSq 0 = 0 := by simp [invIntSq]
   rw [hzero, zero_add]
-  rw [tsum_pnat_eq_tsum_succ]
+  simp only [nsmul_eq_mul]
+  rw [tsum_pnat_eq_tsum_succ (f := fun n : ℕ => invIntSq (n : ℤ))]
   congr 1
   funext n
   simp [invIntSq]
@@ -61,9 +65,12 @@ private lemma summable_intZeroIndicator :
   apply summable_of_hasFiniteSupport
   refine (Set.finite_singleton (0 : ℤ)).subset ?_
   intro k hk
-  simp only [Set.mem_setOf_eq] at hk
-  by_contra hk0
-  simp [intZeroIndicator, hk0] at hk
+  change intZeroIndicator k ≠ 0 at hk
+  have hk0 : k = 0 := by
+    by_contra hne
+    apply hk
+    simp [intZeroIndicator, hne]
+  simpa [hk0]
 
 private lemma schwartz_zero_decay (h : SchwartzMap ℝ ℝ) :
     ∀ x : ℝ, |h x| ≤
@@ -77,7 +84,7 @@ private lemma schwartz_zero_decay (h : SchwartzMap ℝ ℝ) :
   have hbd' : (1 + |x|) ^ 2 * |h x| ≤
       4 * ((Finset.Iic ((2 : ℕ), (0 : ℕ))).sup
         (fun m => SchwartzMap.seminorm ℝ m.1 m.2)) h := by
-    simpa [iteratedDeriv_zero, Real.norm_eq_abs] using hbd
+    convert hbd using 1 <;> norm_num [iteratedDeriv_zero, Real.norm_eq_abs]
   rw [le_div_iff₀ (sq_pos_of_pos (by positivity : (0 : ℝ) < 1 + |x|))]
   simpa [mul_comm] using hbd'
 
@@ -105,9 +112,7 @@ private lemma periodizeCLM_centered_decay_of_pointwise
     rw [Real.norm_eq_abs]
     by_cases hk : k = 0
     · subst hk
-      simp only [u, intZeroIndicator, if_pos, invIntSq, A, B]
-      rw [zero_mul, add_zero]
-      exact hdecay t
+      simpa [u, intZeroIndicator, invIntSq, A, B] using hdecay t
     · have hk_ne : k ≠ 0 := hk
       have hk_abs_pos : 0 < (k.natAbs : ℝ) := by
         exact_mod_cast (Int.natAbs_pos.mpr hk_ne)
@@ -163,7 +168,10 @@ private lemma periodizeCLM_centered_decay_of_pointwise
       have hL_ratio : (1 + |t|) ^ 2 ≤ (9 / 4 : ℝ) * L ^ 2 := by
         have ht1 : 1 + |t| ≤ (3 / 2 : ℝ) * L := by
           nlinarith [ht, hL1]
-        nlinarith [sq_nonneg ((3 / 2 : ℝ) * L - (1 + |t|))]
+        calc
+          (1 + |t|) ^ 2 ≤ ((3 / 2 : ℝ) * L) ^ 2 :=
+            pow_le_pow_left₀ (by positivity) ht1 2
+          _ = (9 / 4 : ℝ) * L ^ 2 := by ring
       have htail : |h (t + (k : ℝ) * L)| ≤
           B * invIntSq k := by
         dsimp [B, invIntSq]
@@ -172,8 +180,7 @@ private lemma periodizeCLM_centered_decay_of_pointwise
         have htail_rhs :
             36 * S / (1 + |t|) ^ 2 * (1 / (k.natAbs : ℝ) ^ 2) =
               36 * S / ((k.natAbs : ℝ) ^ 2 * (1 + |t|) ^ 2) := by
-          field_simp [hk2, hden_pos.ne']
-          ring
+          field_simp [hk2, hden_pos.ne'] <;> ring
         rw [htail_rhs]
         rw [le_div_iff₀ (mul_pos hk2 hden_pos)]
         calc
@@ -190,8 +197,7 @@ private lemma periodizeCLM_centered_decay_of_pointwise
               16 * S / ((k.natAbs : ℝ) ^ 2 * L ^ 2) *
                   ((k.natAbs : ℝ) ^ 2 * (1 + |t|) ^ 2) =
                 (16 * S * (1 + |t|) ^ 2) / L ^ 2 := by
-                  field_simp [hk2, sq_pos_of_pos hLt_pos]
-                  ring
+                  field_simp [hk2, sq_pos_of_pos hLt_pos] <;> ring
               _ ≤ (16 * S * ((9 / 4 : ℝ) * L ^ 2)) / L ^ 2 := by
                 exact div_le_div_of_nonneg_right hscaled
                   (le_of_lt (sq_pos_of_pos hLt_pos))
@@ -210,7 +216,7 @@ private lemma periodizeCLM_centered_decay_of_pointwise
     have hB0 : Summable (fun k : ℤ => B * invIntSq k) :=
       summable_invIntSq.mul_left B
     dsimp [u]
-    rw [hA0.tsum_add hB0, tsum_mul_left, tsum_invIntSq]
+    rw [hA0.tsum_add hB0, tsum_mul_left, tsum_mul_left, tsum_invIntSq]
     have hzero : (∑' k : ℤ, intZeroIndicator k) = 1 := by
       simp [intZeroIndicator]
     rw [hzero]
@@ -255,7 +261,12 @@ theorem periodizeCLM_circlePoint_centered_decay
       constructor <;> linarith [hs2r.1, hs2r.2]
     dsimp [t]
     rw [abs_div, abs_mul, abs_of_pos hL.out, abs_of_pos hN_pos]
-    nlinarith
+    have hmul := mul_le_mul_of_nonneg_right hs_abs (le_of_lt hL.out)
+    calc
+      |(s : ℝ)| * L / (N : ℝ) ≤
+          (((N : ℝ) / 2) * L) / (N : ℝ) :=
+        div_le_div_of_nonneg_right hmul (le_of_lt hN_pos)
+      _ = L / 2 := by field_simp [hN_pos.ne'] <;> ring
   have hcenter := periodizeCLM_centered_decay_of_pointwise h S
     (apply_nonneg _ _)
     (schwartz_zero_decay h) L hL1 t hst
@@ -263,11 +274,14 @@ theorem periodizeCLM_circlePoint_centered_decay
       (periodizeCLM L h).toFun (circlePoint L N z) =
         (periodizeCLM L h).toFun t := by
     by_cases hz : (ZMod.val z : ℤ) ≤ (N : ℤ) / 2
-    · have hs : s = (ZMod.val z : ℤ) := by simp [s, signedVal, hz]
+    · have hs : s = (ZMod.val z : ℤ) := by
+        dsimp [s, signedVal]
+        rw [if_pos hz]
       dsimp only [t, circlePoint]
       simp [hs]
     · have hs : s = (ZMod.val z : ℤ) - (N : ℤ) := by
-        simp [s, signedVal, hz]
+        dsimp [s, signedVal]
+        rw [if_neg hz]
       have hdiff : circlePoint L N z = t + L := by
         dsimp only [t, circlePoint]
         rw [hs]
@@ -311,14 +325,14 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
       2 * h (t + (k : ℝ) * L)
   have hden_pos : 0 < (1 + |t|) ^ 2 := by positivity
   have hLt_pos : 0 < L := hL.out
-  have hsum₊ : Summable (fun k : ℤ => h (t + a + (k : ℝ) * L)) :=
+  have hsumPlus : Summable (fun k : ℤ => h (t + a + (k : ℝ) * L)) :=
     periodize_summable L h (t + a)
-  have hsum₋ : Summable (fun k : ℤ => h (t - a + (k : ℝ) * L)) :=
+  have hsumMinus : Summable (fun k : ℤ => h (t - a + (k : ℝ) * L)) :=
     periodize_summable L h (t - a)
-  have hsum₀ : Summable (fun k : ℤ => h (t + (k : ℝ) * L)) :=
+  have hsumZero : Summable (fun k : ℤ => h (t + (k : ℝ) * L)) :=
     periodize_summable L h t
   have hsum_d : Summable d := by
-    exact (hsum₊.add hsum₋).sub (hsum₀.mul_left 2)
+    exact (hsumPlus.add hsumMinus).sub (hsumZero.mul_left 2)
   have hsum_u : Summable u := by
     dsimp [u]
     exact (summable_intZeroIndicator.mul_left A).add
@@ -387,7 +401,10 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
       have hL_ratio : (1 + |t|) ^ 2 ≤ (9 / 4 : ℝ) * L ^ 2 := by
         have ht1 : 1 + |t| ≤ (3 / 2 : ℝ) * L := by
           nlinarith [ht, hL4]
-        nlinarith [sq_nonneg ((3 / 2 : ℝ) * L - (1 + |t|))]
+        calc
+          (1 + |t|) ^ 2 ≤ ((3 / 2 : ℝ) * L) ^ 2 :=
+            pow_le_pow_left₀ (by positivity) ht1 2
+          _ = (9 / 4 : ℝ) * L ^ 2 := by ring
       have htail : |d k| ≤ B * invIntSq k := by
         dsimp [B, invIntSq]
         rw [if_neg hk]
@@ -433,7 +450,7 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
     have hB0 : Summable (fun k : ℤ => B * invIntSq k) :=
       summable_invIntSq.mul_left B
     dsimp [u]
-    rw [hA0.tsum_add hB0, tsum_mul_left, tsum_invIntSq]
+    rw [hA0.tsum_add hB0, tsum_mul_left, tsum_mul_left, tsum_invIntSq]
     have hzero : (∑' k : ℤ, intZeroIndicator k) = 1 := by
       simp [intZeroIndicator]
     rw [hzero]
@@ -444,8 +461,8 @@ private lemma periodizeCLM_centered_second_diff_normalized_of_pointwise
           (periodizeCLM L h).toFun (t - a) -
       2 * (periodizeCLM L h).toFun t = ∑' k : ℤ, d k := by
     rw [periodizeCLM_apply, periodizeCLM_apply, periodizeCLM_apply]
-    rw [← hsum₊.tsum_add hsum₋, ← tsum_mul_left,
-      ← (hsum₊.add hsum₋).tsum_sub (hsum₀.mul_left 2)]
+    rw [← hsumPlus.tsum_add hsumMinus, ← tsum_mul_left,
+      ← (hsumPlus.add hsumMinus).tsum_sub (hsumZero.mul_left 2)]
     congr 1
     funext k
     dsimp [d]
@@ -490,6 +507,8 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
     nlinarith [hphys]
   let s : ℤ := signedVal N z
   let t : ℝ := (s : ℝ) * L / N
+  have hzval : (ZMod.val z : ℤ) < (N : ℤ) := by
+    exact_mod_cast ZMod.val_lt z
   have hs2 : -(N : ℤ) ≤ 2 * s ∧ 2 * s ≤ (N : ℤ) := by
     dsimp [s, signedVal]
     split_ifs <;> omega
@@ -505,18 +524,26 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
       constructor <;> linarith [hs2r.1, hs2r.2]
     dsimp [t]
     rw [abs_div, abs_mul, abs_of_pos hL.out, abs_of_pos hN_pos]
-    nlinarith
+    have hmul := mul_le_mul_of_nonneg_right hs_abs (le_of_lt hL.out)
+    calc
+      |(s : ℝ)| * L / (N : ℝ) ≤
+          (((N : ℝ) / 2) * L) / (N : ℝ) :=
+        div_le_div_of_nonneg_right hmul (le_of_lt hN_pos)
+      _ = L / 2 := by field_simp [hN_pos.ne'] <;> ring
   have hraw := periodizeCLM_centered_second_diff_normalized_of_pointwise h
     (q h) hq_nonneg a ha ha1 hdd L hL4 t ht
   have hcenter_eq :
-      (periodizeCLM L h).toFun (circlePoint L N z) =
-        (periodizeCLM L h).toFun t := by
+      (periodizeCLM L h) (circlePoint L N z) =
+        (periodizeCLM L h) t := by
     by_cases hz : (ZMod.val z : ℤ) ≤ (N : ℤ) / 2
-    · have hs' : s = (ZMod.val z : ℤ) := by simp [s, signedVal, hz]
+    · have hs' : s = (ZMod.val z : ℤ) := by
+        dsimp [s, signedVal]
+        rw [if_pos hz]
       dsimp only [t, circlePoint]
       simp [hs']
     · have hs' : s = (ZMod.val z : ℤ) - (N : ℤ) := by
-        simp [s, signedVal, hz]
+        dsimp [s, signedVal]
+        rw [if_neg hz]
       have hdiff : circlePoint L N z = t + L := by
         dsimp only [t, circlePoint]
         rw [hs']
@@ -526,8 +553,8 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
       rw [hdiff]
       exact (periodizeCLM L h).periodic' t
   have hsucc :
-      (periodizeCLM L h).toFun (circlePoint L N (z + 1)) =
-        (periodizeCLM L h).toFun (circlePoint L N z + a) := by
+      (periodizeCLM L h) (circlePoint L N (z + 1)) =
+        (periodizeCLM L h) (circlePoint L N z + a) := by
     have hdvd : (N : ℤ) ∣ ((z.val : ℤ) + 1 - ((z + 1 : ZMod N).val : ℤ)) := by
       rw [← Int.modEq_iff_dvd, ← ZMod.intCast_eq_intCast_iff]
       simp
@@ -539,15 +566,15 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
       linarith
     have harg : circlePoint L N (z + 1) =
         circlePoint L N z + a - (r : ℝ) * L := by
-      rw [hval]
       dsimp [circlePoint]
+      rw [hval]
       field_simp [hN_ne]
       nlinarith [hphys]
     rw [harg]
     exact (periodizeCLM L h).periodic'.sub_int_mul_eq r
   have hpred :
-      (periodizeCLM L h).toFun (circlePoint L N (z - 1)) =
-        (periodizeCLM L h).toFun (circlePoint L N z - a) := by
+      (periodizeCLM L h) (circlePoint L N (z - 1)) =
+        (periodizeCLM L h) (circlePoint L N z - a) := by
     have hdvd : (N : ℤ) ∣ ((z.val : ℤ) - 1 - ((z - 1 : ZMod N).val : ℤ)) := by
       rw [← Int.modEq_iff_dvd, ← ZMod.intCast_eq_intCast_iff]
       simp
@@ -559,21 +586,24 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
       linarith
     have harg : circlePoint L N (z - 1) =
         circlePoint L N z - a - (r : ℝ) * L := by
-      rw [hval]
       dsimp [circlePoint]
+      rw [hval]
       field_simp [hN_ne]
       nlinarith [hphys]
     rw [harg]
     exact (periodizeCLM L h).periodic'.sub_int_mul_eq r
   have hcenter_shift :
-      (periodizeCLM L h).toFun (circlePoint L N z + a) =
-        (periodizeCLM L h).toFun (t + a) := by
+      (periodizeCLM L h) (circlePoint L N z + a) =
+        (periodizeCLM L h) (t + a) := by
     by_cases hz : (ZMod.val z : ℤ) ≤ (N : ℤ) / 2
-    · have hs' : s = (ZMod.val z : ℤ) := by simp [s, signedVal, hz]
+    · have hs' : s = (ZMod.val z : ℤ) := by
+        dsimp [s, signedVal]
+        rw [if_pos hz]
       dsimp only [t, circlePoint]
       simp [hs', ha_eq]
     · have hs' : s = (ZMod.val z : ℤ) - (N : ℤ) := by
-        simp [s, signedVal, hz]
+        dsimp [s, signedVal]
+        rw [if_neg hz]
       have hdiff : circlePoint L N z = t + L := by
         dsimp only [t, circlePoint]
         rw [hs']
@@ -584,14 +614,17 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
       simpa [add_assoc, add_comm, add_left_comm] using
         (periodizeCLM L h).periodic' (t + a)
   have hcenter_shift' :
-      (periodizeCLM L h).toFun (circlePoint L N z - a) =
-        (periodizeCLM L h).toFun (t - a) := by
+      (periodizeCLM L h) (circlePoint L N z - a) =
+        (periodizeCLM L h) (t - a) := by
     by_cases hz : (ZMod.val z : ℤ) ≤ (N : ℤ) / 2
-    · have hs' : s = (ZMod.val z : ℤ) := by simp [s, signedVal, hz]
+    · have hs' : s = (ZMod.val z : ℤ) := by
+        dsimp [s, signedVal]
+        rw [if_pos hz]
       dsimp only [t, circlePoint]
       simp [hs', ha_eq]
     · have hs' : s = (ZMod.val z : ℤ) - (N : ℤ) := by
-        simp [s, signedVal, hz]
+        dsimp [s, signedVal]
+        rw [if_neg hz]
       have hdiff : circlePoint L N z = t + L := by
         dsimp only [t, circlePoint]
         rw [hs']

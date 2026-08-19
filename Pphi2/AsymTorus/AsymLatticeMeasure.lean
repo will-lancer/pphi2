@@ -1,7 +1,14 @@
 /-
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Michael R. Douglas
+-/
 
+import Lattice.AsymCovariance
+import Lattice.AsymFiniteField
+import Pphi2.InteractingMeasure.LatticeMeasure
+
+/-!
 # Heterogeneous isotropic lattice measures (Z_Nt × Z_Ns)
 
 The Gaussian (and, downstream, interacting) P(φ)₂ measures on the *heterogeneous* lattice
@@ -24,10 +31,6 @@ replaced by `AsymLatticeField Nt Ns` and the isotropic covariance. The cell area
 and the volume `Nt·Ns·a² = Lt·Ls`, so the `d = 2` Glimm–Jaffe normalisation factor is
 `(a²)^{-1/2} = 1/a` (built into `latticeCovarianceAsymGJ`).
 -/
-
-import Lattice.AsymCovariance
-import Lattice.AsymFiniteField
-import Pphi2.InteractingMeasure.LatticeMeasure
 
 noncomputable section
 
@@ -281,7 +284,7 @@ theorem interactingLatticeMeasureAsym_integrable_exp_of_sub_interaction_le
       intro ω
       simp only [Real.norm_eq_abs, bw, boltzmannWeightAsym]
       rw [abs_of_nonneg (mul_nonneg (Real.exp_pos _).le
-          (Real.exp_pos _).le), abs_of_nonneg (Real.exp_pos C).le]
+          (Real.exp_pos _).le)]
       rw [← Real.exp_add]
       apply Real.exp_le_exp.mpr
       simpa [sub_eq_add_neg] using hbound ω
