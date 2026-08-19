@@ -160,12 +160,8 @@ theorem interactionFunctionalAsym_hasDerivAt_coordinateShift
     intro x hx
     have harg := (hasDerivAt_const t ((evalMapAsym Nt Ns ω) x)).add
       ((hasDerivAt_id t).mul_const (v x))
-    have harg' : HasDerivAt
-        (fun s : ℝ => (evalMapAsym Nt Ns ω) x + s * v x) (v x) t := by
-      simpa [Pi.add_apply, Pi.mul_apply, id] using harg
-    simpa [Function.comp_apply] using
-      ((wickPolynomial_hasDerivAt P (wickConstantAsym Nt Ns a mass)
-        ((evalMapAsym Nt Ns ω) x + t * v x)).comp t harg')
+    convert (wickPolynomial_hasDerivAt P (wickConstantAsym Nt Ns a mass)
+      ((evalMapAsym Nt Ns ω) x + t * v x)).comp t harg using 1 <;> ring
   have hscaled := hsum.const_mul (a ^ 2)
   convert hscaled using 1
   · funext s
@@ -417,7 +413,7 @@ theorem asymQuadraticForm_hasDerivAt_fieldShift
       ∑ x : AsymLatticeSites Nt Ns,
         (v x * (Q φ x + t * (Q v) x) +
           (φ x + t * v x) * (Q v) x)
-    rw [Finset.sum_add, hself']
+    rw [Finset.sum_add_distrib, hself']
     ring
 
 /-- Directional derivative of the source exponent with explicit strength `κ`. -/

@@ -634,13 +634,13 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
   rw [circleSpacing_eq, hsqrt]
   have hsq : 0 ≤ Real.sqrt a := Real.sqrt_nonneg _
   have hraw' := hraw
-  rw [show 2 * (Real.sqrt a * (periodizeCLM L h).toFun t) -
-      Real.sqrt a * (periodizeCLM L h).toFun (t + a) -
-      Real.sqrt a * (periodizeCLM L h).toFun (t - a) =
+  rw [show 2 * (Real.sqrt a * (periodizeCLM L h) t) -
+      Real.sqrt a * (periodizeCLM L h) (t + a) -
+      Real.sqrt a * (periodizeCLM L h) (t - a) =
       Real.sqrt a *
-        (-( (periodizeCLM L h).toFun (t + a) +
-            (periodizeCLM L h).toFun (t - a) -
-            2 * (periodizeCLM L h).toFun t)) by ring]
+        (-( (periodizeCLM L h) (t + a) +
+            (periodizeCLM L h) (t - a) -
+            2 * (periodizeCLM L h) t)) by ring]
   rw [abs_mul, abs_of_nonneg hsq, abs_neg]
   calc
     Real.sqrt a * |(a ^ 2 : ℝ)⁻¹ *
