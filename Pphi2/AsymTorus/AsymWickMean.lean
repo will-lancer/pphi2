@@ -307,7 +307,8 @@ theorem interactingLatticeMeasureAsym_exp_moment_le_exp_of_sub_interaction_le
     simpa only [one_mul] using hmono
   have bw_nn : Configuration (AsymLatticeField Nt Ns) → NNReal :=
     fun ω => Real.toNNReal (bw ω)
-  have hbw_nn_meas : Measurable bw_nn := Measurable.real_toNNReal hbw_meas
+  have hbw_nn_meas : Measurable bw_nn := by
+    simpa [bw_nn] using Measurable.real_toNNReal hbw_meas
   change ∫ ω, F ω ∂(interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) ≤
     Real.exp C
   unfold interactingLatticeMeasureAsym
@@ -315,7 +316,14 @@ theorem interactingLatticeMeasureAsym_exp_moment_le_exp_of_sub_interaction_le
   have wd_eq :
       ∫ ω, F ω ∂(μG.withDensity (fun ω => ENNReal.ofReal (bw ω))) =
         ∫ ω, bw ω * F ω ∂μG := by
-    change ∫ ω, F ω ∂(μG.withDensity (fun ω => ↑(bw_nn ω))) = _
+    have hbw_density :
+        (fun ω => ENNReal.ofReal (bw ω)) =
+          (fun ω => (bw_nn ω : ENNReal)) := by
+      funext ω
+      simpa [bw_nn] using
+        (ENNReal.ofReal_eq_coe_nnreal
+          (le_of_lt (boltzmannWeightAsym_pos Nt Ns P a mass ω)))
+    rw [hbw_density]
     rw [integral_withDensity_eq_integral_smul hbw_nn_meas]
     congr 1
     ext ω

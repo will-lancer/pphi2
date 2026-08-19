@@ -57,7 +57,10 @@ private lemma tsum_invIntSq :
   simp only [nsmul_eq_mul]
   rw [tsum_pnat_eq_tsum_succ (f := fun n : ℕ => invIntSq (n : ℤ))]
   congr 1
-  simp [invIntSq]
+  apply tsum_congr
+  intro n
+  have hn : (n : ℤ) + 1 ≠ 0 := by omega
+  simp [invIntSq, hn]
 
 private lemma summable_intZeroIndicator :
     Summable intZeroIndicator := by
@@ -628,7 +631,7 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
   rw [circleRestriction_apply, circleRestriction_apply, circleRestriction_apply]
   rw [hcenter_eq, hsucc, hpred, hcenter_shift, hcenter_shift']
   have hsqrt : Real.sqrt (L / (N : ℝ)) = Real.sqrt a := by rw [ha_eq]
-  rw [hsqrt]
+  rw [circleSpacing_eq, hsqrt]
   have hsq : 0 ≤ Real.sqrt a := Real.sqrt_nonneg _
   have hraw' := hraw
   rw [show 2 * (Real.sqrt a * (periodizeCLM L h).toFun t) -

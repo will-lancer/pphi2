@@ -75,7 +75,7 @@ theorem circleRestriction_fourierBasis_eq_latticeFourierBasisFun
         SmoothMap_Circle.fourierBasis_apply, latticeFourierBasisFun,
         SmoothMap_Circle.fourierBasisFun]
       split_ifs with h
-      · rw [arg_eq]
+      · simp only [arg_eq]
         calc
           Real.sqrt (L / ↑N) *
               (Real.sqrt (2 / L) *
@@ -88,7 +88,7 @@ theorem circleRestriction_fourierBasis_eq_latticeFourierBasisFun
                 Real.cos (2 * π * ↑(n / 2 + 1) *
                   circlePoint L N z / L) := by
             rw [sqrt_factor 2 (by norm_num)]
-      · rw [arg_eq]
+      · simp only [arg_eq]
         calc
           Real.sqrt (L / ↑N) *
               (Real.sqrt (2 / L) *

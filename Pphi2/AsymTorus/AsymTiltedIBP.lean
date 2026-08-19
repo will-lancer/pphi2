@@ -85,7 +85,6 @@ theorem wickPolynomial_hasDerivAt (P : InteractionPolynomial) (c x : ℝ) :
     convert h using 1
     · ext y
       simp [Finset.sum_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
-    · simp [Finset.sum_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
   have h := htop.add hsum
   simpa [wickPolynomialDerivative, Finset.sum_apply, Pi.add_apply,
     Pi.smul_apply, smul_eq_mul, mul_assoc] using h
@@ -161,10 +160,20 @@ theorem interactionFunctionalAsym_hasDerivAt_coordinateShift
     intro x hx
     have harg := (hasDerivAt_const t ((evalMapAsym Nt Ns ω) x)).add
       ((hasDerivAt_id t).mul_const (v x))
-    convert (wickPolynomial_hasDerivAt P (wickConstantAsym Nt Ns a mass)
-      ((evalMapAsym Nt Ns ω) x + t * v x)).comp t harg using 1 <;> ring
+    have harg' : HasDerivAt
+        (fun s : ℝ => (evalMapAsym Nt Ns ω) x + s * v x) (v x) t := by
+      simpa [Pi.add_apply, Pi.mul_apply, id] using harg
+    simpa [Function.comp_apply] using
+      ((wickPolynomial_hasDerivAt P (wickConstantAsym Nt Ns a mass)
+        ((evalMapAsym Nt Ns ω) x + t * v x)).comp t harg')
   have hscaled := hsum.const_mul (a ^ 2)
   convert hscaled using 1
+  · funext s
+    unfold interactionFunctionalAsym
+    apply congrArg (fun z : ℝ => a ^ 2 * z)
+    apply Finset.sum_congr rfl
+    intro x hx
+    rw [asymCoordinateShift_eval_delta]
 
 /-! ## Source exponent and tilted-density chain rule -/
 
@@ -373,7 +382,7 @@ theorem asymQuadraticForm_hasDerivAt_fieldShift
       ((hasDerivAt_id t).mul_const (v x))
     have hQ := (hasDerivAt_const t (Q φ x)).add
       ((hasDerivAt_id t).mul_const (Q v x))
-    convert hφ.mul hQ using 1 <;> ring
+    convert hφ.mul hQ using 1 <;> simp [id] <;> ring
   have hself :
       ∑ x : AsymLatticeSites Nt Ns,
         (φ + t • v) x * (Q v) x =
@@ -403,9 +412,12 @@ theorem asymQuadraticForm_hasDerivAt_fieldShift
           v x * (Q φ x + t * (Q v) x) := by
       simpa [Q, map_add, map_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
         using hself
-    rw [← hself', Finset.mul_sum]
-    apply Finset.sum_congr rfl
-    intro x hx
+    change 2 * ∑ x : AsymLatticeSites Nt Ns,
+        v x * (Q φ x + t * (Q v) x) =
+      ∑ x : AsymLatticeSites Nt Ns,
+        (v x * (Q φ x + t * (Q v) x) +
+          (φ x + t * v x) * (Q v) x)
+    rw [Finset.sum_add, hself']
     ring
 
 /-- Directional derivative of the source exponent with explicit strength `κ`. -/
