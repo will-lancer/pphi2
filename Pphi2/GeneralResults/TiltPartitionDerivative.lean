@@ -1,7 +1,12 @@
 /-
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Michael R. Douglas
 -/
+
+import Mathlib.Analysis.Calculus.ParametricIntegral
+import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+import Mathlib.MeasureTheory.Measure.Tilted
 
 /-!
 # Differentiating an exponentially tilted partition function
@@ -16,10 +21,6 @@ The second theorem rewrites the logarithmic derivative as the first moment of
 probabilistic estimate remains an input to these purely measure-theoretic
 lemmas.
 -/
-
-import Mathlib.Analysis.Calculus.ParametricIntegral
-import Mathlib.Analysis.SpecialFunctions.Log.Deriv
-import Mathlib.MeasureTheory.Measure.Tilted
 
 noncomputable section
 

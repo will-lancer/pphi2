@@ -1,7 +1,12 @@
 /-
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Michael R. Douglas
+-/
 
+import Pphi2.GeneralResults.WeakLimitMoment
+
+/-!
 # A finite exponential bound controls a normalized tilted moment
 
 This file contains the elementary measure-theoretic adapter used when a
@@ -11,8 +16,6 @@ exponent `F` with an integrable `exp (2 * F)` has an integrable first moment
 under the normalized tilt by `F`; the denominator of the tilt is at least
 one because the base measure is a probability measure.
 -/
-
-import Pphi2.GeneralResults.WeakLimitMoment
 
 noncomputable section
 
@@ -78,19 +81,7 @@ theorem integrable_tilted_first_moment_le_of_exp_two
       (1 : ℝ) = ∫ _ : α, (1 : ℝ) ∂μ := by simp
       _ ≤ ∫ x, Real.exp (F x) ∂μ := by
         apply integral_mono (integrable_const 1) h_exp1
-        exact ae_of_all _ (fun x => Real.one_le_exp (hF_nonneg x))
-
-  have h_source_int :
-      Integrable
-        (fun x => (Real.exp (F x) / (∫ y, Real.exp (F y) ∂μ)) * F x) μ := by
-    have hmul :=
-      (integrable_tilted_iff h_exp1 F).mp hF_tilt
-    have hscaled := hmul.const_mul
-      ((∫ y, Real.exp (F y) ∂μ)⁻¹)
-    convert hscaled using 1
-    · funext x
-      simp only [smul_eq_mul, div_eq_mul_inv]
-      ring
+        exact fun x => Real.one_le_exp (hF_nonneg x)
 
   have h_source_nonneg :
       0 ≤ᵐ[μ] fun x =>
@@ -135,7 +126,7 @@ theorem integrable_tilted_first_moment_le_of_exp_two
       (∫ x, (Real.exp (F x) /
           (∫ y, Real.exp (F y) ∂μ)) * F x ∂μ) ≤
           ∫ x, Real.exp (2 * F x) ∂μ :=
-        integral_mono_of_nonneg h_source_nonneg h_source_int h_source_le
+        integral_mono_of_nonneg h_source_nonneg h_exp2 h_source_le
       _ ≤ B := h_exp2_bound
 
   have h_tilt_integral_eq :
@@ -144,8 +135,6 @@ theorem integrable_tilted_first_moment_le_of_exp_two
           (∫ y, Real.exp (F y) ∂μ)) * F x ∂μ := by
     rw [integral_tilted]
     congr 1
-    funext x
-    simp only [smul_eq_mul]
 
   refine ⟨hF_tilt, ?_⟩
   rw [h_tilt_integral_eq]
@@ -194,6 +183,7 @@ theorem integrable_tilted_first_moment_le_of_log_exp_two
     convert h_exp2 using 1
     ext x
     simp [smul_eq_mul, ← Real.exp_add]
+    ring
 
   have hF_tilt' : Integrable F ν := by
     simpa [ν] using hF_tilt
@@ -234,14 +224,16 @@ theorem integrable_tilted_first_moment_le_of_log_exp_two
       (1 : ℝ) = ∫ _ : α, (1 : ℝ) ∂μ := by simp
       _ ≤ ∫ x, Real.exp (F x) ∂μ := by
         apply integral_mono (integrable_const 1) h_exp1
-        exact ae_of_all _ (fun x => Real.one_le_exp (hF_nonneg x))
+        exact fun x => Real.one_le_exp (hF_nonneg x)
 
   have h_ratio_le :
       (∫ x, Real.exp (2 * F x) ∂μ) /
           (∫ x, Real.exp (F x) ∂μ) ≤ Real.exp C := by
     apply (div_le_iff₀ hZ1_pos).2
     exact h_exp2_bound.trans
-      (mul_le_mul_of_nonneg_left hZ1_one (Real.exp_pos C).le)
+      (by
+        simpa only [mul_one] using
+          (mul_le_mul_of_nonneg_left hZ1_one (Real.exp_pos C).le))
 
   have h_exp_integral_le : Real.exp (∫ x, F x ∂ν) ≤ Real.exp C := by
     calc
