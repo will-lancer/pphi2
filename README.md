@@ -3,8 +3,9 @@
 Formal construction of the P(Φ)₂ Euclidean quantum field theory in Lean 4,
 following the Glimm-Jaffe/Nelson lattice approach.
 
-> **Status at a glance** (2026-07-21; cylinder OS3/OS2 milestone on branch `t2-conjoined-os`).
-> Builds green (`lake build`), **0 sorries** — the remaining debt is a set of documented,
+> **Status at a glance** (source audit 2026-08-19).
+> The active source has **0 sorries and 27 axiom declarations**. A remote `lake build` and
+> refreshed kernel axiom report are required for this branch. The remaining debt is a set of documented,
 > mostly-vetted project axioms. Most-developed line: the **T²_L torus** (OS0–OS2, axiom-free). On the
 > **cylinder** (Route B′) the OS0/OS1/OS2/OS3 theorem `cylinderIso_OS_of_RP_OS2` is now
 > quartic-only (`P.n = 4`; takes `P, hP, mass, hmass`): **reflection positivity (OS3) was fully
@@ -278,11 +279,11 @@ consistency checks:
 
 ## Current status
 
-All six phases are structurally complete and the full project builds
-(`lake build`).
+All six phases are represented in the source. This branch awaits a remote
+`lake build` and refreshed kernel axiom report.
 
-Current counter (`./scripts/count_axioms.sh`, 2026-07-14): pphi2 **29 raw /
-27 real axioms**, 0 sorries; gaussian-field **3 axioms**, 0 sorries. Net history: the
+Current source counter (`./scripts/count_axioms.sh`, 2026-08-19): pphi2
+**27 axiom declarations**, 0 sorries. The counter now excludes docstring mentions. Net history: the
 post-B-I-cleanup base was 30 raw / 28 real; Phase 4.1 added `pphi2_limit_exists`
 (→ 31/29), and on 2026-07-13/14 two dormant GNS-bridge axioms were proved (`asymTransferNormalized_contract`,
 `asymGroundStateRep_eq_groundIsometry_one`; axiom → theorem, Codex), bringing it to 29/27. `pphi2_limit_exists`

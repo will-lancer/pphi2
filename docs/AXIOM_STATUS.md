@@ -3,18 +3,18 @@
 > ⚠️ **This file is superseded as of 2026-06-21.** The master per-axiom status
 > machine is [`../planning/INDEX.md`](../planning/INDEX.md). The historical log
 > of audit passes and discharges is [`../AXIOM_AUDIT.md`](../AXIOM_AUDIT.md).
-> Live raw counts come from `./scripts/count_axioms.sh`.
+> Live source counts come from `./scripts/count_axioms.sh`.
 >
 > This file used to be a consolidated snapshot. It accumulated drift faster
 > than it could be refreshed and now serves only as a pointer.
 
-## At a glance (refreshed 2026-07-13)
+## At a glance (refreshed 2026-08-19)
 
 | Count | Value | Source |
 |---|---|---|
-| pphi2 axioms (real) | **27** | `count_axioms.sh` reports 29 raw; 2 are docstring matches |
+| pphi2 axiom declarations | **27** | `count_axioms.sh` excludes docstring mentions |
 | pphi2 sorries | **0** | `count_axioms.sh` |
-| gaussian-field axioms | **3** | `count_axioms.sh` |
+| gaussian-field axioms | **2** | `count_axioms.sh` at the pinned `d63a285` |
 | gaussian-field sorries | **0** | `count_axioms.sh` |
 
 Net change since 2026-06-21: `spectral_gap_uniform`/`spectral_gap_lower_bound` removed
@@ -28,10 +28,8 @@ its sole consumer `torus_pphi2_isInteracting_weakCoupling` (carrier file
 after Route A's `torus_pphi2_isInteractingStrict_weakCoupling` (PR #48, 2026-06-07)
 subsumed them.
 
-**Docstring-match false positives** (`count_axioms.sh` regex catches the word
-"axiom" at start of line, including inside docstrings):
-- `Pphi2/NelsonEstimate/LatticeBridge.lean:21`
-- `Pphi2/NelsonEstimate/LayerCake.lean:85`
+The counter requires a declaration name and binder or type delimiter, so prose
+inside docstrings is excluded.
 
 ## Where to look
 

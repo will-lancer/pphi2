@@ -6,23 +6,11 @@ Authors: Michael R. Douglas
 import Pphi2
 
 /-!
-# Kernel axiom certificate generator for pphi2 (A×D compose)
+# Kernel axiom certificate generator for pphi2 Part A
 
-Runs `#print axioms` on the composed A×D target list: Part D Checkpoint-0
-names, then Part A's regression block. This is a union of the two generators,
-not an ours/theirs pick of either side. The output is the
-kernel-authoritative axiom set for this composed list: anything that does
-NOT appear in this trace cannot have leaked through the printed targets.
-
-Checkpoint-0 names (Part D):
-
-* `Pphi2.pphi2_existence`
-* `Pphi2.pphi2_nontriviality`
-* `Pphi2.continuumLimit_nonGaussian`
-* `Pphi2.schwinger_agreement`
-
-Part-A regression block (kept in full after the four names;
-`Pphi2.pphi2_existence` is printed once, as the first Checkpoint-0 name):
+Runs `#print axioms` on Part A's headline and regression targets. The output
+is the kernel-authoritative axiom set for this list: anything absent from
+the trace cannot have leaked through the printed targets.
 
 `main_results` (5) from `formalization.yaml`:
 
@@ -65,14 +53,11 @@ lake env lean audit/axiom_report.lean > audit/axiom-report.txt
 The committed `audit/axiom-report.txt` is the **golden trace**; CI diffs the
 fresh run against it (when wired). The two-file split is deliberate:
 generator vs. golden output, with the underscore/hyphen difference in the
-filename per the hub convention. Do not regenerate the golden in this
-compose (no `#print axioms` run).
+filename per the hub convention. Regenerate the golden only from a successful
+remote build of this branch.
 -/
 
 #print axioms Pphi2.pphi2_existence
-#print axioms Pphi2.pphi2_nontriviality
-#print axioms Pphi2.continuumLimit_nonGaussian
-#print axioms Pphi2.schwinger_agreement
 #print axioms Pphi2.pphi2_main
 #print axioms Pphi2.pphi2_nonGaussianity
 #print axioms Pphi2.pphi2_nontrivial

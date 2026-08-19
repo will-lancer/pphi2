@@ -38,8 +38,10 @@ count_file() {
             | grep -v 'count_axioms:skip' \
             | grep -cv '^[0-9]*:[[:space:]]*--\|^[0-9]*:[[:space:]]*/[-*]\|^[0-9]*:[[:space:]]*\*') || true
     else
-        # Default: a top-level `axiom ` declaration line.
-        n=$(grep "$pattern" "$file" 2>/dev/null \
+        # Default: a top-level `axiom <identifier>` declaration line. Require
+        # the identifier to end the line or be followed by a binder/type
+        # delimiter so prose in docstrings is not counted as a declaration.
+        n=$(grep -E '^[[:space:]]*(private[[:space:]]+)?axiom[[:space:]]+[A-Za-z_][A-Za-z0-9_]*([[:space:]]*$|[[:space:]]*(\(|:))' "$file" 2>/dev/null \
             | grep -v 'count_axioms:skip' \
             | grep -cv '^\s*--\|^\s*/[-*]\|^\s*\*') || true
     fi
@@ -74,7 +76,7 @@ count_in_dir() {
         for file in "${files[@]}"; do
             local rel="${file#$dir/}"
             local axioms
-            axioms=$(count_file "$file" '^\(private \)\?axiom ')
+            axioms=$(count_file "$file" 'axiom')
             local sorries
             sorries=$(count_file "$file" 'sorry')
 

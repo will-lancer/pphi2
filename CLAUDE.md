@@ -52,10 +52,10 @@ Pphi2/
   OSAxioms.lean                 -- Phase 6: OS axiom definitions (E2 action, etc.)
   Main.lean                     -- Phase 6: Main theorem assembly
   Bridge.lean                   -- Bridge between pphi2 and Phi4 approaches
+AXIOM_AUDIT.md                  -- Self-audit of all axioms
 scripts/
   count_axioms.sh               -- Axiom/sorry counter
 docs/
-  axiom_audit.md                -- Self-audit of all axioms
   gemini_review.md              -- External review with references
 ```
 

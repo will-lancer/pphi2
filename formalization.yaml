@@ -1,8 +1,7 @@
 # formalization.yaml — https://github.com/mathlib-initiative/formalization.yaml (v0.3)
 # Describes the post-Phase-4.1 (honest ℝ² headline, 2026-07-13) state of pphi2.
-# Built tree (Pphi2.lean + Common): 0 sorries, 29 real `axiom` declarations
-#   (27 public + 2 private). `scripts/count_axioms.sh` reports "31 raw" because
-#   it also matches 2 docstring lines that begin with the word "axiom".
+# Source tree (Pphi2.lean + Common): 0 sorries, 27 `axiom` declarations
+#   (25 public + 2 private). Remote build and kernel-certificate refresh pending.
 #   Legacy `ddj/` and parked `future/` are NOT part of the default build target.
 version: "v0.3"
 
@@ -45,7 +44,8 @@ status:
     Glimm-Jaffe/Nelson lattice approach. The Osterwalder-Schrader axiom skeleton
     (OS0 analyticity, OS1 regularity, OS2 Euclidean invariance, OS3 reflection
     positivity, OS4 clustering, bundled as `Pphi2.SatisfiesFullOS`) is complete
-    and the default target builds with 0 sorries. The headline existence theorem
+    and the active source tree has 0 sorries. A remote build and refreshed
+    kernel certificate are pending. The headline existence theorem
     `Pphi2.pphi2_existence` (∃ μ on S'(ℝ²) satisfying all five OS axioms) is
     assembled from the lattice construction + continuum limit, but is CONDITIONAL
     on a set of named analytic axioms (uniform exponential moment bounds,
@@ -56,9 +56,9 @@ status:
     is the `Pphi2` library (with `Common`); the legacy `ddj/` directory and the
     parked `future/CylinderContinuumLimit/` directory are NOT in the build and
     contain their own separate axioms/sorries that do not affect the main results.
-  sorry_count: 0                 # in the built Pphi2/ + Common tree
+  sorry_count: 0                 # source scan in Pphi2/ + Common; remote build pending
   sorry_in_definitions: 0
-  axioms:                        # 29 real axiom declarations in the built Pphi2/ tree (27 public + 2 private)
+  axioms:                        # 27 source declarations in Pphi2/ (25 public + 2 private)
     - schwinger_agreement                                  # Bridge.lean
     - os2_from_phi4                                        # Bridge.lean
     - pphi2_nontriviality                                  # Main.lean:158 (restated about-the-limit 2026-07-13)
@@ -75,8 +75,6 @@ status:
     - asymInteracting_mgf_gaussianDominated                # AsymTorus/AsymExpMomentDischarge.lean:127
     - asymInteractingVariance_le_freeVariance_lattice_Lt_uniform # AsymTorus/AsymExpMomentDischarge.lean:215
     - asymGroundStateRep_pos_ae                            # AsymTorus/AsymBridgeInstance.lean:81
-    - asymTransferNormalized_contract                      # AsymTorus/AsymBridgeInstance.lean:128
-    - asymGroundStateRep_eq_groundIsometry_one             # AsymTorus/AsymBridgeInstance.lean:140
     - asymPartition_ground_bound                           # AsymTorus/AsymBridgeInstance.lean:159
     - asymFinitePeriodicBridge_remainder_bound             # AsymTorus/AsymBridgeInstance.lean:174
     - asymGroundSemigroup_intertwines                      # AsymTorus/AsymBridgeInstance.lean:219
@@ -160,7 +158,7 @@ fidelity:
 review:
   status: "self-assessed"
   reviewers: []
-  notes: "0 sorries on the active build; 24 real axiom declarations remain in the built Pphi2/ tree (26 raw per count_axioms.sh; the former uniform-spectral-gap pair was removed 2026-07-12 as false as stated). The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
+  notes: "The source scan finds 0 sorries and 27 axiom declarations in Pphi2/ (25 public and 2 private). A remote build and refreshed kernel certificate are pending. The former uniform-spectral-gap pair was removed 2026-07-12 as false as stated. The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
 
 alignment:
   namespace: "Pphi2"

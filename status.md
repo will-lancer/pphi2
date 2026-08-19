@@ -4,7 +4,8 @@
 
 The project formalizes the construction of P(Φ)₂ Euclidean quantum field theory
 in Lean 4 via the Glimm-Jaffe/Nelson lattice approach. All six phases are
-structurally complete and the full project builds successfully (`lake build`).
+represented in the source. This branch awaits a remote `lake build` and a
+refreshed kernel axiom report.
 
 The proof architecture is: axiomatize key analytic/probabilistic results with
 detailed proof sketches, prove the logical structure connecting them, and
@@ -16,11 +17,9 @@ and backend-independent reconstruction rules. This keeps the current scalar
 positive-measure construction explicit while opening a path to broader
 Euclidean/Minkowski interfaces.
 
-**Current counter (`./scripts/count_axioms.sh`, 2026-07-14): pphi2 29 raw / 27 real axioms,
-0 sorries; gaussian-field 3 axioms, 0 sorries** (both verified via `count_axioms.sh`,
-GaussianField pinned at `5bb35e8`). The 29 raw → 27 real reconciliation: 2 lines are docstring
-matches of the word "axiom" (`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
-`Pphi2/NelsonEstimate/LayerCake.lean:85`).
+**Current source counter (`./scripts/count_axioms.sh`, 2026-08-19): pphi2 27 axiom
+declarations, 0 sorries.** The counter excludes docstring mentions and is a
+source-level check pending the remote build and kernel certificate.
 **2026-07-13 (Phase 4.1, honest ℝ² headline — spec `planning/r2-honest-headline-spec.md`):**
 `IsPphi2Limit` strengthened with the coupled-lattice conjunct (`ν k = continuumMeasure 2 (N k)
 P (a k) mass`, `N k → ∞`, `N k·a k → ∞`) — the δ₀ vacuity is CLOSED; the former δ₀ "proof" of
@@ -51,15 +50,16 @@ two-point decays as `C·√gSV·√gSV'·(e^{−m₀·d·a} + e^{−m₀·(Nt·a
 a-uniformly; kernel footprint = trio + {`asymTransferGap_uniform_fixedLs`,
 `asymFinitePeriodicBridge_remainder_bound_uniform`} only (the definitional
 envelope/residual split avoids the packaged GNS-bridge axioms); no new axioms, counts
-unchanged (30 raw, 0 sorries). The 24 real break down as **22 architectural** (enumerated by OS-program cluster in
+unchanged (30 raw, 0 sorries). The current 27 declarations break down as
+**25 architectural** (enumerated by OS-program cluster in
 [`planning/INDEX.md`](planning/INDEX.md), the master status machine) and **2 private
 scaffolding** (`asymTorusInteracting_exponentialMomentBound` in `AsymTorusOS.lean`,
-`gaussian_rp_cov_perfect_square` in `OS3_RP_Lattice.lean`). The seven new architectural axioms
-are the six isolated Layer-B2 Route-A GNS bridge obligations in
+`gaussian_rp_cov_perfect_square` in `OS3_RP_Lattice.lean`). Four active
+Layer-B2 Route-A GNS bridge obligations remain in
 `Pphi2/AsymTorus/AsymBridgeInstance.lean`: ground representative positivity,
-normalized-transfer contraction, ground-isometry bookkeeping, semigroup
-intertwining, the partition lower bound, and the finite-periodic remainder,
-plus B5b single-slice stability in `Pphi2/AsymTorus/AsymB5bSingleSlice.lean`.
+semigroup intertwining, the partition lower bound, and the finite-periodic
+remainder. B5b single-slice stability remains in
+`Pphi2/AsymTorus/AsymB5bSingleSlice.lean`.
 The superseded-chain axiom
 `torus_weakCoupling_lattice_connectedFourPoint_strictNeg` (plus its dead consumer
 `torus_pphi2_isInteracting_weakCoupling` and the carrier file
@@ -347,7 +347,7 @@ itself is a theorem via `embeddedTwoPoint_eq_latticeGreenBilinear`.
 | B' | `AsymTorus/AsymTorusEmbedding.lean` | 0 axioms, 0 sorries |
 | B' | `AsymTorus/AsymTorusInteractingLimit.lean` | 1 axiom, 0 sorries (`asymNelson_exponential_estimate` only — Cluster A Nelson estimate; Phase 2 Cluster B complete 2026-05-08: `asymGaussian_second_moment_uniform_bound` discharged via the new `evalAsymAtFinSiteGJ` GJ asym embedding). |
 | B' | `AsymTorus/AsymTorusOS.lean` | 1 axiom, 0 sorries (`asymTorusInteracting_exponentialMomentBound` only — Cluster A; Phase 2 Cluster B complete 2026-05-08: `asymGf_sub_norm_le_seminorm` discharged via the same `(a²)⁻¹·a_geom² = 1` cancellation pattern as the symmetric pair). |
-| 6 | `Bridge.lean` | 3 axioms, 0 sorries |
+| 6 | `Bridge.lean` | 2 axioms, 0 sorries |
 | B'IR | `IRLimit/Periodization.lean` | 0 axioms, 0 sorries (re-exports from gaussian-field) |
 | B'IR | `IRLimit/CylinderEmbedding.lean` | **0 axioms, 0 sorries** (intertwining proved via NTP pure tensor density) |
 | B'IR | `IRLimit/CovarianceConvergence.lean` | 0 axioms, 0 sorries (spectral decompositions, pullback measures, basis machinery) |
