@@ -123,13 +123,13 @@ private lemma centered_second_diff_of_second_deriv_bound
       taylorWithinEval (h : ℝ → ℝ) 1 (Set.uIcc x (x + a)) x (x + a) =
         h x + a * deriv (h : ℝ → ℝ) x := by
     rw [uIcc_of_le (a := x) (b := x + a) (by linarith), taylor_within_apply]
-    simp [iteratedDerivWithin_zero, iteratedDerivWithin_one,
+    simp [Finset.sum_range_succ, iteratedDerivWithin_zero, iteratedDerivWithin_one,
       hplus_base, sub_eq_add_neg, smul_eq_mul]
   have hminus_taylor :
       taylorWithinEval (h : ℝ → ℝ) 1 (Set.uIcc x (x - a)) x (x - a) =
         h x - a * deriv (h : ℝ → ℝ) x := by
     rw [uIcc_of_ge (a := x) (b := x - a) (by linarith), taylor_within_apply]
-    simp [iteratedDerivWithin_zero, iteratedDerivWithin_one,
+    simp [Finset.sum_range_succ, iteratedDerivWithin_zero, iteratedDerivWithin_one,
       hminus_base, sub_eq_add_neg, smul_eq_mul]
   have hplus' :
       h (x + a) - (h x + a * deriv (h : ℝ → ℝ) x) =
