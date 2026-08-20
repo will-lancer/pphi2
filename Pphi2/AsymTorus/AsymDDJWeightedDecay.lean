@@ -130,8 +130,13 @@ theorem asymWeightedLpPow_le_of_centered_temporal_decay
         Real.rpow A (p - 1) * (3 * Ls * A) =
             3 * Ls * (Real.rpow A (p - 1) * A) := by ring
         _ = 3 * Ls * Real.rpow A p := by
-          rw [← Real.rpow_add_one' (x := A) (y := p - 1) hA (by linarith)]
-          congr 1
-          ring
+          calc
+            3 * Ls * (Real.rpow A (p - 1) * A) =
+                3 * Ls * Real.rpow A ((p - 1) + 1) := by
+              congr 1
+              exact (Real.rpow_add_one' hA (y := p - 1) (by linarith)).symm
+            _ = 3 * Ls * Real.rpow A p := by
+              congr 1
+              ring
 
 end Pphi2

@@ -99,7 +99,8 @@ private theorem cylinderSpatialBasis_pointwise_bound
     _ ≤ SmoothMap_Circle.sobolevSeminorm 0
         (SmoothMap_Circle.fourierBasis m) :=
       SmoothMap_Circle.norm_iteratedDeriv_le_sobolevSeminorm' _ 0 _
-    _ ≤ C := hCb m
+    _ ≤ C := by
+      simpa only [pow_zero, mul_one] using hCb m
 
 private theorem cylinderEmbeddedBasis_raw_bound
     (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
@@ -148,7 +149,9 @@ private theorem cylinderEmbeddedBasis_raw_bound
     have hjm : j ≤ m := by
       exact Nat.unpair_right_le m
     have hjm_real : (1 + (j : ℝ)) ≤ 1 + (m : ℝ) := by
-      linarith [Nat.cast_le.mpr hjm]
+      have hjm_cast : (j : ℝ) ≤ (m : ℝ) := by
+        exact_mod_cast hjm
+      linarith
     have hpow : (1 + (j : ℝ)) ^ S ≤ (1 + (m : ℝ)) ^ S := by
       exact pow_le_pow_left₀ (by positivity) hjm_real S
     have hsem : centeredSchwartzSeminorm
@@ -165,7 +168,7 @@ private theorem cylinderEmbeddedBasis_raw_bound
       rw [show ((signedVal Nt x.1 : ℤ) : ℝ) * Lt / Nt =
           ((signedVal Nt x.1 : ℤ) : ℝ) * (Lt / Nt) by ring,
         hLt_ratio, abs_mul, abs_of_pos ha, hs_abs]
-    rw [hden]
+      ring
     calc
       |(periodizeCLM Lt
           (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ) j)).toFun
@@ -173,7 +176,8 @@ private theorem cylinderEmbeddedBasis_raw_bound
           (4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
             centeredSchwartzSeminorm
               (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ) j) /
-            (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := htem
+            (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by
+          simpa only [hden] using htem
       _ ≤ (4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
             (D * (1 + (m : ℝ)) ^ S) /
             (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by
@@ -184,6 +188,12 @@ private theorem cylinderEmbeddedBasis_raw_bound
             D * (1 + (m : ℝ)) ^ S /
             (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by ring
   have hsp' := hCsp Ns x.2 i
+  have htem_bound_nonneg :
+      0 ≤
+        (4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
+          D * (1 + (m : ℝ)) ^ S /
+            (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 :=
+    (abs_nonneg _).trans htem'
   have hformula :
       asymRawSource a
         (asymLatticeTestFnIso Lt Ls Nt Ns a
@@ -205,10 +215,11 @@ private theorem cylinderEmbeddedBasis_raw_bound
           (E := SmoothMap_Circle Ls ℝ))
         (DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis
           (E := SchwartzMap ℝ ℝ)) m]
-      simp [i, j, Nat.pair_unpair]]
+
     simp [cylinderToTorusEmbed_pure, evalAsymTorusAtSite,
       NuclearTensorProduct.evalCLM_pure, ContinuousLinearMap.comp_apply,
       ContinuousLinearMap.proj_apply]
+    ring
   rw [hformula, abs_mul, abs_mul, abs_of_pos (inv_pos.mpr ha)]
   have htem_apply :
       circleRestriction Lt Nt
@@ -219,6 +230,7 @@ private theorem cylinderEmbeddedBasis_raw_bound
             (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ) j)).toFun
             (circlePoint Lt Nt x.1) := by
     rw [circleRestriction_apply, circleSpacing_eq]
+    rfl
   rw [htem_apply, abs_mul, abs_of_nonneg (Real.sqrt_nonneg _)]
   have hroot : a⁻¹ * Real.sqrt (Lt / Nt) * Real.sqrt (Ls / Ns) = 1 := by
     rw [hLt_ratio, hLs_ratio]
@@ -236,10 +248,43 @@ private theorem cylinderEmbeddedBasis_raw_bound
         ((4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
             D * (1 + (m : ℝ)) ^ S /
             (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2) * Cs := by
-      gcongr
-      · positivity
-      · exact htem'
-      · exact hsp'
+      calc
+        a⁻¹ * (Real.sqrt (Lt / Nt) *
+              |(periodizeCLM Lt
+                (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ) j)).toFun
+                (circlePoint Lt Nt x.1)|) *
+            |circleRestriction Ls Ns
+              (DyninMityaginSpace.basis (E := SmoothMap_Circle Ls ℝ) i) x.2| =
+          (a⁻¹ * Real.sqrt (Lt / Nt)) *
+              |(periodizeCLM Lt
+                (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ) j)).toFun
+                (circlePoint Lt Nt x.1)| *
+            |circleRestriction Ls Ns
+              (DyninMityaginSpace.basis (E := SmoothMap_Circle Ls ℝ) i) x.2| := by
+          ring
+        _ ≤ (a⁻¹ * Real.sqrt (Lt / Nt)) *
+              ((4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
+                D * (1 + (m : ℝ)) ^ S /
+                (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2) *
+            |circleRestriction Ls Ns
+              (DyninMityaginSpace.basis (E := SmoothMap_Circle Ls ℝ) i) x.2| := by
+          apply mul_le_mul_of_nonneg_right
+          · exact mul_le_mul_of_nonneg_left htem' (by positivity)
+          · exact abs_nonneg _
+        _ ≤ (a⁻¹ * Real.sqrt (Lt / Nt)) *
+              ((4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
+                D * (1 + (m : ℝ)) ^ S /
+                (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2) *
+            (Real.sqrt (Ls / Ns) * Cs) := by
+          apply mul_le_mul_of_nonneg_left hsp'
+          exact mul_nonneg
+            (mul_nonneg (inv_nonneg.mpr ha.le) (Real.sqrt_nonneg _))
+            htem_bound_nonneg
+        _ = a⁻¹ * Real.sqrt (Lt / Nt) * Real.sqrt (Ls / Ns) *
+              ((4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
+                D * (1 + (m : ℝ)) ^ S /
+                (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2) * Cs := by
+          ring
     _ = (4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
         D * Cs * (1 + (m : ℝ)) ^ S /
           (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by

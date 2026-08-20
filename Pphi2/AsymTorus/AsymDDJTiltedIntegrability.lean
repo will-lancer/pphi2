@@ -59,6 +59,7 @@ theorem asymWeightedLpPow_smul
         _ = Real.rpow |c| p *
             (a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
               Real.rpow |h x| p) := by
+          apply congrArg (fun s : ℝ => Real.rpow |c| p * s)
           rw [Finset.mul_sum]
 
 /-! ## The finite tilted-moment consumer -/
@@ -138,6 +139,7 @@ theorem interactingLatticeMeasureAsym_tilted_integrable_pow_of_weightedLpPow
           (asymRawSource a g) ≤
           Real.rpow (2 : ℝ) p * (1 / 4 : ℝ) ^ p := hbase
       _ = (1 / 2 : ℝ) ^ p := by
+        change (2 : ℝ) ^ p * ((1 / 4 : ℝ) ^ p) = (1 / 2 : ℝ) ^ p
         rw [← Real.mul_rpow (by norm_num : (0 : ℝ) ≤ 2)
           (by norm_num : (0 : ℝ) ≤ 1 / 4)]
         norm_num
