@@ -81,9 +81,11 @@ theorem asymDDJSourceBall_of_centered_decay
   have hr : 0 < r := by
     dsimp [r]
     exact Real.rpow_pos_of_pos hTD _
+  have hp_ne : p ≠ 0 :=
+    ne_of_gt (lt_of_lt_of_le zero_lt_one hp)
   have hrpow : Real.rpow r p = T / D := by
     simpa [r, one_div] using
-      (Real.rpow_inv_rpow hTD.le hp.ne')
+      (Real.rpow_inv_rpow hTD.le hp_ne)
 
   let q : Seminorm ℝ (CylinderTestFunction Ls) := q₀ + q₁
   have hq : Continuous q := by
@@ -172,6 +174,8 @@ theorem asymDDJSourceBall_of_centered_decay
             Real.rpow (A * q₁ f) p =
               Real.rpow A p * Real.rpow (q₁ f) p :=
           Real.mul_rpow hA.le (apply_nonneg q₁ f)
+        change 3 * Ls * Real.rpow (A * q₁ f) p =
+          3 * Ls * Real.rpow A p * Real.rpow (q₁ f) p
         rw [hmul]
         ring
   have hlap_quarter :

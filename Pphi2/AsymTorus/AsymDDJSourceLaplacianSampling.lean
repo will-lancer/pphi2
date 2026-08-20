@@ -27,10 +27,13 @@ private theorem lapTemporalSeminorm_continuous :
     Continuous lapTemporalSeminorm := by
   apply Continuous.add
   · refine Seminorm.continuous_of_le
-      (p := (Finset.Iic ((2 : ℕ), (0 : ℕ))).sup
-        (fun m => SchwartzMap.seminorm ℝ m.1 m.2))
-      (q := ∑ m ∈ Finset.Iic ((2 : ℕ), (0 : ℕ)),
-        SchwartzMap.seminorm ℝ m.1 m.2) ?_ ?_
+      (p := ((Finset.Iic ((2 : ℕ), (0 : ℕ))).sup
+        (fun m : ℕ × ℕ =>
+          SchwartzMap.seminorm (𝕜 := ℝ) (E := ℝ) (F := ℝ) m.1 m.2) :
+        Seminorm ℝ (SchwartzMap ℝ ℝ)))
+      (q := (∑ (m : ℕ × ℕ) ∈ Finset.Iic ((2 : ℕ), (0 : ℕ)),
+        SchwartzMap.seminorm (𝕜 := ℝ) (E := ℝ) (F := ℝ) m.1 m.2 :
+        Seminorm ℝ (SchwartzMap ℝ ℝ))) ?_ ?_
     · change Continuous fun h : SchwartzMap ℝ ℝ =>
         (∑ m ∈ Finset.Iic ((2 : ℕ), (0 : ℕ)),
           SchwartzMap.seminorm ℝ m.1 m.2) h
@@ -163,7 +166,7 @@ private theorem lapTemporal_zero_bound
       1 + |((signedVal Nt z : ℤ) : ℝ) * Lt / Nt| =
         1 + a * ((signedVal Nt z).natAbs : ℝ) := by
     have hs_abs : ((signedVal Nt z).natAbs : ℝ) =
-        |(signedVal Nt z : ℤ) : ℝ| := by
+        |((signedVal Nt z : ℤ) : ℝ)| := by
       simpa using (Nat.cast_natAbs (α := ℝ) (signedVal Nt z))
     rw [show ((signedVal Nt z : ℤ) : ℝ) * Lt / Nt =
         ((signedVal Nt z : ℤ) : ℝ) * (Lt / Nt) by ring,
@@ -230,8 +233,9 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
             (cylinderToTorusEmbed Lt Ls f))) x := by
       dsimp [T, R]
       simp [finiteLaplacianAsymFun,
-        asymRawSource_asymLatticeTestFnIso_apply, smul_eq_mul,
-        ContinuousLinearMap.smul_apply, ContinuousLinearMap.comp_apply]
+        asymRawSource_asymLatticeTestFnIso_apply Lt Ls Nt Ns a ha,
+        smul_eq_mul, ContinuousLinearMap.smul_apply,
+        ContinuousLinearMap.comp_apply]
       ring
     have hN_pos : (0 : ℝ) < Nt := Nat.cast_pos.mpr (NeZero.pos Nt)
     have hNs_pos : (0 : ℝ) < Ns := Nat.cast_pos.mpr (NeZero.pos Ns)
@@ -245,7 +249,7 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
         1 + |((signedVal Nt x.1 : ℤ) : ℝ) * Lt / Nt| =
           1 + a * ((signedVal Nt x.1).natAbs : ℝ) := by
       have hs_abs : ((signedVal Nt x.1).natAbs : ℝ) =
-          |(signedVal Nt x.1 : ℤ) : ℝ| := by
+          |((signedVal Nt x.1 : ℤ) : ℝ)| := by
         simpa using (Nat.cast_natAbs (α := ℝ) (signedVal Nt x.1))
       rw [show ((signedVal Nt x.1 : ℤ) : ℝ) * Lt / Nt =
           ((signedVal Nt x.1 : ℤ) : ℝ) * (Lt / Nt) by ring,
