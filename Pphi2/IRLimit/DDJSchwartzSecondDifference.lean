@@ -32,11 +32,11 @@ theorem centeredSecondDiffSeminorm_continuous :
   · change Continuous fun h : SchwartzMap ℝ ℝ =>
       (∑ m ∈ Finset.Iic ((2 : ℕ), (2 : ℕ)),
         SchwartzMap.seminorm ℝ m.1 m.2) h
-    simp_rw [map_sum, Finset.sum_apply]
     exact continuous_finsetSum _ fun m _ =>
       (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ)).continuous_seminorm m
   · simpa only [centeredSecondDiffSeminorm] using
       (Seminorm.finset_sup_le_sum
+        (𝕜 := ℝ) (E := SchwartzMap ℝ ℝ)
         (fun m : ℕ × ℕ => SchwartzMap.seminorm ℝ m.1 m.2)
         (Finset.Iic ((2 : ℕ), (2 : ℕ))))
 
@@ -93,26 +93,26 @@ private lemma centered_second_diff_of_second_deriv_bound
       derivWithin (h : ℝ → ℝ) (Set.Icc x (x + a)) x =
         deriv (h : ℝ → ℝ) x := by
     exact ((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-      le_top).contDiffAt.differentiableAt_one.derivWithin
+      (mod_cast le_top)).contDiffAt.differentiableAt_one.derivWithin
       (uniqueDiffOn_Icc (by linarith) x (by simp [ha.le]))
   have hminus_base :
       derivWithin (h : ℝ → ℝ) (Set.Icc (x - a) x) x =
         deriv (h : ℝ → ℝ) x := by
     exact ((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-      le_top).contDiffAt.differentiableAt_one.derivWithin
+      (mod_cast le_top)).contDiffAt.differentiableAt_one.derivWithin
       (uniqueDiffOn_Icc (by linarith) x (by simp [ha.le]))
   obtain ⟨yplus, hyplus, hplus⟩ :=
     taylor_mean_remainder_lagrange_iteratedDeriv
       (f := (h : ℝ → ℝ)) (x₀ := x) (x := x + a) (n := 1)
       (by linarith)
       (((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-        le_top).contDiffOn)
+        (mod_cast le_top)).contDiffOn)
   obtain ⟨yminus, hyminus, hminus⟩ :=
     taylor_mean_remainder_lagrange_iteratedDeriv
       (f := (h : ℝ → ℝ)) (x₀ := x) (x := x - a) (n := 1)
       (by linarith)
       (((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-        le_top).contDiffOn)
+        (mod_cast le_top)).contDiffOn)
   have hyplus' : yplus ∈ Set.Icc (x - a) (x + a) := by
     rw [uIoo_of_lt (by linarith)] at hyplus
     constructor <;> linarith [hyplus.1, hyplus.2]

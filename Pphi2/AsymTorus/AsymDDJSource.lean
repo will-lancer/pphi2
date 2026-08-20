@@ -192,8 +192,7 @@ theorem asymWeightedPairing_pow_le
         apply Finset.sum_congr rfl
         intro x hx
         change a ^ 2 * (|v x| ^ (n : ℝ)) = a ^ 2 * |v x| ^ n
-        exact congrArg (fun z : ℝ => a ^ 2 * z)
-          (Real.rpow_natCast (|v x|) n)
+        simpa only [Real.rpow_two, Real.rpow_natCast]
   have hpair :
       |a ^ 2 * ∑ x : α, u x * v x| ≤ ∑ x : α, F x * G x := by
     calc
