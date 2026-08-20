@@ -652,8 +652,8 @@ theorem asymTorusSiteEval_sq_tendsto
     intro N r
     dsimp [fN]
     rw [map_sum]
-    simp only [ContinuousLinearMap.map_smul, smul_eq_mul]
     simp [
+      map_smul (DyninMityaginSpace.coeff r), smul_eq_mul,
       DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis,
       mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_range, eq_comm]
   have hl2_fN : ∀ N,
@@ -736,7 +736,13 @@ theorem asymTorusSiteEval_sq_tendsto
                   (RapidDecaySeq.basisVec n)) := by
           apply Finset.sum_congr rfl
           intro x hx
-          rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.map_smul]
+          have hxm := map_smul
+            (evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x)
+            (DyninMityaginSpace.coeff m f) (RapidDecaySeq.basisVec m)
+          have hxn := map_smul
+            (evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x)
+            (DyninMityaginSpace.coeff n f) (RapidDecaySeq.basisVec n)
+          rw [hxm, hxn]
           simp only [smul_eq_mul]
           ring
         _ = _ := by
@@ -991,7 +997,7 @@ theorem asymTorusSiteEval_sq_tendsto
             have htri := abs_sub_le (S k (fN N₀))
               (l2InnerProduct (fN N₀) (fN N₀))
               (l2InnerProduct f f)
-            exact add_le_add_left htri _
+            exact add_le_add_right htri _
         _ = _ := by ring
     _ < ε / 3 + ε / 3 + ε / 3 := by
       gcongr
