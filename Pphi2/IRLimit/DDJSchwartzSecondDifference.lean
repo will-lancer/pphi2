@@ -32,8 +32,9 @@ theorem centeredSecondDiffSeminorm_continuous :
   · change Continuous fun h : SchwartzMap ℝ ℝ =>
       (∑ m ∈ Finset.Iic ((2 : ℕ), (2 : ℕ)),
         SchwartzMap.seminorm ℝ m.1 m.2) h
-    exact continuous_finsetSum _ fun m _ =>
-      (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ)).continuous_seminorm m
+    simpa only [schwartzSeminormFamily_apply] using
+      (continuous_finsetSum (Finset.Iic ((2 : ℕ), (2 : ℕ))) fun m _ =>
+        (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ)).continuous_seminorm m)
   · simpa only [centeredSecondDiffSeminorm] using
       (Seminorm.finset_sup_le_sum
         (𝕜 := ℝ) (E := SchwartzMap ℝ ℝ)
@@ -105,14 +106,12 @@ private lemma centered_second_diff_of_second_deriv_bound
     taylor_mean_remainder_lagrange_iteratedDeriv
       (f := (h : ℝ → ℝ)) (x₀ := x) (x := x + a) (n := 1)
       (by linarith)
-      (((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-        (mod_cast le_top)).contDiffOn)
+      ((h.smooth 2).contDiffOn)
   obtain ⟨yminus, hyminus, hminus⟩ :=
     taylor_mean_remainder_lagrange_iteratedDeriv
       (f := (h : ℝ → ℝ)) (x₀ := x) (x := x - a) (n := 1)
       (by linarith)
-      (((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-        (mod_cast le_top)).contDiffOn)
+      ((h.smooth 2).contDiffOn)
   have hyplus' : yplus ∈ Set.Icc (x - a) (x + a) := by
     rw [uIoo_of_lt (by linarith)] at hyplus
     constructor <;> linarith [hyplus.1, hyplus.2]
