@@ -663,10 +663,9 @@ theorem asymTorusSiteEval_sq_tendsto
     have hcoeff_basis (u v : ℕ) :
         DyninMityaginSpace.coeff u (RapidDecaySeq.basisVec v) =
           if u = v then 1 else 0 := by
-      change DyninMityaginSpace.coeff u
-          (DyninMityaginSpace.basis
-            (E := AsymTorusTestFunction Lt Ls) v) = _
-      exact DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis u v
+      change (RapidDecaySeq.basisVec v).val u =
+        if u = v then 1 else 0
+      simp [RapidDecaySeq.basisVec]
     rw [map_sum]
     by_cases hr : r ∈ Finset.range N
     · rw [if_pos hr, Finset.sum_eq_single r]
