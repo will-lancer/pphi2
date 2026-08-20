@@ -652,7 +652,7 @@ theorem asymTorusSiteEval_sq_tendsto
     intro N r
     dsimp [fN]
     rw [map_sum]
-    simp_rw [map_smul, smul_eq_mul]
+    simp only [ContinuousLinearMap.map_smul, smul_eq_mul]
     simp [
       DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis,
       mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_range, eq_comm]
@@ -718,8 +718,7 @@ theorem asymTorusSiteEval_sq_tendsto
                    (RapidDecaySeq.basisVec n)) := by
       intro k
       dsimp [S, fN]
-      simp only [Finset.sum_apply, map_sum, map_smul, Pi.smul_apply,
-        smul_eq_mul, pow_two]
+      simp only [map_sum, pow_two]
       simp_rw [Finset.sum_mul_sum]
       rw [Finset.sum_comm]
       apply Finset.sum_congr rfl
@@ -737,7 +736,7 @@ theorem asymTorusSiteEval_sq_tendsto
                   (RapidDecaySeq.basisVec n)) := by
           apply Finset.sum_congr rfl
           intro x hx
-          rw [map_smul, map_smul]
+          rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.map_smul]
           simp only [smul_eq_mul]
           ring
         _ = _ := by
@@ -927,9 +926,14 @@ theorem asymTorusSiteEval_sq_tendsto
       ← EuclideanSpace.real_norm_sq_eq vn]
     rw [show ‖vf‖ ^ 2 - ‖vn‖ ^ 2 =
         (‖vf‖ - ‖vn‖) * (‖vf‖ + ‖vn‖) by ring, abs_mul]
-    simpa [mul_comm] using
-      mul_le_mul_of_nonneg_right (abs_norm_sub_norm_le vf vn)
-        (add_nonneg (norm_nonneg _) (norm_nonneg _))
+    have hsum_nonneg : 0 ≤ ‖vf‖ + ‖vn‖ :=
+      add_nonneg (norm_nonneg vf) (norm_nonneg vn)
+    rw [abs_of_nonneg hsum_nonneg]
+    calc
+      |‖vf‖ - ‖vn‖| * (‖vf‖ + ‖vn‖) =
+          (‖vf‖ + ‖vn‖) * |‖vf‖ - ‖vn‖| := mul_comm _ _
+      _ ≤ (‖vf‖ + ‖vn‖) * ‖vf - vn‖ :=
+        mul_le_mul_of_nonneg_left (abs_norm_sub_norm_le vf vn) hsum_nonneg
   have hsqdiff' : |S k f - S k (fN N₀)| < ε / 3 := by
     calc
       |S k f - S k (fN N₀)| ≤
@@ -984,12 +988,10 @@ theorem asymTorusSiteEval_sq_tendsto
               (|S k (fN N₀) - l2InnerProduct (fN N₀) (fN N₀)| +
                 |l2InnerProduct (fN N₀) (fN N₀) - l2InnerProduct f f|) :=
           by
-            simpa [add_comm, add_left_comm, add_assoc] using
-              (add_le_add_right
-                (abs_sub_le (S k (fN N₀))
-                  (l2InnerProduct (fN N₀) (fN N₀))
-                  (l2InnerProduct f f))
-                |S k f - S k (fN N₀)|)
+            have htri := abs_sub_le (S k (fN N₀))
+              (l2InnerProduct (fN N₀) (fN N₀))
+              (l2InnerProduct f f)
+            exact add_le_add_left htri _
         _ = _ := by ring
     _ < ε / 3 + ε / 3 + ε / 3 := by
       gcongr
