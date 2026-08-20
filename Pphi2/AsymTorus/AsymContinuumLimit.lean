@@ -660,6 +660,13 @@ theorem asymTorusSiteEval_sq_tendsto
         (DyninMityaginSpace.coeff
           (E := AsymTorusTestFunction Lt Ls) r).map_smul
             (DyninMityaginSpace.coeff x f) (RapidDecaySeq.basisVec x)
+    have hcoeff_basis (u v : ℕ) :
+        DyninMityaginSpace.coeff u (RapidDecaySeq.basisVec v) =
+          if u = v then 1 else 0 := by
+      change DyninMityaginSpace.coeff u
+          (DyninMityaginSpace.basis
+            (E := AsymTorusTestFunction Lt Ls) v) = _
+      exact DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis u v
     rw [map_sum]
     by_cases hr : r ∈ Finset.range N
     · rw [if_pos hr, Finset.sum_eq_single r]
@@ -670,7 +677,13 @@ theorem asymTorusSiteEval_sq_tendsto
                 DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec r) :=
             hcoeff_smul r
           _ = DyninMityaginSpace.coeff r f := by
-            simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis]
+            calc
+              DyninMityaginSpace.coeff r f *
+                    DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec r) =
+                  DyninMityaginSpace.coeff r f * (if r = r then 1 else 0) :=
+                congrArg (fun y : ℝ => DyninMityaginSpace.coeff r f * y)
+                  (hcoeff_basis r r)
+              _ = DyninMityaginSpace.coeff r f := by simp
       · intro x hx hxr
         calc
           DyninMityaginSpace.coeff r
@@ -679,7 +692,13 @@ theorem asymTorusSiteEval_sq_tendsto
                 DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) :=
             hcoeff_smul x
           _ = 0 := by
-            simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis, Ne.symm hxr]
+            calc
+              DyninMityaginSpace.coeff x f *
+                    DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) =
+                  DyninMityaginSpace.coeff x f * (if r = x then 1 else 0) :=
+                congrArg (fun y : ℝ => DyninMityaginSpace.coeff x f * y)
+                  (hcoeff_basis r x)
+              _ = 0 := by simp [Ne.symm hxr]
       · intro hrN
         exact (hrN hr).elim
     · rw [if_neg hr]
@@ -696,7 +715,13 @@ theorem asymTorusSiteEval_sq_tendsto
               DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) :=
           hcoeff_smul x
         _ = 0 := by
-          simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis, hrx]
+          calc
+            DyninMityaginSpace.coeff x f *
+                  DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) =
+                DyninMityaginSpace.coeff x f * (if r = x then 1 else 0) :=
+              congrArg (fun y : ℝ => DyninMityaginSpace.coeff x f * y)
+                (hcoeff_basis r x)
+            _ = 0 := by simp [hrx]
   have hl2_fN : ∀ N,
       l2InnerProduct (fN N) (fN N) =
         ∑ m ∈ Finset.range N, (DyninMityaginSpace.coeff m f) ^ 2 := by
