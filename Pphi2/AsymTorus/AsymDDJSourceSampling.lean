@@ -214,7 +214,7 @@ private theorem cylinderEmbeddedBasis_raw_bound
         (DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis
           (E := SmoothMap_Circle Ls ℝ))
         (DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis
-          (E := SchwartzMap ℝ ℝ)) m]
+          (E := SchwartzMap ℝ ℝ)) m]]
 
     simp [cylinderToTorusEmbed_pure, evalAsymTorusAtSite,
       NuclearTensorProduct.evalCLM_pure, ContinuousLinearMap.comp_apply,
