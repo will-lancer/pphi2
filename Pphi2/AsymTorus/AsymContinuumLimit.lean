@@ -651,11 +651,34 @@ theorem asymTorusSiteEval_sq_tendsto
     classical
     intro N r
     dsimp [fN]
+    have hcoeff_smul (x : ℕ) :
+        DyninMityaginSpace.coeff r
+              (DyninMityaginSpace.coeff x f • RapidDecaySeq.basisVec x) =
+            DyninMityaginSpace.coeff x f *
+              DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) := by
+      simpa only [smul_eq_mul] using
+        (DyninMityaginSpace.coeff
+          (E := AsymTorusTestFunction Lt Ls) r).map_smul
+            (DyninMityaginSpace.coeff x f) (RapidDecaySeq.basisVec x)
     rw [map_sum]
-    simp [
-      map_smul (DyninMityaginSpace.coeff r), smul_eq_mul,
-      DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis,
-      mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_range, eq_comm]
+    by_cases hr : r ∈ Finset.range N
+    · rw [if_pos hr, Finset.sum_eq_single r]
+      · rw [hcoeff_smul]
+        simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis]
+      · intro x hx hxr
+        rw [hcoeff_smul]
+        simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis, Ne.symm hxr]
+      · intro hrN
+        exact (hrN hr).elim
+    · rw [if_neg hr]
+      apply Finset.sum_eq_zero
+      intro x hx
+      rw [hcoeff_smul]
+      have hrx : r ≠ x := by
+        intro hrx
+        apply hr
+        simpa [hrx] using hx
+      simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis, hrx]
   have hl2_fN : ∀ N,
       l2InnerProduct (fN N) (fN N) =
         ∑ m ∈ Finset.range N, (DyninMityaginSpace.coeff m f) ^ 2 := by
@@ -736,14 +759,13 @@ theorem asymTorusSiteEval_sq_tendsto
                   (RapidDecaySeq.basisVec n)) := by
           apply Finset.sum_congr rfl
           intro x hx
-          have hxm := map_smul
-            (evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x)
-            (DyninMityaginSpace.coeff m f) (RapidDecaySeq.basisVec m)
-          have hxn := map_smul
-            (evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x)
-            (DyninMityaginSpace.coeff n f) (RapidDecaySeq.basisVec n)
-          rw [hxm, hxn]
-          simp only [smul_eq_mul]
+          let ev : AsymTorusTestFunction Lt Ls →L[ℝ] ℝ :=
+            evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+          change ev (DyninMityaginSpace.coeff m f • RapidDecaySeq.basisVec m) *
+              ev (DyninMityaginSpace.coeff n f • RapidDecaySeq.basisVec n) =
+            DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff n f *
+              (ev (RapidDecaySeq.basisVec m) * ev (RapidDecaySeq.basisVec n))
+          simp only [ev.map_smul, smul_eq_mul]
           ring
         _ = _ := by
           rw [Finset.mul_sum]
