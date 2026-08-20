@@ -62,7 +62,7 @@ theorem asymDDJSourceBall_of_centered_decay
 
   obtain ⟨C₀, hC₀, q₀, hq₀, hsource⟩ :=
     asymRawSource_weightedLpPow_le_of_centered_decay Ls p hp
-  obtain ⟨A, hA, q₁, hq₁, hlap⟩ :=
+  obtain ⟨A, q₁, hA, hq₁, hlap⟩ :=
     asymFiniteLaplacianRawSource_pointwise_centered_decay Ls
 
   let C₁ : ℝ := 3 * Ls * Real.rpow A p
