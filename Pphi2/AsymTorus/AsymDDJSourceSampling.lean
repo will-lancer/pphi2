@@ -36,7 +36,7 @@ private theorem centeredSchwartzSeminorm_continuous :
   · change Continuous fun h : SchwartzMap ℝ ℝ =>
       (∑ m ∈ Finset.Iic ((2 : ℕ), (0 : ℕ)),
         SchwartzMap.seminorm ℝ m.1 m.2) h
-    simpa only [schwartzSeminormFamily_apply] using
+    simpa only [SchwartzMap.schwartzSeminormFamily_apply] using
       (continuous_finsetSum (Finset.Iic ((2 : ℕ), (0 : ℕ))) fun m _ =>
         (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ)).continuous_seminorm m)
   · simpa only [centeredSchwartzSeminorm] using
@@ -58,7 +58,8 @@ private theorem centeredSchwartzSeminorm_basis_poly_bound :
     (DyninMityaginSpace.p (E := SchwartzMap ℝ ℝ))
     t
     (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ))
-    (fun i _ => DyninMityaginSpace.basis_growth i)
+    (fun i _ => DyninMityaginSpace.basis_growth
+      (E := SchwartzMap ℝ ℝ) i)
   refine ⟨(Cnn : ℝ) * D, ?_, S, ?_⟩
   · have hCpos : (0 : ℝ) < Cnn :=
       NNReal.coe_pos.mpr (pos_iff_ne_zero.mpr hCnn)

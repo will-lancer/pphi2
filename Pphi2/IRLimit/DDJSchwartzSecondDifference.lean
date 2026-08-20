@@ -32,7 +32,7 @@ theorem centeredSecondDiffSeminorm_continuous :
   · change Continuous fun h : SchwartzMap ℝ ℝ =>
       (∑ m ∈ Finset.Iic ((2 : ℕ), (2 : ℕ)),
         SchwartzMap.seminorm ℝ m.1 m.2) h
-    simpa only [schwartzSeminormFamily_apply] using
+    simpa only [SchwartzMap.schwartzSeminormFamily_apply] using
       (continuous_finsetSum (Finset.Iic ((2 : ℕ), (2 : ℕ))) fun m _ =>
         (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ)).continuous_seminorm m)
   · simpa only [centeredSecondDiffSeminorm] using
