@@ -644,10 +644,17 @@ theorem periodizeCLM_circlePoint_centered_second_diff_decay
   rw [abs_mul]
   rw [abs_mul, abs_of_nonneg hsq, abs_neg]
   calc
-    Real.sqrt a * |(a ^ 2 : ℝ)⁻¹ *
-        ((periodizeCLM L h).toFun (t + a) +
-          (periodizeCLM L h).toFun (t - a) -
-          2 * (periodizeCLM L h).toFun t)| ≤
+    |(a ^ 2 : ℝ)⁻¹| * (Real.sqrt a *
+        |(periodizeCLM L h) (t + a) +
+          (periodizeCLM L h) (t - a) -
+          2 * (periodizeCLM L h) t|) =
+      Real.sqrt a * |(a ^ 2 : ℝ)⁻¹ *
+        ((periodizeCLM L h) (t + a) +
+          (periodizeCLM L h) (t - a) -
+          2 * (periodizeCLM L h) t)| := by
+      rw [abs_mul]
+      ring
+    _ ≤
       Real.sqrt a *
         ((16 + 288 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) * q h /
           (1 + |t|) ^ 2) := by
