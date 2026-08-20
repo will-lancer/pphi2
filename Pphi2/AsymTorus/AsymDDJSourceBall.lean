@@ -114,9 +114,9 @@ theorem asymDDJSourceBall_of_centered_decay
   have hq₀r : q₀ f ≤ r := hq₀_le.trans hqf
   have hq₁r : q₁ f ≤ r := hq₁_le.trans hqf
   have hq₀pow : Real.rpow (q₀ f) p ≤ Real.rpow r p :=
-    Real.rpow_le_rpow (apply_nonneg q₀ f) hq₀r hp.le
+    Real.rpow_le_rpow (apply_nonneg q₀ f) hq₀r hp_pos.le
   have hq₁pow : Real.rpow (q₁ f) p ≤ Real.rpow r p :=
-    Real.rpow_le_rpow (apply_nonneg q₁ f) hq₁r hp.le
+    Real.rpow_le_rpow (apply_nonneg q₁ f) hq₁r hp_pos.le
   have hC₀D : C₀ ≤ D := by
     dsimp [D]
     exact le_add_of_nonneg_right hC₁.le
