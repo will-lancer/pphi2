@@ -31,7 +31,7 @@ private theorem lapTemporalSeminorm_continuous :
         (fun m : ℕ × ℕ =>
           SchwartzMap.seminorm (𝕜 := ℝ) (E := ℝ) (F := ℝ) m.1 m.2) :
         Seminorm ℝ (SchwartzMap ℝ ℝ)))
-      (q := (∑ (m : ℕ × ℕ) ∈ Finset.Iic ((2 : ℕ), (0 : ℕ)),
+      (q := (∑ m ∈ Finset.Iic ((2 : ℕ), (0 : ℕ)),
         SchwartzMap.seminorm (𝕜 := ℝ) (E := ℝ) (F := ℝ) m.1 m.2 :
         Seminorm ℝ (SchwartzMap ℝ ℝ))) ?_ ?_
     · change Continuous fun h : SchwartzMap ℝ ℝ =>
@@ -160,8 +160,6 @@ private theorem lapTemporal_zero_bound
     field_simp [ne_of_gt hN_pos]
   have hperiod := periodizeCLM_circlePoint_centered_decay h Lt hLt1 Nt z
   rw [circleRestriction_apply, circleSpacing_eq, hratio]
-  have hsqrt : Real.sqrt (Lt / (Nt : ℝ)) = Real.sqrt a := by rw [hratio]
-  rw [hsqrt]
   have hden :
       1 + |((signedVal Nt z : ℤ) : ℝ) * Lt / Nt| =
         1 + a * ((signedVal Nt z).natAbs : ℝ) := by
@@ -236,7 +234,6 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
         asymRawSource_asymLatticeTestFnIso_apply Lt Ls Nt Ns a ha,
         smul_eq_mul, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.comp_apply]
-      ring
     have hN_pos : (0 : ℝ) < Nt := Nat.cast_pos.mpr (NeZero.pos Nt)
     have hNs_pos : (0 : ℝ) < Ns := Nat.cast_pos.mpr (NeZero.pos Ns)
     have hLt_ratio : Lt / (Nt : ℝ) = a := by
@@ -438,9 +435,6 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
             ((a ^ 2 : ℝ)⁻¹ *
               (cs (x.2 + 1) + cs (x.2 - 1) - 2 * cs x.2)) := by
         dsimp [T, R]
-        simp only [ContinuousLinearMap.smul_apply,
-          ContinuousLinearMap.add_apply, ContinuousLinearMap.sub_apply,
-          ContinuousLinearMap.comp_apply, smul_eq_mul]
         rw [hEval, hEval, hEval, hEval, hEval]
         ring
       have hterm₀ :
@@ -525,11 +519,26 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
                 |(a ^ 2 : ℝ)⁻¹ *
                   (cs (x.2 + 1) + cs (x.2 - 1) - 2 * cs x.2)| := by
           rw [hTbasis]
-          exact abs_add_le _ _
+          simpa only [abs_mul, mul_assoc] using
+            (abs_add_le
+              ((a⁻¹) * ((a ^ 2 : ℝ)⁻¹ *
+                (ct (x.1 + 1) + ct (x.1 - 1) - 2 * ct x.1)) * cs x.2)
+              ((a⁻¹) * ct x.1 * ((a ^ 2 : ℝ)⁻¹ *
+                (cs (x.2 + 1) + cs (x.2 - 1) - 2 * cs x.2))))
         _ ≤ (K₂ * D * C₀ + K₀ * D * C₂) *
               (1 + (m : ℝ)) ^ (S + 2) /
               (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 :=
-          add_le_add hterm₀ hterm₂
+          by
+            calc
+              _ ≤ K₂ * D * C₀ * (1 + (m : ℝ)) ^ (S + 2) /
+                    (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 +
+                  K₀ * D * C₂ * (1 + (m : ℝ)) ^ (S + 2) /
+                    (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 :=
+                add_le_add hterm₀ hterm₂
+              _ = (K₂ * D * C₀ + K₀ * D * C₂) *
+                    (1 + (m : ℝ)) ^ (S + 2) /
+                    (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by
+                ring
         _ = A * (1 + (m : ℝ)) ^ (S + 2) /
               (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by
           dsimp [A]
