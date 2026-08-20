@@ -25,20 +25,20 @@ def centeredSecondDiffSeminorm : Seminorm ℝ (SchwartzMap ℝ ℝ) :=
 
 theorem centeredSecondDiffSeminorm_continuous :
     Continuous centeredSecondDiffSeminorm := by
-  change Continuous
-    (((Finset.Iic ((2 : ℕ), (2 : ℕ))).sup
-      (fun m => SchwartzMap.seminorm ℝ m.1 m.2)) :
-      Seminorm ℝ (SchwartzMap ℝ ℝ))
-  apply Seminorm.continuous_of_le _
-    (Seminorm.finset_sup_le_sum
-      (fun m : ℕ × ℕ => SchwartzMap.seminorm ℝ m.1 m.2)
-      (Finset.Iic ((2 : ℕ), (2 : ℕ))))
-  change Continuous fun h : SchwartzMap ℝ ℝ =>
-    (∑ m ∈ Finset.Iic ((2 : ℕ), (2 : ℕ)),
-      SchwartzMap.seminorm ℝ m.1 m.2) h
-  simp_rw [map_sum, Finset.sum_apply]
-  exact continuous_finsetSum _ fun m _ =>
-    (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ)).continuous_seminorm m
+  refine Seminorm.continuous_of_le
+    (p := centeredSecondDiffSeminorm)
+    (q := ∑ m ∈ Finset.Iic ((2 : ℕ), (2 : ℕ)),
+      SchwartzMap.seminorm ℝ m.1 m.2) ?_ ?_
+  · change Continuous fun h : SchwartzMap ℝ ℝ =>
+      (∑ m ∈ Finset.Iic ((2 : ℕ), (2 : ℕ)),
+        SchwartzMap.seminorm ℝ m.1 m.2) h
+    simp_rw [map_sum, Finset.sum_apply]
+    exact continuous_finsetSum _ fun m _ =>
+      (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ)).continuous_seminorm m
+  · simpa only [centeredSecondDiffSeminorm] using
+      (Seminorm.finset_sup_le_sum
+        (fun m : ℕ × ℕ => SchwartzMap.seminorm ℝ m.1 m.2)
+        (Finset.Iic ((2 : ℕ), (2 : ℕ))))
 
 private lemma centeredSecondDiffSeminorm_second_deriv_bound
     (h : SchwartzMap ℝ ℝ) (x a : ℝ) (ha : 0 < a) (ha1 : a ≤ 1) :
@@ -93,26 +93,26 @@ private lemma centered_second_diff_of_second_deriv_bound
       derivWithin (h : ℝ → ℝ) (Set.Icc x (x + a)) x =
         deriv (h : ℝ → ℝ) x := by
     exact ((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-      (by norm_num)).contDiffAt.differentiableAt_one.derivWithin
+      le_top).contDiffAt.differentiableAt_one.derivWithin
       (uniqueDiffOn_Icc (by linarith) x (by simp [ha.le]))
   have hminus_base :
       derivWithin (h : ℝ → ℝ) (Set.Icc (x - a) x) x =
         deriv (h : ℝ → ℝ) x := by
     exact ((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-      (by norm_num)).contDiffAt.differentiableAt_one.derivWithin
+      le_top).contDiffAt.differentiableAt_one.derivWithin
       (uniqueDiffOn_Icc (by linarith) x (by simp [ha.le]))
   obtain ⟨yplus, hyplus, hplus⟩ :=
     taylor_mean_remainder_lagrange_iteratedDeriv
       (f := (h : ℝ → ℝ)) (x₀ := x) (x := x + a) (n := 1)
       (by linarith)
       (((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-        (by norm_num)).contDiffOn)
+        le_top).contDiffOn)
   obtain ⟨yminus, hyminus, hminus⟩ :=
     taylor_mean_remainder_lagrange_iteratedDeriv
       (f := (h : ℝ → ℝ)) (x₀ := x) (x := x - a) (n := 1)
       (by linarith)
       (((h.smooth' : ContDiff ℝ (⊤ : ℕ∞) (h : ℝ → ℝ)).of_le
-        (by norm_num)).contDiffOn)
+        le_top).contDiffOn)
   have hyplus' : yplus ∈ Set.Icc (x - a) (x + a) := by
     rw [uIoo_of_lt (by linarith)] at hyplus
     constructor <;> linarith [hyplus.1, hyplus.2]
@@ -128,9 +128,13 @@ private lemma centered_second_diff_of_second_deriv_bound
   have hminus_taylor :
       taylorWithinEval (h : ℝ → ℝ) 1 (Set.uIcc x (x - a)) x (x - a) =
         h x - a * deriv (h : ℝ → ℝ) x := by
+    have hminus_base' :
+        derivWithin (h : ℝ → ℝ) (Set.Icc (x + -a) x) x =
+          deriv (h : ℝ → ℝ) x := by
+      simpa only [sub_eq_add_neg] using hminus_base
     rw [uIcc_of_ge (a := x) (b := x - a) (by linarith), taylor_within_apply]
     simp [Finset.sum_range_succ, iteratedDerivWithin_zero, iteratedDerivWithin_one,
-      hminus_base, sub_eq_add_neg, smul_eq_mul]
+      hminus_base', sub_eq_add_neg, smul_eq_mul]
   have hplus' :
       h (x + a) - (h x + a * deriv (h : ℝ → ℝ) x) =
         iteratedDeriv 2 (h : ℝ → ℝ) yplus * a ^ 2 / 2 := by

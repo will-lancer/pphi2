@@ -192,7 +192,8 @@ theorem asymWeightedPairing_pow_le
         apply Finset.sum_congr rfl
         intro x hx
         change a ^ 2 * (|v x| ^ (n : ℝ)) = a ^ 2 * |v x| ^ n
-        rw [Real.rpow_natCast]
+        exact congrArg (fun z : ℝ => a ^ 2 * z)
+          (Real.rpow_natCast (|v x|) n)
   have hpair :
       |a ^ 2 * ∑ x : α, u x * v x| ≤ ∑ x : α, F x * G x := by
     calc
@@ -255,7 +256,6 @@ theorem asymWeightedPairing_pow_le
     have hp_exp : (1 / p) * (n : ℝ) = (n : ℝ) - 1 := by
       dsimp [p]
       field_simp [hn_ne, hn_sub_ne]
-      ring
     have hn_exp : (1 / (n : ℝ)) * (n : ℝ) = 1 := by
       field_simp [hn_pos.ne']
     rw [hp_exp, hn_exp, Real.rpow_one]
