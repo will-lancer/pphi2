@@ -663,22 +663,40 @@ theorem asymTorusSiteEval_sq_tendsto
     rw [map_sum]
     by_cases hr : r ∈ Finset.range N
     · rw [if_pos hr, Finset.sum_eq_single r]
-      · rw [hcoeff_smul]
-        simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis]
+      · calc
+          DyninMityaginSpace.coeff r
+                (DyninMityaginSpace.coeff r f • RapidDecaySeq.basisVec r) =
+              DyninMityaginSpace.coeff r f *
+                DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec r) :=
+            hcoeff_smul r
+          _ = DyninMityaginSpace.coeff r f := by
+            simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis]
       · intro x hx hxr
-        rw [hcoeff_smul]
-        simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis, Ne.symm hxr]
+        calc
+          DyninMityaginSpace.coeff r
+                (DyninMityaginSpace.coeff x f • RapidDecaySeq.basisVec x) =
+              DyninMityaginSpace.coeff x f *
+                DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) :=
+            hcoeff_smul x
+          _ = 0 := by
+            simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis, Ne.symm hxr]
       · intro hrN
         exact (hrN hr).elim
     · rw [if_neg hr]
       apply Finset.sum_eq_zero
       intro x hx
-      rw [hcoeff_smul]
       have hrx : r ≠ x := by
         intro hrx
         apply hr
         simpa [hrx] using hx
-      simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis, hrx]
+      calc
+        DyninMityaginSpace.coeff r
+              (DyninMityaginSpace.coeff x f • RapidDecaySeq.basisVec x) =
+            DyninMityaginSpace.coeff x f *
+              DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) :=
+          hcoeff_smul x
+        _ = 0 := by
+          simp [DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis, hrx]
   have hl2_fN : ∀ N,
       l2InnerProduct (fN N) (fN N) =
         ∑ m ∈ Finset.range N, (DyninMityaginSpace.coeff m f) ^ 2 := by
@@ -765,8 +783,19 @@ theorem asymTorusSiteEval_sq_tendsto
               ev (DyninMityaginSpace.coeff n f • RapidDecaySeq.basisVec n) =
             DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff n f *
               (ev (RapidDecaySeq.basisVec m) * ev (RapidDecaySeq.basisVec n))
-          simp only [ev.map_smul, smul_eq_mul]
-          ring
+          calc
+            ev (DyninMityaginSpace.coeff m f • RapidDecaySeq.basisVec m) *
+                ev (DyninMityaginSpace.coeff n f • RapidDecaySeq.basisVec n) =
+              (DyninMityaginSpace.coeff m f • ev (RapidDecaySeq.basisVec m)) *
+                (DyninMityaginSpace.coeff n f • ev (RapidDecaySeq.basisVec n)) := by
+              exact congrArg₂ (fun u v : ℝ => u * v)
+                (ev.map_smul (DyninMityaginSpace.coeff m f)
+                  (RapidDecaySeq.basisVec m))
+                (ev.map_smul (DyninMityaginSpace.coeff n f)
+                  (RapidDecaySeq.basisVec n))
+            _ = _ := by
+              simp only [smul_eq_mul]
+              ring
         _ = _ := by
           rw [Finset.mul_sum]
     rw [show (fun k => S k (fN N)) =
