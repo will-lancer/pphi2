@@ -983,11 +983,13 @@ theorem asymTorusSiteEval_sq_tendsto
         _ ≤ |S k f - S k (fN N₀)| +
               (|S k (fN N₀) - l2InnerProduct (fN N₀) (fN N₀)| +
                 |l2InnerProduct (fN N₀) (fN N₀) - l2InnerProduct f f|) :=
-          add_le_add_right
-            (abs_sub_le (S k (fN N₀))
-              (l2InnerProduct (fN N₀) (fN N₀))
-              (l2InnerProduct f f))
-            |S k f - S k (fN N₀)|
+          by
+            simpa [add_comm, add_left_comm, add_assoc] using
+              (add_le_add_right
+                (abs_sub_le (S k (fN N₀))
+                  (l2InnerProduct (fN N₀) (fN N₀))
+                  (l2InnerProduct f f))
+                |S k f - S k (fN N₀)|)
         _ = _ := by ring
     _ < ε / 3 + ε / 3 + ε / 3 := by
       gcongr
