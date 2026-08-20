@@ -205,7 +205,7 @@ private theorem cylinderEmbeddedBasis_raw_bound
             (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ) j)) x.1) *
         (circleRestriction Ls Ns
           (DyninMityaginSpace.basis (E := SmoothMap_Circle Ls ℝ) i) x.2) := by
-    rw [asymRawSource_asymLatticeTestFnIso_apply]
+    rw [asymRawSource_asymLatticeTestFnIso_apply Lt Ls Nt Ns a ha]
     rw [show RapidDecaySeq.basisVec m =
         NuclearTensorProduct.pure
           (DyninMityaginSpace.basis (E := SmoothMap_Circle Ls ℝ) i)

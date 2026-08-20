@@ -168,7 +168,11 @@ theorem asymDDJSourceBall_of_centered_decay
           3 * Ls * Real.rpow (A * q₁ f) p := hlapLp
       _ = C₁ * Real.rpow (q₁ f) p := by
         dsimp [C₁]
-        rw [Real.mul_rpow hA.le (apply_nonneg q₁ f)]
+        have hmul :
+            Real.rpow (A * q₁ f) p =
+              Real.rpow A p * Real.rpow (q₁ f) p :=
+          Real.mul_rpow hA.le (apply_nonneg q₁ f)
+        rw [hmul]
         ring
   have hlap_quarter :
       asymWeightedLpPow p a

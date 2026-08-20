@@ -26,16 +26,22 @@ private def lapTemporalSeminorm : Seminorm ℝ (SchwartzMap ℝ ℝ) :=
 private theorem lapTemporalSeminorm_continuous :
     Continuous lapTemporalSeminorm := by
   apply Continuous.add
-  · apply Seminorm.continuous_of_le _
-      (Seminorm.finset_sup_le_sum
-        (fun m : ℕ × ℕ => SchwartzMap.seminorm ℝ m.1 m.2)
-        (Finset.Iic ((2 : ℕ), (0 : ℕ))))
-    change Continuous fun h : SchwartzMap ℝ ℝ =>
-      (∑ m ∈ Finset.Iic ((2 : ℕ), (0 : ℕ)),
-        SchwartzMap.seminorm ℝ m.1 m.2) h
-    simp_rw [map_sum, Finset.sum_apply]
-    exact continuous_finsetSum _ fun m _ =>
-      (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ)).continuous_seminorm m
+  · refine Seminorm.continuous_of_le
+      (p := (Finset.Iic ((2 : ℕ), (0 : ℕ))).sup
+        (fun m => SchwartzMap.seminorm ℝ m.1 m.2))
+      (q := ∑ m ∈ Finset.Iic ((2 : ℕ), (0 : ℕ)),
+        SchwartzMap.seminorm ℝ m.1 m.2) ?_ ?_
+    · change Continuous fun h : SchwartzMap ℝ ℝ =>
+        (∑ m ∈ Finset.Iic ((2 : ℕ), (0 : ℕ)),
+          SchwartzMap.seminorm ℝ m.1 m.2) h
+      simpa only [SchwartzMap.schwartzSeminormFamily_apply] using
+        (continuous_finsetSum (Finset.Iic ((2 : ℕ), (0 : ℕ))) fun m _ =>
+          (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ)).continuous_seminorm m)
+    · simpa only using
+        (Seminorm.finset_sup_le_sum
+          (𝕜 := ℝ) (E := SchwartzMap ℝ ℝ)
+          (fun m : ℕ × ℕ => SchwartzMap.seminorm ℝ m.1 m.2)
+          (Finset.Iic ((2 : ℕ), (0 : ℕ))))
   · exact centeredSecondDiffSeminorm_continuous
 
 private theorem lapTemporalSeminorm_nonneg (h : SchwartzMap ℝ ℝ) :
@@ -52,9 +58,10 @@ private theorem lapTemporalSeminorm_basis_poly_bound :
     (schwartz_withSeminorms (𝕜 := ℝ) (E := ℝ) (F := ℝ))
     lapTemporalSeminorm lapTemporalSeminorm_continuous
   obtain ⟨D, hD, S, hb⟩ := GaussianField.finset_sup_poly_bound
-    DyninMityaginSpace.p t
+    (DyninMityaginSpace.p (E := SchwartzMap ℝ ℝ)) t
     (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ))
-    (fun i _ => DyninMityaginSpace.basis_growth i)
+    (fun i _ => DyninMityaginSpace.basis_growth
+      (E := SchwartzMap ℝ ℝ) i)
   refine ⟨(Cnn : ℝ) * D, ?_, S, ?_⟩
   · have hCpos : (0 : ℝ) < Cnn :=
       NNReal.coe_pos.mpr (pos_iff_ne_zero.mpr hCnn)
@@ -64,7 +71,7 @@ private theorem lapTemporalSeminorm_basis_poly_bound :
       lapTemporalSeminorm
           (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ) m) ≤
           (Cnn : ℝ) *
-            (t.sup DyninMityaginSpace.p)
+            (t.sup (DyninMityaginSpace.p (E := SchwartzMap ℝ ℝ)))
               (DyninMityaginSpace.basis (E := SchwartzMap ℝ ℝ) m) := hle _
       _ ≤ (Cnn : ℝ) * (D * (1 + (m : ℝ)) ^ S) := by
         exact mul_le_mul_of_nonneg_left (hb m) (NNReal.coe_nonneg Cnn)
@@ -97,7 +104,7 @@ private theorem lapSpatialBasis_bounds
     SmoothMap_Circle.sobolevSeminorm_fourierBasis_le (L := Ls) 2
   refine ⟨C₀, C₂, hC₀, hC₂, ?_, ?_⟩
   · intro Ns _ z m
-    rw [dm_basis_eq_fourierBasis (L := Ls), circleRestriction_apply,
+    rw [dm_basis_eq_fourierBasis (L := Ls) m, circleRestriction_apply,
       circleSpacing_eq, abs_mul, abs_of_nonneg (Real.sqrt_nonneg _)]
     apply mul_le_mul_of_nonneg_left _ (Real.sqrt_nonneg _)
     calc
@@ -110,13 +117,14 @@ private theorem lapSpatialBasis_bounds
       _ ≤ SmoothMap_Circle.sobolevSeminorm 0
           (SmoothMap_Circle.fourierBasis m) :=
         SmoothMap_Circle.norm_iteratedDeriv_le_sobolevSeminorm' _ 0 _
-      _ ≤ C₀ := hC₀b m
+      _ ≤ C₀ := by
+        simpa only [pow_zero, mul_one] using hC₀b m
   · intro Ns _ m z
-    rw [dm_basis_eq_fourierBasis (L := Ls)]
+    rw [dm_basis_eq_fourierBasis (L := Ls) m]
     have hlap := negLaplacian_restriction_bound Ls Ns
       (DyninMityaginSpace.basis
         (E := SmoothMap_Circle Ls ℝ) m) z
-    rw [dm_basis_eq_fourierBasis (L := Ls)] at hlap
+    rw [dm_basis_eq_fourierBasis (L := Ls) m] at hlap
     calc
       |(circleSpacing Ls Ns)⁻¹ ^ 2 *
           (2 * circleRestriction Ls Ns
@@ -160,6 +168,7 @@ private theorem lapTemporal_zero_bound
     rw [show ((signedVal Nt z : ℤ) : ℝ) * Lt / Nt =
         ((signedVal Nt z : ℤ) : ℝ) * (Lt / Nt) by ring,
       hratio, abs_mul, abs_of_pos ha, hs_abs]
+    ring
   rw [hden] at hperiod
   calc
     Real.sqrt a *
@@ -241,6 +250,7 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
       rw [show ((signedVal Nt x.1 : ℤ) : ℝ) * Lt / Nt =
           ((signedVal Nt x.1 : ℤ) : ℝ) * (Lt / Nt) by ring,
         hLt_ratio, abs_mul, abs_of_pos ha, hs_abs]
+      ring
     have hroot : |a⁻¹| * Real.sqrt a * Real.sqrt a = 1 := by
       rw [abs_of_pos (inv_pos.mpr ha)]
       have hsqrt : (Real.sqrt a) ^ 2 = a := Real.sq_sqrt ha.le
@@ -255,14 +265,18 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
       let j := (Nat.unpair m).2
       have him : i ≤ m := by exact Nat.unpair_left_le m
       have hjm : j ≤ m := by exact Nat.unpair_right_le m
-      have him_real : (1 + (i : ℝ)) ≤ 1 + (m : ℝ) :=
-        add_le_add_left (Nat.cast_le.mpr him) 1
-      have hjm_real : (1 + (j : ℝ)) ≤ 1 + (m : ℝ) :=
-        add_le_add_left (Nat.cast_le.mpr hjm) 1
+      have him_real : (1 + (i : ℝ)) ≤ 1 + (m : ℝ) := by
+        have him_cast : (i : ℝ) ≤ (m : ℝ) := by
+          exact_mod_cast him
+        linarith
+      have hjm_real : (1 + (j : ℝ)) ≤ 1 + (m : ℝ) := by
+        have hjm_cast : (j : ℝ) ≤ (m : ℝ) := by
+          exact_mod_cast hjm
+        linarith
       have hpow2 : (1 + (i : ℝ)) ^ 2 ≤ (1 + (m : ℝ)) ^ 2 :=
-        pow_le_pow_left₀ (by positivity) him_real
+        pow_le_pow_left₀ (by positivity) him_real 2
       have hpow : (1 + (j : ℝ)) ^ S ≤ (1 + (m : ℝ)) ^ S :=
-        pow_le_pow_left₀ (by positivity) hjm_real
+        pow_le_pow_left₀ (by positivity) hjm_real S
       have hpow_extra : (1 + (m : ℝ)) ^ S ≤
           (1 + (m : ℝ)) ^ (S + 2) := by
         rw [pow_add]
@@ -305,8 +319,24 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
             (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by
         dsimp [ct] at ⊢
         dsimp [K₀] at htem0 ⊢
-        gcongr
-        exact hq0.trans hsem
+        calc
+          |circleRestriction Lt Nt (periodizeCLM Lt bt) x.1| ≤
+              Real.sqrt a *
+                  (4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
+                ((Finset.Iic ((2 : ℕ), (0 : ℕ))).sup
+                  (fun r => SchwartzMap.seminorm ℝ r.1 r.2)) bt /
+                (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := htem0
+          _ ≤ Real.sqrt a *
+                  (4 + 72 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
+                (D * (1 + (m : ℝ)) ^ S) /
+                (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by
+            apply div_le_div_of_nonneg_right
+            · simpa only [mul_assoc] using
+                (mul_le_mul_of_nonneg_left
+                  (mul_le_mul_of_nonneg_left
+                    (by simpa [bt] using hq0.trans hsem) (by positivity))
+                  (by positivity))
+            · positivity
       have htem2 := periodizeCLM_circlePoint_centered_second_diff_decay
         bt centeredSecondDiffSeminorm centeredSecondDiffSeminorm_continuous
         Lt hLt4 Nt a ha ha1 hLtphys x.1
@@ -325,8 +355,28 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
         rw [hsign, abs_neg]
         rw [hden] at htem2
         dsimp [ct, K₂] at htem2 ⊢
-        gcongr
-        exact hq2.trans hsem
+        calc
+          |(a ^ 2 : ℝ)⁻¹ *
+              (2 * ct x.1 - ct (x.1 + 1) - ct (x.1 - 1))| ≤
+              Real.sqrt a *
+                  (16 + 288 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
+                centeredSecondDiffSeminorm bt /
+                (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := htem2
+          _ ≤ Real.sqrt a *
+                  (16 + 288 * (∑' n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ^ 2)) *
+                (D * (1 + (m : ℝ)) ^ S) /
+                (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by
+            apply div_le_div_of_nonneg_right
+            · simpa only [mul_assoc] using
+                (mul_le_mul_of_nonneg_left
+                  (mul_le_mul_of_nonneg_left
+                    (by simpa [bt] using hq2.trans hsem) (by positivity))
+                  (by positivity))
+            · positivity
+      have htem2_bound_nonneg :
+          0 ≤ Real.sqrt a * K₂ * (D * (1 + (m : ℝ)) ^ S) /
+            (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 :=
+        (abs_nonneg _).trans htem2'
       have hsp0 : |cs x.2| ≤ Real.sqrt a * C₀ := by
         dsimp [cs, bs]
         simpa [hLs_ratio] using hC₀b Ns x.2 i
@@ -355,7 +405,7 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
                 (cs (x.2 + 1) + cs (x.2 - 1) - 2 * cs x.2)| ≤
               Real.sqrt a * C₂ * (1 + (i : ℝ)) ^ 2 := hsp2_i
           _ ≤ Real.sqrt a * C₂ * (1 + (m : ℝ)) ^ 2 := by
-            gcongr
+            exact mul_le_mul_of_nonneg_left hpow2 (by positivity)
       have hEval : ∀ (y : AsymLatticeSites Nt Ns),
           evalAsymTorusAtSite Lt Ls Nt Ns y
               (cylinderToTorusEmbed Lt Ls
@@ -372,8 +422,7 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
             (DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis
               (E := SmoothMap_Circle Ls ℝ))
             (DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis
-              (E := SchwartzMap ℝ ℝ)) m]
-          simp [i, j, Nat.pair_unpair]]
+              (E := SchwartzMap ℝ ℝ)) m]]
         simp [cylinderToTorusEmbed_pure, evalAsymTorusAtSite,
           NuclearTensorProduct.evalCLM_pure,
           ContinuousLinearMap.comp_apply, ContinuousLinearMap.proj_apply,
@@ -406,23 +455,29 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
                 (Real.sqrt a * K₂ * (D * (1 + (m : ℝ)) ^ S) /
                   (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2) *
                 |cs x.2| := by
-            gcongr
-            exact htem2'
+            apply mul_le_mul_of_nonneg_right
+            · exact mul_le_mul_of_nonneg_left htem2' (abs_nonneg _)
+            · exact abs_nonneg _
           _ ≤ |a⁻¹| *
                 (Real.sqrt a * K₂ * (D * (1 + (m : ℝ)) ^ S) /
                   (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2) *
                 (Real.sqrt a * C₀) := by
-            gcongr
-            exact hsp0
+            apply mul_le_mul_of_nonneg_left hsp0
+            exact mul_nonneg (abs_nonneg _) htem2_bound_nonneg
           _ = (|a⁻¹| * Real.sqrt a * Real.sqrt a) *
                 (K₂ * D * C₀ * (1 + (m : ℝ)) ^ S /
                   (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2) := by
             ring
           _ ≤ K₂ * D * C₀ * (1 + (m : ℝ)) ^ (S + 2) /
                 (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 := by
-            rw [hroot]
-            gcongr
-            exact hpow_extra
+            rw [hroot, one_mul]
+            apply div_le_div_of_nonneg_right
+            · exact mul_le_mul_of_nonneg_left hpow_extra (by positivity)
+            · positivity
+      have htem0_bound_nonneg :
+          0 ≤ Real.sqrt a * K₀ * (D * (1 + (m : ℝ)) ^ S) /
+            (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2 :=
+        (abs_nonneg _).trans htem0'
       have hterm₂ :
           |a⁻¹| * |ct x.1| *
               |(a ^ 2 : ℝ)⁻¹ *
@@ -438,14 +493,15 @@ theorem asymFiniteLaplacianRawSource_pointwise_centered_decay
                   (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2) *
                 |(a ^ 2 : ℝ)⁻¹ *
                   (cs (x.2 + 1) + cs (x.2 - 1) - 2 * cs x.2)| := by
-            gcongr
-            exact htem0'
+            apply mul_le_mul_of_nonneg_right
+            · exact mul_le_mul_of_nonneg_left htem0' (abs_nonneg _)
+            · exact abs_nonneg _
           _ ≤ |a⁻¹| *
                 (Real.sqrt a * K₀ * (D * (1 + (m : ℝ)) ^ S) /
                   (1 + a * ((signedVal Nt x.1).natAbs : ℝ)) ^ 2) *
                 (Real.sqrt a * C₂ * (1 + (m : ℝ)) ^ 2) := by
-            gcongr
-            exact hsp2'
+            apply mul_le_mul_of_nonneg_left hsp2'
+            exact mul_nonneg (abs_nonneg _) htem0_bound_nonneg
           _ = (|a⁻¹| * Real.sqrt a * Real.sqrt a) *
                 (K₀ * D * C₂ * (1 + (m : ℝ)) ^ S *
                   (1 + (m : ℝ)) ^ 2 /
