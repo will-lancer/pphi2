@@ -447,7 +447,6 @@ private theorem asym_circleRestriction_inner_tendsto
             hfg ((n : ℝ) * L / (↑(N k - 1 + 1) : ℝ))) := by
     funext k
     letI : NeZero (N k) := hN k
-    rw [hNsucc k]
     calc
       ∑ z : ZMod (N k),
           circleRestriction L (N k) f z * circleRestriction L (N k) g z =
@@ -468,14 +467,14 @@ private theorem asym_circleRestriction_inner_tendsto
       _ = ∑ n ∈ Finset.range (N k),
           (L / (N k : ℝ)) *
             hfg ((n : ℝ) * L / (N k : ℝ)) := by
-        rw [asym_zmod_sum_eq_range]
-        apply Finset.sum_congr rfl
-        intro n hn
-        simp [hfg, circlePoint]
+        simpa [circlePoint, hfg] using
+          (asym_zmod_sum_eq_range (N k)
+            (fun n => (L / (N k : ℝ)) *
+              hfg ((n : ℝ) * L / (N k : ℝ))))
       _ = ∑ n ∈ Finset.range (N k - 1 + 1),
           (L / (↑(N k - 1 + 1) : ℝ)) *
             hfg ((n : ℝ) * L / (↑(N k - 1 + 1) : ℝ)) := by
-        rw [hNsucc k]
+        simp only [hNsucc k]
   rw [hrewrite]
   simpa only [Function.comp_def] using hcomp
 
@@ -590,7 +589,7 @@ private theorem asym_basis_pair_tendsto
             rw [Finset.sum_mul_sum]
   rw [hprod]
   have hdelta :
-      (if mt = nt then 1 else 0) * (if ms = ns then 1 else 0) =
+      (if mt = nt then (1 : ℝ) else 0) * (if ms = ns then 1 else 0) =
         (if m = n then 1 else 0) := by
     by_cases hmn : m = n
     · subst n
@@ -653,7 +652,7 @@ theorem asymTorusSiteEval_sq_tendsto
     intro N r
     dsimp [fN]
     rw [map_sum]
-    simp_rw [ContinuousLinearMap.map_smul, smul_eq_mul]
+    simp_rw [map_smul, smul_eq_mul]
     simp [
       DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis,
       mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_range, eq_comm]
@@ -719,8 +718,8 @@ theorem asymTorusSiteEval_sq_tendsto
                    (RapidDecaySeq.basisVec n)) := by
       intro k
       dsimp [S, fN]
-      simp only [Finset.sum_apply, map_sum, ContinuousLinearMap.map_smul,
-        Pi.smul_apply, smul_eq_mul, pow_two]
+      simp only [Finset.sum_apply, map_sum, map_smul, Pi.smul_apply,
+        smul_eq_mul, pow_two]
       simp_rw [Finset.sum_mul_sum]
       rw [Finset.sum_comm]
       apply Finset.sum_congr rfl
@@ -728,9 +727,21 @@ theorem asymTorusSiteEval_sq_tendsto
       rw [Finset.sum_comm]
       apply Finset.sum_congr rfl
       intro n hn
-      apply Finset.sum_congr rfl
-      intro x hx
-      ring
+      calc
+        _ = ∑ x : AsymLatticeSites (Nt k) (Ns k),
+            (DyninMityaginSpace.coeff m f *
+              DyninMityaginSpace.coeff n f) *
+              (evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+                  (RapidDecaySeq.basisVec m) *
+                evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x
+                  (RapidDecaySeq.basisVec n)) := by
+          apply Finset.sum_congr rfl
+          intro x hx
+          rw [map_smul, map_smul]
+          simp only [smul_eq_mul]
+          ring
+        _ = _ := by
+          rw [Finset.mul_sum]
     rw [show (fun k => S k (fN N)) =
         (fun k => ∑ m ∈ Finset.range N, ∑ n ∈ Finset.range N,
           DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff n f *
@@ -781,7 +792,9 @@ theorem asymTorusSiteEval_sq_tendsto
   have hpdiff : Filter.Tendsto
       (fun N => RapidDecaySeq.rapidDecaySeminorm 0 (fN N - f)) atTop (nhds 0) := by
     have hdiff : Filter.Tendsto (fun N => fN N - f) atTop (nhds 0) := by
-      simpa using hfN.sub tendsto_const_nhds
+      have hconst : Filter.Tendsto (fun _ : ℕ => f) atTop (nhds f) :=
+        tendsto_const_nhds
+      simpa using hfN.sub hconst
     have hp :=
       (RapidDecaySeq.rapidDecay_withSeminorms.continuous_seminorm 0).continuousAt.tendsto.comp
         hdiff
@@ -896,16 +909,22 @@ theorem asymTorusSiteEval_sq_tendsto
   have hnorm_diff : ‖vf - vn‖ ≤ A * p (fN N₀ - f) := by
     rw [← hvd]
     have := hsample_bound k (f - fN N₀)
-    have heq : p (f - fN N₀) = p (fN N₀ - f) := by
-      rw [show f - fN N₀ = -(fN N₀ - f) by abel,
-        map_neg_eq_map]
+    have heq :
+        RapidDecaySeq.rapidDecaySeminorm 0 (f - fN N₀) =
+          RapidDecaySeq.rapidDecaySeminorm 0 (fN N₀ - f) := by
+      rw [show f - fN N₀ = -(fN N₀ - f) by abel]
+      exact map_neg_eq_map _ _
     rw [heq] at this
     exact this
   have hsqdiff :
       |S k f - S k (fN N₀)| ≤
         (‖vf‖ + ‖vn‖) * ‖vf - vn‖ := by
-    dsimp [S, vf, vn]
-    rw [← EuclideanSpace.real_norm_sq_eq, ← EuclideanSpace.real_norm_sq_eq]
+    dsimp [S]
+    change
+      |(∑ x, vf x ^ 2) - (∑ x, vn x ^ 2)| ≤
+        (‖vf‖ + ‖vn‖) * ‖vf - vn‖
+    rw [← EuclideanSpace.real_norm_sq_eq vf,
+      ← EuclideanSpace.real_norm_sq_eq vn]
     rw [show ‖vf‖ ^ 2 - ‖vn‖ ^ 2 =
         (‖vf‖ - ‖vn‖) * (‖vf‖ + ‖vn‖) by ring, abs_mul]
     simpa [mul_comm] using
@@ -936,13 +955,22 @@ theorem asymTorusSiteEval_sq_tendsto
         rw [heq]
         have hcoef : 0 < A ^ 2 * (2 * d + 1) := by
           nlinarith [hden]
+        have hA_pos : 0 < A := by
+          dsimp [A]
+          exact Real.sqrt_pos.2 hC₀_pos
+        have hfac_pos : 0 < 2 * d + 1 := by
+          have hd : 0 ≤ d := by
+            dsimp [d, p]
+            exact apply_nonneg _ _
+          linarith
         have hmul := mul_lt_mul_of_pos_left hsmall' hcoef
         calc
           A ^ 2 * (2 * d + 1) * p (fN N₀ - f) <
               A ^ 2 * (2 * d + 1) *
                 (ε / (3 * A ^ 2 * (2 * d + 1))) := hmul
           _ = ε / 3 := by
-            field_simp [ne_of_gt hden, ne_of_gt hcoef]
+            field_simp [ne_of_gt hden, ne_of_gt hcoef,
+              ne_of_gt hA_pos, ne_of_gt hfac_pos]
   calc
     |S k f - l2InnerProduct f f| ≤
         |S k f - S k (fN N₀)| +
@@ -955,7 +983,11 @@ theorem asymTorusSiteEval_sq_tendsto
         _ ≤ |S k f - S k (fN N₀)| +
               (|S k (fN N₀) - l2InnerProduct (fN N₀) (fN N₀)| +
                 |l2InnerProduct (fN N₀) (fN N₀) - l2InnerProduct f f|) :=
-          add_le_add_left (abs_sub_le _ _ _) _
+          add_le_add_right
+            (abs_sub_le (S k (fN N₀))
+              (l2InnerProduct (fN N₀) (fN N₀))
+              (l2InnerProduct f f))
+            |S k f - S k (fN N₀)|
         _ = _ := by ring
     _ < ε / 3 + ε / 3 + ε / 3 := by
       gcongr
