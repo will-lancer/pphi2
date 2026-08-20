@@ -40,7 +40,7 @@ import GaussianField.ConfigurationEmbedding
 
 noncomputable section
 
-open MeasureTheory GaussianField
+open MeasureTheory GaussianField Filter
 
 namespace Pphi2
 
@@ -594,15 +594,20 @@ private theorem asym_basis_pair_tendsto
         (if m = n then 1 else 0) := by
     by_cases hmn : m = n
     · subst n
-      simp
+      simp [mt, ms, nt, ns]
     by_cases hmt : mt = nt
     · by_cases hms : ms = ns
       · have hmn' : m = n := by
-          rw [← Nat.pair_unpair m, ← Nat.pair_unpair n, hmt, hms]
-        simp [hmn']
+          calc
+            m = Nat.pair mt ms := by
+              simpa [mt, ms] using (Nat.pair_unpair m).symm
+            _ = Nat.pair nt ns := by rw [hmt, hms]
+            _ = n := by
+              simpa [nt, ns] using Nat.pair_unpair n
+        exact (hmn hmn').elim
       · simp [hmt, hms, hmn]
     · simp [hmt, hmn]
-  convert htime'.mul hspace' using 1 <;> simp [hdelta]
+  simpa only [hdelta] using htime'.mul hspace'
 
 theorem asymTorusSiteEval_sq_tendsto
     (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
@@ -648,7 +653,7 @@ theorem asymTorusSiteEval_sq_tendsto
     intro N r
     dsimp [fN]
     rw [map_sum]
-    simp_rw [map_smul, smul_eq_mul]
+    simp_rw [ContinuousLinearMap.map_smul, smul_eq_mul]
     simp [
       DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis,
       mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_range, eq_comm]
@@ -681,7 +686,7 @@ theorem asymTorusSiteEval_sq_tendsto
           fun N => ∑ m ∈ Finset.range N,
             DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff m f := by
       ext N
-      refine Finset.sum_congr rfl fun m _ => (pow_two _).symm
+      refine Finset.sum_congr rfl fun m _ => pow_two _
     rw [hsq]
     -- `l2InnerProduct` is defeq to the bilinear tsum; do not unfold it
     -- (the expansion is a private name).
@@ -714,9 +719,9 @@ theorem asymTorusSiteEval_sq_tendsto
                    (RapidDecaySeq.basisVec n)) := by
       intro k
       dsimp [S, fN]
-      simp only [Finset.sum_apply, map_sum, map_smul, Pi.smul_apply, smul_eq_mul,
-        pow_two]
-      rw [Finset.sum_mul_sum]
+      simp only [Finset.sum_apply, map_sum, ContinuousLinearMap.map_smul,
+        Pi.smul_apply, smul_eq_mul, pow_two]
+      simp_rw [Finset.sum_mul_sum]
       rw [Finset.sum_comm]
       apply Finset.sum_congr rfl
       intro m hm
@@ -768,7 +773,7 @@ theorem asymTorusSiteEval_sq_tendsto
       rw [Finset.sum_eq_single m]
       · simp [pow_two]
       · intro b hb hbm
-        simp [hbm]
+        simp [if_neg (Ne.symm hbm)]
       · intro hmN
         exact (hmN hm).elim
     rw [hdiag] at hsum
@@ -790,7 +795,11 @@ theorem asymTorusSiteEval_sq_tendsto
   let C₀ := Lt * Ls * C₀t ^ 2 * C₀s ^ 2
   have hC₀_pos : 0 < C₀ := by
     dsimp [C₀]
-    positivity
+    exact mul_pos
+      (mul_pos
+        (mul_pos (Fact.out : (0 : ℝ) < Lt) (Fact.out : (0 : ℝ) < Ls))
+        (sq_pos_of_pos hC₀t_pos))
+      (sq_pos_of_pos hC₀s_pos)
   have hsample_bound : ∀ k (h : AsymTorusTestFunction Lt Ls),
       ‖WithLp.toLp 2 (fun x : AsymLatticeSites (Nt k) (Ns k) =>
           evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h)‖ ≤
@@ -810,10 +819,13 @@ theorem asymTorusSiteEval_sq_tendsto
       rw [EuclideanSpace.real_norm_sq_eq]
       simpa [C₀, Real.norm_eq_abs, sq_abs] using hsquare
     have hp : 0 ≤ RapidDecaySeq.rapidDecaySeminorm 0 h := apply_nonneg _ _
-    have hsqrt : 0 ≤ Real.sqrt C₀ := Real.sqrt_nonneg _
-    nlinarith [Real.sq_sqrt hC₀_pos.le, norm_nonneg
-      (WithLp.toLp 2 (fun x : AsymLatticeSites (Nt k) (Ns k) =>
-        evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h))]
+    calc
+      ‖WithLp.toLp 2 (fun x : AsymLatticeSites (Nt k) (Ns k) =>
+          evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h)‖ ≤
+          Real.sqrt (C₀ * (RapidDecaySeq.rapidDecaySeminorm 0 h) ^ 2) :=
+        Real.le_sqrt_of_sq_le hsquare'
+      _ = Real.sqrt C₀ * RapidDecaySeq.rapidDecaySeminorm 0 h := by
+        rw [Real.sqrt_mul hC₀_pos.le, Real.sqrt_sq_eq_abs, abs_of_nonneg hp]
   rw [Metric.tendsto_atTop]
   intro ε hε
   let p : AsymTorusTestFunction Lt Ls → ℝ :=
