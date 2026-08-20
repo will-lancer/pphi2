@@ -171,6 +171,7 @@ private theorem lapTemporal_zero_bound
       hratio, abs_mul, abs_of_pos ha, hs_abs]
     ring
   rw [hden] at hperiod
+  rw [abs_mul, abs_of_nonneg (Real.sqrt_nonneg _)]
   calc
     Real.sqrt a *
         |(periodizeCLM Lt h).toFun (circlePoint Lt Nt z)| ≤
