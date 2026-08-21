@@ -18,8 +18,10 @@ the trace cannot have leaked through the printed targets.
 * `Pphi2.pphi2_main` — a P(Φ)₂ continuum-limit measure satisfies the OS bundle.
 * `Pphi2.pphi2_nonGaussianity` — u₄ ≠ 0 (rests on `continuumLimit_nonGaussian`).
 * `Pphi2.pphi2_nontrivial` — S₂(f,f) > 0 (rests on `pphi2_nontriviality`).
-* `Pphi2.cylinderIso_OS_of_RP_OS2` — cylinder OS0–OS3 assembly
-  (conditional on RP + OS2-symmetry + the uniform exp-moment axiom).
+* `Pphi2.cylinderIso_OS_of_RP_OS2`: quartic cylinder OS0–OS3 assembly;
+  RP and OS2 are proved internally. Its non-kernel dependencies are the upstream
+  axiom `GaussianField.embed_l2_uniform_bound` and the Pphi2 project axiom
+  `Pphi2.asymInteracting_expMoment_volume_uniform`.
 
 Secondary regression targets (not in `formalization.yaml`):
 

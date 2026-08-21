@@ -9,49 +9,52 @@
 > in the tree.
 
 
-*2026-05-27. A vetting map for the isotropic `Z_Nt × Z_Ns` cylinder construction
-(`AsymTorus/AsymContinuumLimit.lean`). Lists every non-Mathlib input the cylinder
-OS0–OS3 theorem rests on, with its exact statement, role, mathematical content,
-references, and a provability verdict. The point is to let you check that each
-input is (a) true and (b) formalizable, and to flag one input that is currently
-**mis-stated** in Lean.*
+*Original review 2026-05-27; live-interface refresh 2026-08-20.* This is a
+vetting map for the isotropic `Z_Nt × Z_Ns` cylinder construction
+(`AsymTorus/AsymContinuumLimit.lean`). It records the non-Mathlib inputs,
+their roles, mathematical content, references, and provability verdicts. The
+original `hRP` and `hOS2` maps remain below as historical records. The current
+theorem builds those properties internally and is quartic-only.
 
 ---
 
 ## 0. Logical structure
 
-The top-level theorem is
+The current top-level theorem is
 
 ```
-routeBPrimeIso_cylinder_OS
-    (P mass hmass) (Knel hKnel_pos hKnel_uniform) (hRP) (hOS2)
-  : ∃ ν, IsProbabilityMeasure ν ∧ (cylinder OS0 ∧ OS2-refl ∧ OS2-time ∧ OS2-space ∧ OS3)
+cylinderIso_OS_of_RP_OS2
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass)
+  : ∃ ν, IsProbabilityMeasure ν ∧
+      (cylinder OS0 ∧ OS2-refl ∧ OS2-time ∧ OS2-space ∧ OS3)
 ```
 
-Everything **below** the dotted line is a *theorem* (no axioms beyond the two isotropic
-axioms + Mathlib's `propext/Choice/Quot.sound`). Everything **above** is an explicit
-hypothesis whose provability we must vet.
+The lower-level `routeBPrimeIso_cylinder_OS` still accepts the uniform
+interacting-moment bound as `hUnif`. The wrapper obtains `hUnif` from the
+quartic axiom `asymInteracting_expMoment_volume_uniform`, then invokes the
+isotropic construction. OS2 comes from the heterogeneous lattice
+construction. Reflection positivity is carried through the constructed
+no-wrap family and its IR limit.
 
 ```
-                       routeBPrimeIso_cylinder_OS            (this file's subject)
-                      /            |             \
-       hKnel_uniform        hRP (OS3)        hOS2          ← 3 explicit hypotheses
-         (§4 — FLAG)        (§5)             (§6)
-            |
-   asymTorusIso_cylinderUniformGreenBound                  ← builds the IR family + uniform Green bound
-            |
-   asymTorusIso_measureHasGreenMomentBound(_of_nelson)     ← MeasureHasGreenMomentBound = THEOREM (per Lt)
-        /        |          \
-  cutoff bound  UV limit   weakLimit_exponential_moment
-  (Phase 2)     (tightness+Prokhorov)   (truncation+MCT)
-      |
-  asymNelson_exponential_estimate_iso
-      |
-  asymChaosCutoffDecomposition (§2)  +  wickConstantAsym_eq_variance (§1)
-      |                                          + GaussianField.embed_l2_uniform_bound (§3, via routeBPrime)
+asymInteracting_expMoment_volume_uniform (P hP mass hmass)
+                         |
+                         | hUnif, with K and C
+                         v
+asymTorusIso_cylinderUniformGreenBound
+       |                 |                     |
+       |                 |                     +-- no-wrap RP family
+       |                 +-- internal OS2 symmetry
+       +-- uniform Green moment
+                         |
+                         v
+              routeBPrimeIso_cylinder_OS
+                         |
+                         v
+              cylinderIso_OS_of_RP_OS2
 ```
 
-`#print axioms` (2026-05-27, after §1 discharge):
+Historical `#print axioms` snapshot (2026-05-27, after §1 discharge):
 - `asymTorusIso_measureHasGreenMomentBound` / `asymTorusIso_cylinderUniformGreenBound` /
   `routeBPrimeIso_cylinder_OS` (the conditional theorems):
   `[propext, Classical.choice, Quot.sound, asymChaosCutoffDecomposition]`
@@ -59,9 +62,11 @@ hypothesis whose provability we must vet.
 - `cylinderIso_OS_of_RP_OS2` (the §4-unconditional theorem): the above **+**
   `asymInteracting_expMoment_volume_uniform`.
 
-So now: **two** project axioms (§2, §4), one upstream gaussian-field axiom (§3), and two remaining
-hypotheses (§5 OS3, §6 OS2). §1 `wickConstantAsym_eq_variance` was discharged to a theorem (so it no
-longer appears above); §4 was promoted from hypothesis to a vetted axiom.
+That snapshot treated §5 and §6 as explicit hypotheses. In the current
+source, `cylinderIso_OS_of_RP_OS2` has no `hRP` or `hOS2` argument. The
+isotropic construction returns OS2 and no-wrap reflection positivity, and the
+wrapper carries them into the cylinder limit. §1 remains a theorem. §4 is a
+quartic-only axiom.
 
 ---
 
@@ -151,27 +156,42 @@ estimate, fully sketched.
 
 ---
 
-## 4. The volume-uniform exp-moment input  **(corrected 2026-05-27 — now form (★))**
+## 4. The volume-uniform exp-moment input  **(corrected 2026-05-27: current form (★), quartic only)**
 
 > **History.** The first cut of `asymTorusIso_cylinderUniformGreenBound` /
 > `routeBPrimeIso_cylinder_OS` took the hypothesis
 > `hKnel_uniform : ∀ L>0 …, ∫ e^{-2V_Λ} dμ_GFF ≤ Knel` (uniform Nelson `L²` across periods). **That
 > form is FALSE** (see below), so the theorem was vacuous. It has been **replaced** by the
-> interacting-moment form (★); the verdict below applies to (★).
+> interacting-moment form (★). The current axiom also carries the restriction
+> `hP : P.n = 4`; the verdict below applies to that quartic form.
 
-The current hypothesis of both theorems:
+The live axiom has the following contract. `Ls` is the section parameter with
+`[Fact (0 < Ls)]`.
 
 ```lean
-(K : ℝ) (hK_pos : 0 < K)
-(hUnif : ∀ (L : ℝ) [Fact (0 < L)] (Nt Ns) [NeZero][NeZero] (a) (ha), Nt·a = L → Ns·a = Ls → ∀ f,
-    Integrable (e^{|ωf|}) (asymTorusInteractingMeasureIso L Ls Nt Ns a P mass ha hmass) ∧
-    ∫ e^{|ωf|} ∂(asymTorusInteractingMeasureIso L Ls Nt Ns a P mass ha hmass)
-      ≤ K · e^{∫ (ω·asymLatticeTestFnIso L Ls Nt Ns a f)² dμ_GFF})            -- (★)
+axiom asymInteracting_expMoment_volume_uniform
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass) :
+    ∃ K C : ℝ, 0 < K ∧ 0 < C ∧
+      ∀ (L : ℝ) [Fact (0 < L)] (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+        (a : ℝ) (ha : 0 < a),
+        (Nt : ℝ) * a = L → (Ns : ℝ) * a = Ls →
+        ∀ f : AsymTorusTestFunction L Ls,
+        Integrable (fun ω : Configuration (AsymTorusTestFunction L Ls) =>
+          Real.exp (|ω f|))
+          (asymTorusInteractingMeasureIso L Ls Nt Ns a P mass ha hmass) ∧
+        ∫ ω : Configuration (AsymTorusTestFunction L Ls),
+          Real.exp (|ω f|)
+            ∂(asymTorusInteractingMeasureIso L Ls Nt Ns a P mass ha hmass) ≤
+          K * Real.exp (C * ∫ ω : Configuration (AsymLatticeField Nt Ns),
+            (ω (asymLatticeTestFnIso L Ls Nt Ns a f)) ^ 2
+              ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass))
 ```
 
-i.e. the **interacting** exp-moment `∫ e^{|ωf|} dμ_int ≤ K·e^{σ²}`, uniform in the period `L` (the
-`σ²` Green-control on the RHS is allowed to depend on `f`, `L`; only the prefactor `K` must be
-uniform).
+The current wrappers unpack `K` and `C`, then pass the resulting `hUnif` to
+`asymTorusIso_cylinderUniformGreenBound` and
+`routeBPrimeIso_cylinder_OS`. The interacting exp-moment is uniform in the
+period `L`; the Green-control term may depend on `f` and `L`, while `K` and
+`C` are fixed for the chosen quartic `P`, mass, and circumference `Ls`.
 
 **Why the naive `∫ e^{-2V} ≤ Knel` form was FALSE (and is no longer used).**
 
@@ -226,7 +246,14 @@ and isolates the one genuine cluster-expansion input as an honest, true hypothes
 
 ---
 
-## 5. `hRP` — OS3 reflection positivity (`CylinderMeasureSequenceEventuallyReflectionPositive`)
+## 5. Historical `hRP` map: OS3 reflection positivity
+(`CylinderMeasureSequenceEventuallyReflectionPositive`)
+
+This section records the 2026-05-27 theorem interface. `hRP` is not an
+argument of the current `cylinderIso_OS_of_RP_OS2` theorem. The current
+isotropic construction produces a no-wrap reflection-positive family through
+`asymTorusIso_measureHasGreenMomentBound_of_cutoff_withNoWrapRP`; the final
+cylinder reflection-positivity statement is obtained in the wrapper.
 
 ```lean
 (hRP : ∀ (Lt) (hLt) (μ),
@@ -235,9 +262,9 @@ and isolates the one genuine cluster-expansion input as an honest, true hypothes
 -- where the predicate is:  ∀ n f c, ∀ᶠ k in atTop, CylinderRPMatrixNonnegative Ls (νseq k) n f c
 ```
 
-**Role.** OS3 (reflection positivity) of the cylinder-pullback measures, eventually in the IR
-index. Feeds `routeBPrime_cylinder_OS`, which transfers it through the weak limit
-(`cylinderMeasureReflectionPositive_of_tendsto_cf`).
+**Historical role.** OS3 (reflection positivity) of the cylinder-pullback
+measures, eventually in the IR index. The current route uses the constructed
+no-wrap family and `cylinderMeasureReflectionPositive_of_noWrap_limit`.
 
 **Math.** RP is preserved under: (i) the lattice measure (RP of `Z_Nt × Z_Ns` with the reflection
 across a time hyperplane — a Gaussian/Markov-field RP, standard for nearest-neighbour actions),
@@ -257,18 +284,21 @@ the torus into two equal halves (no fixed-site obstruction). The IR-family const
 `Nt_k = 2(n+1)(k+1)`, `Ns_k = 2(k+1)`, `a_k = Ls/(2(k+1))` — **both extents even** — keeping
 `Lt n = (n+1)·Ls` and `a_k → 0`. So the family fed to the IR limit is OS3-ready.
 
-**Caveat on the `hRP`/`hOS2` shape.** In `routeBPrimeIso_cylinder_OS` / `cylinderIso_OS_of_RP_OS2`
-these are stated `∀ (Lt) (hLt) (μ), …` (all families). That is *over-strong*: a genuine OS3 proof
-establishes RP for the **specific** even-`Nt`-derived family the construction produces, not for
-arbitrary `μ`. The honest usage is to `obtain` the family from
-`asymTorusIso_cylinderUniformGreenBound` and apply the proved `routeBPrime_cylinder_OS` with RP/OS2
-for *that* family. A future refinement narrows the hypotheses to the constructed family (it is
-left ∀-quantified now only because that family is `Classical.choose`-constructed and unnamed). This
-input is *independent* of the moment bounds and belongs to the cyl-OS3 work-stream.
+**Historical shape note.** The old interface quantified over
+`∀ (Lt) (hLt) (μ), …`, which was stronger than the family needed by the
+construction. The current source selects the even-`Nt` family and proves its
+no-wrap reflection positivity before the IR limit. This stream remains
+independent of the quartic moment axiom.
 
 ---
 
-## 6. `hOS2` — Euclidean symmetry (`AsymTorusSequenceHasCylinderOS2Symmetry`)
+## 6. Historical `hOS2` map: Euclidean symmetry
+(`AsymTorusSequenceHasCylinderOS2Symmetry`)
+
+This section preserves the former explicit input. `hOS2` is not an argument
+of the current cylinder theorem. The current source derives
+`AsymTorusSequenceHasCylinderOS2Symmetry` from the torus OS theorem through
+`AsymTorusSequenceHasCylinderOS2Symmetry.of_torusOS`.
 
 ```lean
 (hOS2 : ∀ (Lt) (hLt) (μ), AsymTorusSequenceHasCylinderOS2Symmetry Ls Lt hLt μ)
@@ -276,9 +306,11 @@ input is *independent* of the moment bounds and belongs to the cyl-OS3 work-stre
 --           ∧ (∀ n, ∀ f,   ∫ e^{iω f} dμ = ∫ e^{iω (asymTorusTimeReflection f)} dμ)
 ```
 
-**Role.** OS2 (Euclidean invariance): the torus measures are invariant under the `(time,space)`
-translations and time reflection of the torus; `routeBPrime_cylinder_OS` pushes this to cylinder
-time-translation, space-translation, and time-reflection invariance.
+**Historical role.** OS2 (Euclidean invariance): the torus measures are
+invariant under the `(time,space)` translations and time reflection of the
+torus; `routeBPrime_cylinder_OS` pushed this to cylinder time-translation,
+space-translation, and time-reflection invariance. The current source proves
+these properties from the heterogeneous lattice construction.
 
 **Math.** The lattice measure on `Z_Nt × Z_Ns` is invariant under the **discrete** translation
 group (the action and the Wick constant are translation-invariant — same circulant fact as §1) and
@@ -286,12 +318,12 @@ under the time reflection (the action is reflection-symmetric). The torus transl
 `asymTorusTranslation` act through the embedding; invariance passes to the UV continuum limit by
 characteristic-functional convergence.
 
-**Provability: HIGH (standard, follows the §1 circulant structure).** Discrete translation +
-reflection invariance of the lattice Gibbs measure is immediate from invariance of the action and
-the homogeneous (site-independent) Wick ordering. Continuum rotation invariance (full OS2 on `ℝ²`)
-would be harder (the lattice breaks rotations — the `OS2_WardIdentity` anomaly story), but the
-**cylinder** OS2 only needs translations + time reflection, which the lattice has exactly. Left as
-a hypothesis here because it is a separate (easy) development.
+**Provability: HIGH (standard, follows the §1 circulant structure).** Discrete
+translation and reflection invariance of the lattice Gibbs measure follow from
+the action and homogeneous Wick ordering. The current cylinder proof uses
+those finite-lattice symmetries and the torus OS certificate. Full continuum
+rotation invariance remains a separate question; cylinder OS2 needs the
+translations and time reflection supplied by the construction.
 
 ---
 
@@ -302,18 +334,21 @@ a hypothesis here because it is a separate (easy) development.
 | §1 `wickConstantAsym_eq_variance` | **DISCHARGED → theorem** | ✅ | done | circulant diagonal; proved 2026-05-27 (`AsymWickVariance.lean`) |
 | §2 `asymChaosCutoffDecomposition` | axiom (port in progress) | ✅ | **Medium** | port of square Nelson machinery; UNITs 1 + 4 + 3·{pow_one,pow_two} **done** (commits `ab6dcdb`/`48b479e`/`014c598`, `AsymFieldDecomposition.lean` + `AsymCovarianceBoundsGJ.lean`, both `#axioms = standard trio`); remaining: UNIT 3 `of_three_le`, UNITs 2/5/6/7 |
 | §3 `embed_l2_uniform_bound` | axiom (upstream) | ✅ | **High** | periodization, Stein–Weiss; pre-existing |
-| §4 volume-uniformity (★) | **axiom** `asymInteracting_expMoment_volume_uniform` | ✅ (form `K·e^{C·σ²}`) | **Deep** (the real one) | DT-vetted with `∃C`; cluster-expansion / mass-gap |
-| §5 `hRP` (OS3) | hypothesis | ✅ | Medium–High | lattice RP + weak-limit inheritance |
-| §6 `hOS2` | hypothesis | ✅ | High | discrete translation/reflection invariance |
+| §4 volume-uniformity (★) | **Pphi2 project axiom**, quartic `asymInteracting_expMoment_volume_uniform` with `hP : P.n = 4` | ✅ (form `K·e^{C·σ²}`) | **Deep** (the real one) | DT-vetted with `∃C`; cluster-expansion / mass-gap |
+| §5 historical `hRP` map (OS3) | superseded interface | ✅ | Medium–High | current source builds no-wrap RP internally |
+| §6 historical `hOS2` map | superseded interface | ✅ | High | current source derives OS2 internally |
 
 **The one genuinely deep input is §4** (the volume-uniform interacting exp-moment, ≡ pressure
 dominates the linear lower bound, ≡ cluster expansion). Everything else is either a standard fact
 or a mechanical port of already-proved square-track material.
 
-**Status (2026-05-27):** §4 is the true interacting-moment form (★), a deep-think-vetted `axiom`
-`asymInteracting_expMoment_volume_uniform`; `cylinderIso_OS_of_RP_OS2` gives cylinder
-OS0/OS1/OS2/OS3 unconditional in §4 (only §5/§6 remain as hypotheses). **§1 has been discharged to a
-theorem.** pphi2 on the branch: **21 raw / 19 real axioms, 0 sorries**. The two remaining isotropic
-axioms are §2 `asymChaosCutoffDecomposition` (port of proved square Nelson machinery) and §4 (the
-genuine cluster-expansion / transfer-matrix-gap result); plus the §5–§6 hypotheses (lattice RP +
-symmetry — see `cylinder-os3-discharge-plan.md`).
+**Historical status (2026-05-27):** §4 was the true interacting-moment form (★), a deep-think-vetted
+axiom. The old theorem map listed §5 and §6 as explicit hypotheses. The historical source snapshot
+reported **21 raw / 19 real axioms, 0 sorries**.
+
+**Current interface (2026-08-20):** §4 is the quartic axiom
+`asymInteracting_expMoment_volume_uniform` with arguments `(P) (hP : P.n = 4)
+(mass) (hmass)`. `cylinderIso_OS_of_RP_OS2` has the same quartic restriction
+and takes no `hRP` or `hOS2` argument. Its construction derives OS2 from the
+heterogeneous lattice symmetries and carries no-wrap reflection positivity
+through the IR limit. Current axiom counts belong in the fresh audit report.

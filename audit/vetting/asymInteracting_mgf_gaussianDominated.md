@@ -42,7 +42,7 @@ n-pair amplification defeats the `K = 2` `|·|`-form). The axiom now carries
 ```yaml
 ---
 axiom: asymInteracting_mgf_gaussianDominated
-file: Pphi2/AsymTorus/AsymExpMomentDischarge.lean:127
+file: Pphi2/AsymTorus/AsymExpMomentDischarge.lean:114
 statement_hash: null
 model: gemini-3-pro
 tool: mcp__gemini__deep_think_gemini

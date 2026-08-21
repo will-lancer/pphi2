@@ -1,7 +1,7 @@
 # Vetting — `asymInteracting_expMoment_volume_uniform`
 
 Captured soundness-review records for `asymInteracting_expMoment_volume_uniform`
-(`Pphi2/AsymTorus/AsymContinuumLimit.lean:621`). Linked from
+(`Pphi2/AsymTorus/AsymContinuumLimit.lean:2460`). Linked from
 [`../../AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md) and
 [`../../planning/INDEX.md`](../../planning/INDEX.md) item 1.
 
@@ -10,7 +10,7 @@ Captured soundness-review records for `asymInteracting_expMoment_volume_uniform`
 ```yaml
 ---
 axiom: asymInteracting_expMoment_volume_uniform
-file: Pphi2/AsymTorus/AsymContinuumLimit.lean:621
+file: Pphi2/AsymTorus/AsymContinuumLimit.lean:2460
 statement_hash: null    # not yet populated; required for L3 strictness
 model: gemini-3.1-pro-preview
 tool: mcp__gemini__deep_think_gemini
@@ -24,7 +24,10 @@ superseded_by: null
 ---
 ```
 
-**Axiom statement vetted (verbatim):**
+**Current axiom statement (the earlier all-`P` map is historical):**
+
+The live declaration is quartic-only. `Ls` is the section parameter, with
+`[Fact (0 < Ls)]`.
 
 ```lean
 /-- Volume-uniform interacting exponential-moment bound on the cylinder.
@@ -37,16 +40,30 @@ There exist constants `K > 0` and `C > 0` such that, for every cylinder geometry
 where `μ_int` is the interacting asymmetric-torus measure and `σ²(f)` is the
 free covariance.
 
-Discharges the `hUnif` hypothesis of `routeBPrimeIso_cylinder_OS`, giving
-`cylinderIso_OS_of_RP_OS2`. -/
-axiom asymInteracting_expMoment_volume_uniform :
-    ∃ K C : ℝ, 0 < K ∧ 0 < C ∧ ∀ (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
-      (a : ℝ) (ha : 0 < a) (hLs : Ns * a = Ls.val) (P : InteractionPolynomial)
-      (mass : ℝ) (hmass : 0 < mass) (f : AsymTestFunction Nt Ns),
-        ∫ ω, Real.exp |asymPairing ω f|
-            ∂(asymInteractingMeasure Nt Ns a ha P mass hmass)
-          ≤ K * Real.exp (C * asymFreeCovariance Nt Ns a ha mass hmass f f)
+The quartic hypothesis is consumed by `cylinderIso_OS_of_RP_OS2`; the current
+theorem proves cylinder OS2 from the heterogeneous lattice construction and
+carries reflection positivity through the no-wrap limit. -/
+axiom asymInteracting_expMoment_volume_uniform
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass) :
+    ∃ K C : ℝ, 0 < K ∧ 0 < C ∧
+      ∀ (L : ℝ) [Fact (0 < L)] (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+        (a : ℝ) (ha : 0 < a),
+        (Nt : ℝ) * a = L → (Ns : ℝ) * a = Ls →
+        ∀ f : AsymTorusTestFunction L Ls,
+        Integrable (fun ω : Configuration (AsymTorusTestFunction L Ls) =>
+          Real.exp (|ω f|))
+          (asymTorusInteractingMeasureIso L Ls Nt Ns a P mass ha hmass) ∧
+        ∫ ω : Configuration (AsymTorusTestFunction L Ls),
+          Real.exp (|ω f|)
+            ∂(asymTorusInteractingMeasureIso L Ls Nt Ns a P mass ha hmass) ≤
+          K * Real.exp (C * ∫ ω : Configuration (AsymLatticeField Nt Ns),
+            (ω (asymLatticeTestFnIso L Ls Nt Ns a f)) ^ 2
+              ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass))
 ```
+
+The earlier all-`P` statement and its `AsymTestFunction` / lattice-measure
+notation are retained in repository history. They do not describe the live
+axiom. The restriction `hP : P.n = 4` is part of the current contract.
 
 **Prompt (verbatim, condensed; for the full deep-think transcript see
 [`../../AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md) 2026-05-27 entry):**
@@ -54,7 +71,7 @@ axiom asymInteracting_expMoment_volume_uniform :
 > The exact prompt and full reply from `mcp__gemini__deep_think_gemini`
 > on 2026-05-27 are recorded inline in the project AXIOM_AUDIT.md at the
 > "Discharge plan (cylinder shortcut)" entry. Summary of the question:
-> "Is the stated `K · exp(C · σ²)` bound (with `∃ K, C > 0`, uniform in
+> "Is the stated quartic `K · exp(C · σ²)` bound (with `∃ K, C > 0`, uniform in
 > the time period `L` at fixed `Ls`) (a) correctly typed, (b) strong
 > enough to discharge `routeBPrimeIso_cylinder_OS`, (c) non-vacuous,
 > (d) actually true in infinite volume?"
@@ -81,12 +98,12 @@ axiom asymInteracting_expMoment_volume_uniform :
 > References: Glimm–Jaffe Ch. 18–19; Simon Ch. V/VIII; Newman (1975);
 > Glimm–Jaffe–Spencer.
 
-**Reasoning digest:** *Likely correct* — the `∃ K, C > 0` form with the
-`C · σ²` exponent is the only true volume-uniform form of the Nelson-style
-exponential-moment bound for P(φ)₂. The `C = 1` form (originally stated) was
-**false**; the corrected `∃ C` form (committed in the same revision) is
-sound, with two independent routes (Newman/Lee–Yang + transfer-matrix gap)
-both vetted.
+**Reasoning digest:** *Likely correct.* The quartic `∃ K, C > 0` form with
+the `C · σ²` exponent is the current volume-uniform interacting-moment
+contract for P(φ)₂. The earlier `C = 1` and all-`P` forms are historical
+records. The current declaration remains an axiom; its consumers prove OS2
+from the heterogeneous lattice symmetries and carry reflection positivity
+through the no-wrap limit.
 
 **Conditions / follow-ups:**
 

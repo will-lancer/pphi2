@@ -1,4 +1,12 @@
-# Cylinder RP adapter — Phase 2 plan (discharge `hRP` after Phase 1 landed)
+# Cylinder RP adapter: historical Phase 2 plan (completed 2026-07-20)
+
+> **Current interface (2026-08-20).** The blocker analysis and source pointers
+> in the opening sections record the pre-discharge design. Phase 2 later landed,
+> and the current quartic `cylinderIso_OS_of_RP_OS2` has no `hRP` or `hOS2`
+> argument. Its explicit inputs are `(P) (hP : P.n = 4) (mass) (hmass)`.
+> Beyond the Lean trio, its kernel footprint is the upstream axiom
+> `GaussianField.embed_l2_uniform_bound` and the Pphi2 project axiom
+> `Pphi2.asymInteracting_expMoment_volume_uniform`.
 
 **Date**: 2026-07-20. **Status**: Phase 1 DONE (`da8d134`,
 `Pphi2/AsymTorus/AsymReflectionPositivity.lean`,
@@ -93,9 +101,10 @@ the remaining OS2-family hypothesis: the heterogeneous Iso cutoff measure is
 proved translation- and time-reflection-invariant, the resulting
 `AsymSatisfiesTorusOS` package is threaded through the Green-bound existential,
 and `AsymTorusSequenceHasCylinderOS2Symmetry.of_torusOS` supplies the sequence
-input internally. The headline now has only `P`, `mass`, and `hmass` as explicit
-inputs; its two nonlogical textbook dependencies are
-`asymInteracting_expMoment_volume_uniform` and `embed_l2_uniform_bound`.
+input internally. The headline now has `(P) (hP : P.n = 4) (mass) (hmass)` as
+explicit inputs. Its two nonlogical textbook dependencies are the Pphi2 project
+axiom `asymInteracting_expMoment_volume_uniform` and the upstream axiom
+`GaussianField.embed_l2_uniform_bound`.
 
 ## 2026-07-20 partial landed (green)
 

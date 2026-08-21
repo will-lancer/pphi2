@@ -3,7 +3,7 @@
 ```yaml
 ---
 axiom: asymGroundStateRep_eq_groundIsometry_one
-file: Pphi2/AsymTorus/AsymBridgeInstance.lean:140
+file: Pphi2/AsymTorus/AsymBridgeInstance.lean:199
 statement_hash: null
 model: codex implementation audit
 tool: local Lean build + upstream GroundMeasure API review

@@ -1,7 +1,8 @@
 # formalization.yaml — https://github.com/mathlib-initiative/formalization.yaml (v0.3)
 # Describes the post-Phase-4.1 (honest ℝ² headline, 2026-07-13) state of pphi2.
 # Source tree (Pphi2.lean + Common): 0 sorries, 27 `axiom` declarations
-#   (25 public + 2 private). Remote build and kernel-certificate refresh pending.
+#   (25 public + 2 private). Remote build passed and the 110-target kernel report
+#   was generated at commit 7f7b73876704dab85431573bb4ff0373e79bc602.
 #   Legacy `ddj/` and parked `future/` are NOT part of the default build target.
 version: "v0.3"
 
@@ -44,45 +45,51 @@ status:
     Glimm-Jaffe/Nelson lattice approach. The Osterwalder-Schrader axiom skeleton
     (OS0 analyticity, OS1 regularity, OS2 Euclidean invariance, OS3 reflection
     positivity, OS4 clustering, bundled as `Pphi2.SatisfiesFullOS`) is complete
-    and the active source tree has 0 sorries. A remote build and refreshed
-    kernel certificate are pending. The headline existence theorem
+    and the active source tree has 0 sorries. The remote build passed at commit
+    `7f7b73876704dab85431573bb4ff0373e79bc602` in
+    https://github.com/will-lancer/pphi2/actions/runs/32430497721; the assurance
+    run https://github.com/will-lancer/pphi2/actions/runs/32430497014 generated
+    the checked-in 110-target kernel report. The headline existence theorem
     `Pphi2.pphi2_existence` (∃ μ on S'(ℝ²) satisfying all five OS axioms) is
     assembled from the lattice construction + continuum limit, but is CONDITIONAL
-    on a set of named analytic axioms (uniform exponential moment bounds,
-    clustering-from-spectral-gap, rotation/Ward-identity restoration,
-    propagator convergence, non-Gaussianity). (The former uniform-spectral-gap
+    on exactly five named project axioms:
+    `canonical_continuumMeasure_cf_tendsto`,
+    `continuum_exponential_clustering`,
+    `continuum_exponential_moment_bound`, `pphi2_limit_exists`, and
+    `rotation_cf_defect_polylog_bound`. Propagator convergence and
+    non-Gaussianity belong to separate results. (The former uniform-spectral-gap
     axioms were removed 2026-07-12 as false-as-stated; see AXIOM_AUDIT.md.) These represent the standard but
     not-yet-formalized analytic hard cores of the construction. The build target
     is the `Pphi2` library (with `Common`); the legacy `ddj/` directory and the
     parked `future/CylinderContinuumLimit/` directory are NOT in the build and
     contain their own separate axioms/sorries that do not affect the main results.
-  sorry_count: 0                 # source scan in Pphi2/ + Common; remote build pending
+  sorry_count: 0                 # source scan in Pphi2/ + Common; remote build passed
   sorry_in_definitions: 0
   axioms:                        # 27 source declarations in Pphi2/ (25 public + 2 private)
     - schwinger_agreement                                  # Bridge.lean
     - os2_from_phi4                                        # Bridge.lean
-    - pphi2_nontriviality                                  # Main.lean:158 (restated about-the-limit 2026-07-13)
-    - continuum_exponential_moment_bound                   # ContinuumLimit/AxiomInheritance.lean:123
-    - canonical_continuumMeasure_cf_tendsto                # ContinuumLimit/AxiomInheritance.lean:327
-    - continuum_exponential_clustering                     # ContinuumLimit/AxiomInheritance.lean:354
-    - continuumLimit_nonGaussian                           # ContinuumLimit/Convergence.lean:293 (regime-restricted 2026-07-13)
-    - pphi2_limit_exists                                   # ContinuumLimit/Convergence.lean:325 (NEW 2026-07-13, the OPEN existence input)
-    - fss_infrared_quadratic                               # AsymTorus/AsymInfraredBound.lean:113
-    - asymTransferGap_uniform_fixedLs                      # AsymTorus/AsymSliceFamilySusceptibility.lean:886
-    - asymFinitePeriodicBridge_remainder_bound_uniform     # AsymTorus/AsymSliceFamilySusceptibility.lean:971
-    - asymFinitePeriodicBridge_diagonal_bound              # AsymTorus/AsymSliceFamilySusceptibility.lean:997
-    - asymInteracting_expMoment_volume_uniform             # AsymTorus/AsymContinuumLimit.lean:621
-    - asymInteracting_mgf_gaussianDominated                # AsymTorus/AsymExpMomentDischarge.lean:127
-    - asymInteractingVariance_le_freeVariance_lattice_Lt_uniform # AsymTorus/AsymExpMomentDischarge.lean:215
+    - pphi2_nontriviality                                  # Main.lean:156 (restated about-the-limit 2026-07-13)
+    - continuum_exponential_moment_bound                   # ContinuumLimit/AxiomInheritance.lean:124
+    - canonical_continuumMeasure_cf_tendsto                # ContinuumLimit/AxiomInheritance.lean:328
+    - continuum_exponential_clustering                     # ContinuumLimit/AxiomInheritance.lean:355
+    - continuumLimit_nonGaussian                           # ContinuumLimit/Convergence.lean:310 (regime-restricted 2026-07-13)
+    - pphi2_limit_exists                                   # ContinuumLimit/Convergence.lean:342 (NEW 2026-07-13, the OPEN existence input)
+    - fss_infrared_quadratic                               # AsymTorus/AsymInfraredBound.lean:117
+    - asymTransferGap_uniform_fixedLs                      # AsymTorus/AsymSliceFamilySusceptibility.lean:887
+    - asymFinitePeriodicBridge_remainder_bound_uniform     # AsymTorus/AsymSliceFamilySusceptibility.lean:972
+    - asymFinitePeriodicBridge_diagonal_bound              # AsymTorus/AsymSliceFamilySusceptibility.lean:998
+    - asymInteracting_expMoment_volume_uniform             # AsymTorus/AsymContinuumLimit.lean:2460
+    - asymInteracting_mgf_gaussianDominated                # AsymTorus/AsymExpMomentDischarge.lean:114
+    - asymInteractingVariance_le_freeVariance_lattice_Lt_uniform # AsymTorus/AsymExpMomentDischarge.lean:211
     - asymGroundStateRep_pos_ae                            # AsymTorus/AsymBridgeInstance.lean:81
-    - asymPartition_ground_bound                           # AsymTorus/AsymBridgeInstance.lean:159
-    - asymFinitePeriodicBridge_remainder_bound             # AsymTorus/AsymBridgeInstance.lean:174
-    - asymGroundSemigroup_intertwines                      # AsymTorus/AsymBridgeInstance.lean:219
+    - asymPartition_ground_bound                           # AsymTorus/AsymBridgeInstance.lean:251
+    - asymFinitePeriodicBridge_remainder_bound             # AsymTorus/AsymBridgeInstance.lean:273
+    - asymGroundSemigroup_intertwines                      # AsymTorus/AsymBridgeInstance.lean:318
     - groundVariance_le_freeCovariance                     # AsymTorus/AsymB5bSingleSlice.lean:162
     - asymTorusInteracting_exponentialMomentBound          # AsymTorus/AsymTorusOS.lean:852 (private)
     - rotation_cf_defect_polylog_bound                     # OSProofs/OS2_WardIdentity.lean:614
-    - two_point_clustering_from_spectral_gap               # OSProofs/OS4_MassGap.lean:137
-    - general_clustering_from_spectral_gap                 # OSProofs/OS4_MassGap.lean:160
+    - two_point_clustering_from_spectral_gap               # OSProofs/OS4_MassGap.lean:136
+    - general_clustering_from_spectral_gap                 # OSProofs/OS4_MassGap.lean:159
     - gaussian_rp_cov_perfect_square                       # OSProofs/OS3_RP_Lattice.lean:648 (private)
     - nelson_exponential_estimate_master_bounded           # NelsonEstimate/PolynomialChaosBridge.lean:1321
     - latticeGreenBilinear_basis_tendsto_continuum         # GaussianContinuumLimit/PropagatorConvergence.lean:103
@@ -91,7 +98,7 @@ status:
       file: "Pphi2/Main.lean"
       sorry_count: 0
       literature_dependencies:
-        - statement: "existence of a probability measure on S'(ℝ²) satisfying the OS0–OS4 axioms for P(Φ)₂; conditional on the single OPEN existence axiom `pphi2_limit_exists` (Fröhlich 1976 / Park 1977 tightness route; δ₀ vacuity of the limit predicate closed 2026-07-13) plus the 4 named OS-inheritance axioms (the former uniform-spectral-gap axioms were removed 2026-07-12 as false as stated)"
+        - statement: "existence of a probability measure on S'(ℝ²) satisfying the OS0–OS4 axioms for P(Φ)₂; conditional on exactly five named project axioms: `canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering`, `continuum_exponential_moment_bound`, `pphi2_limit_exists`, and `rotation_cf_defect_polylog_bound`. Here `pphi2_limit_exists` is the single OPEN existence input (Fröhlich 1976 / Park 1977 tightness route; δ₀ vacuity of the limit predicate closed 2026-07-13). Propagator convergence and non-Gaussianity belong to separate results."
           source: "ISBN:978-0-691-08144-3"
         - statement: "lattice construction and continuum limit of the P(Φ)₂ measure"
           source: "ISBN:978-0-387-96477-7"
@@ -117,7 +124,7 @@ status:
       file: "Pphi2/AsymTorus/AsymContinuumLimit.lean"
       sorry_count: 0
       literature_dependencies:
-        - statement: "cylinder S¹(Lₛ)×ℝ φ⁴₂ OS0–OS3 assembly, conditional on reflection positivity and OS2-symmetry inputs and the uniform exponential-moment axiom"
+        - statement: "quartic-only cylinder S¹(Lₛ)×ℝ φ⁴₂ OS0–OS3 assembly with arguments `(P) (hP : P.n = 4) (mass) (hmass)`; OS2 and reflection positivity are proved internally; the footprint beyond the Lean trio is the upstream axiom `GaussianField.embed_l2_uniform_bound` and the Pphi2 axiom `Pphi2.asymInteracting_expMoment_volume_uniform`"
           source: "ISBN:978-0-387-96477-7"
 
 automation:
@@ -142,10 +149,13 @@ fidelity:
     NOT the OS reconstruction step itself (no Minkowski Wightman theory, Hilbert
     space, or field operators are constructed; `massParameter_positive` is
     bookkeeping over the input bare mass, not a derived physical mass gap). The
-    headline existence theorem is conditional on several named analytic axioms
-    (uniform exponential moments, clustering, rotation restoration,
-    propagator/non-Gaussianity inputs) standing in for the not-yet-formalized
-    cluster-expansion / correlation-inequality content. (The former
+    headline existence theorem is conditional on exactly five named project
+    axioms (`canonical_continuumMeasure_cf_tendsto`,
+    `continuum_exponential_clustering`,
+    `continuum_exponential_moment_bound`, `pphi2_limit_exists`, and
+    `rotation_cf_defect_polylog_bound`) standing in for the not-yet-formalized
+    cluster-expansion / correlation-inequality content. Propagator convergence
+    and non-Gaussianity belong to separate results. (The former
     uniform-spectral-gap axioms were removed 2026-07-12 as false as stated;
     see AXIOM_AUDIT.md.) Per
     the project's own coherence analysis, `SatisfiesFullOS` is also satisfied by
@@ -158,7 +168,7 @@ fidelity:
 review:
   status: "self-assessed"
   reviewers: []
-  notes: "The source scan finds 0 sorries and 27 axiom declarations in Pphi2/ (25 public and 2 private). A remote build and refreshed kernel certificate are pending. The former uniform-spectral-gap pair was removed 2026-07-12 as false as stated. The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
+  notes: "The source scan finds 0 sorries and 27 axiom declarations in Pphi2/ (25 public and 2 private). Commit 7f7b73876704dab85431573bb4ff0373e79bc602 passed the remote build at https://github.com/will-lancer/pphi2/actions/runs/32430497721, and https://github.com/will-lancer/pphi2/actions/runs/32430497014 generated the checked-in 110-target kernel report. The former uniform-spectral-gap pair was removed 2026-07-12 as false as stated. The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
 
 alignment:
   namespace: "Pphi2"
@@ -167,7 +177,7 @@ alignment:
       lean: "Pphi2.pphi2_existence"
       module: "Pphi2.Main"
       status: "literature-dependency"
-      note: "OS0–OS4 existence; conditional on the named analytic axioms (uniform moments, clustering, rotation restoration; the former spectral-gap axioms were removed 2026-07-12 as false as stated)."
+      note: "OS0–OS4 existence; conditional on exactly five named project axioms (`canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering`, `continuum_exponential_moment_bound`, `pphi2_limit_exists`, and `rotation_cf_defect_polylog_bound`); propagator convergence and non-Gaussianity belong to separate results. The former spectral-gap axioms were removed 2026-07-12 as false as stated."
     - source: "10.1007/BF01645738"
       lean: "Pphi2.SatisfiesFullOS"
       module: "Pphi2.OSAxioms"
@@ -187,6 +197,6 @@ alignment:
       lean: "Pphi2.cylinderIso_OS_of_RP_OS2"
       module: "Pphi2.AsymTorus.AsymContinuumLimit"
       status: "literature-dependency"
-      note: "cylinder OS0–OS3 assembly via the Nelson Markov-field / transfer-matrix route; conditional on RP, OS2-symmetry, and the uniform exp-moment axiom."
+      note: "quartic-only cylinder OS0–OS3 assembly for `(P) (hP : P.n = 4) (mass) (hmass)` via the Nelson Markov-field / transfer-matrix route; OS2 and reflection positivity are proved internally; footprint beyond the Lean trio: upstream axiom `GaussianField.embed_l2_uniform_bound` and Pphi2 axiom `Pphi2.asymInteracting_expMoment_volume_uniform`."
 
 acknowledgements: ""

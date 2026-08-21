@@ -107,15 +107,13 @@ lattice family `continuumMeasure 2 (N k) P (a k) mass` with `N k → ∞`,
 `a k → 0`, `N k · a k → ∞` — the statement can no longer be discharged by
 the Dirac measure at 0.
 
-**Inputs (kernel axiom footprint):**
-- Existence of the limit measure: the axiom `pphi2_limit_exists`
-  (`ContinuumLimit/Convergence.lean`) — the single OPEN existence input
-  (Fröhlich 1976 / Park 1977 tightness route; the repo's own discharge route
-  is the cylinder campaign, `docs/cylinder-master-plan.md`).
-- OS0–OS4 for the limit: the 4 inheritance axioms
-  `continuum_exponential_moment_bound`, `canonical_continuumMeasure_cf_tendsto`,
-  `continuum_exponential_clustering`, `rotation_cf_defect_polylog_bound`
-  (`ContinuumLimit/AxiomInheritance.lean`, `OSProofs/OS2_WardIdentity.lean`).
+**Inputs (kernel axiom footprint):** exactly five named project axioms:
+`canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering`,
+`continuum_exponential_moment_bound`, `pphi2_limit_exists`, and
+`rotation_cf_defect_polylog_bound`. The open existence input
+`pphi2_limit_exists` follows the Fröhlich 1976 / Park 1977 tightness route;
+the repository's discharge route is the cylinder campaign in
+`docs/cylinder-master-plan.md`.
 
 **Not claimed here**: interaction (non-Gaussianity, `pphi2_nonGaussianity`)
 and non-degeneracy (`pphi2_nontrivial`) are separate statements; conjoining

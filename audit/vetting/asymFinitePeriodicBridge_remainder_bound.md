@@ -3,7 +3,7 @@
 ```yaml
 ---
 axiom: asymFinitePeriodicBridge_remainder_bound
-file: Pphi2/AsymTorus/AsymBridgeInstance.lean:174
+file: Pphi2/AsymTorus/AsymBridgeInstance.lean:273
 statement_hash: null
 model: codex implementation audit
 tool: local Lean build + Layer-B2 Route-A plan review

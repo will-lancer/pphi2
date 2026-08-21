@@ -3,7 +3,7 @@
 ```yaml
 ---
 axiom: asymTransferNormalized_contract
-file: Pphi2/AsymTorus/AsymBridgeInstance.lean:128
+file: Pphi2/AsymTorus/AsymBridgeInstance.lean:125
 statement_hash: null
 model: codex implementation audit
 tool: local Lean build + spectral-gap code review

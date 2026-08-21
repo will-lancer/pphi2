@@ -1,11 +1,11 @@
 # Vetting — `schwinger_agreement`
 
-`Pphi2/Bridge.lean:274`. INDEX item 4.
+`Pphi2/Bridge.lean:268`. INDEX item 4.
 
 ```yaml
 ---
 axiom: schwinger_agreement
-file: Pphi2/Bridge.lean:274
+file: Pphi2/Bridge.lean:268
 statement_hash: null
 model: gemini (early audit) + self-audit
 tool: mcp__gemini__deep_think_gemini

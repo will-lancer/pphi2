@@ -1,11 +1,11 @@
 # Vetting — `os2_from_phi4`
 
-`Pphi2/Bridge.lean:345`. INDEX item 5.
+`Pphi2/Bridge.lean:339`. INDEX item 5.
 
 ```yaml
 ---
 axiom: os2_from_phi4
-file: Pphi2/Bridge.lean:345
+file: Pphi2/Bridge.lean:339
 statement_hash: null
 model: gemini (early audit) + self-audit
 tool: mcp__gemini__deep_think_gemini

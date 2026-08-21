@@ -4,8 +4,11 @@
 
 The project formalizes the construction of P(Φ)₂ Euclidean quantum field theory
 in Lean 4 via the Glimm-Jaffe/Nelson lattice approach. All six phases are
-represented in the source. This branch awaits a remote `lake build` and a
-refreshed kernel axiom report.
+represented in the source. Commit
+`7f7b73876704dab85431573bb4ff0373e79bc602` passed the remote `lake build` in
+[CI run 32430497721](https://github.com/will-lancer/pphi2/actions/runs/32430497721).
+[Assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
+generated the checked-in 110-target kernel report.
 
 The proof architecture is: axiomatize key analytic/probabilistic results with
 detailed proof sketches, prove the logical structure connecting them, and
@@ -17,9 +20,14 @@ and backend-independent reconstruction rules. This keeps the current scalar
 positive-measure construction explicit while opening a path to broader
 Euclidean/Minkowski interfaces.
 
-**Current source counter (`./scripts/count_axioms.sh`, 2026-08-19): pphi2 27 axiom
+**Current source counter (`./scripts/count_axioms.sh`, 2026-08-20): pphi2 27 axiom
 declarations, 0 sorries.** The counter excludes docstring mentions and is a
 source-level check pending the remote build and kernel certificate.
+The plane headline `Pphi2.pphi2_existence` is conditional on exactly these five
+named project axioms: `canonical_continuumMeasure_cf_tendsto`,
+`continuum_exponential_clustering`, `continuum_exponential_moment_bound`,
+`pphi2_limit_exists`, and `rotation_cf_defect_polylog_bound`. Their exact
+kernel footprint is recorded in the refreshed report.
 **2026-07-13 (Phase 4.1, honest ℝ² headline — spec `planning/r2-honest-headline-spec.md`):**
 `IsPphi2Limit` strengthened with the coupled-lattice conjunct (`ν k = continuumMeasure 2 (N k)
 P (a k) mass`, `N k → ∞`, `N k·a k → ∞`) — the δ₀ vacuity is CLOSED; the former δ₀ "proof" of
@@ -29,8 +37,8 @@ Fröhlich 1976 + Park 1977 tightness route, Rating Standard, **(NOT VERIFIED)** 
 upstream to `Convergence.lean`); `pphi2_nontriviality` restated about-the-limit
 (`IsPphi2Limit μ P mass → ∀ f ≠ 0, S₂(f,f) > 0`, **(NOT VERIFIED)**, GRS two-point lower
 bound); the vacuous reparametrization theorems deleted (→ `docs/plan.md` § Deferred
-consistency checks). `#print axioms Pphi2.pphi2_existence` = trio + 5 project axioms
-(the 4 inheritance axioms + `pphi2_limit_exists`) — the honest count. The +2 over the pre-route-(a) base are the vetted
+consistency checks). `#print axioms Pphi2.pphi2_existence` = the Lean trio plus the five named
+project axioms in [`audit/axiom-report.txt`](audit/axiom-report.txt). The +2 over the pre-route-(a) base are the vetted
 B2 route-(a) axioms `fss_infrared_quadratic` (S1, AXIOM_AUDIT.md 2026-07-12 S1 entry) and
 `asymTransferGap_uniform_fixedLs` (S2, γ-form fixed-`Ls` a-uniform transfer gap,
 `Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`, AXIOM_AUDIT.md 2026-07-12 S2 entry).
@@ -51,8 +59,7 @@ a-uniformly; kernel footprint = trio + {`asymTransferGap_uniform_fixedLs`,
 `asymFinitePeriodicBridge_remainder_bound_uniform`} only (the definitional
 envelope/residual split avoids the packaged GNS-bridge axioms); no new axioms, counts
 unchanged (30 raw, 0 sorries). The current 27 declarations break down as
-**25 architectural** (enumerated by OS-program cluster in
-[`planning/INDEX.md`](planning/INDEX.md), the master status machine) and **2 private
+**25 public declarations** (enumerated in [`formalization.yaml`](formalization.yaml)) and **2 private
 scaffolding** (`asymTorusInteracting_exponentialMomentBound` in `AsymTorusOS.lean`,
 `gaussian_rp_cov_perfect_square` in `OS3_RP_Lattice.lean`). Four active
 Layer-B2 Route-A GNS bridge obligations remain in
@@ -78,13 +85,16 @@ cluster-expansion input). [`wickConstantAsym_eq_variance` was a third isotropic 
 bound + UNIT 6 polynomial-chaos negative-tail wrapper). **Layer B1 of the last-axiom
 discharge architecture** complete 2026-05-31: cylinder transfer matrix (`AsymL2Operator.lean`,
 `AsymJentzsch.lean`, `AsymPositivity.lean`) + Layer-B1 variance bound (`AsymVarianceBound.lean`).
-Remaining: Layer A (Newman MGF via new `lee-yang` repo, scaffolded), Layer B2
-(Lt-uniformity via chessboard, deferred), Layer C (~50-line assembly).]
-gaussian-field **3** (the Phase-1b `AsymCovariance` convergence
-`lattice_green_tendsto_continuum_asym` added 0 axioms), with GaussianField pinned at `5bb35e8`.
-Phase 3 produces `MeasureHasGreenMomentBound` as a theorem (per `Lt`) and, via the three axioms,
-`cylinderIso_OS_of_RP_OS2`: cylinder `S¹(Ls)×ℝ` OS0/OS1/OS2/OS3 conditional only on the separate
-reflection-positivity and OS2-symmetry inputs. The generic Gaussian exp-moment lemma
+Historical Phase-2 snapshot (2026-05-31): Remaining: Layer A (Newman MGF via new
+`lee-yang` repo, scaffolded), Layer B2 (Lt-uniformity via chessboard, deferred),
+Layer C (~50-line assembly).]
+gaussian-field **2 axioms, 0 sorries** (the Phase-1b `AsymCovariance` convergence
+`lattice_green_tendsto_continuum_asym` added 0 axioms), with GaussianField pinned at `d63a285`.
+Phase 3 produces `MeasureHasGreenMomentBound` as a theorem (per `Lt`). The current quartic
+`cylinderIso_OS_of_RP_OS2` signature is `(P) (hP : P.n = 4) (mass) (hmass)`; its kernel
+footprint beyond the Lean trio is `GaussianField.embed_l2_uniform_bound` plus
+`Pphi2.asymInteracting_expMoment_volume_uniform`. Reflection positivity and OS2 symmetry are
+proved internally. The generic Gaussian exp-moment lemma
 `GaussianField.gaussian_exp_abs_moment` and the weak-limit transfer
 `GaussianField.weakLimit_exponential_moment` are theorems (0 axioms). See
 `docs/cylinder-conditional-inputs-provability.md` for the input-by-input provability map.
@@ -101,20 +111,25 @@ the closure + density-extends after `Lt→∞` and drops `hRP`. `#print axioms`:
 `cylinderIso_OS_of_RP_OS2` = bare trio + `embed_l2_uniform_bound` +
 `asymInteracting_expMoment_volume_uniform` (NO new axioms). Full record:
 `planning/rp-adapter-phase2-plan.md`. **`hOS2` was also dropped** (`f5896f1`, heterogeneous Iso OS2
-gap filled in `Pphi2/AsymTorus/AsymIsoOS.lean`): `cylinderIso_OS_of_RP_OS2` now takes only
-`(P, mass, hmass)` — no external hypotheses. Verified `#print axioms` = `[propext, Classical.choice,
+gap filled in `Pphi2/AsymTorus/AsymIsoOS.lean`): `cylinderIso_OS_of_RP_OS2` now has signature
+`(P) (hP : P.n = 4) (mass) (hmass)` with no external hypotheses. Verified `#print axioms` = `[propext, Classical.choice,
 Quot.sound]` + `GaussianField.embed_l2_uniform_bound` + `Pphi2.asymInteracting_expMoment_volume_uniform`.
 So cylinder `S¹(Ls)×ℝ` OS0/OS1/OS2/OS3 now rests on exactly the CYL-1a volume-uniform exp-moment
 axiom plus the pre-existing `embed_l2_uniform_bound` — nothing else. Remaining cylinder streams:
 the CYL-1a exp-moment axiom itself, and OS4 (mass gap/clustering). pphi2 also depends on markov-semigroups and gaussian-hilbert (axiom counts
-track `main` — see [`docs/AXIOM_STATUS.md`](docs/AXIOM_STATUS.md) and each repo's own
-`AXIOM_AUDIT.md`) for the upstream `polynomial_chaos_concentration` API used by Cluster A, and now
+track `main`; see each repository's `AXIOM_AUDIT.md`) for the upstream
+`polynomial_chaos_concentration` API used by Cluster A, and now
 on [`gibbs-variational`](https://github.com/mrdouglasny/gibbs-variational) (0 axioms, 1
 off-critical-path `sorry`) for the finite-dim Boué–Dupuis bound that will discharge the cylinder
-CYL-1a Green-moment input. See [`docs/AXIOM_STATUS.md`](docs/AXIOM_STATUS.md) for the canonical
-inventory (refreshed 2026-05-22).
+CYL-1a Green-moment input. The current pphi2 inventory is in
+[`formalization.yaml`](formalization.yaml), with status in
+[`planning/INDEX.md`](planning/INDEX.md) and history in [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md).
 
-Recent change (2026-05-08, post PR #14 merge): **5 Stage 1 GJ axioms
+> The remaining inventory and work-log tables preserve historical snapshots. Their
+> counts and per-file descriptions are not the current source declaration inventory;
+> use `formalization.yaml` and the current status block above.
+
+Historical change (2026-05-08, post PR #14 merge): **5 Stage 1 GJ axioms
 discharged in Phase 2** plus three additional pphi2 axioms cleared by
 PR #14 (`fourierTransform_lp_eq_fourierIntegral` private axiom -> proved
 theorem via Mathlib's tempered-distribution embedding;
@@ -278,9 +293,9 @@ itself is a theorem via `embeddedTwoPoint_eq_latticeGreenBilinear`.
 `schwinger2_convergence` was proved from
 `schwinger_n_convergence`, and `pphi2_nonGaussianity` from `continuumLimit_nonGaussian`.
 
-## File inventory
+## Historical file inventory
 
-### Active files (lattice approach)
+### Historical active files (lattice approach)
 
 | Phase | File | Status |
 |-------|------|--------|
@@ -980,9 +995,11 @@ infrastructure. Assessment date: 2026-03-04.
 
 ---
 
-## Upstream: gaussian-field
+## Historical upstream snapshot: gaussian-field (2026-05-22)
 
-The pinned Lake `GaussianField` dependency has **6 axioms, 1 sorry**:
+The pinned Lake `GaussianField` dependency was recorded with **6 axioms, 1 sorry**
+in this historical table. The current pinned-dependency count and the cylinder
+footprint are recorded in the current status block above.
 - `GeneralResults/PolynomialDensityGaussian.lean`: 1 axiom
 - `SchwartzNuclear/HermiteGalerkin.lean`: 2 axioms, 1 sorry
 - `Cylinder/GreenFunction.lean`: 1 axiom

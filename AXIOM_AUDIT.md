@@ -1,6 +1,29 @@
 # Comprehensive Axiom Audit: pphi2 + gaussian-field + markov-semigroups + gaussian-hilbert
 
-**Last updated**: 2026-07-14.
+**Last updated**: 2026-08-20.
+
+## 2026-08-20: Part A proof repair and 110-target certificate refresh
+
+* Source commit `7f7b73876704dab85431573bb4ff0373e79bc602` passed the remote
+  `lake build` in [CI run 32430497721](https://github.com/will-lancer/pphi2/actions/runs/32430497721).
+  [Assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
+  also passed its build and sorry-confinement steps and generated the kernel report used here.
+* The text source scan reports **27 axiom declarations and 0 sorries**, split into
+  **25 public declarations and 2 private scaffolding declarations**. This inventory
+  counts declarations. Kernel footprints below count transitive dependencies of named targets.
+* `audit/axiom_report.lean` contains **110 unique ordered targets**: five
+  `formalization.yaml` main results and 105 regression targets. The generated report has
+  110 headers in the same order. Its first five blocks match the earlier headline blocks.
+  The proof repair preserved the theorem and axiom declaration inventory.
+* `Pphi2.pphi2_existence` depends on exactly five Pphi2 axioms:
+  `canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering`,
+  `continuum_exponential_moment_bound`, `pphi2_limit_exists`, and
+  `rotation_cf_defect_polylog_bound`, together with `propext`, `Classical.choice`,
+  and `Quot.sound`.
+* `Pphi2.cylinderIso_OS_of_RP_OS2` depends on the upstream axiom
+  `GaussianField.embed_l2_uniform_bound`, the Pphi2 project axiom
+  `Pphi2.asymInteracting_expMoment_volume_uniform`, and the same Lean trio.
+  The theorem is quartic-only and derives RP and OS2 internally.
 
 ## 2026-07-14 — Ground-isometry-one bridge PROVED (axiom discharged)
 

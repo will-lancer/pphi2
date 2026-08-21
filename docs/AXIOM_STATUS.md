@@ -8,7 +8,7 @@
 > This file used to be a consolidated snapshot. It accumulated drift faster
 > than it could be refreshed and now serves only as a pointer.
 
-## At a glance (refreshed 2026-08-19)
+## At a glance (refreshed 2026-08-20)
 
 | Count | Value | Source |
 |---|---|---|
@@ -17,10 +17,21 @@
 | gaussian-field axioms | **2** | `count_axioms.sh` at the pinned `d63a285` |
 | gaussian-field sorries | **0** | `count_axioms.sh` |
 
+The pphi2 source count is a declaration inventory. It is separate from the
+dependency count for any one theorem. At source commit
+`7f7b73876704dab85431573bb4ff0373e79bc602`,
+[CI run 32430497721](https://github.com/will-lancer/pphi2/actions/runs/32430497721)
+passed the remote build and
+[assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
+generated the checked-in 110-target certificate. The `Pphi2.pphi2_existence`
+block records five named Pphi2 axioms plus the Lean trio.
+
 Net change since 2026-06-21: `spectral_gap_uniform`/`spectral_gap_lower_bound` removed
 (false as stated), and cylinder-era + Phase-4.1 axioms added (the B2 route-(a) S1/S2/τ-bridge
-pair, and `pphi2_limit_exists`). The authoritative live inventory is `AXIOM_AUDIT.md`;
-this snapshot is a pointer only.
+pair, and `pphi2_limit_exists`). The canonical source inventory is
+[`../formalization.yaml`](../formalization.yaml), the current plan is
+[`../planning/INDEX.md`](../planning/INDEX.md), and [`../AXIOM_AUDIT.md`](../AXIOM_AUDIT.md)
+is the dated audit history. This snapshot is a pointer only.
 
 The superseded-chain `torus_weakCoupling_lattice_connectedFourPoint_strictNeg` axiom and
 its sole consumer `torus_pphi2_isInteracting_weakCoupling` (carrier file
