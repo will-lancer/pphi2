@@ -14,6 +14,7 @@ This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 
 import Pphi2.AsymTorus.AsymDDJSource
 import Pphi2.IRLimit.CylinderEmbedding
+import Pphi2.IRLimit.DDJPeriodizationBound
 import Pphi2.TorusContinuumLimit.TorusPropagatorConvergence
 
 noncomputable section

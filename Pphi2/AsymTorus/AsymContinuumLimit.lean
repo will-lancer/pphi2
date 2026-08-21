@@ -539,10 +539,6 @@ theorem asymTorusIso_measureHasGreenMomentBound_of_cutoff
     (K * Real.exp (C * asymTorusContinuumGreen Lt Ls mass hmass f f)) hB_tendsto h_unif
   exact ⟨hint, hle⟩
 
-/-- The even-time-lattice UV construction carries both its Green moment bound
-and cylinder reflection positivity for every compact-span family that fits in
-the finite time period without wrapping. -/
-
 /-- `…_of_cutoff` with the cutoff bound built from a Nelson `L²` constant `Knel` via
 `…_cutoff_of_nelson`; the resulting Green-moment constant is `√(2·Knel)`. -/
 theorem asymTorusIso_measureHasGreenMomentBound_of_nelson
@@ -584,23 +580,6 @@ theorem asymTorusIso_measureHasGreenMomentBound
   obtain ⟨μ, hμ_prob, hMHGMB⟩ := asymTorusIso_measureHasGreenMomentBound_of_nelson Lt Ls
     P mass hmass Knel hKnel_pos hKnel_bound Nt Ns a hNt hNs ha hvolt hvols ha0
   exact ⟨μ, Real.sqrt (2 * Knel), hμ_prob, Real.sqrt_pos_of_pos (by linarith), hMHGMB⟩
-
-/-- **Conditional cylinder Green-moment input from a volume-uniform *interacting* exp-moment.**
-
-Given a *single* constant `K` bounding the **interacting** exponential moment
-`∫ exp|ωf| dμ_int ≤ K·exp(σ²)` uniformly across all periods `L` (at fixed `Ls`) — the genuine
-volume-uniformity (`Z⁻¹ ≥ e^{-p|Λ|}` pressure cancels the linear lower bound `e^{c|Λ|}`; a
-cluster-expansion-level fact for P(φ)₂, see `docs/cylinder-conditional-inputs-provability.md` §4) —
-the isotropic construction supplies the full IR family for `routeBPrime_cylinder_OS`: periods
-`Lt n = (n+1)·Ls → ∞` (rational-compatible, so the UV limit exists at each `n`), UV-continuum
-measures `μ n`, and `AsymTorusSequenceHasUniformGreenMomentBound` with the single constant `K`.
-
-Each `μ n` is built by `asymTorusIso_measureHasGreenMomentBound_of_cutoff` along the exactly-
-isotropic sequence `Ns_k = k+1`, `a_k = Ls/(k+1)`, `Nt_k = (n+1)(k+1)` (so `Nt_k·a_k = Lt n`,
-`Ns_k·a_k = Ls`, `a_k → 0`).
-
-NB: the hypothesis is on the **interacting** moment, *not* the Nelson `L²` moment `∫ e^{-2V}` —
-the latter genuinely grows like `e^{f|Λ|}` (free energy) and is never volume-uniform. -/
 
 end Pphi2
 

@@ -14,6 +14,7 @@ This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 
 import Mathlib.Analysis.MeanInequalities
 import Pphi2.AsymTorus.AsymTorusEmbeddingIso
+import Pphi2.IRLimit.DDJPeriodizationBound
 
 noncomputable section
 
