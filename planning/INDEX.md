@@ -4,10 +4,13 @@
 > **27 axioms, 0 sorries**: 25 public declarations and 2 private scaffolding declarations.
 > The checked-in kernel trace for `Pphi2.pphi2_existence` has five named project axioms
 > plus `propext`, `Classical.choice`, and `Quot.sound`. Commit
-> `7f7b73876704dab85431573bb4ff0373e79bc602` passed
-> [CI](https://github.com/will-lancer/pphi2/actions/runs/32430497721), and the matching
-> [assurance run](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
-> generated the checked-in 110-target report. Major changes since this machine was written:
+> `dd86add0a569ed353d3de799f0f7140a5bd0ed56` passed
+> [CI](https://github.com/will-lancer/pphi2/actions/runs/32432752877), and
+> [assurance](https://github.com/will-lancer/pphi2/actions/runs/32432746708)
+> confirmed the 110-target kernel match and sorry confinement. The report came from
+> [generation run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
+> at proof-repair commit `7f7b73876704dab85431573bb4ff0373e79bc602`.
+> Major changes since this machine was written:
 > The **thresholded Layer-B2 variance bound** and the `|f|`-form exp-moment are now theorems
 > on the named S1/S2, bridge-pair, and B5b inputs. The legacy all-`(Lt,a)` Layer-B2 input
 > remains in the source, and the Layer-C `asymInteracting_expMoment_volume_uniform` assembly

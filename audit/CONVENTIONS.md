@@ -45,11 +45,13 @@ pattern excludes prose and docstring mentions.
 
 Current source scan (2026-08-20): **27 axioms, 0 sorries**.
 The declarations comprise **25 public** and **2 private scaffolding** axioms.
-Commit `7f7b73876704dab85431573bb4ff0373e79bc602` passed the remote
-[`lake build`](https://github.com/will-lancer/pphi2/actions/runs/32430497721).
-The corresponding
-[assurance run](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
-generated the checked-in 110-target kernel report.
+The checked-in report was generated at proof-repair commit
+`7f7b73876704dab85431573bb4ff0373e79bc602` by
+[assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014).
+Commit `dd86add0a569ed353d3de799f0f7140a5bd0ed56` passed
+[`lake build`](https://github.com/will-lancer/pphi2/actions/runs/32432752877), and
+[assurance run 32432746708](https://github.com/will-lancer/pphi2/actions/runs/32432746708)
+confirmed the report matches the kernel and sorries remain confined.
 
 The vetting directory currently tracks a separate active scope of **19 records**;
 the exact record list is maintained in [`audit/vetting/README.md`](vetting/README.md).

@@ -62,9 +62,12 @@ becomes the natural rung-5 capstone.
 - **Kernel certificate.** The generator lists 110 unique targets in
   [`audit/axiom_report.lean`](axiom_report.lean): the five
   `formalization.yaml` main results plus 105 regression targets. The checked-in
-  [`audit/axiom-report.txt`](axiom-report.txt) contains all 110 blocks generated
-  by [assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
-  at source commit `7f7b73876704dab85431573bb4ff0373e79bc602`. Regenerate with:
+  [`audit/axiom-report.txt`](axiom-report.txt) contains all 110 blocks. They were
+  generated at proof-repair commit `7f7b73876704dab85431573bb4ff0373e79bc602`
+  by [assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014).
+  At commit `dd86add0a569ed353d3de799f0f7140a5bd0ed56`,
+  [assurance run 32432746708](https://github.com/will-lancer/pphi2/actions/runs/32432746708)
+  confirmed the report matches the kernel and sorries remain confined. Regenerate with:
   ```bash
   lake env lean audit/axiom_report.lean > audit/axiom-report.txt
   ```

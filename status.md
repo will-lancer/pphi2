@@ -5,10 +5,13 @@
 The project formalizes the construction of P(Φ)₂ Euclidean quantum field theory
 in Lean 4 via the Glimm-Jaffe/Nelson lattice approach. All six phases are
 represented in the source. Commit
-`7f7b73876704dab85431573bb4ff0373e79bc602` passed the remote `lake build` in
-[CI run 32430497721](https://github.com/will-lancer/pphi2/actions/runs/32430497721).
-[Assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
-generated the checked-in 110-target kernel report.
+`dd86add0a569ed353d3de799f0f7140a5bd0ed56` passed the remote `lake build` in
+[CI run 32432752877](https://github.com/will-lancer/pphi2/actions/runs/32432752877).
+[Assurance run 32432746708](https://github.com/will-lancer/pphi2/actions/runs/32432746708)
+confirmed that the checked-in 110-target report matches the kernel and that sorries remain
+confined. The report was generated from proof-repair commit
+`7f7b73876704dab85431573bb4ff0373e79bc602` in
+[assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014).
 
 The proof architecture is: axiomatize key analytic/probabilistic results with
 detailed proof sketches, prove the logical structure connecting them, and
@@ -22,7 +25,7 @@ Euclidean/Minkowski interfaces.
 
 **Current source counter (`./scripts/count_axioms.sh`, 2026-08-20): pphi2 27 axiom
 declarations, 0 sorries.** The counter excludes docstring mentions and is a
-source-level check pending the remote build and kernel certificate.
+source-level declaration inventory.
 The plane headline `Pphi2.pphi2_existence` is conditional on exactly these five
 named project axioms: `canonical_continuumMeasure_cf_tendsto`,
 `continuum_exponential_clustering`, `continuum_exponential_moment_bound`,

@@ -20,11 +20,13 @@
 The pphi2 source count is a declaration inventory. It is separate from the
 dependency count for any one theorem. At source commit
 `7f7b73876704dab85431573bb4ff0373e79bc602`,
-[CI run 32430497721](https://github.com/will-lancer/pphi2/actions/runs/32430497721)
-passed the remote build and
 [assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
-generated the checked-in 110-target certificate. The `Pphi2.pphi2_existence`
-block records five named Pphi2 axioms plus the Lean trio.
+generated the checked-in 110-target certificate. Commit
+`dd86add0a569ed353d3de799f0f7140a5bd0ed56` passed
+[CI run 32432752877](https://github.com/will-lancer/pphi2/actions/runs/32432752877), and
+[assurance run 32432746708](https://github.com/will-lancer/pphi2/actions/runs/32432746708)
+confirmed the report matches the kernel and sorries remain confined. The
+`Pphi2.pphi2_existence` block records five named Pphi2 axioms plus the Lean trio.
 
 Net change since 2026-06-21: `spectral_gap_uniform`/`spectral_gap_lower_bound` removed
 (false as stated), and cylinder-era + Phase-4.1 axioms added (the B2 route-(a) S1/S2/τ-bridge

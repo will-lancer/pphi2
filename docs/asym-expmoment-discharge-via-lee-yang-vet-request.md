@@ -116,7 +116,7 @@ This document:
 
 ## 1. The axiom
 
-`Pphi2/AsymTorus/AsymContinuumLimit.lean:601` (informal):
+`Pphi2/AsymTorus/AsymContinuumLimit.lean:2460` (informal):
 
 > For any even-degree `InteractionPolynomial P` with positive leading
 > coefficient and mass `m > 0`, there exist constants `K, C > 0` such

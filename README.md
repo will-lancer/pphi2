@@ -5,10 +5,13 @@ following the Glimm-Jaffe/Nelson lattice approach.
 
 > **Status at a glance** (source audit 2026-08-20).
 > The active source has **0 sorries and 27 axiom declarations**. Commit
-> `7f7b73876704dab85431573bb4ff0373e79bc602` passed the remote `lake build` in
-> [CI run 32430497721](https://github.com/will-lancer/pphi2/actions/runs/32430497721).
-> [Assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
-> generated the 110-target kernel report now checked into `audit/axiom-report.txt`.
+> `dd86add0a569ed353d3de799f0f7140a5bd0ed56` passed the remote `lake build` in
+> [CI run 32432752877](https://github.com/will-lancer/pphi2/actions/runs/32432752877).
+> [Assurance run 32432746708](https://github.com/will-lancer/pphi2/actions/runs/32432746708)
+> confirmed that the checked-in 110-target report matches the kernel and that sorries
+> remain confined. The report was generated at proof-repair commit
+> `7f7b73876704dab85431573bb4ff0373e79bc602` in
+> [assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014).
 > The remaining debt is a set of documented,
 > mostly-vetted project axioms. Most-developed line: the **T²_L torus** (OS0–OS2, axiom-free). On the
 > **cylinder** (Route B′) the OS0/OS1/OS2/OS3 theorem `cylinderIso_OS_of_RP_OS2` is now
@@ -299,10 +302,12 @@ consistency checks:
 ## Current status
 
 All six phases are represented in the source. Commit
-`7f7b73876704dab85431573bb4ff0373e79bc602` passed the remote `lake build` in
-[CI run 32430497721](https://github.com/will-lancer/pphi2/actions/runs/32430497721), and
-[assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
-generated the checked-in 110-target kernel report.
+`dd86add0a569ed353d3de799f0f7140a5bd0ed56` passed
+[CI run 32432752877](https://github.com/will-lancer/pphi2/actions/runs/32432752877).
+[Assurance run 32432746708](https://github.com/will-lancer/pphi2/actions/runs/32432746708)
+confirmed the 110-target kernel match and the sorry guard. The report-generation
+provenance is [assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
+at proof-repair commit `7f7b73876704dab85431573bb4ff0373e79bc602`.
 
 Current source counter (`./scripts/count_axioms.sh`, 2026-08-20): pphi2
 **27 axiom declarations**, 0 sorries. The counter now excludes docstring mentions. Net history: the

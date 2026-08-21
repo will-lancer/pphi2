@@ -256,7 +256,7 @@ Because `V_a^{\rm pphi2} → 0` typically:
 Routes A, B′, and pphi2N all use the same `latticeGaussianMeasure` and
 `interactionFunctional` and so inherit this conclusion identically.
 
-The axioms `pphi2_nontriviality` (`Pphi2/Main.lean:128`) and
+The axioms `pphi2_nontriviality` (`Pphi2/Main.lean:156`) and
 `continuumLimit_nonGaussian` (`Pphi2/ContinuumLimit/Convergence.lean:256`)
 assert the limit is non-Gaussian. Under the current normalisation those
 are not just open — they are **false**.

@@ -1,8 +1,9 @@
 # formalization.yaml — https://github.com/mathlib-initiative/formalization.yaml (v0.3)
 # Describes the post-Phase-4.1 (honest ℝ² headline, 2026-07-13) state of pphi2.
 # Source tree (Pphi2.lean + Common): 0 sorries, 27 `axiom` declarations
-#   (25 public + 2 private). Remote build passed and the 110-target kernel report
-#   was generated at commit 7f7b73876704dab85431573bb4ff0373e79bc602.
+#   (25 public + 2 private). The 110-target report was generated at commit
+#   7f7b73876704dab85431573bb4ff0373e79bc602 and verified at
+#   dd86add0a569ed353d3de799f0f7140a5bd0ed56.
 #   Legacy `ddj/` and parked `future/` are NOT part of the default build target.
 version: "v0.3"
 
@@ -45,11 +46,13 @@ status:
     Glimm-Jaffe/Nelson lattice approach. The Osterwalder-Schrader axiom skeleton
     (OS0 analyticity, OS1 regularity, OS2 Euclidean invariance, OS3 reflection
     positivity, OS4 clustering, bundled as `Pphi2.SatisfiesFullOS`) is complete
-    and the active source tree has 0 sorries. The remote build passed at commit
-    `7f7b73876704dab85431573bb4ff0373e79bc602` in
-    https://github.com/will-lancer/pphi2/actions/runs/32430497721; the assurance
-    run https://github.com/will-lancer/pphi2/actions/runs/32430497014 generated
-    the checked-in 110-target kernel report. The headline existence theorem
+    and the active source tree has 0 sorries. Commit
+    `dd86add0a569ed353d3de799f0f7140a5bd0ed56` passed
+    https://github.com/will-lancer/pphi2/actions/runs/32432752877. Assurance run
+    https://github.com/will-lancer/pphi2/actions/runs/32432746708 confirmed the
+    110-target kernel match and sorry confinement. The report was generated at
+    proof-repair commit `7f7b73876704dab85431573bb4ff0373e79bc602` in
+    https://github.com/will-lancer/pphi2/actions/runs/32430497014. The headline existence theorem
     `Pphi2.pphi2_existence` (∃ μ on S'(ℝ²) satisfying all five OS axioms) is
     assembled from the lattice construction + continuum limit, but is CONDITIONAL
     on exactly five named project axioms:
@@ -168,7 +171,7 @@ fidelity:
 review:
   status: "self-assessed"
   reviewers: []
-  notes: "The source scan finds 0 sorries and 27 axiom declarations in Pphi2/ (25 public and 2 private). Commit 7f7b73876704dab85431573bb4ff0373e79bc602 passed the remote build at https://github.com/will-lancer/pphi2/actions/runs/32430497721, and https://github.com/will-lancer/pphi2/actions/runs/32430497014 generated the checked-in 110-target kernel report. The former uniform-spectral-gap pair was removed 2026-07-12 as false as stated. The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
+  notes: "The source scan finds 0 sorries and 27 axiom declarations in Pphi2/ (25 public and 2 private). The 110-target report was generated at proof-repair commit 7f7b73876704dab85431573bb4ff0373e79bc602 by https://github.com/will-lancer/pphi2/actions/runs/32430497014. Commit dd86add0a569ed353d3de799f0f7140a5bd0ed56 passed https://github.com/will-lancer/pphi2/actions/runs/32432752877, and https://github.com/will-lancer/pphi2/actions/runs/32432746708 confirmed the report matches the kernel and sorries remain confined. The former uniform-spectral-gap pair was removed 2026-07-12 as false as stated. The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
 
 alignment:
   namespace: "Pphi2"
