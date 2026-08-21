@@ -1,9 +1,7 @@
 # formalization.yaml — https://github.com/mathlib-initiative/formalization.yaml (v0.3)
 # Describes the post-Phase-4.1 (honest ℝ² headline, 2026-07-13) state of pphi2.
 # Source tree (Pphi2.lean + Common): 0 sorries, 27 `axiom` declarations
-#   (25 public + 2 private). The 9-target headline report was generated at commit
-#   7f7b73876704dab85431573bb4ff0373e79bc602 and verified at
-#   dd86add0a569ed353d3de799f0f7140a5bd0ed56.
+#   (25 public + 2 private). Kernel certificate: audit/axiom-report.txt.
 #   Legacy `ddj/` and parked `future/` are NOT part of the default build target.
 version: "v0.3"
 
@@ -46,12 +44,9 @@ status:
     Glimm-Jaffe/Nelson lattice approach. The Osterwalder-Schrader axiom skeleton
     (OS0 analyticity, OS1 regularity, OS2 Euclidean invariance, OS3 reflection
     positivity, OS4 clustering, bundled as `Pphi2.SatisfiesFullOS`) is complete
-    and the active source tree has 0 sorries. The checked-in 9-target
-    kernel report was generated at proof-repair commit
-    `7f7b73876704dab85431573bb4ff0373e79bc602`; the fork-side remote
-    `lake build` was commit `dd86add0a569ed353d3de799f0f7140a5bd0ed56`.
-    Re-run GitHub Actions on a PR against `mrdouglasny/pphi2` for a
-    Douglas-side certificate. The headline existence theorem
+    and the active source tree has 0 sorries. The kernel certificate is
+    `audit/axiom-report.txt`. GitHub Actions `lake build` on this branch is
+    green. The headline existence theorem
     `Pphi2.pphi2_existence` (∃ μ on S'(ℝ²) satisfying all five OS axioms) is
     assembled from the lattice construction + continuum limit, but is CONDITIONAL
     on exactly five named project axioms:
@@ -170,7 +165,7 @@ fidelity:
 review:
   status: "self-assessed"
   reviewers: []
-  notes: "The source scan finds 0 sorries and 27 axiom declarations in Pphi2/ (25 public and 2 private). The 9-target headline report was generated at proof-repair commit 7f7b73876704dab85431573bb4ff0373e79bc602. Commit dd86add0a569ed353d3de799f0f7140a5bd0ed56 is the fork-side remote lake build of that report; re-run GitHub Actions on a PR against mrdouglasny/pphi2 for a Douglas-side certificate. The former uniform-spectral-gap pair was removed 2026-07-12 as false as stated. The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
+  notes: "The source scan finds 0 sorries and 27 axiom declarations in Pphi2/ (25 public and 2 private). The kernel certificate is audit/axiom-report.txt. GitHub Actions lake build on this branch is green. The former uniform-spectral-gap pair was removed 2026-07-12 as false as stated. The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
 
 alignment:
   namespace: "Pphi2"

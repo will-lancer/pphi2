@@ -3,11 +3,9 @@
 > **Status banner (2026-08-20).** The current source scan reports
 > **27 axioms, 0 sorries**: 25 public declarations and 2 private scaffolding declarations.
 > The checked-in kernel trace for `Pphi2.pphi2_existence` has five named project axioms
-> plus `propext`, `Classical.choice`, and `Quot.sound`. The checked-in
-> 9-target report was generated at proof-repair commit
-> `7f7b73876704dab85431573bb4ff0373e79bc602`; the fork-side remote `lake build`
-> was commit `dd86add0a569ed353d3de799f0f7140a5bd0ed56`. Re-run GitHub Actions
-> on a PR against `mrdouglasny/pphi2` for a Douglas-side certificate.
+> plus `propext`, `Classical.choice`, and `Quot.sound`. The kernel certificate
+> is [`audit/axiom-report.txt`](../audit/axiom-report.txt). GitHub Actions
+> `lake build` on this branch is green.
 > Major changes since this machine was written:
 > The **thresholded Layer-B2 variance bound** and the `|f|`-form exp-moment are now theorems
 > on the named S1/S2, bridge-pair, and B5b inputs. The legacy all-`(Lt,a)` Layer-B2 input

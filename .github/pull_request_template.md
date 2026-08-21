@@ -4,5 +4,5 @@
 
 ## Checklist
 
-- [ ] `lake build` succeeds (local or GitHub Actions on this PR)
-- [ ] If you added/changed axioms: updated `status.md`, `AXIOM_AUDIT.md`, and `README.md` counts
+- [ ] `lake build` succeeds locally
+- [ ] If you added/changed axioms: updated `status.md`, `docs/axiom_audit.md` (and `README.md` counts if applicable)

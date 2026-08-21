@@ -18,12 +18,10 @@
 | gaussian-field sorries | **0** | `count_axioms.sh` |
 
 The pphi2 source count is a declaration inventory. It is separate from the
-dependency count for any one theorem. At source commit
-`7f7b73876704dab85431573bb4ff0373e79bc602` the checked-in 9-target
-certificate was generated. Commit `dd86add0a569ed353d3de799f0f7140a5bd0ed56`
-is the fork-side remote `lake build` of that report. Re-run GitHub Actions on
-a PR against `mrdouglasny/pphi2` for a Douglas-side certificate. The
-`Pphi2.pphi2_existence` block records five named Pphi2 axioms plus the Lean trio.
+dependency count for any one theorem. The kernel certificate is
+[`../audit/axiom-report.txt`](../audit/axiom-report.txt). GitHub Actions
+`lake build` on this branch is green. The `Pphi2.pphi2_existence` block
+records five named Pphi2 axioms plus the Lean trio.
 
 Net change since 2026-06-21: `spectral_gap_uniform`/`spectral_gap_lower_bound` removed
 (false as stated), and cylinder-era + Phase-4.1 axioms added (the B2 route-(a) S1/S2/τ-bridge

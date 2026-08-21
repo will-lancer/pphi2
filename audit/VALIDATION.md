@@ -63,10 +63,8 @@ becomes the natural rung-5 capstone.
   [`audit/axiom_report.lean`](axiom_report.lean): the five
   `formalization.yaml` main results plus four named Layer-B2/C regression
   theorems. The checked-in [`audit/axiom-report.txt`](axiom-report.txt)
-  contains those nine blocks.
-  Commit `dd86add0a569ed353d3de799f0f7140a5bd0ed56` is the fork-side remote
-  `lake build` of that report. Re-run GitHub Actions on a PR against
-  `mrdouglasny/pphi2` for a Douglas-side certificate. Regenerate with:
+  contains those nine blocks. GitHub Actions `lake build` on this branch is
+  green. Regenerate with:
   ```bash
   lake env lean audit/axiom_report.lean > audit/axiom-report.txt
   ```

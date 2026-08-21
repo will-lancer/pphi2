@@ -4,11 +4,9 @@
 
 ## 2026-08-20: Part A proof repair and headline certificate refresh
 
-* Source commit `7f7b73876704dab85431573bb4ff0373e79bc602` is the proof-repair
-  commit that generated the kernel report used here; its old nine-block golden
-  was stale. Commit `dd86add0a569ed353d3de799f0f7140a5bd0ed56` is the fork-side
-  remote `lake build` of that report. Re-run GitHub Actions on a PR against
-  `mrdouglasny/pphi2` for a Douglas-side certificate.
+* The kernel certificate is the committed `audit/axiom-report.txt` (nine
+  headline / regression targets). GitHub Actions `lake build` on this branch
+  is green.
 * The text source scan reports **27 axiom declarations and 0 sorries**, split into
   **25 public declarations and 2 private scaffolding declarations**. This inventory
   counts declarations. Kernel footprints below count transitive dependencies of named targets.

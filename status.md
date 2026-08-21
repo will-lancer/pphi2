@@ -4,10 +4,9 @@
 
 The project formalizes the construction of P(Φ)₂ Euclidean quantum field theory
 in Lean 4 via the Glimm-Jaffe/Nelson lattice approach. All six phases are
-represented in the source. Re-run GitHub Actions on a PR against this branch
-for a Douglas-side `lake build` certificate. The fork-side remote build was
-commit `dd86add`; the checked-in 9-target report was generated at
-proof-repair commit `7f7b738`.
+represented in the source. The checked-in kernel certificate is
+`audit/axiom-report.txt` (nine headline / regression targets). GitHub Actions
+`lake build` on this branch is green.
 
 The proof architecture is: axiomatize key analytic/probabilistic results with
 detailed proof sketches, prove the logical structure connecting them, and

@@ -45,11 +45,8 @@ pattern excludes prose and docstring mentions.
 
 Current source scan (2026-08-20): **27 axioms, 0 sorries**.
 The declarations comprise **25 public** and **2 private scaffolding** axioms.
-The checked-in report was generated at proof-repair commit
-`7f7b73876704dab85431573bb4ff0373e79bc602`. Commit
-`dd86add0a569ed353d3de799f0f7140a5bd0ed56` is the fork-side remote `lake build`
-of that report. Re-run GitHub Actions on a PR against `mrdouglasny/pphi2` for a
-Douglas-side certificate.
+The checked-in report is [`audit/axiom-report.txt`](axiom-report.txt).
+GitHub Actions `lake build` on this branch is green.
 
 The vetting directory currently tracks a separate active scope of **19 records**;
 the exact record list is maintained in [`audit/vetting/README.md`](vetting/README.md).

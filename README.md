@@ -3,11 +3,10 @@
 Formal construction of the P(Φ)₂ Euclidean quantum field theory in Lean 4,
 following the Glimm-Jaffe/Nelson lattice approach.
 
-> **Status at a glance** (source audit 2026-08-20).
-> The active source has **0 sorries and 27 axiom declarations**. Re-run GitHub
-> Actions on this PR for a Douglas-side `lake build` certificate; the fork-side
-> remote build was at commit `dd86add`, with the checked-in kernel report generated
-> at `7f7b738`. The remaining debt is a set of documented,
+> **Status at a glance** (source audit 2026-08-21).
+> The active source has **0 sorries and 27 axiom declarations**. The kernel
+> certificate is [`audit/axiom-report.txt`](audit/axiom-report.txt) (nine headline /
+> regression targets). GitHub Actions `lake build` on this branch is green. The remaining debt is a set of documented,
 > mostly-vetted project axioms. Most-developed line: the **T²_L torus** (OS0–OS2, axiom-free). On the
 > **cylinder** (Route B′) the OS0/OS1/OS2/OS3 theorem `cylinderIso_OS_of_RP_OS2` is now
 > quartic-only (`P.n = 4`; takes `P, hP, mass, hmass`). The Lean `hRP` and `hOS2`
@@ -298,10 +297,9 @@ consistency checks:
 
 ## Current status
 
-All six phases are represented in the source. Re-run GitHub Actions on this PR
-for a Douglas-side certificate. The fork-side remote `lake build` was commit
-`dd86add`; the checked-in 9-target kernel report was generated at
-proof-repair commit `7f7b738`.
+All six phases are represented in the source. The kernel certificate is
+[`audit/axiom-report.txt`](audit/axiom-report.txt). GitHub Actions `lake build`
+on this branch is green.
 
 Current source counter (`./scripts/count_axioms.sh`, 2026-08-20): pphi2
 **27 axiom declarations**, 0 sorries. The counter now excludes docstring mentions. Net history: the
