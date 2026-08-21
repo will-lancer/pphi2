@@ -4,41 +4,20 @@ One file per architectural axiom, format per
 [`templates/vetting-entry.md`](https://github.com/math-commons/formalization-assurance/blob/main/templates/vetting-entry.md)
 in the assurance hub.
 
-## Status (2026-08-20; source inventory reconciled)
+## Status (2026-06-23)
 
-The source inventory was reconciled on 2026-08-20. Declaration-level vetting remains
-open. The directory currently carries **19 active records** in the tracked analytic-input
-scope. The scope is these records:
+| Rung | Count | Notes |
+|---|---|---|
+| Vetting record landed (with detailed evidence) | **5 / 26** | items 1, 2, active Layer-B2 lattice item 3, 17 plus B5b `groundVariance_le_freeCovariance` |
+| Vetting record landed (citation-form) | **19 / 26** | items 4–16, 18–23 — point at existing evidence in `docs/`, `AXIOM_AUDIT.md`, `planning/INDEX.md`, and Route-A Layer-B2 plans |
+| Private scaffolding | **2 / 26** | `asymTorusInteracting_exponentialMomentBound`, `gaussian_rp_cov_perfect_square` |
+| **Total covered** | **26 / 26** | all real axioms have a record |
+| Statement hashes populated | 0 / 26 | required for L3 strictness |
 
-1. `schwinger_agreement`
-2. `os2_from_phi4`
-3. `continuum_exponential_moment_bound`
-4. `canonical_continuumMeasure_cf_tendsto`
-5. `continuum_exponential_clustering`
-6. `continuumLimit_nonGaussian`
-7. `latticeGreenBilinear_basis_tendsto_continuum`
-8. `pphi2_nontriviality`
-9. `nelson_exponential_estimate_master_bounded`
-10. `rotation_cf_defect_polylog_bound`
-11. `two_point_clustering_from_spectral_gap`
-12. `general_clustering_from_spectral_gap`
-13. `asymInteracting_expMoment_volume_uniform`
-14. `asymInteracting_mgf_gaussianDominated`
-15. `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`
-16. `asymTransferGap_uniform_fixedLs`
-17. `fss_infrared_quadratic`
-18. `groundVariance_le_freeCovariance`
-19. `asymFinitePeriodicBridge_uniform_pair` (the paired remainder and diagonal inputs)
-
-`pphi2_limit_exists` has no dedicated vetting record in this directory. The
-current source inventory contains 27 declarations, so this record scope does not
-claim declaration-level coverage. The directory retains detailed bridge records,
-private scaffolding records, and removed or discharged records for provenance.
-
-Statement hashes populated: **0 / 19** in the active scope; hashes are required
-for L3 strictness.
-
-Most active records are citation-form. They point at the existing vetting evidence in
+All 26 active real axioms now have a record. The directory also retains the
+discharged torus-level record
+`asymInteractingVariance_le_freeVariance_Lt_uniform.md` for provenance.
+Most are citation-form — they point at the existing vetting evidence in
 [`../../docs/gemini_review.md`](../../docs/gemini_review.md) (Feb 2026 group
 review), [`../../AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md) (rolling log),
 per-axiom discharge plans in [`../../docs/`](../../docs/), and the live status
@@ -49,10 +28,10 @@ where the vetting was rich enough to quote. The citation-form records assert
 the vetting happened, name the source doc, and carry forward the verdict; they
 do not reproduce the full verbatim transcript (which lives in the cited doc).
 
-**Strictness ladder.** [`policy.yml`](policy.yml) is at **L1** (warn). The
-project can raise to **L2** (coverage-enforce) once a CI gate reads the active
-record scope and the source inventory is reconciled. Raising to **L3**
-additionally requires populating `statement_hash` in each active record.
+**Strictness ladder.** [`policy.yml`](policy.yml) is at **L1** (warn). Now
+that coverage is at 26/26, the project is ready to raise to **L2**
+(coverage-enforce) once a CI gate reads this directory. Raising to **L3**
+additionally requires populating `statement_hash` in each record.
 
 ## Where the vetting evidence lives today
 
@@ -88,9 +67,7 @@ the hub for the convention.
 
 ## Axiom inventory
 
-The canonical source declaration inventory is the 27-entry list in
-[`../../formalization.yaml`](../../formalization.yaml), with current planning
-context in [`../../planning/INDEX.md`](../../planning/INDEX.md). The 19 records
-above are a maintained vetting scope within that inventory. Private scaffolding,
-removed declarations, discharged theorems, and bridge records remain linked for
-provenance.
+The 26 active real axioms (24 architectural + 2 private scaffolding) are the
+target population. For the canonical list with file:line locations see
+[`../../formalization.yaml`](../../formalization.yaml) and
+[`../../planning/INDEX.md`](../../planning/INDEX.md).

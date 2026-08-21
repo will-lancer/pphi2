@@ -21,7 +21,8 @@
 * `Pphi2.cylinderIso_OS_of_RP_OS2` depends on the upstream axiom
   `GaussianField.embed_l2_uniform_bound`, the Pphi2 project axiom
   `Pphi2.asymInteracting_expMoment_volume_uniform`, and the same Lean trio.
-  The theorem is quartic-only and derives RP and OS2 internally.
+  The theorem is quartic-only and derives RP and OS2 internally. The live
+  CYL-1a axiom lives in `Pphi2/AsymTorus/AsymCutoffFamilyOS.lean`.
 
 ## 2026-07-14 — Ground-isometry-one bridge PROVED (axiom discharged)
 

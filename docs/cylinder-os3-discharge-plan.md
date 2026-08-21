@@ -1,13 +1,8 @@
 # OS3 (reflection positivity) discharge plan — isotropic cylinder construction
 
-> **HISTORICAL PLAN (completed 2026-07-20; interface refreshed 2026-08-20).**
-> The full plan below describes the former `hRP`/`hOS2` theorem interface. The
-> current quartic `cylinderIso_OS_of_RP_OS2` has neither argument: RP is carried
-> through the constructed no-wrap family, and OS2 comes from the heterogeneous
-> lattice construction. Its explicit inputs are `(P) (hP : P.n = 4) (mass)
-> (hmass)`. The ~2000-line bespoke asym-lattice RP port described below was
-> superseded by the generic **`isReflectionPositive_of_evenNearestNeighbour`** (Glimm–
-> Jaffe 6.2.2) in the sibling `reflection-positivity` repo
+> **⚠ SUPERSEDED PATH (2026-07-20).** The ~2000-line bespoke asym-lattice RP port described
+> below is superseded by the generic **`isReflectionPositive_of_evenNearestNeighbour`** (Glimm–
+> Jaffe 6.2.2) now designed in the sibling `reflection-positivity` repo
 > (`docs/lattice-rp-design.md`, Gemini-vetted). Plan: prove that ONE generic theorem there
 > (Route A; crossing perfect-square **axiom-free** via per-edge Hubbard–Stratonovich), then a
 > THIN pphi2 adapter instantiates it (`Λ = AsymLatticeSites`, time-reflection `r`, `J = 1/a²` NN
@@ -112,9 +107,9 @@ The positive-time test functions must map correctly: `cylinderPositiveTimeSubmod
 `Cylinder/Symmetry.lean`, `Torus/AsymmetricTorus.lean`) and reflect the time factor — they line up
 with `timeReflectionAsym` under the embedding.
 
-## Historical prerequisite: narrow `hRP`/`hOS2` to the constructed family
+## Prerequisite: narrow `hRP`/`hOS2` to the constructed family
 
-`cylinderIso_OS_of_RP_OS2` then took `hRP`/`hOS2` `∀`-quantified over *all* families, which a
+`cylinderIso_OS_of_RP_OS2` currently takes `hRP`/`hOS2` `∀`-quantified over *all* families, which a
 genuine OS3 proof cannot supply (it proves RP only for the specific even-`Nt` family). Before
 discharging, expose the IR family from `asymTorusIso_cylinderUniformGreenBound` as a named `def`
 (or restructure so the family is in scope) and narrow the hypotheses to it. Then the discharged

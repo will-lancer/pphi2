@@ -38,7 +38,7 @@ renormalizability limits the log power but doesn't eliminate it).
   for arbitrary `m ≥ 1`) is **PROVED**.
 - The pointwise observable API `rotationCFPointwiseDefect` is a proved
   support layer.
-- Currently load-bearing for `pphi2_existence` (one of the 5 project
+- Currently load-bearing for `pphi2_existence` (one of the 4 project
   axioms in the kernel certificate).
 
 **Cross-references:**

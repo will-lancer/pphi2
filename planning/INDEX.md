@@ -1,49 +1,36 @@
 # pphi2 — remaining-axiom discharge plan (master index)
 
-> **Status banner (2026-08-20).** The current source scan reports
-> **27 axioms, 0 sorries**: 25 public declarations and 2 private scaffolding declarations.
-> The checked-in kernel trace for `Pphi2.pphi2_existence` has five named project axioms
-> plus `propext`, `Classical.choice`, and `Quot.sound`. The kernel certificate
-> is [`audit/axiom-report.txt`](../audit/axiom-report.txt). GitHub Actions
-> `lake build` on this branch is green.
-> Major changes since this machine was written:
-> The **thresholded Layer-B2 variance bound** and the `|f|`-form exp-moment are now theorems
-> on the named S1/S2, bridge-pair, and B5b inputs. The legacy all-`(Lt,a)` Layer-B2 input
-> remains in the source, and the Layer-C `asymInteracting_expMoment_volume_uniform` assembly
-> remains tracked as an open item. **Asym exponential clustering** is a theorem (2 axioms);
-> **Layer A** is sign-restricted
-> (was false for mixed-sign `f`) with its finite-Ising portion of the Newman producer chain
-> complete in the sibling `lee-yang` repo, while the Griffiths–Simon limit passage (A3) and
-> the pphi2 adapter (A4) remain; **Phase 4.1** made the ℝ² headline honest. See
+> **⚠ Status banner (2026-08-20).** Current counts: **pphi2 27 axiom declarations, 0 sorries**
+> (`./scripts/count_axioms.sh` now requires a declaration name, so the former two docstring
+> false positives are gone; 25 public + 2 private). The "17" below is the pre-cylinder
+> architectural cohort; cylinder-era axioms and the Phase-4.1 `pphi2_limit_exists` have since
+> been added, and the false `spectral_gap_*` pair
+> removed). Major changes since this machine was written, all on `t2-conjoined-os`:
+> **Layer B2 is DISCHARGED** — the interacting≤free variance bound and the `|f|`-form
+> exp-moment are theorems on 5–6 vetted axioms (S1 FSS, S2 fixed-`Ls` gap, τ-form bridge pair,
+> B5b); **asym exponential clustering** is a theorem (2 axioms); **Layer A** is sign-restricted
+> (was false for mixed-sign `f`) with its finite-Ising→Newman producer chain proof-complete in
+> the sibling `lee-yang` repo; **Phase 4.1** made the ℝ² headline honest. See
 > [`completion-plan-2026-07.md`](completion-plan-2026-07.md) §"Status addendum (2026-07-13)"
 > for the full rollup and [`keystone-18-campaign.md`](keystone-18-campaign.md) for the
-> uniqueness keystone design. The source declaration inventory is canonical in
-> [`formalization.yaml`](../formalization.yaml); target-specific kernel dependencies are
-> canonical in [`audit/axiom-report.txt`](../audit/axiom-report.txt).
-> Per-row statuses below are being brought current incrementally.
+> uniqueness keystone design. Per-row statuses below are being brought current incrementally.
 
 **Plan-loop status machine for the (originally 17) project-introduced axioms** standing between
-the current state and "φ⁴₂ is a Wightman QFT, in Lean." This index preserves the dated plan
-rows and dependency sketches. The live declaration inventory is in
-[`formalization.yaml`](../formalization.yaml), and the live target dependency certificate is
-[`audit/axiom-report.txt`](../audit/axiom-report.txt). Each row points to the canonical detailed
-discharge plan (in `docs/`); where the detailed plan is stale or missing, that is flagged.
-Re-read this index every cycle; pick the next `todo`/`in_progress` item whose `deps` are `done`.
+the current state and "φ⁴₂ is a Wightman QFT, in Lean." Single source of truth: this file. Each
+row points to the canonical detailed discharge plan (in `docs/`); where the detailed plan is
+stale or missing, that is flagged. Re-read this index every cycle; pick the next
+`todo`/`in_progress` item whose `deps` are `done`.
 
 Status legend: `done` = proved/sorry-free · `in_progress` = actively being formalized ·
 `scoped` = discharge route designed, not started · `open` = route not yet pinned.
 Difficulty: `★` mechanical/short · `★★` real but bounded · `★★★` genuine hard analytic core.
 
-**Dated phased campaign plan (2026-07 review synthesis)**: [`completion-plan-2026-07.md`](completion-plan-2026-07.md)
+**Phased campaign plan (2026-07 review synthesis)**: [`completion-plan-2026-07.md`](completion-plan-2026-07.md)
 — T² assembly (Phase 0), upstream hypercontractivity check, cylinder OS0–OS3/OS4, ℝ² headline
-restatement + uniqueness keystone, with milestones M0–M6. The plan sequences the dated axiom
-rows into a work order; current inventory and certificate pointers live above.
+restatement + uniqueness keystone, with milestones M0–M6. This index stays the per-axiom source
+of truth; the plan sequences the axiom rows into a work order.
 
-> The numbered rows, dependency graph, and historical triage below preserve planning snapshots
-> from their dated cycles. Use the status banner, `formalization.yaml`, and the refreshed kernel
-> report for current declaration and dependency claims.
-
-## ⚠ Historical cross-cutting coherence snapshot: [`planning/coherence-analysis.md`]
+## ⚠ Cross-cutting coherence (read first) — [`planning/coherence-analysis.md`]
 
 The 17 axioms are individually sound but **do not currently assemble into "an *interacting* φ⁴₂
 QFT exists"**. Three architecture gaps (all fixed by one keystone — weak-coupling uniqueness):
@@ -67,7 +54,7 @@ time) adds **OS3 (reflection positivity)** and **OS4 (clustering / mass gap)** �
 `Lt`-uniform exponential-moment bound, gating OS0/OS1) and **CYL-2a** (the uniform spectral gap →
 clustering, gating OS4). Master campaign doc: [`docs/cylinder-master-plan.md`].
 
-## Historical dependency DAG (clusters)
+## Dependency DAG (clusters)
 
 ```
                                  nelson_exponential_estimate_master_bounded (12) ★★★
@@ -92,9 +79,9 @@ clustering, gating OS4). Master campaign doc: [`docs/cylinder-master-plan.md`].
 
 ## Cluster 1 — CYL-1a: the `Lt`-uniform exponential-moment bound (gates OS0/OS1)
 
-- [ ] **1. `asymInteracting_expMoment_volume_uniform`** `AsymContinuumLimit.lean:2460`
+- [ ] **1. `asymInteracting_expMoment_volume_uniform`** `AsymCutoffFamilyOS.lean:759`
   status: scoped   deps: [2, 3]   diff: ★ (Layer C assembly, ~50 lines)
-  note: `K·exp(C·Var_free)` bound. Assembly of Layer A (2) × Layer B2 (3). Plan:
+  note: quartic-only `K·exp(C·Var_free)` bound (`hP : P.n = 4`). Assembly of Layer A (2) × Layer B2 (3). Plan:
   [`docs/asym-interacting-expmoment-volume-uniform-discharge-plan.md`], [`docs/cyl-1a-bridge-plan.md`].
 - [ ] **2. `asymInteracting_mgf_gaussianDominated`** (Layer A) `AsymExpMomentDischarge.lean:114`
   status: scoped   deps: [12]   diff: ★★★
@@ -104,12 +91,9 @@ clustering, gating OS4). Master campaign doc: [`docs/cylinder-master-plan.md`].
   for mixed-sign `f`; AXIOM_AUDIT 2026-07-12/13, rating Flagged → Standard); signed `f` recovered
   by `asymInteracting_expMoment_of_signed` (`AsymSignedSplit.lean`); the Layer C assembly (1) is
   now proved there in the split-seminorm form `K·exp(C·(Var_free(f₊)+Var_free(f₋)))`.
-- [~] **3. `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`** (Layer B2 Route-A lattice input) `AsymExpMomentDischarge.lean:211`
-  status: **thresholded theorem landed; legacy all-`(Lt,a)` input remains**   deps: [17]   diff: ★★★ (★★ with the route pinned)
-  note: The thresholded interacting≤free variance theorem is the current B2 result. The
-  all-`(Lt,a)` lattice input remains an axiom, and item 1 remains the Layer-C assembly target.
-  The detailed Route-A implementation log below is a dated planning record. Transfer-matrix
-  Feynman–Kac route, **Route A** (bounded-cutoff approximation, gemini-vetted
+- [~] **3. `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`** (Layer B2 Route-A lattice input) `AsymExpMomentDischarge.lean:213`
+  status: **in_progress — torus axiom replaced by theorem 2026-06-23; lattice Route-A input remains**   deps: [17]   diff: ★★★ (★★ with the route pinned)
+  note: transfer-matrix Feynman–Kac route, **Route A** (bounded-cutoff approximation, gemini-vetted
   2026-06-22). **Built & sorry-free on `main`** (`Pphi2/AsymTorus/Asym*`):
   the rank-1 operator-decay bricks (`AsymTraceBridge`), the proved gap (`AsymGappedTransfer`,
   `susceptibility_le`), the measure→path-measure bridge `interacting_second_moment_eq_pathMeasure`
@@ -160,10 +144,10 @@ weak-coupling / single-phase hypothesis.
 - [x] **16. `spectral_gap_lower_bound`** — **REMOVED 2026-07-12 (FALSE as stated)**
   note: same fixed-`Ns` mechanism as 17 (and additionally false at criticality even in the
   coupled limit without weak coupling). Same addendum carries the replacement design.
-- [ ] **14. `two_point_clustering_from_spectral_gap`** `OSProofs/OS4_MassGap.lean:136`   status: scoped   deps: [3-bridge]   diff: ★★ (given B2 trace bridge)
+- [ ] **14. `two_point_clustering_from_spectral_gap`** `OSProofs/OS4_MassGap.lean:137`   status: scoped   deps: [3-bridge]   diff: ★★ (given B2 trace bridge)
   note: = `connected_two_point_le` with `γ=e^{−massGap·a}` via `twoPoint_dictionary` +
   `asymTransferKernel_kPow_apply` (proved). Do in the B2 trace-bridge PR. → `planning/cyl-2a-spectral-gap.md`.
-- [ ] **15. `general_clustering_from_spectral_gap`** `OSProofs/OS4_MassGap.lean:159`   status: scoped   deps: [3-bridge]   diff: ★★ (given B2 trace bridge)
+- [ ] **15. `general_clustering_from_spectral_gap`** `OSProofs/OS4_MassGap.lean:160`   status: scoped   deps: [3-bridge]   diff: ★★ (given B2 trace bridge)
   note: same, bounded `F,G` → `M_F,M_G`. → `planning/cyl-2a-spectral-gap.md`.
 
 ## Cluster 3 — OS2 (rotation invariance)
@@ -171,25 +155,25 @@ weak-coupling / single-phase hypothesis.
 - [ ] **13. `rotation_cf_defect_polylog_bound`** `OSProofs/OS2_WardIdentity.lean:614`   status: scoped   deps: []   diff: ★★★
   note: lattice breaks rotations; the characteristic-function rotation defect → 0 in the continuum
   limit (polylog bound). Plan: [`docs/cylinder-master-plan.md`], [`docs/dual-construction-strategy.md`].
-- [ ] **5. `os2_from_phi4`** `Bridge.lean:339`   status: scoped   deps: [13]   diff: ★★
+- [ ] **5. `os2_from_phi4`** `Bridge.lean:345`   status: scoped   deps: [13]   diff: ★★
   note: OS2 (E(2)-invariance) for the φ⁴ measure from the rotation defect bound. Plan:
   [`docs/axiom_proof_plans.md`], [`docs/AXIOM_STATUS.md`].
 
 ## Cluster 4 — continuum-limit inheritance
 
-- [ ] **19. `pphi2_limit_exists`** (NEW 2026-07-13, Phase 4.1 / spec D2) `ContinuumLimit/Convergence.lean:342`   status: open   deps: [cylinder M2–M4, 18]   diff: ★★★
+- [ ] **19. `pphi2_limit_exists`** (NEW 2026-07-13, Phase 4.1 / spec D2) `ContinuumLimit/Convergence.lean:325`   status: open   deps: [cylinder M2–M4, 18]   diff: ★★★
   note: existence of the infinite-volume P(φ)₂ continuum limit in the D1-strengthened
-  `IsPphi2Limit` sense, the single OPEN existence input of the ℝ² headline (see the five-name
-  `pphi2_existence` footprint in [`../audit/axiom-report.txt`](../audit/axiom-report.txt)). Replaced the δ₀ vacuity "proof" killed by
+  `IsPphi2Limit` sense — the single OPEN existence input of the ℝ² headline (`pphi2_existence`
+  kernel footprint = the 4 inheritance axioms + this). Replaced the δ₀ vacuity "proof" killed by
   D1. Rating: **Standard**; Sources: **GR, LP** (Gemini 3.1-pro vet 2026-07-12, citation-corrected
   to Fröhlich Adv. Math. 23 (1976) + Y.M. Park JMP 18 (1977) tightness route — NOT GRS, which
   fails for even deg ≥ 6 multi-well P per Ellis–Monroe–Newman). Discharge route: cylinder campaign
   (`docs/cylinder-master-plan.md`) IR limit `Lt→∞` then `Ls→∞`; keystone 18's cluster expansion
   gives it with uniqueness at weak coupling. Vet record: `planning/r2-honest-headline-spec.md` D2.
-- [ ] **6. `continuum_exponential_moment_bound`** `ContinuumLimit/AxiomInheritance.lean:124`   status: scoped   deps: [1]   diff: ★★
+- [ ] **6. `continuum_exponential_moment_bound`** `ContinuumLimit/AxiomInheritance.lean:123`   status: scoped   deps: [1]   diff: ★★
   note: pass the `Lt`-uniform exp-moment (1) to the continuum measure. Plan:
   [`docs/asym-interacting-expmoment-volume-uniform-discharge-plan.md`].
-- [ ] **7. `canonical_continuumMeasure_cf_tendsto`** `ContinuumLimit/AxiomInheritance.lean:328`   status: scoped   deps: []   diff: ★★
+- [ ] **7. `canonical_continuumMeasure_cf_tendsto`** `ContinuumLimit/AxiomInheritance.lean:327`   status: scoped   deps: []   diff: ★★
   note: characteristic-function convergence lattice → continuum. Plan: [`docs/pr10_summary.md`].
   **2026-07-13 (Phase 4.1)**: `IsPphi2Limit` now carries the forward-direction coupled conjunct
   (`ν k = continuumMeasure 2 (N k) P (a k) mass`, `N k → ∞`, `N k·a k → ∞`) **plus** the
@@ -197,7 +181,7 @@ weak-coupling / single-phase hypothesis.
   form (see needs-human note below) can be restated forward and discharged directly from the
   strengthened predicate, which carries exactly the CF-convergence data along a
   canonically-coupled sequence; if so, the needs-human flag closes.
-- [ ] **8. `continuum_exponential_clustering`** `ContinuumLimit/AxiomInheritance.lean:355`   status: scoped   deps: [14, 15]   diff: ★★
+- [ ] **8. `continuum_exponential_clustering`** `ContinuumLimit/AxiomInheritance.lean:354`   status: scoped   deps: [14, 15]   diff: ★★
   note: clustering passes to the continuum. Plan: [`docs/cyl-2-scope.md`].
 - [ ] **10. `latticeGreenBilinear_basis_tendsto_continuum`** `GaussianContinuumLimit/PropagatorConvergence.lean:103`   status: scoped   deps: []   diff: ★★
   note: free propagator (bilinear form) lattice → continuum on a basis. Plan: [`docs/pr10_summary.md`].
@@ -209,7 +193,7 @@ weak-coupling / single-phase hypothesis.
 non-Gaussianity (only `S₂>0`, ★★ via correlation inequalities, all phases); 9 is the genuine
 interacting content (`u₄≠0`, ★★★, needs `λ>0`).
 
-- [~] **11. `pphi2_nontriviality`** (`S₂(f,f)>0` for `f≠0`) `Main.lean:156`   status: **RESTATED about-the-limit (Phase 4.1, 2026-07-13)**   deps: []   diff: ★★→★★★
+- [~] **11. `pphi2_nontriviality`** (`S₂(f,f)>0` for `f≠0`) `Main.lean:158`   status: **RESTATED about-the-limit (Phase 4.1, 2026-07-13)**   deps: []   diff: ★★→★★★
   note: **2026-07-13**: restated in the about-the-limit form
   `IsPphi2Limit μ P mass → ∀ f ≠ 0, S₂(f,f) > 0` (spec D5) — with the D1-strengthened
   `IsPphi2Limit` (δ₀ excluded, `ν k = continuumMeasure …` forced) the old objections lapse: it is
@@ -241,7 +225,7 @@ interacting content (`u₄≠0`, ★★★, needs `λ>0`).
 
 ## Cluster 6 — OS→Schwinger bridge
 
-- [ ] **4. `schwinger_agreement`** `Bridge.lean:268`   status: scoped   deps: []   diff: ★
+- [ ] **4. `schwinger_agreement`** `Bridge.lean:274`   status: scoped   deps: []   diff: ★
   note: the constructed Schwinger functions agree with the measure moments (bookkeeping bridge).
   Plan: [`docs/axiom_proof_plans.md`], [`docs/AXIOM_STATUS.md`].
 
@@ -255,14 +239,12 @@ interacting content (`u₄≠0`, ★★★, needs `λ>0`).
 
 ---
 
-## Historical ★★★ mountain inventory (mostly independent)
+## The four genuine ★★★ mountains (mostly independent)
 
 1. **The exp-moment chain** (1 ← 2 ← 12, + 3) — Layer A (Nelson/Lee–Yang) + Layer B2 (transfer gap,
-   ours). Status (2026-07-13): the **thresholded B2 variance bound** is a theorem
-   (`asymInteractingVariance_le_freeVariance_lattice_thresholded`, on the named S1/S2, bridge-pair,
-   and B5b inputs). The legacy all-`(Lt,a)` input and Layer-C assembly remain tracked above.
-   Layer A: axiom sign-restricted; the finite-Ising portion of the Newman producer chain is
-   complete in `lee-yang`; the Griffiths–Simon limit passage (A3) and pphi2 adapter (A4) remain.
+   ours). Status (2026-07-13): **B2 DISCHARGED** — thresholded interacting≤free variance is a
+   theorem (`asymInteractingVariance_le_freeVariance_lattice_thresholded`, 5 vetted axioms).
+   Layer A: axiom sign-restricted; finite-Ising→Newman producer chain proof-complete in `lee-yang`.
 2. **The uniform spectral gap** — the OS4 mass gap surviving `a→0` along a coupled sequence.
    The former axioms (16, 17) were **REMOVED 2026-07-12 as false as stated** (fixed-`Ns`
    shrinking-volume regime — see the Cluster-2 rows above and AXIOM_AUDIT.md); the mountain
@@ -277,7 +259,7 @@ interacting content (`u₄≠0`, ★★★, needs `λ>0`).
 Everything else (4, 5, 6, 7, 8, 10, 11, 14, 15) is ★/★★ "estimate-and-pass-to-limit" or rides on a
 mountain's infrastructure once it lands.
 
-## Historical plan-loop triage: cycle 2026-06-04 (the actionable-item sweep)
+## Plan-loop triage — cycle 2026-06-04 (the actionable-item sweep)
 
 This cycle investigated the four "cheap independent" candidates (4, 7, 10, 11) to find anything
 dischargeable now. **Result: all blocked on a substantial missing lemma** — none is a few-edit win.
@@ -325,7 +307,7 @@ Layer-A Nelson/Lee–Yang engine (2/12), the open coupled-limit spectral-gap rep
 the former axioms 16/17 were removed 2026-07-12 as false), or a regime/intent human
 decision (11, 9, 7).
 
-## Historical plan-loop frontier: 2026-06-07 (post Route-A non-triviality)
+## Plan-loop frontier — 2026-06-07 (post Route-A non-triviality)
 
 **Item 9 (non-Gaussianity, `u₄≠0`) is DONE on T², axiom-free** (Route A,
 `torus_pphi2_isInteractingStrict_weakCoupling`, PR #48). The earlier weak-coupling axiom is not used.
@@ -340,9 +322,8 @@ second moment + HS trace-class + B5b single-slice stability + the `1/a` cancella
 Remaining ★★★ mountains / human-gated items (unchanged from the 2026-06-04 triage):
 - **Layer A** (`asymInteracting_mgf_gaussianDominated`, item 2) — Newman MGF via Lee–Yang. Axiom
   **sign-restricted 2026-07-13** (was false for mixed-sign `f`); the finite-Ising→Newman producer
-   chain (Asano + unit-circle roots + cosh-factor bound) has its finite-Ising portion **complete**
-   in the `lee-yang` repo. Remaining: the Griffiths–Simon limit passage (A3) + the pphi2 adapter
-   (A4).
+  chain (Asano + unit-circle roots + cosh-factor bound) is **proof-complete** in the `lee-yang`
+  repo. Remaining: the Griffiths–Simon limit passage (A3) + the pphi2 adapter (A4).
 - **Spectral gap uniformity** — the former axioms (16/17) were REMOVED 2026-07-12 as false as
   stated; the mountain persists as the OPEN coupled-limit replacement (17a/17b,
   `planning/cyl-2a-volume-scaling-addendum.md`) — still feeds OS4 clustering (14/15) *and* the
@@ -351,19 +332,18 @@ Remaining ★★★ mountains / human-gated items (unchanged from the 2026-06-04
 - **Nelson/Lee–Yang** (12), **rotation defect** (13), **IR-limit** (10), **cluster-expansion
   keystone** (4/18).
 
-Net: the architecture is complete; non-Gaussianity on T² is now a theorem. The nearest incremental
-surface is the Layer-C route from the thresholded `|f|` estimate to the cylinder consumers and the
-legacy CYL-1a axiom (item 3). The other open items are standalone research-grade subprojects.
+Net: the architecture is complete; non-Gaussianity on T² is now a theorem. The incremental surface is
+the cylinder Layer-B2 wiring (item 3); everything else is a standalone research-grade subproject.
 
-## Historical axiom-count snapshot (2026-07-12; superseded by the 2026-08-20 source scan)
+## Axioms beyond the 17 (sanity check vs `count_axioms.sh`)
 
-At the 2026-07-12 snapshot, `count_axioms.sh` reported **26 raw axioms** (after the removal of the
+`count_axioms.sh` reports **26 raw axioms** (rechecked 2026-07-12, after the removal of the
 false `spectral_gap_uniform`/`spectral_gap_lower_bound` — see the AXIOM_AUDIT 2026-07-12
 entry); 2 are docstring matches of the word "axiom" inside text continuations
 (`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
 `Pphi2/NelsonEstimate/LayerCake.lean:85`), leaving **24 real axioms**.
 
-That snapshot's 24 architectural axioms accounted for its proof debt, including the
+The 24 architectural axioms account for the current proof debt, including the
 six Layer-B2 Route-A GNS bridge obligations in
 `Pphi2/AsymTorus/AsymBridgeInstance.lean`:
 `asymGroundStateRep_pos_ae`, `asymTransferNormalized_contract`,
@@ -372,7 +352,7 @@ six Layer-B2 Route-A GNS bridge obligations in
 plus B5b `groundVariance_le_freeCovariance` in
 `Pphi2/AsymTorus/AsymB5bSingleSlice.lean` and the lattice Route-A final
 assembly input `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`.
-The remaining 2 in that snapshot were:
+The remaining 2:
 - **`asymTorusInteracting_exponentialMomentBound`** (`Pphi2/AsymTorus/AsymTorusOS.lean`,
   `private`) — torus-side scaffolding consumed only inside `AsymTorusOS`.
 - **`gaussian_rp_cov_perfect_square`** (`Pphi2/OSProofs/OS3_RP_Lattice.lean`,
@@ -393,7 +373,7 @@ axiom 3 (variance / Layer-B2, the cylinder's active item) → `main`. SUPERSEDED
 `main` Asym* files + `docs/B4B5-design.md`); `l5-affine-bound` (the lattice u₄ route, subsumed by
 Route A); `planning/continuum-rescaling-plan.md` (Route B, deferred).
 
-## Historical staleness flags
+## Staleness flags
 Many `docs/*` plans predate the transfer-matrix pivot (several dated 2026-05-13). The CURRENT
 status for Layer B2 (3) and the transfer route is `docs/B4B5-design.md` (NB
 `docs/transfer-instantiation-plan.md` is now SUPERSEDED — see its banner). `docs/AXIOM_STATUS.md`

@@ -1,11 +1,11 @@
 # Vetting — `general_clustering_from_spectral_gap`
 
-`Pphi2/OSProofs/OS4_MassGap.lean:159`. INDEX item 15.
+`Pphi2/OSProofs/OS4_MassGap.lean:160`. INDEX item 15.
 
 ```yaml
 ---
 axiom: general_clustering_from_spectral_gap
-file: Pphi2/OSProofs/OS4_MassGap.lean:159
+file: Pphi2/OSProofs/OS4_MassGap.lean:160
 statement_hash: null
 model: gemini
 tool: mcp__gemini__deep_think_gemini

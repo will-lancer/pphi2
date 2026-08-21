@@ -75,9 +75,9 @@ status:
     - asymTransferGap_uniform_fixedLs                      # AsymTorus/AsymSliceFamilySusceptibility.lean:887
     - asymFinitePeriodicBridge_remainder_bound_uniform     # AsymTorus/AsymSliceFamilySusceptibility.lean:972
     - asymFinitePeriodicBridge_diagonal_bound              # AsymTorus/AsymSliceFamilySusceptibility.lean:998
-    - asymInteracting_expMoment_volume_uniform             # AsymTorus/AsymContinuumLimit.lean:2460
+    - asymInteracting_expMoment_volume_uniform             # AsymTorus/AsymCutoffFamilyOS.lean:759
     - asymInteracting_mgf_gaussianDominated                # AsymTorus/AsymExpMomentDischarge.lean:114
-    - asymInteractingVariance_le_freeVariance_lattice_Lt_uniform # AsymTorus/AsymExpMomentDischarge.lean:211
+    - asymInteractingVariance_le_freeVariance_lattice_Lt_uniform # AsymTorus/AsymExpMomentDischarge.lean:213
     - asymGroundStateRep_pos_ae                            # AsymTorus/AsymBridgeInstance.lean:81
     - asymPartition_ground_bound                           # AsymTorus/AsymBridgeInstance.lean:251
     - asymFinitePeriodicBridge_remainder_bound             # AsymTorus/AsymBridgeInstance.lean:273
@@ -118,7 +118,7 @@ status:
         - statement: "nontriviality of the two-point function S₂(f,f) > 0 (rests on the `pphi2_nontriviality` axiom — restated 2026-07-13 about the coupled limit — packaged via `pphi2_limit_exists`; correlation-inequality lower bound)"
           source: "10.2307/1970988"
     - declaration: "Pphi2.cylinderIso_OS_of_RP_OS2"
-      file: "Pphi2/AsymTorus/AsymContinuumLimit.lean"
+      file: "Pphi2/AsymTorus/AsymCutoffFamilyOS.lean"
       sorry_count: 0
       literature_dependencies:
         - statement: "quartic-only cylinder S¹(Lₛ)×ℝ φ⁴₂ OS0–OS3 assembly with arguments `(P) (hP : P.n = 4) (mass) (hmass)`; OS2 and reflection positivity are proved internally; the footprint beyond the Lean trio is the upstream axiom `GaussianField.embed_l2_uniform_bound` and the Pphi2 axiom `Pphi2.asymInteracting_expMoment_volume_uniform`"
@@ -192,7 +192,7 @@ alignment:
       note: "rests on the `pphi2_nontriviality` axiom; correlation-inequality two-point lower bound."
     - source: "10.1016/0022-1236(73)90024-4"
       lean: "Pphi2.cylinderIso_OS_of_RP_OS2"
-      module: "Pphi2.AsymTorus.AsymContinuumLimit"
+      module: "Pphi2.AsymTorus.AsymCutoffFamilyOS"
       status: "literature-dependency"
       note: "quartic-only cylinder OS0–OS3 assembly for `(P) (hP : P.n = 4) (mass) (hmass)` via the Nelson Markov-field / transfer-matrix route; OS2 and reflection positivity are proved internally; footprint beyond the Lean trio: upstream axiom `GaussianField.embed_l2_uniform_bound` and Pphi2 axiom `Pphi2.asymInteracting_expMoment_volume_uniform`."
 

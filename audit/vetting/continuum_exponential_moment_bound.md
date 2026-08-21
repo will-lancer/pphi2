@@ -1,11 +1,11 @@
 # Vetting — `continuum_exponential_moment_bound`
 
-`Pphi2/ContinuumLimit/AxiomInheritance.lean:124`. INDEX item 6.
+`Pphi2/ContinuumLimit/AxiomInheritance.lean:123`. INDEX item 6.
 
 ```yaml
 ---
 axiom: continuum_exponential_moment_bound
-file: Pphi2/ContinuumLimit/AxiomInheritance.lean:124
+file: Pphi2/ContinuumLimit/AxiomInheritance.lean:123
 statement_hash: null
 model: gemini
 tool: mcp__gemini__deep_think_gemini

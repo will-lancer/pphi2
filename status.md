@@ -75,7 +75,7 @@ the raw count is up from the pre-cylinder base. `measure_determined_by_schwinger
 theorem via `MeasureUniqueness.measure_eq_of_moments`). The remaining genuinely-critical input is
 one deep-think-vetted isotropic-redesign axiom:
 `asymInteracting_expMoment_volume_uniform`
-(`AsymTorus/AsymContinuumLimit.lean`, the volume-uniform interacting exp-moment — the genuine
+(`AsymTorus/AsymCutoffFamilyOS.lean`, the volume-uniform interacting exp-moment — the genuine
 cluster-expansion input). [`wickConstantAsym_eq_variance` was a third isotropic axiom, **discharged
 2026-05-27** → theorem in `AsymTorus/AsymWickVariance.lean`, algebraic circulant route.
 `asymChaosCutoffDecomposition` was the second, **discharged 2026-05-31** → theorem in

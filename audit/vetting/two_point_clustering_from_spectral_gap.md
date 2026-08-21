@@ -9,12 +9,12 @@
 > in the tree.
 
 
-`Pphi2/OSProofs/OS4_MassGap.lean:136`. INDEX item 14.
+`Pphi2/OSProofs/OS4_MassGap.lean:137`. INDEX item 14.
 
 ```yaml
 ---
 axiom: two_point_clustering_from_spectral_gap
-file: Pphi2/OSProofs/OS4_MassGap.lean:136
+file: Pphi2/OSProofs/OS4_MassGap.lean:137
 statement_hash: null
 model: gemini
 tool: mcp__gemini__deep_think_gemini

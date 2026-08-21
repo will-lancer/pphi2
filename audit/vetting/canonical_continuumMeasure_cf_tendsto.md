@@ -1,11 +1,11 @@
 # Vetting — `canonical_continuumMeasure_cf_tendsto`
 
-`Pphi2/ContinuumLimit/AxiomInheritance.lean:328`. INDEX item 7.
+`Pphi2/ContinuumLimit/AxiomInheritance.lean:327`. INDEX item 7.
 
 ```yaml
 ---
 axiom: canonical_continuumMeasure_cf_tendsto
-file: Pphi2/ContinuumLimit/AxiomInheritance.lean:328
+file: Pphi2/ContinuumLimit/AxiomInheritance.lean:327
 statement_hash: null
 model: gemini
 tool: mcp__gemini__deep_think_gemini
@@ -38,7 +38,7 @@ instead be a direct weak-convergence statement** before discharging.
 **Conditions / follow-ups:**
 
 - **Statement re-review needed** before formalizing the discharge.
-- Currently load-bearing for `pphi2_existence` (one of the 5 project
+- Currently load-bearing for `pphi2_existence` (one of the 4 project
   axioms appearing in the kernel certificate).
 
 **Cross-references:**

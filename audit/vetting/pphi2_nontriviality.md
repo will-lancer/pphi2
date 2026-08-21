@@ -1,11 +1,11 @@
 # Vetting — `pphi2_nontriviality`
 
-`Pphi2/Main.lean:156`. INDEX item 11.
+`Pphi2/Main.lean:128`. INDEX item 11.
 
 ```yaml
 ---
 axiom: pphi2_nontriviality
-file: Pphi2/Main.lean:156
+file: Pphi2/Main.lean:128
 statement_hash: null
 model: gemini + self-audit
 tool: mcp__gemini__deep_think_gemini

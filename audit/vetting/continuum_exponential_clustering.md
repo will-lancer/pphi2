@@ -1,11 +1,11 @@
 # Vetting — `continuum_exponential_clustering`
 
-`Pphi2/ContinuumLimit/AxiomInheritance.lean:355`. INDEX item 8.
+`Pphi2/ContinuumLimit/AxiomInheritance.lean:354`. INDEX item 8.
 
 ```yaml
 ---
 axiom: continuum_exponential_clustering
-file: Pphi2/ContinuumLimit/AxiomInheritance.lean:355
+file: Pphi2/ContinuumLimit/AxiomInheritance.lean:354
 statement_hash: null
 model: gemini
 tool: mcp__gemini__deep_think_gemini
@@ -32,7 +32,7 @@ land, this is a pass-to-the-limit step.
 - Depends on items 14 + 15 (`two_point_clustering_from_spectral_gap`,
   `general_clustering_from_spectral_gap`) — both currently scoped, riding
   on the proved B2 trace bridge once it lands.
-- Currently load-bearing for `pphi2_existence` (one of the 5 project
+- Currently load-bearing for `pphi2_existence` (one of the 4 project
   axioms appearing in the kernel certificate).
 
 **Cross-references:**

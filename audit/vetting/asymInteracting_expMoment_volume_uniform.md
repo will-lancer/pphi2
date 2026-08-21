@@ -1,7 +1,7 @@
 # Vetting — `asymInteracting_expMoment_volume_uniform`
 
 Captured soundness-review records for `asymInteracting_expMoment_volume_uniform`
-(`Pphi2/AsymTorus/AsymContinuumLimit.lean:2460`). Linked from
+(`Pphi2/AsymTorus/AsymCutoffFamilyOS.lean:759`). Linked from
 [`../../AXIOM_AUDIT.md`](../../AXIOM_AUDIT.md) and
 [`../../planning/INDEX.md`](../../planning/INDEX.md) item 1.
 
@@ -10,7 +10,7 @@ Captured soundness-review records for `asymInteracting_expMoment_volume_uniform`
 ```yaml
 ---
 axiom: asymInteracting_expMoment_volume_uniform
-file: Pphi2/AsymTorus/AsymContinuumLimit.lean:2460
+file: Pphi2/AsymTorus/AsymCutoffFamilyOS.lean:759
 statement_hash: null    # not yet populated; required for L3 strictness
 model: gemini-3.1-pro-preview
 tool: mcp__gemini__deep_think_gemini

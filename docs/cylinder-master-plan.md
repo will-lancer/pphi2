@@ -1,13 +1,5 @@
 # Cylinder S¹×ℝ φ⁴₂ — master plan & progress tracker
 
-> **Historical-plan boundary (2026-08-20).** The dated campaign sections below
-> preserve their original interfaces. Any passage that presents `hRP` or `hOS2`
-> as a current theorem argument is historical. The live quartic theorem
-> `cylinderIso_OS_of_RP_OS2` takes `(P) (hP : P.n = 4) (mass) (hmass)`, derives
-> RP and OS2 internally, and depends beyond the Lean trio on the upstream axiom
-> `GaussianField.embed_l2_uniform_bound` and the Pphi2 project axiom
-> `Pphi2.asymInteracting_expMoment_volume_uniform`.
-
 > **Editorial note (2026-07-12).** References in this document to `spectral_gap_uniform`,
 > `spectral_gap_lower_bound`, or `clustering_uniform` as live declarations are historical:
 > those were **removed 2026-07-12 as false as stated** (fixed-`Ns` shrinking-volume regime;
@@ -122,7 +114,7 @@ infinite-volume-control theorem and the first hard bottleneck. Forecast honestly
 
 ---
 
-## Historical state from the original campaign: OS0+OS2+OS3 conditional interface
+## Current state — OS0+OS2+OS3 already PROVED (conditionally)
 
 `Pphi2/IRLimit/CylinderOS.lean` — **`routeBPrime_cylinder_OS`** (line ~460) is a
 **proved theorem**: the cylinder (S¹(Lₛ)×ℝ, obtained as the IR limit Lₜ → ∞ of the
@@ -134,7 +126,7 @@ asymmetric torus T²(Lₜ×Lₛ)) satisfies
 - **OS3** (reflection positivity) — transferred from the asymmetric-torus sequence via
   characteristic-functional convergence,
 
-**conditionally on three input hypotheses** it took as arguments at this stage:
+**conditionally on three input hypotheses** it currently takes as arguments:
 
 | Hypothesis | Meaning | Status |
 |---|---|---|
@@ -154,12 +146,12 @@ Supporting results **already proved**:
 
 ---
 
-## Historical target framing: two distinct named endpoints
+## The target — two distinct named endpoints (do not conflate)
 
 - **`cylinder_satisfies_OS0123`** (milestone M-cyl-1): the cylinder φ⁴₂ measure satisfies
-  **OS0, OS1, OS2, OS3 unconditionally**. At this stage,
-  `routeBPrime_cylinder_OS` delivered OS0, OS2, and OS3 conditionally and did
-  not output OS1, so this endpoint required the three conditions and an OS1 lane.
+  **OS0, OS1, OS2, OS3 unconditionally**. `routeBPrime_cylinder_OS` currently delivers OS0,
+  OS2, OS3 *conditionally* and does **not** output OS1 — so this endpoint needs both the
+  three conditions discharged and an OS1 lane added (CYL-1d).
 - **`cylinder_satisfies_OS`** (full endpoint): adds **OS4**. Ideally down to the bare Mathlib
   trio (as the torus reached), realistically modulo the new spectral-gap-transfer theorem
   (CYL-2a) and a small set of textbook-vetted OS4 axioms (CYL-3).

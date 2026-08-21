@@ -3,7 +3,7 @@
 ```yaml
 ---
 axiom: asymGroundSemigroup_intertwines
-file: Pphi2/AsymTorus/AsymBridgeInstance.lean:318
+file: Pphi2/AsymTorus/AsymBridgeInstance.lean:219
 statement_hash: null
 model: codex implementation audit
 tool: local Lean build + upstream GroundSemigroup/GroundGap API review

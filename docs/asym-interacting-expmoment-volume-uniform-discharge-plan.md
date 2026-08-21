@@ -1,13 +1,5 @@
 # `asymInteracting_expMoment_volume_uniform` discharge plan
 
-> **Historical interface note (2026-08-20).** This document preserves the
-> 2026-05-31 discharge campaign. References below to `hRP` and `hOS2` as live
-> cylinder inputs describe the former theorem interface. The current quartic
-> `cylinderIso_OS_of_RP_OS2` takes `(P) (hP : P.n = 4) (mass) (hmass)`, derives
-> RP and OS2 internally, and depends beyond the Lean trio on the upstream axiom
-> `GaussianField.embed_l2_uniform_bound` and the Pphi2 project axiom
-> `Pphi2.asymInteracting_expMoment_volume_uniform`.
-
 > **Editorial note (2026-07-12).** References in this document to `spectral_gap_uniform`,
 > `spectral_gap_lower_bound`, or `clustering_uniform` as live declarations are historical:
 > those were **removed 2026-07-12 as false as stated** (fixed-`Ns` shrinking-volume regime;
@@ -50,11 +42,11 @@ the original estimates are preserved for the record.
 
 ## Target — the exact axiom
 
-`Pphi2/AsymTorus/AsymContinuumLimit.lean:2460`:
+`Pphi2/AsymTorus/AsymContinuumLimit.lean:601`:
 
 ```lean
 axiom asymInteracting_expMoment_volume_uniform
-    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass) :
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ K C : ℝ, 0 < K ∧ 0 < C ∧
       ∀ (L : ℝ) [Fact (0 < L)] (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a),
         (Nt : ℝ) * a = L → (Ns : ℝ) * a = Ls → ∀ f : AsymTorusTestFunction L Ls,
@@ -310,13 +302,12 @@ available to *every* downstream project.
 
 ## Three options
 
-### Historical Option 1: Full discharge
+### Option 1 — Full discharge
 
-The 2026-05-31 proposal was to execute Layers A + B + C. It treated the upstream
-`embed_l2_uniform_bound` and the former cylinder-RP/OS2-symmetry hypotheses as
-separate workstreams. RP and OS2 have since been proved internally; the current
-quartic cylinder theorem retains the upstream embedding axiom and the Pphi2
-volume-uniform moment axiom.
+Execute Layers A + B + C. Multi-week. Produces a fully unconditional
+cylinder OS0/OS1/OS2/OS3 result (modulo the upstream
+`embed_l2_uniform_bound` and the two cylinder-RP/OS2-symmetry
+hypotheses, which are also separate proof workstreams).
 
 **Pros**: zero project-introduced axioms on the branch; the
 construction is genuinely standalone.
@@ -391,23 +382,23 @@ is real: every constructive-QFT downstream (Phi4, OSforGFF,
 OSreconstruction, future Higgs / gauge work) inherits the Lee-Yang,
 chessboard, and confined-Schrödinger infrastructure for free.
 
-**Option 3 (keep as single axiom) was the 2026-05-31 recommendation for the
-near-term cylinder campaign** when higher-leverage targets existed
+**Option 3 (keep as single axiom) remains the right call for the
+near-term cylinder campaign** if higher-leverage targets exist
 elsewhere — the axiom is well-vetted, the form is correct, and 8-14
 weeks is a substantial investment. Candidates for higher leverage:
 * Extending the cylinder construction to the full square-lattice case
 * Discharging `embed_l2_uniform_bound` upstream
-* The historical cylinder OS3 / `hRP` / `hOS2` hypothesis chain, since discharged
+* The cylinder OS3 / hRP / hOS2 hypothesis chain
 * The square's own `spectral_gap_uniform` (which shares the Layer B2
   discharge path)
 
-## Historical exclusions from this plan
+## What's NOT in this plan
 
 * `embed_l2_uniform_bound` (upstream `gaussian-field` axiom, §3).
-* `hRP` (cylinder reflection positivity, §5), later discharged internally.
-* `hOS2` (cylinder Euclidean symmetry, §6), later discharged internally.
+* `hRP` (cylinder reflection positivity, §5).
+* `hOS2` (cylinder Euclidean symmetry, §6).
 
-These were separate workstreams in the 2026-05-31 interface; see
+These are all separate workstreams; see
 `docs/cylinder-conditional-inputs-provability.md` for their provability
 verdicts and `docs/cylinder-os3-discharge-plan.md` for the OS3 line of
 attack.

@@ -1,26 +1,18 @@
 # pphi2 completion plan — 2026-07 review synthesis
 
-> Historical planning document. The review, phases, and task statuses below preserve the
-> 2026-07 planning state. Current source declarations are tracked in
-> [`../formalization.yaml`](../formalization.yaml), current target dependencies in
-> [`../audit/axiom-report.txt`](../audit/axiom-report.txt), and live planning
-> pointers in [`INDEX.md`](INDEX.md).
-
 **Date**: 2026-07-12 (status refreshed 2026-07-13 — see the addendum at the end). **Source**: full-project review (four parallel audits: T² validity,
 cylinder Route B′ gaps, Route A ℝ² status, planning-repo/random-fields leverage). Fresh
 `lean_verify` kernel checks were run against the current build cache for every headline named
 below; findings marked **[verified]** are from those runs, not from the committed certificate.
 
-**Companion docs**: [`INDEX.md`](INDEX.md) (dated per-axiom status machine),
-[`../formalization.yaml`](../formalization.yaml) (canonical source inventory),
-[`../audit/axiom-report.txt`](../audit/axiom-report.txt) (target dependency certificate after
-refresh), [`coherence-analysis.md`](coherence-analysis.md) (Gaps A/B/C),
+**Companion docs**: [`INDEX.md`](INDEX.md) (per-axiom status machine — remains the single source
+of truth for axiom rows), [`coherence-analysis.md`](coherence-analysis.md) (Gaps A/B/C),
 [`../docs/cylinder-master-plan.md`](../docs/cylinder-master-plan.md),
 [`../docs/layer-B2-discharge-plan.md`](../docs/layer-B2-discharge-plan.md).
 
 ---
 
-## Historical review verdict (what this plan is built on)
+## Review verdict (what this plan is built on)
 
 1. **T² is partially valid: strong pieces, unassembled whole.**
    - `torusInteracting_satisfies_OS` (`TorusInteractingOS.lean:2822`) — OS0/OS1/OS2 for any weak
@@ -39,7 +31,7 @@ refresh), [`coherence-analysis.md`](coherence-analysis.md) (Gaps A/B/C),
      `audit/axiom-report.txt`**; `TorusIsNondegenerate` (S₂ > 0) is undischarged;
      `audit/FAITHFULNESS.md:98–104` is stale (says coupling files are PR-only; they are on main).
 2. **ℝ² headline `pphi2_existence` is near-vacuous as stated**: `pphi2_limit_exists`
-   (`ContinuumLimit/Convergence.lean:282`) is witnessed by `Measure.dirac 0`; the 4 inheritance axioms
+   (`ContinuumLimit/Convergence.lean:282`) is witnessed by `Measure.dirac 0`; the 4 kernel axioms
    (`continuum_exponential_moment_bound`, `canonical_continuumMeasure_cf_tendsto`,
    `continuum_exponential_clustering`, `rotation_cf_defect_polylog_bound`) supply all physics
    about that abstract measure. Known (memory `pphi2-existence-vacuous-delta0`); this plan makes
@@ -127,18 +119,13 @@ cheap, high leverage, independent of all other phases.
 
 ---
 
-## Historical Phase 2 plan: Cylinder OS0–OS3 unconditional  *(the main campaign; ≈ 4–8 wk elapsed)*
-
-The current B2 state is the thresholded interacting≤free variance theorem. The legacy
-all-`(Lt,a)` input remains in the source, while the Layer-C
-`asymInteracting_expMoment_volume_uniform` assembly remains an open target. The phase tasks
-below retain their July ordering and assumptions.
+## Phase 2 — Cylinder OS0–OS3 unconditional  *(the main campaign; ≈ 4–8 wk elapsed)*
 
 Target: `routeBPrime_cylinder_OS` with all three family hypotheses discharged →
 **M-cyl-1: cylinder OS0+OS1+OS2+OS3, axiom count on this lane → 0** (modulo any axioms
 deliberately retained as vetted GJ inputs — decide at 2.4).
 
-### 2a. Historical Layer B2 finish plan (~1.5–3 wk per `layer-B2-scoping.md`)
+### 2a. Layer B2 finish (current crux; ~1.5–3 wk per `layer-B2-scoping.md`)
 
 - [ ] **2a.1** Close Route-A Pieces 2–3: the finite-K time-family estimate and the K→∞
   dominated-convergence packaging (Pieces 1 & 5 landed 2026-06-23).
@@ -156,7 +143,7 @@ deliberately retained as vetted GJ inputs — decide at 2.4).
   `TransferSystem`/`TransferConstruction` dictionaries (see its `RECON.md` "Op 1") rather than
   re-proving trace identities.
 - [ ] **2a.4** Assemble → convert `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`
-  (`AsymExpMomentDischarge.lean:211`) to a theorem.
+  (`AsymExpMomentDischarge.lean:215`) to a theorem.
 - **Route discipline (vetted dead-ends — do not revisit):** direct TM-sum vs `Var_free`
   comparison (NORM MISMATCH, L² ⊄ H⁻¹); mode-by-mode covariance domination (false — Wick
   bare mass → −∞); spectral-measure domination ρ_int ≤ Cρ_free (false — mutually singular);
@@ -164,13 +151,13 @@ deliberately retained as vetted GJ inputs — decide at 2.4).
   representation axiom (do not write). Surviving route: **B1 ⊕ gap**. No chessboard/FSS at
   fixed Ls.
 
-### 2b. Layer A: Newman/Lee–Yang MGF domination (★★★; *see 2026-07-13 addendum: axiom sign-restricted; finite-Ising portion of the producer chain complete in `lee-yang`; A3/A4 remain*)
+### 2b. Layer A — Newman/Lee–Yang MGF domination (★★★ — *see 2026-07-13 addendum: axiom sign-restricted; producer chain proof-complete in `lee-yang`; A3/A4 remain*)
 
 - [x] **2b.1** *(DONE 2026-07-12 — [`layer-a-lee-yang-scoping.md`](layer-a-lee-yang-scoping.md):
   polynomial/Asano side already complete in `lee-yang`; recommended inequality-first restructure
   avoids Hadamard/Hurwitz; A1–A4 breakdown ~4–7 wk.)* Scope the `lee-yang` repo deliverable: Lee–Yang property for the lattice P(φ)₂
   (ferromagnetic, even P) → Newman's Gaussian domination of the MGF
-  (`asymInteracting_mgf_gaussianDominated`, `AsymExpMomentDischarge.lean:114`, K = 2 form).
+  (`asymInteracting_mgf_gaussianDominated`, `AsymExpMomentDischarge.lean:127`, K = 2 form).
   Refs: Newman 1975; GJ Ch. 18–19; vetting record in AXIOM_AUDIT (the `∃C·σ²` exponent form is
   the correct one; `C = 1` is false in infinite volume).
 - [ ] **2b.2** Decide staging: this is the natural candidate to **retain as a vetted textbook
@@ -180,9 +167,9 @@ deliberately retained as vetted GJ inputs — decide at 2.4).
 - [ ] **2b.3** Same decision for `nelson_exponential_estimate_master_bounded`
   (`PolynomialChaosBridge.lean:1321`) — note Phase 1 success shrinks its upstream debt.
 
-### 2c. Layer C assembly (historical plan)
+### 2c. Layer C assembly
 
-- [ ] **2c.1** `asymInteracting_expMoment_volume_uniform` (`AsymContinuumLimit.lean:2460`) →
+- [ ] **2c.1** `asymInteracting_expMoment_volume_uniform` (`AsymContinuumLimit.lean:621`) →
   theorem, ~50 lines from A × B2. Discharges `hUnif` /
   `AsymTorusSequenceHasUniformGreenMomentBound` at the family level.
 
@@ -203,8 +190,8 @@ deliberately retained as vetted GJ inputs — decide at 2.4).
 - [ ] **2e.1** Discharge/narrow the inheritance axioms now that their inputs are theorems:
   `continuum_exponential_moment_bound` (`AxiomInheritance.lean:123`),
   `latticeGreenBilinear_basis_tendsto_continuum` (`PropagatorConvergence.lean:103`),
-  `continuum_exponential_clustering` (`AxiomInheritance.lean:355`, waits on Phase 3).
-  **Restate** `canonical_continuumMeasure_cf_tendsto` (`AxiomInheritance.lean:328`) in the
+  `continuum_exponential_clustering` (`AxiomInheritance.lean:354`, waits on Phase 3).
+  **Restate** `canonical_continuumMeasure_cf_tendsto` (`AxiomInheritance.lean:327`) in the
   forward direction (lattice → continuum CF convergence for the *constructed* sequence) instead
   of the blocked converse form — fold into Phase 4.1's headline rewrite.
 - [ ] **2e.2** CYL-1d: add OS1 to the cylinder bundle (extends the proved OS0 transfer).
@@ -323,16 +310,16 @@ analytic work so effort accrues to a non-vacuous target.
 
 ---
 
-## Historical status addendum (2026-07-13, end of the overnight/morning loop)
+## Status addendum (2026-07-13, end of the overnight/morning loop)
 
 **Landed since the plan was written** (all on `t2-conjoined-os`, pushed):
-- **Thresholded B2 theorem landed**: `asymInteractingVariance_le_freeVariance_lattice_thresholded`
-  AND its torus-level Piece-5 migration `…_torus_thresholded`, theorems on the named
-  S1 FSS, S2 gap, τ-bridge pair, and B5b inputs. The legacy all-`(Lt,a)` input carries a
-  migration note; Layer-C rewiring to the eventual form remains the open assembly task.
+- **B2 DISCHARGED (thresholded)**: `asymInteractingVariance_le_freeVariance_lattice_thresholded`
+  AND its torus-level Piece-5 migration `…_torus_thresholded` — theorems on exactly the
+  5 vetted axioms (S1 FSS, S2 gap, τ-bridge pair, B5b). Legacy all-`(Lt,a)` axiom carries a
+  migration note; Layer-C rewiring to the eventual form is the remaining wiring.
 - **Asym exponential clustering** in physical distance (2-axiom footprint) — the OS4 lattice
   input, replacing the removed `clustering_uniform` route.
-- **Phase 4.1 DONE**: honest ℝ² headline (δ₀ closed, vetted existence axiom; the 31 raw/29 real count is historical to this 2026-07-13 snapshot).
+- **Phase 4.1 DONE**: honest ℝ² headline (δ₀ closed, vetted existence axiom, 31 raw/29 real).
 - **Keystone-18 fully designed**: campaign staged (K18-0..4) + the K18-2 activity layer
   vetted FINAL (AR-BKAR, no field split — Hölder+Nelson; λ₀ a-uniform; adjacent-block
   integrated bounds). Effort for K18-2 reduced to 2–4 wk.

@@ -23,10 +23,10 @@ The ladder, from weakest to strongest:
 
 **Current rung: 2 (sorry-free + axiom-pinned).** The headline
 `Pphi2.pphi2_existence` is `0 sorries` and rests on a kernel-certified
-axiom basis: 5 named project axioms plus the 3 Lean kernel axioms (see
-[`audit/axiom-report.txt`](axiom-report.txt)). The source-scan total and the
-kernel dependency footprint answer different questions; consult the report
-for the target-specific dependency set.
+axiom basis: 4 project axioms plus the 3 Lean kernel axioms (see
+[`audit/axiom-report.txt`](axiom-report.txt)). The other 13 architectural
+axioms are dormant for this headline, load-bearing only for stronger or
+sibling results — see [`audit/FAITHFULNESS.md`](FAITHFULNESS.md).
 
 **Gap to rung 3 (named-property pinning).** The OS bundle
 (`Pphi2.SatisfiesFullOS`) is the right informal target *if* one accepts
@@ -59,12 +59,8 @@ becomes the natural rung-5 capstone.
 
 ## Validation evidence
 
-- **Kernel certificate.** The generator lists 9 headline / regression targets in
-  [`audit/axiom_report.lean`](axiom_report.lean): the five
-  `formalization.yaml` main results plus four named Layer-B2/C regression
-  theorems. The checked-in [`audit/axiom-report.txt`](axiom-report.txt)
-  contains those nine blocks. GitHub Actions `lake build` on this branch is
-  green. Regenerate with:
+- **Kernel certificate** for the six headline targets:
+  [`audit/axiom-report.txt`](axiom-report.txt). Regenerate with:
   ```bash
   lake env lean audit/axiom_report.lean > audit/axiom-report.txt
   ```
@@ -74,24 +70,24 @@ becomes the natural rung-5 capstone.
   [`audit/FAITHFULNESS.md`](FAITHFULNESS.md).
 - **Comparator pass** (external kernel-replay + axiom-whitelist check):
   not yet run. Pre-requisite is the headline becoming axiom-clean for a
-  released, sorry-free, public version of the theorem (currently 5 named
-  project axioms remain, so it is not axiom-clean). See the user-global
+  released, sorry-free, public version of the theorem (currently 4
+  project axioms remain — not axiom-clean). See the user-global
   [`COMPARATOR.md`](https://github.com/math-commons/formalization-assurance/blob/main/COMPARATOR.md)
   hub doc for the protocol.
 
 ## Roadmap
 
-- **Short term (weeks).** Complete the Layer-C route from the proved
-  thresholded `|f|` estimate to the cylinder consumers, then restate or
-  discharge the legacy CYL-1a exponential-moment axiom (item 3 in
-  [`planning/INDEX.md`](../planning/INDEX.md)).
-- **Medium term.** The vetting directory currently carries **19 active records**
-  for the tracked scope listed in [`vetting/README.md`](vetting/README.md).
-  This is a record-scope statement, not coverage of all 27 source declarations;
-  `pphi2_limit_exists` still lacks a dedicated record. Raise
-  `vetting_strictness` from L1 to L2 in [`vetting/policy.yml`](vetting/policy.yml)
-  after the record metadata and current inventory are reconciled. Subsequently
-  raise to L3 by populating `statement_hash` in each active record.
+- **Short term (weeks).** Close out the cylinder Layer-B2 wiring
+  (item 3 in [`planning/INDEX.md`](../planning/INDEX.md)). This is the
+  nearest concrete formalization win and tightens the cylinder side of
+  the kernel certificate.
+- **Medium term.** Vetting coverage is at **19/19** as of 2026-06-21
+  (see [`vetting/README.md`](vetting/README.md)). Next step is to
+  raise `vetting_strictness` from L1 to L2 in
+  [`vetting/policy.yml`](vetting/policy.yml) once the per-record
+  metadata stabilizes (e.g. the `NEEDS_REVISION`-flagged records 7 and 11
+  are resolved). Subsequently raise to L3 by populating `statement_hash`
+  in each record.
 - **Long term.** The four ★★★ mountains in
   [`planning/INDEX.md`](../planning/INDEX.md): Lee–Yang/Newman MGF
   (Layer A); spectral-gap uniformity (CYL-2a); non-Gaussianity on ℝ²;

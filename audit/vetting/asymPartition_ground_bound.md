@@ -3,7 +3,7 @@
 ```yaml
 ---
 axiom: asymPartition_ground_bound
-file: Pphi2/AsymTorus/AsymBridgeInstance.lean:251
+file: Pphi2/AsymTorus/AsymBridgeInstance.lean:159
 statement_hash: null
 model: codex implementation audit
 tool: local Lean build + transfer trace dictionary review
