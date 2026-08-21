@@ -207,9 +207,11 @@ MIGRATION NOTE (2026-07-13): the thresholded form is now a THEOREM
 `asymInteractingVariance_le_freeVariance_lattice_thresholded`, 5 vetted axioms);
 this all-(Lt,a) axiom remains only for the legacy Layer-C wiring and is
 over-broad at small Lt / coarse a (true but unproved there) — consumers should
-migrate to the thresholded form (planning/b2-stageB-holes-spec.md §C4 design). -/
+migrate to the thresholded form (planning/b2-stageB-holes-spec.md §C4 design).
+Restricted to `P.n = 4`: the literature path runs through FSS, which is
+Simon–Griffiths / φ⁴, not general even `n ≥ 6`. -/
 axiom asymInteractingVariance_le_freeVariance_lattice_Lt_uniform
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass)
     (Ls : ℝ) [Fact (0 < Ls)] :
     ∃ C : ℝ, 0 < C ∧
       ∀ (Lt : ℝ) [Fact (0 < Lt)]
@@ -227,7 +229,7 @@ axiom asymInteractingVariance_le_freeVariance_lattice_Lt_uniform
 along `asymTorusEmbedLiftIso`. Not a discharge: the mathematical content
 is exactly that axiom. -/
 theorem asymInteractingVariance_le_freeVariance_Lt_uniform
-    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass)
     (Ls : ℝ) [Fact (0 < Ls)] :
     ∃ C : ℝ, 0 < C ∧
       ∀ (Lt : ℝ) [Fact (0 < Lt)]
@@ -240,7 +242,7 @@ theorem asymInteractingVariance_le_freeVariance_Lt_uniform
             (ω (asymLatticeTestFnIso Lt Ls Nt Ns a f)) ^ 2
               ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) := by
   obtain ⟨C, hC_pos, hC_bound⟩ :=
-    asymInteractingVariance_le_freeVariance_lattice_Lt_uniform P mass hmass Ls
+    asymInteractingVariance_le_freeVariance_lattice_Lt_uniform P hP mass hmass Ls
   refine ⟨C, hC_pos, ?_⟩
   intro Lt _hLt Nt Ns _ _ a ha hvolt hvols f
   set g := asymLatticeTestFnIso Lt Ls Nt Ns a f

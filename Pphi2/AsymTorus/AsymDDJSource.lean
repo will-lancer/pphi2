@@ -9,12 +9,11 @@ viewed as a finite-lattice source.  The lattice pullback contains the GJ
 factor `a`; the source entering the physical `a²` pairing is therefore
 `(a²)⁻¹ • g`.  The definitions here are bookkeeping interfaces for a future
 finite source estimate.  They do not assert that such an estimate holds.
+This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 import Mathlib.Analysis.MeanInequalities
-import Pphi2.AsymTorus.AsymTiltedMoment
 import Pphi2.AsymTorus.AsymTorusEmbeddingIso
-import Pphi2.IRLimit.DDJPeriodizationBound
 
 noncomputable section
 
@@ -279,28 +278,6 @@ theorem asymRawSource_asymLatticeTestFnIso_apply
   simp only [asymRawSource, Pi.smul_apply, smul_eq_mul,
     asymLatticeTestFnIso, evalAsymTorusAtSiteGJ_apply]
   field_simp [ha0, ha2] <;> ring
-
-/-- The finite Laplacian is linear at the continuous-linear-map level.  Keeping
-this identity named makes the scalar normalization of a raw source available
-without unfolding the stencil at every use site. -/
-theorem finiteLaplacianAsym_map_smul
-    {Nt Ns : ℕ} [NeZero Nt] [NeZero Ns]
-    (a c : ℝ) (g : AsymLatticeField Nt Ns) :
-    finiteLaplacianAsym Nt Ns a (c • g) =
-      c • finiteLaplacianAsym Nt Ns a g := by
-  exact (finiteLaplacianAsym Nt Ns a).map_smul c g
-
-/-- Pointwise form of `finiteLaplacianAsym_map_smul` for the source
-normalization used in this file. -/
-theorem finiteLaplacianAsymFun_asymRawSource_apply
-    {Nt Ns : ℕ} [NeZero Nt] [NeZero Ns]
-    (a : ℝ) (g : AsymLatticeField Nt Ns)
-    (x : AsymLatticeSites Nt Ns) :
-    finiteLaplacianAsymFun Nt Ns a (asymRawSource a g) x =
-      (a ^ 2 : ℝ)⁻¹ * finiteLaplacianAsymFun Nt Ns a g x := by
-  simp only [asymRawSource, Pi.smul_apply, smul_eq_mul,
-    finiteLaplacianAsymFun]
-  ring
 
 /-- The finite lattice pairing of a configuration with a GJ pullback can be
 written using the physical cell-area pairing and `asymRawSource`. -/

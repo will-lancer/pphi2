@@ -8,6 +8,7 @@ The weighted source estimate at exponent `P.n / (P.n - 1)` gives an
 exponential bound for the doubled source.  This file records the elementary
 consequence that the `P.n`-th source moment is integrable under the normalized
 tilt by the original source exponent.
+This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 import Pphi2.AsymTorus.AsymDDJSource

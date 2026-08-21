@@ -248,65 +248,6 @@ theorem integrable_tilted_first_moment_le_of_log_exp_two
       (Real.exp_le_exp).mp h_exp_integral_le
     simpa [ν] using h_le
 
-/--
-Power-form specialization of
-`integrable_tilted_first_moment_le_of_exp_two`.  It converts a strength-two
-bound for `F = X^n / n` into integrability and a bound for the normalized
-tilted `n`-th source moment.
--/
-theorem integrable_tilted_pow_le_of_exp_two
-    {α : Type*} [MeasurableSpace α]
-    (μ : Measure α) [IsProbabilityMeasure μ]
-    (n : ℕ) (hn_pos : 0 < n) (X : α → ℝ) (B : ℝ)
-    (hX_meas : Measurable X)
-    (hX_pow_nonneg : ∀ x, 0 ≤ (X x) ^ n)
-    (h_exp2 : Integrable
-      (fun x => Real.exp (2 * ((X x) ^ n / (n : ℝ)))) μ)
-    (h_exp2_bound :
-      (∫ x, Real.exp (2 * ((X x) ^ n / (n : ℝ))) ∂μ) ≤ B) :
-    Integrable (fun x => (X x) ^ n)
-        (μ.tilted (fun x => (X x) ^ n / (n : ℝ))) ∧
-      (∫ x, (X x) ^ n ∂(μ.tilted
-        (fun x => (X x) ^ n / (n : ℝ)))) ≤ (n : ℝ) * B := by
-  have hnR_pos : (0 : ℝ) < (n : ℝ) := by
-    exact_mod_cast hn_pos
-  let F : α → ℝ := fun x => (X x) ^ n / (n : ℝ)
-  have hF_meas : Measurable F := by
-    dsimp [F]
-    exact (hX_meas.pow_const n).div measurable_const
-  have hF_nonneg : ∀ x, 0 ≤ F x := by
-    intro x
-    dsimp [F]
-    exact div_nonneg (hX_pow_nonneg x) hnR_pos.le
-  have hcore :=
-    integrable_tilted_first_moment_le_of_exp_two μ F B
-      hF_meas hF_nonneg (by simpa [F] using h_exp2) (by simpa [F] using h_exp2_bound)
-  have hpow_int :
-      Integrable (fun x => (X x) ^ n) (μ.tilted F) := by
-    have hscaled := hcore.1.const_mul (n : ℝ)
-    convert hscaled using 1
-    funext x
-    dsimp [F]
-    field_simp [hnR_pos.ne'] <;> ring
-
-  have hpow_integral_eq :
-      (∫ x, (X x) ^ n ∂(μ.tilted F)) =
-        (n : ℝ) * (∫ x, F x ∂(μ.tilted F)) := by
-    calc
-      (∫ x, (X x) ^ n ∂(μ.tilted F)) =
-          ∫ x, (n : ℝ) * F x ∂(μ.tilted F) := by
-            congr 1
-            funext x
-            dsimp [F]
-            field_simp [hnR_pos.ne'] <;> ring
-      _ = (n : ℝ) * (∫ x, F x ∂(μ.tilted F)) := by
-        rw [integral_const_mul]
-
-  refine ⟨?_, ?_⟩
-  · simpa [F] using hpow_int
-  · rw [hpow_integral_eq]
-    exact mul_le_mul_of_nonneg_left hcore.2 hnR_pos.le
-
 /-- Sharp log-pressure specialization for an even-power source. -/
 theorem integrable_tilted_pow_le_of_log_exp_two
     {α : Type*} [MeasurableSpace α]

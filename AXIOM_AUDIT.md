@@ -2,24 +2,19 @@
 
 **Last updated**: 2026-08-20.
 
-## 2026-08-20: Part A proof repair and 110-target certificate refresh
+## 2026-08-20: Part A proof repair and headline certificate refresh
 
-* Source commit `7f7b73876704dab85431573bb4ff0373e79bc602` passed the remote
-  `lake build` in [CI run 32430497721](https://github.com/will-lancer/pphi2/actions/runs/32430497721).
-  [Assurance run 32430497014](https://github.com/will-lancer/pphi2/actions/runs/32430497014)
-  passed its build and sorry-confinement steps and generated the kernel report used here;
-  its old nine-block golden was stale. Commit
-  `dd86add0a569ed353d3de799f0f7140a5bd0ed56` then passed
-  [CI run 32432752877](https://github.com/will-lancer/pphi2/actions/runs/32432752877), while
-  [assurance run 32432746708](https://github.com/will-lancer/pphi2/actions/runs/32432746708)
-  confirmed the report matches the kernel and sorries remain confined.
+* Source commit `7f7b73876704dab85431573bb4ff0373e79bc602` is the proof-repair
+  commit that generated the kernel report used here; its old nine-block golden
+  was stale. Commit `dd86add0a569ed353d3de799f0f7140a5bd0ed56` is the fork-side
+  remote `lake build` of that report. Re-run GitHub Actions on a PR against
+  `mrdouglasny/pphi2` for a Douglas-side certificate.
 * The text source scan reports **27 axiom declarations and 0 sorries**, split into
   **25 public declarations and 2 private scaffolding declarations**. This inventory
   counts declarations. Kernel footprints below count transitive dependencies of named targets.
-* `audit/axiom_report.lean` contains **110 unique ordered targets**: five
-  `formalization.yaml` main results and 105 regression targets. The generated report has
-  110 headers in the same order. Its first five blocks match the earlier headline blocks.
-  The proof repair preserved the theorem and axiom declaration inventory.
+* `audit/axiom_report.lean` prints the five `formalization.yaml` main results
+  plus four named Layer-B2/C regression theorems. Finite source-tilt / DDJ
+  plumbing is not part of the kernel certificate.
 * `Pphi2.pphi2_existence` depends on exactly five Pphi2 axioms:
   `canonical_continuumMeasure_cf_tendsto`, `continuum_exponential_clustering`,
   `continuum_exponential_moment_bound`, `pphi2_limit_exists`, and

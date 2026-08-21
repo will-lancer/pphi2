@@ -4,6 +4,5 @@
 
 ## Checklist
 
-- [ ] Remote `lake build` succeeds in CI
-- [ ] Fresh `audit/axiom-report.txt` was generated on the same commit; no source or regenerated golden-report diff remains after CI
-- [ ] If you added/changed axioms or changed their status: updated `status.md`, `AXIOM_AUDIT.md`, `README.md`, `formalization.yaml`, `planning/INDEX.md`, `audit/CONVENTIONS.md`, `audit/VALIDATION.md`, `audit/vetting/README.md`, and the superseded `docs/AXIOM_STATUS.md` pointer as applicable
+- [ ] `lake build` succeeds (local or GitHub Actions on this PR)
+- [ ] If you added/changed axioms: updated `status.md`, `AXIOM_AUDIT.md`, and `README.md` counts

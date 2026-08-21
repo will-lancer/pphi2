@@ -15,6 +15,7 @@ The periodization map is defined in the GaussianField dependency by
 periodized temporal Schwartz function is sampled on a finite circle.  The
 bound is uniform for periods `L ≥ 1`; the decay variable is the centered
 physical coordinate, rather than the uncentered representative `val z`.
+This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 noncomputable section

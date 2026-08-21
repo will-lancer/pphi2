@@ -13,6 +13,7 @@ import Pphi2.GeneralResults.TiltPartitionDerivative
 
 -- Phase 1: Wick ordering
 import Pphi2.WickOrdering.WickPolynomial
+import Pphi2.WickOrdering.WickDerivative
 import Pphi2.WickOrdering.Counterterm
 
 -- Phase 1: Interacting measure (general + lattice)
@@ -80,6 +81,8 @@ import Pphi2.AsymTorus.AsymTorusOS
 -- Isotropic Z_Nt × Z_Ns redesign (cylinder construction, in progress)
 import Pphi2.AsymTorus.AsymCutoffBound
 import Pphi2.AsymTorus.AsymContinuumLimit
+import Pphi2.AsymTorus.AsymSamplingBridge
+import Pphi2.AsymTorus.AsymCutoffFamilyOS
 import Pphi2.NelsonEstimate.AsymFieldDecomposition
 import Pphi2.NelsonEstimate.AsymCovarianceBoundsGJ
 import Pphi2.NelsonEstimate.AsymRoughCovarianceHigherP
@@ -99,6 +102,15 @@ import Pphi2.AsymTorus.AsymMeasureFactorization
 import Pphi2.AsymTorus.AsymCoordinateDensity
 import Pphi2.AsymTorus.AsymTiltPartitionDerivative
 import Pphi2.AsymTorus.AsymTiltedScoreIdentity
+import Pphi2.AsymTorus.AsymDDJSource
+import Pphi2.AsymTorus.AsymDDJLocalMoment
+import Pphi2.AsymTorus.AsymDDJSourceSampling
+import Pphi2.AsymTorus.AsymDDJSourceLp
+import Pphi2.AsymTorus.AsymDDJSourceBall
+import Pphi2.AsymTorus.AsymDDJTiltedIntegrability
+import Pphi2.AsymTorus.AsymDDJWeightedDecay
+import Pphi2.AsymTorus.AsymTiltedIBP
+import Pphi2.IRLimit.DDJSchwartzSecondDifference
 import Pphi2.AsymTorus.AsymReflectionPositivity
 import Pphi2.AsymTorus.AsymLinkReflection
 import Pphi2.AsymTorus.AsymLinkReflectionRP

@@ -9,6 +9,7 @@ inverse cell area.  For a cylinder test function its temporal factors are
 periodized Schwartz functions.  The centered periodization estimate and the
 Dynin-Mityagin expansion therefore give a uniform inverse-square bound in the
 centered temporal lattice coordinate.
+This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 import Pphi2.AsymTorus.AsymDDJSource

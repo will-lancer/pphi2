@@ -9,6 +9,7 @@ argument.  A pointwise inverse-square bound in the centered temporal
 coordinate gives a cell-weighted `p`-power bound, uniformly in both lattice
 cardinalities.  The physical identity `Ns * a = Ls` is the only spatial
 bookkeeping input.
+This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 import Pphi2.AsymTorus.AsymDDJSource

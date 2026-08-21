@@ -279,7 +279,7 @@ theorem asymInteracting_expMoment_volume_uniform_proof
             (ω (fun x => max (-(asymLatticeTestFnIso L Ls Nt Ns a f x)) 0)) ^ 2
             ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass)))) := by
   obtain ⟨C_B, hC_B_pos, hC_B_bound⟩ :=
-    asymInteractingVariance_le_freeVariance_lattice_Lt_uniform P mass hmass Ls
+    asymInteractingVariance_le_freeVariance_lattice_Lt_uniform P hP mass hmass Ls
   refine ⟨2, C_B, by norm_num, hC_B_pos, ?_⟩
   intro L _hL Nt Ns _ _ a ha hvolt hvols f
   set g := asymLatticeTestFnIso L Ls Nt Ns a f with hg_def

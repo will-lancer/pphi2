@@ -1,11 +1,12 @@
-# Continuous integration: build the default Lake targets on every PR and on pushes to main.
+# Continuous integration: build the default Lake targets on every push and PR.
 # Uses the official https://github.com/leanprover/lean-action (same stack as `lake new` templates).
+# Feature branches used to need a manual "Run workflow" click because `push` only
+# listed `main`. That made CI look broken. Run on every branch push.
 
 name: CI
 
 on:
   push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 

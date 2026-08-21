@@ -7,6 +7,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 This file isolates the unperiodized estimate used by the centered lattice
 periodization bound.  The seminorm is a finite supremum of the usual Schwartz
 seminorms through derivative order two.
+This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 import Pphi2.IRLimit.DDJPeriodizationBound

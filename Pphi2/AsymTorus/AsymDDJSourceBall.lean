@@ -8,6 +8,7 @@ The zero-order raw source and its finite Laplacian have separate sampling
 estimates.  This file packages them with one continuous cylinder seminorm and
 one radius.  The quarter-radius leaves the stronger room needed when the
 source is doubled in the finite tilted-integrability argument.
+This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 import Pphi2.AsymTorus.AsymDDJSourceLp

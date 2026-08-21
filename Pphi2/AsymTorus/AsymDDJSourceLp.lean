@@ -7,6 +7,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 The centered temporal source estimate supplies the pointwise majorant needed
 by the finite weighted interpolation lemma.  This file packages the two
 estimates into the cylinder-level source-power bound.
+This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 import Pphi2.AsymTorus.AsymDDJSourceSampling

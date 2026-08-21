@@ -7,6 +7,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 This file keeps the finite Laplacian at the source level.  The temporal
 factor is handled by the centered periodization estimate, and the spatial
 factor by the one-dimensional restriction estimate from GaussianField.
+This is not Dimock–Dang–Jäkel (DDJ) 5.3/6.1.
 -/
 
 import Pphi2.AsymTorus.AsymDDJSourceSampling
