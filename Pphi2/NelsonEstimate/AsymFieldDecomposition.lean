@@ -13,7 +13,8 @@ discharging `asymChaosCutoffDecomposition` (the heterogeneous Nelson chaos decom
 **Foundational layer (this file):** the joint space/measure, the rectangular-dispersion eigenvalue,
 the smooth/rough cutoff weights, the DFT mode coefficients, and the smooth/rough/sum synthesis
 functions. The deep `pushforward_eq_GFF` identity (`map (φ_S+φ_R) = latticeGaussianMeasureAsym`) is
-the next target — see `docs/asym-fielddecomposition-redesign.md`.
+proved below as `asymCanonicalJointMeasure_map_sumConfig` and supplies the Gaussian-law bridge used
+by the downstream chaos decomposition.
 
 The 1D DFT primitives (`latticeEigenvalue1d`, `latticeFourierBasisFun`, `latticeFourierNormSq`) are
 the **same** functions the square uses (per direction `Nt`/`Ns`), so no new Fourier objects are
@@ -108,7 +109,7 @@ def asymCanonicalRoughFieldFunction (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
     ∑ m : AsymCanonicalMode Nt Ns, asymCanonicalRoughModeCoeff Nt Ns a mass T x m * η.2 m
 
 /-- The synthesized field `φ_S + φ_R`; its law (under `asymCanonicalJointMeasure`) is the lattice
-GFF — the `pushforward_eq_GFF` identity, the next target (see the redesign doc). -/
+GFF, via `asymCanonicalJointMeasure_map_sumConfig` below. -/
 def asymCanonicalSumFieldFunction (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
     (a mass T : ℝ) (η : AsymCanonicalJoint Nt Ns) : AsymLatticeField Nt Ns :=
   fun x => asymCanonicalSmoothFieldFunction Nt Ns a mass T η x +

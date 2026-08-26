@@ -19,6 +19,9 @@ B5 `1/a` cancellation) build on this.
 * `asym_pairing_sum_slice` — the bilinear site pairing through `asymSliceEquiv`.
 * `config_pairing_eq_slice` — `ω g = Σ_t Σ_i (slice g)·(slice (evalMapAsym ω))`.
 * `interacting_second_moment_eq_pathMeasure` — `∫ (ω g)² dμ_int = ∫ (slice pairing)² d(pathMeasure)`.
+* `interacting_cross_moment_eq_pathMeasure` — the bilinear Gibbs two-point
+  `∫ (ω g)(ω h) dμ_int` is the path-measure pairing of `slicePairing g` with
+  `slicePairing h` (same pushforward; the square case is the diagonal).
 -/
 
 open MeasureTheory GaussianField ReflectionPositivity
@@ -81,5 +84,29 @@ theorem interacting_second_moment_eq_pathMeasure
   refine integral_congr_ae (Filter.Eventually.of_forall (fun ω => ?_))
   simp only [Function.comp_apply, slicePairing]
   rw [config_pairing_eq_slice]
+
+/-- **Bilinear Gibbs two-point.** The interacting lattice cross moment is the
+path-measure pairing of the two slice functionals. Same change of variables as
+`interacting_second_moment_eq_pathMeasure`; the square theorem is the diagonal. -/
+theorem interacting_cross_moment_eq_pathMeasure
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (g h : AsymLatticeField Nt Ns) :
+    ∫ ω, (ω g) * (ω h) ∂(interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) =
+      ∫ ψ, (slicePairing Nt Ns g ψ) * (slicePairing Nt Ns h ψ)
+        ∂((asymTransferSystem Nt Ns P a mass ha hmass).pathMeasure Nt) := by
+  have hsl : Measurable (asymSliceEquiv Nt Ns) := by
+    rw [← asymSliceMeasurableEquiv_coe Nt Ns]; exact (asymSliceMeasurableEquiv Nt Ns).measurable
+  have hev : Measurable (evalMapAsym Nt Ns) := measurable_evalMapAsym Nt Ns
+  have hcomp : (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass).map
+        (asymSliceEquiv Nt Ns ∘ evalMapAsym Nt Ns) =
+      (asymTransferSystem Nt Ns P a mass ha hmass).pathMeasure Nt := by
+    rw [← Measure.map_map hsl hev]
+    exact interactingLatticeMeasureAsym_slice_pushforward_eq_pathMeasure Nt Ns P a mass ha hmass
+  rw [← hcomp, integral_map (hsl.comp hev).aemeasurable
+    ((slicePairing_measurable Nt Ns g).mul
+      (slicePairing_measurable Nt Ns h)).aestronglyMeasurable]
+  refine integral_congr_ae (Filter.Eventually.of_forall (fun ω => ?_))
+  simp only [Function.comp_apply, slicePairing]
+  rw [config_pairing_eq_slice, config_pairing_eq_slice]
 
 end Pphi2

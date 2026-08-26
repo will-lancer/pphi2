@@ -109,6 +109,14 @@ quantifier over mixed-sign `f` is separately FALSE (2-spin counterexample;
 Lebowitz-κ₄). Signed consumers in `AsymSignedSplit.lean` inherit this
 quartic axiom at `f₊`, `f₋` and are not a discharge.
 
+**Adapter (2026-08-18).** `lee-yang` at `d48ee59` is pinned in
+`lakefile.toml`. `asymInteracting_mgf_gaussianDominated_of_griffithsSimon`
+(`AsymInteractingLeeYang.lean`) proves this inequality from
+`GriffithsSimonMGFData` for the pushforward along `ω ↦ ω f`. That data is
+**not** constructed for Wick `:P(φ):` on `interactingLatticeMeasureAsym`
+(lee-yang A3 deferred; finite Ising Newman is the wrong polynomial class).
+Keep this axiom. Do not apply free-field OS or Gaussian MGF in its place.
+
 **Reference**: C. M. Newman, Comm. Math. Phys. 41 (1975), Theorem 3;
 Simon–Griffiths, Comm. Math. Phys. 33 (1973). -/
 axiom asymInteracting_mgf_gaussianDominated

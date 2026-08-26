@@ -171,9 +171,12 @@
 - **References**: Osterwalder-Seiler (1978), Fröhlich-Israel-Lieb-Simon (1978)
 
 ### ward_identity_lattice + scaling dimension argument
-- **Verdict**: CORRECT
-- **Super-renormalizability argument is valid**: Lattice Laplacian correction has dim=4 > d=2, giving O(a²) anomaly. In P(φ)₂, super-renormalizability means no log corrections (all Feynman diagrams finite after Wick ordering).
-- **References**: Symanzik (1983) "Continuum limit and improved action", Huebner et al. (2012) arXiv:1204.4146
+- **Verdict retracted for the current Lean declaration**: its left side
+  subtracts an integral from itself. The intended rotated-observable Ward
+  identity and its uniform anomaly estimate remain open.
+- The dimension-counting discussion is motivation for the missing theorem.
+- **References to review for the replacement statement**: Symanzik (1983)
+  "Continuum limit and improved action", Huebner et al. (2012) arXiv:1204.4146
 
 ---
 

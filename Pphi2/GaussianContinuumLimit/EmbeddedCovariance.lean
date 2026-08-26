@@ -12,7 +12,7 @@ and continuum covariance structures.
 
 - `gaussianContinuumMeasure` — pushforward of `latticeGaussianMeasure` to S'(ℝ^d)
 - `embeddedTwoPoint` — two-point function `∫ ω(f)·ω(g) dν_{GFF,a}`
-- `continuumGreenBilinear` — continuum Green's function `∫ f̂(k) ĝ(k) / (|k|²+m²) dk/(2π)^d`
+- `continuumGreenBilinear` — current raw-Schwartz bilinear interface
 
 ## Mathematical background
 
@@ -79,12 +79,13 @@ def embeddedTwoPoint (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
 
   `G(f, g) = ∫ f̂(k) · ĝ(k) / (|k|² + m²) dk / (2π)^d`
 
-This is the two-point function of the continuum massive free field.
-It is the inner product in the Sobolev space H⁻¹(ℝ^d), i.e., the
-quadratic form of the operator `(-Δ + m²)⁻¹`.
+The intended two-point form uses Fourier transforms and represents the
+continuum massive free field. The current body below integrates the raw
+values `f.toFun k * g.toFun k`; it therefore serves as a convention placeholder
+until the Fourier transform and normalization are made explicit.
 
-The definition uses the Fourier-space representation, which makes
-positivity manifest (the integrand is nonneg). -/
+The raw-value body still makes positivity manifest, while its physical-space
+meaning requires that convention to be resolved. -/
 def continuumGreenBilinear (mass : ℝ)
     (f g : ContinuumTestFunction d) : ℝ :=
   (2 * Real.pi) ^ (-(d : ℤ)) *

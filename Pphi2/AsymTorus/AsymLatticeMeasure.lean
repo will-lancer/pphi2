@@ -28,10 +28,12 @@ and the volume `Nt·Ns·a² = Lt·Ls`, so the `d = 2` Glimm–Jaffe normalisatio
 import Lattice.AsymCovariance
 import Lattice.AsymFiniteField
 import Pphi2.InteractingMeasure.LatticeMeasure
+import GaussianField.Symmetry
 
 noncomputable section
 
 open GaussianField MeasureTheory
+open scoped BigOperators
 
 namespace Pphi2
 
@@ -158,6 +160,16 @@ theorem interactionFunctionalAsym_bounded_below (Nt Ns : ℕ) [NeZero Nt] [NeZer
     _ = -(a ^ 2 * Fintype.card (AsymLatticeSites Nt Ns) * A) := by
         simp [Finset.sum_const, mul_comm]; ring
 
+/-- The heterogeneous interaction is a sum of single-site Wick polynomials. -/
+theorem interactionFunctionalAsym_single_site
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ) :
+    ∃ v : AsymLatticeSites Nt Ns → (ℝ → ℝ),
+      ∀ ω : Configuration (AsymLatticeField Nt Ns),
+        interactionFunctionalAsym Nt Ns P a mass ω =
+          a ^ 2 * ∑ x, v x (ω (asymLatticeDelta Nt Ns x)) :=
+  ⟨fun _x τ => wickPolynomial P (wickConstantAsym Nt Ns a mass) τ, fun _ω => rfl⟩
+
 /-! ## Boltzmann weight, partition function, interacting measure -/
 
 /-- The Boltzmann weight `exp(-V_a(ω))` on the heterogeneous lattice. -/
@@ -171,6 +183,20 @@ theorem boltzmannWeightAsym_pos (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
     (ω : Configuration (AsymLatticeField Nt Ns)) :
     0 < boltzmannWeightAsym Nt Ns P a mass ω :=
   Real.exp_pos _
+
+/-- The Boltzmann weight is the product of Wick site factors
+`exp(-a² :P(φ_x):_c)`. Pair couplings live in the free Gaussian, not here. -/
+theorem boltzmannWeightAsym_eq_siteProduct
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ)
+    (ω : Configuration (AsymLatticeField Nt Ns)) :
+    boltzmannWeightAsym Nt Ns P a mass ω =
+      ∏ x : AsymLatticeSites Nt Ns,
+        Real.exp (-(a ^ 2 *
+          wickPolynomial P (wickConstantAsym Nt Ns a mass)
+            (ω (asymLatticeDelta Nt Ns x)))) := by
+  unfold boltzmannWeightAsym interactionFunctionalAsym
+  rw [Finset.mul_sum, ← Finset.sum_neg_distrib, Real.exp_sum]
 
 theorem boltzmannWeightAsym_integrable (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
     (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass) :
@@ -339,6 +365,97 @@ theorem interactingLatticeMeasureAsym_integrable_exp_of_source_control
     _ ≤ a ^ 2 * Fintype.card (AsymLatticeSites Nt Ns) * B := by
       simp only [interactionFunctionalAsym]
       linarith [hsum]
+
+/-! ## GFF-to-interacting integrability transfer and Z₂ parity -/
+
+/-- If `T` preserves `μ` and the density `f` is `T`-invariant, then `T`
+preserves `μ.withDensity f`. -/
+private theorem map_withDensity_eq_of_invariant {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {T : α → α} (hT : Measurable T) (hμ : μ.map T = μ)
+    {f : α → ℝ≥0∞} (hf : Measurable f) (hfT : ∀ x, f (T x) = f x) :
+    (μ.withDensity f).map T = μ.withDensity f := by
+  ext s hs
+  rw [Measure.map_apply hT hs, withDensity_apply _ (hT hs), withDensity_apply _ hs]
+  calc
+    ∫⁻ x in T ⁻¹' s, f x ∂μ
+        = ∫⁻ x in T ⁻¹' s, f (T x) ∂μ :=
+          setLIntegral_congr_fun (hT hs) fun x _ => (hfT x).symm
+    _ = ∫⁻ y in s, f y ∂(μ.map T) := (setLIntegral_map hs hf hT).symm
+    _ = ∫⁻ y in s, f y ∂μ := by rw [hμ]
+
+/-- The interaction is invariant under the field flip `ω ↦ ω ∘ (-1)`. -/
+theorem interactionFunctionalAsym_comp_neg (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ)
+    (ω : Configuration (AsymLatticeField Nt Ns)) :
+    interactionFunctionalAsym Nt Ns P a mass
+        (configurationPullback negCLM ω) =
+      interactionFunctionalAsym Nt Ns P a mass ω := by
+  unfold interactionFunctionalAsym
+  congr 1
+  refine Finset.sum_congr rfl fun x _ => ?_
+  rw [configurationPullback_apply, negCLM_apply, map_neg, wickPolynomial_neg]
+
+/-- The heterogeneous lattice Gaussian is parity-invariant. -/
+theorem latticeGaussianMeasureAsym_map_neg (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass) :
+    (latticeGaussianMeasureAsym Nt Ns a mass ha hmass).map
+        (configurationPullback (negCLM (E := AsymLatticeField Nt Ns))) =
+      latticeGaussianMeasureAsym Nt Ns a mass ha hmass := by
+  unfold latticeGaussianMeasureAsym
+  exact measure_neg_invariant (latticeCovarianceAsymGJ Nt Ns a mass ha hmass)
+
+/-- **Parity invariance of the interacting heterogeneous lattice measure.** -/
+theorem interactingLatticeMeasureAsym_map_neg (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass) :
+    (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass).map
+        (configurationPullback (negCLM (E := AsymLatticeField Nt Ns))) =
+      interactingLatticeMeasureAsym Nt Ns P a mass ha hmass := by
+  unfold interactingLatticeMeasureAsym
+  rw [Measure.map_smul]
+  congr 1
+  refine map_withDensity_eq_of_invariant (measurable_configurationPullback _)
+    (latticeGaussianMeasureAsym_map_neg Nt Ns a mass ha hmass)
+    (ENNReal.measurable_ofReal.comp
+      ((interactionFunctionalAsym_measurable Nt Ns P a mass).neg.exp))
+    fun ω => ?_
+  unfold boltzmannWeightAsym
+  rw [interactionFunctionalAsym_comp_neg]
+
+/-- An observable integrable under the free GFF remains integrable under the
+Wick interacting reweighting: `exp(-V)` is bounded because `V` is bounded
+below. -/
+theorem interactingLatticeMeasureAsym_integrable_of_gff
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (F : Configuration (AsymLatticeField Nt Ns) → ℝ)
+    (hF_GFF : Integrable F (latticeGaussianMeasureAsym Nt Ns a mass ha hmass)) :
+    Integrable F (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) := by
+  obtain ⟨B, hB⟩ := interactionFunctionalAsym_bounded_below Nt Ns P a mass ha hmass
+  have hZ := partitionFunctionAsym_pos Nt Ns P a mass ha hmass
+  set μ_GFF := latticeGaussianMeasureAsym Nt Ns a mass ha hmass
+  set bw := boltzmannWeightAsym Nt Ns P a mass
+  have hbw_pos : ∀ ω, 0 < bw ω := boltzmannWeightAsym_pos Nt Ns P a mass
+  have hbw_bound : ∀ ω, bw ω ≤ Real.exp B := fun ω =>
+    Real.exp_le_exp_of_le (by linarith [hB ω])
+  have hf_dens_meas : Measurable (fun ω => ENNReal.ofReal (bw ω)) :=
+    ENNReal.measurable_ofReal.comp
+      ((interactionFunctionalAsym_measurable Nt Ns P a mass).neg.exp)
+  have hbw_simp : ∀ ω, (ENNReal.ofReal (bw ω)).toReal = bw ω :=
+    fun ω => ENNReal.toReal_ofReal (le_of_lt (hbw_pos ω))
+  have hF_wd : Integrable F (μ_GFF.withDensity (fun ω => ENNReal.ofReal (bw ω))) := by
+    apply (integrable_withDensity_iff hf_dens_meas
+      (Filter.Eventually.of_forall (fun _ => ENNReal.ofReal_lt_top))).mpr
+    simp_rw [hbw_simp]
+    apply (hF_GFF.mul_const (Real.exp B)).mono
+    · exact hF_GFF.aestronglyMeasurable.mul
+        (interactionFunctionalAsym_measurable Nt Ns P a mass).neg.exp.aestronglyMeasurable
+    · exact Filter.Eventually.of_forall fun ω => by
+        simp only [Real.norm_eq_abs, abs_mul, abs_of_pos (hbw_pos ω),
+          abs_of_pos (Real.exp_pos B)]
+        exact mul_le_mul_of_nonneg_left (hbw_bound ω) (abs_nonneg _)
+  unfold interactingLatticeMeasureAsym
+  exact hF_wd.smul_measure
+    (ENNReal.inv_ne_top.mpr ((ENNReal.ofReal_pos.mpr hZ).ne'))
 
 end Pphi2
 

@@ -2,10 +2,11 @@
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Torus OS Axioms: OS0–OS3 for the Gaussian Continuum Limit
+# Torus OS Axioms: OS0–OS2 for the Gaussian Continuum Limit
 
-Defines and proves Osterwalder-Schrader axioms OS0 through OS3 for the
-torus Gaussian continuum limit measure.
+Defines and proves Osterwalder-Schrader axioms OS0 through OS2 for the
+torus Gaussian continuum limit measure. Reflection positivity is left for
+the cylinder route.
 
 ## Main results
 
@@ -13,8 +14,7 @@ torus Gaussian continuum limit measure.
 - `TorusOS1_Regularity` — ‖Z[f_re, f_im]‖ ≤ exp(c·(q(f_re)+q(f_im)))
 - `TorusOS2_TranslationInvariance` — invariance under (ℝ/Lℤ)² translations
 - `TorusOS2_D4Invariance` — invariance under D4 point group
-- `TorusOS3_ReflectionPositivity` — RP matrix positive semidefinite
-- `SatisfiesTorusOS` — bundled structure for all torus OS axioms
+- `SatisfiesTorusOS` — bundled structure for the torus OS0–OS2 properties
 - `torusGaussianLimit_satisfies_OS` — main theorem
 
 ## Mathematical background
@@ -24,10 +24,8 @@ The torus T²_L has:
 - **OS1**: ‖Z[f_re,f_im]‖ ≤ exp(c·(q(f_re)+q(f_im))) for continuous seminorm q.
 - **OS2**: G_L is translation-invariant (spectral argument: translation
   acts by phase on Fourier modes) and D4-invariant (eigenvalues are D4-symmetric).
-- **OS3**: For positive-time test functions f₁,...,fₙ, the RP matrix
-  `Mᵢⱼ = Re(Z[fᵢ - Θfⱼ])` is positive semidefinite. Uses the
-  generating-functional matrix form matching `OS3_ReflectionPositivity`
-  in `OSAxioms.lean`.
+- **OS3**: Reflection positivity is not included in this torus bundle. The
+  cylinder route supplies the real-time reflection-positivity statement.
 
 ## Warmup for cylinder S¹ × ℝ
 
@@ -874,7 +872,7 @@ private lemma torusGeneratingFunctional_re_eq_integral_cos
 
 /-! ## Bundle and main theorem -/
 
-/-- **Bundled torus OS axioms OS0–OS3.**
+/-- **Bundled torus OS axioms OS0–OS2.**
 
 This structure is measure-agnostic: it applies to any probability measure
 on Configuration(TorusTestFunction L), whether Gaussian or interacting.
@@ -888,11 +886,11 @@ structure SatisfiesTorusOS
   os2_D4 : TorusOS2_D4Invariance L μ
   -- OS3 (reflection positivity) dropped: natural on cylinder S¹×ℝ, not torus T²
 
-/-- **The torus Gaussian continuum limit satisfies OS0–OS3.**
+/-- **The torus Gaussian continuum limit satisfies OS0–OS2.**
 
 The proof uses the Gaussian structure (characteristic functional = exp(-½G))
-to establish OS0, OS1, and OS2. OS3 is inherited from lattice RP via
-weak limits. -/
+to establish OS0, OS1, and OS2. Reflection positivity is not a field of
+`SatisfiesTorusOS`; it is treated on the cylinder route. -/
 theorem torusGaussianLimit_satisfies_OS
     (mass : ℝ) (hmass : 0 < mass)
     (μ : Measure (Configuration (TorusTestFunction L)))
@@ -904,11 +902,12 @@ theorem torusGaussianLimit_satisfies_OS
   os2_translation := torusGaussianLimit_os2_translation L mass hmass μ hGCL
   os2_D4 := torusGaussianLimit_os2_D4 L mass hmass μ hGCL
 
-/-- **Existence of a torus Gaussian measure satisfying OS0–OS3.**
+/-- **Existence of a torus Gaussian measure satisfying OS0–OS2.**
 
 Master theorem: for any torus size L > 0 and mass m > 0, there exists
 a probability measure on Configuration(TorusTestFunction L) satisfying
-all torus OS axioms. The measure is the continuum limit of lattice GFFs.
+the torus OS0–OS2 properties. The measure is the continuum limit of lattice
+GFFs.
 
 The statement hides all construction details (mass, lattice, convergence)
 behind the existential — the output is just a measure satisfying `SatisfiesTorusOS`. -/

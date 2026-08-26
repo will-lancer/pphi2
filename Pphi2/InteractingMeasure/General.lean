@@ -142,7 +142,11 @@ theorem interactingMeasure_isProbabilityMeasure
 
 /-! ## Schwinger functions -/
 
-/-- **Two-point Schwinger function** `S₂(f, g) = ∫ ω(f) · ω(g) dμ_V(ω)`. -/
+/-- Raw two-point integral `S₂(f, g) = ∫ ω(f) · ω(g) dμ_V(ω)`.
+
+This definition carries Mathlib's totalized-integral convention: it evaluates
+to zero when the integrand is not integrable. Consumer theorems must provide
+the relevant moment-integrability result before treating it as an expectation. -/
 def schwinger2
     (V : Configuration E → ℝ)
     (μ : Measure (Configuration E))
@@ -158,7 +162,7 @@ theorem schwinger2_symm
     schwinger2 V μ f g = schwinger2 V μ g f := by
   simp only [schwinger2]; congr 1 with ω; ring
 
-/-- **One-point Schwinger function** (expectation value of the field). -/
+/-- Raw one-point integral. Its expectation interpretation requires integrability. -/
 def schwinger1
     (V : Configuration E → ℝ)
     (μ : Measure (Configuration E))
@@ -166,7 +170,8 @@ def schwinger1
   ∫ ω : Configuration E,
     ω f ∂(interactingMeasure V μ)
 
-/-- **Interacting generating functional** `Z_V(f) = ∫ exp(ω(f)) dμ_V(ω)`. -/
+/-- Raw exponential integral `Z_V(f) = ∫ exp(ω(f)) dμ_V(ω)`.
+Its generating-functional interpretation requires exponential integrability. -/
 def interactingGeneratingFunctional
     (V : Configuration E → ℝ)
     (μ : Measure (Configuration E))
@@ -233,9 +238,12 @@ theorem interactingMeasure_absolutelyContinuous
 
 /-! ## n-point Schwinger functions -/
 
-/-- **n-point Schwinger function.**
+/-- **Raw n-point Schwinger integral.**
 
-  `S_n(f₁, ..., fₙ) = ∫ ω(f₁) · ... · ω(fₙ) dμ_V(ω)` -/
+  `S_n(f₁, ..., fₙ) = ∫ ω(f₁) · ... · ω(fₙ) dμ_V(ω)`
+
+The integral is totalized by Mathlib. A moment theorem must establish
+integrability before this is used as a probabilistic expectation. -/
 def schwingerN
     (V : Configuration E → ℝ)
     (μ : Measure (Configuration E))

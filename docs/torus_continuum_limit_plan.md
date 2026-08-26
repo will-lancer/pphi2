@@ -1,8 +1,11 @@
 # Torus Continuum Limit: OS Axioms Plan
 
+> Historical plan. The active `TorusOSAxioms` bundle contains OS0–OS2.
+> Reflection positivity remains a separate cylinder-route obligation.
+
 ## Goal
 
-Prove OS axioms OS0–OS3 for **both** the Gaussian and interacting P(φ)₂
+The original target was OS0–OS3 for **both** the Gaussian and interacting P(φ)₂
 continuum limit measures on the torus T²_L. The torus approach isolates
 the UV limit (a = L/N → 0) from IR issues by fixing the physical volume L.
 

@@ -392,11 +392,10 @@ No log corrections in d=2.
 
 ### 32. `prokhorov_configuration_sequential` (Convergence.lean)
 
-**Difficulty**: Infrastructure
+**Status**: Proved via `GaussianField.prokhorov_configuration`.
 **Statement**: Sequential Prokhorov on S'(ℝ²).
-**Plan**: S'(ℝ²) is Polish (Gelfand-Vilenkin).
-**Blocker**: Mathlib lacks nuclear space API.
-**Alternative**: Bypass via torus path (already done for Gaussian).
+**Alternative proof plan**: build a weighted negative-Sobolev realization;
+see `Pphi2/ContinuumLimit/SobolevProkhorovPlan.lean`.
 
 ---
 
@@ -530,9 +529,9 @@ c_a = G_a(0,0) = (1/|Λ*|) Σ_k (4sin²(ak/2)/a² + m²)⁻¹.
 |------|-------|-----------|
 | 1: Moderate | 13 | `transferOperator_isCompact`, `fourierTransform_lp_eq_fourierIntegral`, `gaussian_density_rp`, torus infrastructure, OS inheritance |
 | 2: Hard | 14 | `spectral_gap_uniform`, `exponential_moment_bound`, Ward identity, tightness chain |
-| 3: Infra/Deep | 10 | `prokhorov_configuration_sequential`, nontriviality, clustering |
+| 3: Infra/Deep | 9 | nontriviality, clustering |
 | 4: Very Hard | 8 | Bridge axioms, `schwinger_agreement`, infrastructure |
-| **Total** | **41** (+ 4 private/removed) | |
+| **Total** | **40** (+ 4 private/removed) | |
 
 ## Proved Axioms (Historical)
 

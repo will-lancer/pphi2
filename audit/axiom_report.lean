@@ -31,7 +31,9 @@ Part-A regression block (kept in full after the four names;
 * `Pphi2.pphi2_nonGaussianity` — u₄ ≠ 0 (rests on `continuumLimit_nonGaussian`).
 * `Pphi2.pphi2_nontrivial` — S₂(f,f) > 0 (rests on `pphi2_nontriviality`).
 * `Pphi2.cylinderIso_OS_of_RP_OS2` — cylinder OS0–OS3 assembly
-  (conditional on RP + OS2-symmetry + the uniform exp-moment axiom).
+  (thresholded `|f|`-form + no-wrap RP + OS2; still inherits the named
+  Layer A/B2 inputs of that thresholded theorem, plus
+  `GaussianField.embed_l2_uniform_bound`).
 
 Secondary regression targets (not in `formalization.yaml`):
 

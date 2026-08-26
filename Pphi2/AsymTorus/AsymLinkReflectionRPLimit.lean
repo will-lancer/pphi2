@@ -300,6 +300,81 @@ theorem asymGaussianIso_second_moment_le_seminorm
       dsimp [C]
       ring
 
+/-- Sitewise absolute lattice pullback is controlled by the same continuous
+rapid-decay seminorm as the signed second moment.  The comparison uses the
+massive counting-ℓ² bound and the pointwise identity `|G(x)|² = G(x)²`; it
+does not identify `|g|` with the pullback of a smooth torus test function. -/
+theorem asymCylinderLatticeAbsSecondMoment_le_seminorm
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (mass : ℝ) (hmass : 0 < mass) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns] (a : ℝ) (ha : 0 < a)
+        (f : AsymTorusTestFunction Lt Ls),
+        ∫ ω : Configuration (AsymLatticeField Nt Ns),
+            (ω (fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a f x|)) ^ 2
+            ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) ≤
+          C * (RapidDecaySeq.rapidDecaySeminorm 0 f) ^ 2 := by
+  obtain ⟨C₀t, hC₀t_pos, hC₀t_bound⟩ :=
+    SmoothMap_Circle.sobolevSeminorm_fourierBasis_le (L := Lt) 0
+  have hC₀t : ∀ m, SmoothMap_Circle.sobolevSeminorm (L := Lt) 0
+      (SmoothMap_Circle.fourierBasis m) ≤ C₀t := fun m => by
+    specialize hC₀t_bound m
+    simpa only [pow_zero, mul_one] using hC₀t_bound
+  obtain ⟨C₀s, hC₀s_pos, hC₀s_bound⟩ :=
+    SmoothMap_Circle.sobolevSeminorm_fourierBasis_le (L := Ls) 0
+  have hC₀s : ∀ m, SmoothMap_Circle.sobolevSeminorm (L := Ls) 0
+      (SmoothMap_Circle.fourierBasis m) ≤ C₀s := fun m => by
+    specialize hC₀s_bound m
+    simpa only [pow_zero, mul_one] using hC₀s_bound
+  let C := mass⁻¹ ^ 2 * Lt * Ls * C₀t ^ 2 * C₀s ^ 2
+  have hC_pos : 0 < C := by
+    dsimp [C]
+    exact mul_pos
+      (mul_pos
+        (mul_pos
+          (mul_pos (sq_pos_of_pos (inv_pos.mpr hmass)) (Fact.out : 0 < Lt))
+          (Fact.out : 0 < Ls))
+        (sq_pos_of_pos hC₀t_pos))
+      (sq_pos_of_pos hC₀s_pos)
+  refine ⟨C, hC_pos, ?_⟩
+  intro Nt Ns _ _ a ha f
+  have hsite :=
+    asymTorusSiteEval_norm_sq_le_seminorm Lt Ls
+      C₀t hC₀t_pos hC₀t C₀s hC₀s_pos hC₀s f Nt Ns
+  calc
+    ∫ ω : Configuration (AsymLatticeField Nt Ns),
+        (ω (fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a f x|)) ^ 2
+        ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) ≤
+      (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
+        ∑ x : AsymLatticeSites Nt Ns,
+          (asymLatticeTestFnIso Lt Ls Nt Ns a f x) ^ 2 :=
+      asymFreeVariance_sitewiseAbs_le_mass_inv_sq Nt Ns a mass ha hmass
+        (asymLatticeTestFnIso Lt Ls Nt Ns a f)
+    _ = mass⁻¹ ^ 2 *
+        ∑ x : AsymLatticeSites Nt Ns,
+          (evalAsymTorusAtSite Lt Ls Nt Ns x f) ^ 2 := by
+      have hscale :=
+        asymLatticeTestFnIso_scaled_sq_sum_eq_evalAsymTorusAtSite_sq_sum
+          Lt Ls Nt Ns a ha f
+      calc
+        (a ^ 2 : ℝ)⁻¹ * mass⁻¹ ^ 2 *
+            ∑ x : AsymLatticeSites Nt Ns,
+              (asymLatticeTestFnIso Lt Ls Nt Ns a f x) ^ 2 =
+            mass⁻¹ ^ 2 * ((a ^ 2 : ℝ)⁻¹ *
+              ∑ x : AsymLatticeSites Nt Ns,
+                (asymLatticeTestFnIso Lt Ls Nt Ns a f x) ^ 2) := by ring
+        _ = mass⁻¹ ^ 2 *
+            ∑ x : AsymLatticeSites Nt Ns,
+              (evalAsymTorusAtSite Lt Ls Nt Ns x f) ^ 2 := by
+          rw [hscale]
+    _ ≤ mass⁻¹ ^ 2 *
+        (Lt * Ls * C₀t ^ 2 * C₀s ^ 2 *
+          (RapidDecaySeq.rapidDecaySeminorm 0 f) ^ 2) :=
+      mul_le_mul_of_nonneg_left hsite (sq_nonneg _)
+    _ = C * (RapidDecaySeq.rapidDecaySeminorm 0 f) ^ 2 := by
+      dsimp [C]
+      ring
+
 /-- The heterogeneous lattice Gaussian second moments vanish along every
 cylinder test-function sequence tending to zero. This is the diagonal
 covariance control required by the moving-reflection RP limit. -/
@@ -380,6 +455,93 @@ theorem asymCylinderLatticeSecondMoment_smul
     rw [htest, map_smul]
     simp only [smul_eq_mul]
     ring
+  rw [hpoint, integral_const_mul]
+
+/-- Sitewise absolute Gaussian second moments vanish along every cylinder
+test-function sequence tending to zero. -/
+theorem asymCylinderLatticeAbsSecondMoment_tendsto_zero_of_tendsto
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (mass : ℝ) (hmass : 0 < mass)
+    (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k))
+    (ha : ∀ k, 0 < a k)
+    (hseq : ℕ → CylinderTestFunction Ls)
+    (hseq0 : Tendsto hseq atTop (nhds 0)) :
+    Tendsto (fun k =>
+      haveI := hNt k
+      haveI := hNs k
+      ∫ ω : Configuration (AsymLatticeField (Nt k) (Ns k)),
+        (ω (fun x => |asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k)
+          (cylinderToTorusEmbed Lt Ls (hseq k)) x|)) ^ 2
+        ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k) mass (ha k) hmass))
+      atTop (nhds 0) := by
+  obtain ⟨C, hC_pos, hbound⟩ :=
+    asymCylinderLatticeAbsSecondMoment_le_seminorm Lt Ls mass hmass
+  have hembed : Tendsto
+      (fun k => cylinderToTorusEmbed Lt Ls (hseq k))
+      atTop (nhds 0) := by
+    have h := (cylinderToTorusEmbed Lt Ls).cont.continuousAt.tendsto.comp hseq0
+    simpa using h
+  have hp0 : Tendsto
+      (fun k => RapidDecaySeq.rapidDecaySeminorm 0
+        (cylinderToTorusEmbed Lt Ls (hseq k)))
+      atTop (nhds 0) := by
+    have h :=
+      (RapidDecaySeq.rapidDecay_withSeminorms.continuous_seminorm 0).continuousAt.tendsto.comp
+        hembed
+    convert h using 1
+    exact congrArg nhds (map_zero (RapidDecaySeq.rapidDecaySeminorm 0)).symm
+  have hupper : Tendsto
+      (fun k => C * (RapidDecaySeq.rapidDecaySeminorm 0
+        (cylinderToTorusEmbed Lt Ls (hseq k))) ^ 2)
+      atTop (nhds 0) := by
+    simpa using (hp0.pow 2).const_mul C
+  refine squeeze_zero (fun k => ?_) (fun k => ?_) hupper
+  · haveI := hNt k
+    haveI := hNs k
+    exact integral_nonneg fun _ => sq_nonneg _
+  · haveI := hNt k
+    haveI := hNs k
+    exact hbound (Nt k) (Ns k) (a k) (ha k)
+      (cylinderToTorusEmbed Lt Ls (hseq k))
+
+/-- The sitewise-absolute heterogeneous lattice Gaussian second moment is
+quadratic under real scaling of the cylinder test function. -/
+theorem asymCylinderLatticeAbsSecondMoment_smul
+    (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
+    (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
+    (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (t : ℝ) (h : CylinderTestFunction Ls) :
+    ∫ ω : Configuration (AsymLatticeField Nt Ns),
+        (ω (fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls (t • h)) x|)) ^ 2
+        ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) =
+      t ^ 2 * ∫ ω : Configuration (AsymLatticeField Nt Ns),
+        (ω (fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls h) x|)) ^ 2
+        ∂(latticeGaussianMeasureAsym Nt Ns a mass ha hmass) := by
+  have hpoint : (fun ω : Configuration (AsymLatticeField Nt Ns) =>
+      (ω (fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a
+        (cylinderToTorusEmbed Lt Ls (t • h)) x|)) ^ 2) =
+      fun ω => t ^ 2 *
+        (ω (fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls h) x|)) ^ 2 := by
+    have htest : asymLatticeTestFnIso Lt Ls Nt Ns a
+        (cylinderToTorusEmbed Lt Ls (t • h)) =
+        t • asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls h) := by
+      funext x
+      simp [asymLatticeTestFnIso, map_smul, Pi.smul_apply, smul_eq_mul]
+    funext ω
+    have habs :
+        (fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls (t • h)) x|) =
+        |t| • fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a
+          (cylinderToTorusEmbed Lt Ls h) x| := by
+      funext x
+      simp [htest, Pi.smul_apply, smul_eq_mul, abs_mul]
+    rw [habs, map_smul]
+    simp only [smul_eq_mul, mul_pow, sq_abs]
   rw [hpoint, integral_const_mul]
 
 /-- A scaled exponential-moment bound controls the absolute first moment by

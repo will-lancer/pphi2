@@ -1,8 +1,7 @@
 # formalization.yaml — https://github.com/mathlib-initiative/formalization.yaml (v0.3)
 # Describes the post-Phase-4.1 (honest ℝ² headline, 2026-07-13) state of pphi2.
-# Built tree (Pphi2.lean + Common): 0 sorries, 29 real `axiom` declarations
-#   (27 public + 2 private). `scripts/count_axioms.sh` reports "31 raw" because
-#   it also matches 2 docstring lines that begin with the word "axiom".
+# Source tree (Pphi2.lean + Common): 0 sorries, 25 `axiom` declarations
+#   (23 public + 2 private). Remote build and kernel-certificate refresh pending.
 #   Legacy `ddj/` and parked `future/` are NOT part of the default build target.
 version: "v0.3"
 
@@ -45,7 +44,9 @@ status:
     Glimm-Jaffe/Nelson lattice approach. The Osterwalder-Schrader axiom skeleton
     (OS0 analyticity, OS1 regularity, OS2 Euclidean invariance, OS3 reflection
     positivity, OS4 clustering, bundled as `Pphi2.SatisfiesFullOS`) is complete
-    and the default target builds with 0 sorries. The headline existence theorem
+    and the active source tree has 0 real sorries. The current working tree
+    still needs a remote build before its default-target status is certified.
+    The headline existence theorem
     `Pphi2.pphi2_existence` (∃ μ on S'(ℝ²) satisfying all five OS axioms) is
     assembled from the lattice construction + continuum limit, but is CONDITIONAL
     on a set of named analytic axioms (uniform exponential moment bounds,
@@ -56,38 +57,34 @@ status:
     is the `Pphi2` library (with `Common`); the legacy `ddj/` directory and the
     parked `future/CylinderContinuumLimit/` directory are NOT in the build and
     contain their own separate axioms/sorries that do not affect the main results.
-  sorry_count: 0                 # in the built Pphi2/ + Common tree
+  sorry_count: 0                 # source scan in Pphi2/ + Common; remote build pending
   sorry_in_definitions: 0
-  axioms:                        # 29 real axiom declarations in the built Pphi2/ tree (27 public + 2 private)
+  axioms:                        # 25 source-level declarations in Pphi2/ (23 public + 2 private); remote certificate pending
     - schwinger_agreement                                  # Bridge.lean
     - os2_from_phi4                                        # Bridge.lean
     - pphi2_nontriviality                                  # Main.lean:158 (restated about-the-limit 2026-07-13)
-    - continuum_exponential_moment_bound                   # ContinuumLimit/AxiomInheritance.lean:123
-    - canonical_continuumMeasure_cf_tendsto                # ContinuumLimit/AxiomInheritance.lean:327
-    - continuum_exponential_clustering                     # ContinuumLimit/AxiomInheritance.lean:354
-    - continuumLimit_nonGaussian                           # ContinuumLimit/Convergence.lean:293 (regime-restricted 2026-07-13)
-    - pphi2_limit_exists                                   # ContinuumLimit/Convergence.lean:325 (NEW 2026-07-13, the OPEN existence input)
-    - fss_infrared_quadratic                               # AsymTorus/AsymInfraredBound.lean:113
-    - asymTransferGap_uniform_fixedLs                      # AsymTorus/AsymSliceFamilySusceptibility.lean:886
-    - asymFinitePeriodicBridge_remainder_bound_uniform     # AsymTorus/AsymSliceFamilySusceptibility.lean:971
-    - asymFinitePeriodicBridge_diagonal_bound              # AsymTorus/AsymSliceFamilySusceptibility.lean:997
-    - asymInteracting_expMoment_volume_uniform             # AsymTorus/AsymContinuumLimit.lean:621
-    - asymInteracting_mgf_gaussianDominated                # AsymTorus/AsymExpMomentDischarge.lean:127
-    - asymInteractingVariance_le_freeVariance_lattice_Lt_uniform # AsymTorus/AsymExpMomentDischarge.lean:215
-    - asymGroundStateRep_pos_ae                            # AsymTorus/AsymBridgeInstance.lean:81
-    - asymTransferNormalized_contract                      # AsymTorus/AsymBridgeInstance.lean:128
-    - asymGroundStateRep_eq_groundIsometry_one             # AsymTorus/AsymBridgeInstance.lean:140
-    - asymPartition_ground_bound                           # AsymTorus/AsymBridgeInstance.lean:159
-    - asymFinitePeriodicBridge_remainder_bound             # AsymTorus/AsymBridgeInstance.lean:174
-    - asymGroundSemigroup_intertwines                      # AsymTorus/AsymBridgeInstance.lean:219
-    - groundVariance_le_freeCovariance                     # AsymTorus/AsymB5bSingleSlice.lean:162
+    - continuum_exponential_moment_bound                   # ContinuumLimit/AxiomInheritance.lean:124
+    - canonical_continuumMeasure_cf_tendsto                # ContinuumLimit/AxiomInheritance.lean:328
+    - continuum_exponential_clustering                     # ContinuumLimit/AxiomInheritance.lean:355
+    - continuumLimit_nonGaussian                           # ContinuumLimit/Convergence.lean:307 (regime-restricted 2026-07-13)
+    - pphi2_limit_exists                                   # ContinuumLimit/Convergence.lean:346 (open coupled-limit existence input)
+    - fss_infrared_quadratic                               # AsymTorus/AsymInfraredBound.lean:121
+    - asymTransferGap_uniform_fixedLs                      # AsymTorus/AsymSliceFamilySusceptibility.lean:913
+    - asymFinitePeriodicBridge_remainder_bound_uniform     # AsymTorus/AsymSliceFamilySusceptibility.lean:998
+    - asymFinitePeriodicBridge_diagonal_bound              # AsymTorus/AsymSliceFamilySusceptibility.lean:1024
+    - asymInteracting_expMoment_volume_uniform             # AsymTorus/AsymContinuumLimit.lean:2704 (legacy monolithic input)
+    - asymInteracting_mgf_gaussianDominated                # AsymTorus/AsymExpMomentDischarge.lean:122
+    - asymInteractingVariance_le_freeVariance_lattice_Lt_uniform # AsymTorus/AsymExpMomentDischarge.lean:219
+    - asymPartition_ground_bound                           # AsymTorus/AsymBridgeInstance.lean:271
+    - asymFinitePeriodicBridge_remainder_bound             # AsymTorus/AsymBridgeInstance.lean:293
+    - groundVariance_le_freeCovariance                     # AsymTorus/AsymB5bSingleSlice.lean:200
     - asymTorusInteracting_exponentialMomentBound          # AsymTorus/AsymTorusOS.lean:852 (private)
-    - rotation_cf_defect_polylog_bound                     # OSProofs/OS2_WardIdentity.lean:614
-    - two_point_clustering_from_spectral_gap               # OSProofs/OS4_MassGap.lean:137
-    - general_clustering_from_spectral_gap                 # OSProofs/OS4_MassGap.lean:160
-    - gaussian_rp_cov_perfect_square                       # OSProofs/OS3_RP_Lattice.lean:648 (private)
-    - nelson_exponential_estimate_master_bounded           # NelsonEstimate/PolynomialChaosBridge.lean:1321
-    - latticeGreenBilinear_basis_tendsto_continuum         # GaussianContinuumLimit/PropagatorConvergence.lean:103
+    - rotation_cf_defect_polylog_bound                     # OSProofs/OS2_WardIdentity.lean:619
+    - two_point_clustering_from_spectral_gap               # OSProofs/OS4_MassGap.lean:136
+    - general_clustering_from_spectral_gap                 # OSProofs/OS4_MassGap.lean:159
+    - gaussian_rp_cov_perfect_square                       # OSProofs/OS3_RP_Lattice.lean:660 (private)
+    - nelson_exponential_estimate_master_bounded           # NelsonEstimate/PolynomialChaosBridge.lean:1329
+    - latticeGreenBilinear_basis_tendsto_continuum         # GaussianContinuumLimit/PropagatorConvergence.lean:119
   main_results:
     - declaration: "Pphi2.pphi2_existence"
       file: "Pphi2/Main.lean"
@@ -127,7 +124,7 @@ automation:
     - method: "agent"
       models: ["claude-opus-4-8"]
       framework: "Claude Code"
-      prompting_notes: "Primary prover: cycle-by-cycle proving with compiler-guided repair; multi-repo (depends on reflection-positivity, gaussian-field, bochner, gaussian-hilbert, gibbs-variational)."
+      prompting_notes: "Primary prover: cycle-by-cycle proving with compiler-guided repair; multi-repo (depends on reflection-positivity, gaussian-field, bochner, gaussian-hilbert, gibbs-variational, and lee-yang for the conditional Newman adapter)."
     - method: "agent"
       models: ["gpt-5-codex"]
       framework: "Codex"
@@ -160,7 +157,7 @@ fidelity:
 review:
   status: "self-assessed"
   reviewers: []
-  notes: "0 sorries on the active build; 24 real axiom declarations remain in the built Pphi2/ tree (26 raw per count_axioms.sh; the former uniform-spectral-gap pair was removed 2026-07-12 as false as stated). The headline existence/OS results are literature-dependencies resting on those axioms, not unconditional proofs. See status.md and AXIOM_AUDIT.md."
+  notes: "The current source scan finds 0 sorries and 25 axiom declarations in Pphi2/ (23 public and 2 private). Remote build and kernel-certificate refresh remain pending. Four former ground-state bridge axioms are now theorems; the former uniform-spectral-gap pair was removed 2026-07-12 as false as stated. The headline existence/OS results are literature-dependencies resting on those axioms. See status.md and AXIOM_AUDIT.md."
 
 alignment:
   namespace: "Pphi2"
@@ -189,6 +186,6 @@ alignment:
       lean: "Pphi2.cylinderIso_OS_of_RP_OS2"
       module: "Pphi2.AsymTorus.AsymContinuumLimit"
       status: "literature-dependency"
-      note: "cylinder OS0–OS3 assembly via the Nelson Markov-field / transfer-matrix route; conditional on RP, OS2-symmetry, and the uniform exp-moment axiom."
+      note: "cylinder OS0–OS3 assembly via the thresholded |f|-form exponential-moment route, no-wrap RP, and proved OS2; still inherits named Layer A/B2 inputs of the thresholded theorem plus embed_l2_uniform_bound."
 
 acknowledgements: ""

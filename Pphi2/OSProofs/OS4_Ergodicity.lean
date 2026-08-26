@@ -10,7 +10,7 @@ measure with respect to time translations.
 ## Main results
 
 - `clustering_implies_ergodicity` — exp clustering → ergodic w.r.t. time shifts
-- `unique_vacuum` — the ground state (vacuum) is unique
+- `unique_vacuum` — legacy wrapper exposing a ground/first-excited spectral pair
 
 ## Mathematical background
 
@@ -180,18 +180,14 @@ theorem clustering_implies_ergodicity
     have h_ne_top : μ A ≠ ⊤ := measure_ne_top μ A
     rw [← ENNReal.ofReal_toReal h_ne_top, h, ENNReal.ofReal_one]
 
-/-! ## Unique vacuum -/
+/-! ## Ground/first-excited spectral data -/
 
-/-- **The vacuum is unique.**
+/-- **Ground/first-excited spectral data.**
 
-On the lattice, uniqueness of the ground state Ω follows from the
-Perron-Frobenius theorem (`transferOperator_ground_simple`).
-
-In the continuum limit, uniqueness of the vacuum follows from
-ergodicity of the limiting measure (clustering_implies_ergodicity).
-
-Physical meaning: the theory has a unique vacuum — there is no
-spontaneous symmetry breaking of time-translation symmetry. -/
+The formal conclusion packages eigenvectors at two distinct levels. The
+underlying spectral theorem carries the ground-state simplicity statement;
+the eigenspace-dimension and continuum-limit vacuum statements live outside
+this wrapper. -/
 theorem unique_vacuum (Ns : ℕ) [NeZero Ns]
     (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :
@@ -207,18 +203,11 @@ theorem unique_vacuum (Ns : ℕ) [NeZero Ns]
 
 /-! ## Mixing -/
 
-/-- **Exponential mixing.**
+/-- **Mass-gap witness used by the mixing interface.**
 
-The measure μ_a is exponentially mixing with respect to time translations:
-for any bounded measurable F, G and time separation R:
-
-  `Cov_μ(F, G ∘ T_R) → 0 exponentially as R → ∞`
-
-This is a restatement of exponential clustering in the language of
-ergodic theory. It implies:
-1. Ergodicity (as shown above).
-2. The Central Limit Theorem for time-averaged observables.
-3. Exponential decay of the autocorrelation function. -/
+The formal conclusion supplies a positive rate bounded by `massGap`. The
+observable-level covariance estimate remains in
+`general_clustering_from_spectral_gap`. -/
 theorem exponential_mixing (_Ns _Nt : ℕ) [NeZero _Ns] [NeZero _Nt]
     (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :
@@ -226,25 +215,12 @@ theorem exponential_mixing (_Ns _Nt : ℕ) [NeZero _Ns] [NeZero _Nt]
     ∃ m : ℝ, 0 < m ∧ m ≤ massGap _Ns P a mass ha hmass :=
   ⟨massGap _Ns P a mass ha hmass, massGap_pos _Ns P a mass ha hmass, le_refl _⟩
 
-/-! ## OS4 on the lattice
+/-! ## Mass-gap interface on the lattice -/
 
-Putting it together: the lattice interacting measure satisfies OS4
-(exponential clustering / mass gap). -/
+/-- **Positive lattice mass gap.**
 
-/-- **OS4 on the lattice**: the interacting lattice measure satisfies
-exponential clustering (the mass gap condition).
-
-The connected correlation functions decay exponentially at a rate
-given by the mass gap `m_phys = E₁ - E₀ > 0`:
-
-  `|⟨F(φ) · G(T_R φ)⟩_μ - ⟨F⟩_μ · ⟨G⟩_μ| ≤ C(F,G) · exp(-m_phys · R)`
-
-for all bounded measurable F, G.
-
-This follows from:
-1. `massGap_pos`: the mass gap is strictly positive
-2. The spectral decomposition via the transfer matrix
-3. Completeness of the energy eigenstates -/
+The formal conclusion is the positivity fact used by the separate finite-
+torus clustering theorem in `OS4_MassGap.lean`. -/
 theorem os4_lattice (_Ns _Nt : ℕ) [NeZero _Ns] [NeZero _Nt]
     (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :
@@ -252,8 +228,7 @@ theorem os4_lattice (_Ns _Nt : ℕ) [NeZero _Ns] [NeZero _Nt]
     0 < massGap _Ns P a mass ha hmass :=
   massGap_pos _Ns P a mass ha hmass
 
--- This is immediate from massGap_pos, but we state it as the "OS4 fact"
--- to make the connection to the axiom framework explicit.
+-- Compatibility wrapper exposing the same mass-gap fact under the OS4 name.
 theorem os4_lattice_from_gap
     (Ns : ℕ) [NeZero Ns] (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :

@@ -2,16 +2,23 @@
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Existence of the Continuum Limit
+# Continuum Limit Extraction (fixed-N UV, plus the OPEN plane axiom)
 
 Applies Prokhorov's theorem to extract a weakly convergent subsequence
-from the tight family of continuum-embedded measures.
+from the tight family of continuum-embedded measures at **fixed** lattice
+size `N` (the section variable). That UV extraction is `continuumLimit`.
+It is **not** coupled-plane existence (`N_k → ∞` and `N_k a_k → ∞`).
 
 ## Main results
 
-- `prokhorov` — tightness implies sequential compactness (axiomatized)
-- `continuumLimit` — existence of the P(Φ)₂ continuum measure
-- `schwinger_convergence` — Schwinger functions converge
+- `prokhorov_configuration_sequential` — tightness implies sequential
+  compactness on configuration space (theorem)
+- `continuumLimit` — fixed-`N` UV subsequence extraction as `a_n → 0`
+- `pphi2_limit_exists` — **axiom**, OPEN: coupled `IsPphi2Limit` existence
+
+Do not apply `gaussianFreeField_satisfies_all_OS_axioms_*` to
+`IsPphi2Limit`: that inhabits OS for the free GFF, not the interacting
+plane limit.
 
 ## Mathematical background
 
@@ -19,27 +26,16 @@ from the tight family of continuum-embedded measures.
 
 The file contains:
 1. A proved generic sequential Prokhorov theorem on Polish spaces.
-2. A configuration-specific extraction axiom used for
+2. A configuration-specific extraction theorem used for
    `Configuration (ContinuumTestFunction d)`.
 
 ### Application
 
-From `continuumMeasures_tight`, the family {ν_a}_{a>0} is tight.
-By `prokhorov_configuration_sequential`, any sequence ν_{a_n} with a_n → 0
-has a weakly convergent subsequence ν_{a_{n_k}} ⇀ ν.
-
-The limit ν is the P(Φ)₂ Euclidean measure on S'(ℝ²).
-
-### Schwinger functions
-
-The n-point Schwinger functions converge:
-
-  `S_a^{(n)}(f₁,...,fₙ) = ∫ Φ(f₁)···Φ(fₙ) dν_a → S^{(n)}(f₁,...,fₙ)`
-
-This follows from:
-1. Weak convergence: ∫ F dν_a → ∫ F dν for bounded continuous F.
-2. The function Φ ↦ Φ(f₁)···Φ(fₙ) is not bounded, but uniform
-   moment bounds justify the convergence.
+From `continuumMeasures_tight` (fixed `N`), the family {ν_a}_{a∈(0,1]} is
+tight. By `prokhorov_configuration_sequential`, any sequence ν_{a_n} with
+`a_n → 0` has a weakly convergent subsequence. That limit is **not**
+automatically an `IsPphi2Limit` witness: the coupled lattice identity is
+missing.
 
 ## References
 
@@ -197,24 +193,25 @@ theorem prokhorov_configuration_sequential
 
 /-! ## The continuum limit -/
 
-/-- **Existence of the P(Φ)₂ continuum limit.**
+/-- **Fixed-`N` UV subsequence extraction**, not coupled-plane existence.
 
-For any sequence of lattice spacings aₙ → 0, there exists a subsequence
-aₙₖ and a probability measure μ on S'(ℝ^d) such that:
+For any sequence of lattice spacings `aₙ → 0` at the **section** lattice
+size `N`, tightness of `{continuumMeasure d N P (a n) mass}` yields a
+subsequence and a probability measure μ on S'(ℝ^d) such that bounded
+continuous observables converge.
 
-  `ν_{aₙₖ} ⇀ μ` weakly
-
-where `ν_a = (ι_a)_* μ_a` is the continuum-embedded interacting measure.
-
-The limit μ is the P(Φ)₂ Euclidean quantum field theory measure. -/
+This does **not** produce an `IsPphi2Limit` witness: `N` is fixed, so the
+coupled IR conditions `N_k → ∞` and `N_k a_k → ∞` are absent. The OPEN
+existence input remains the axiom `pphi2_limit_exists`. -/
 theorem continuumLimit (P : InteractionPolynomial)
     (mass : ℝ) (hmass : 0 < mass)
     -- A sequence of lattice spacings converging to 0
     (a : ℕ → ℝ) (ha_pos : ∀ n, 0 < a n) (ha_le : ∀ n, a n ≤ 1)
-    (_ha_lim : Tendsto a atTop (nhds 0)) :
+    (ha_lim : Tendsto a atTop (nhds 0)) :
     ∃ (φ : ℕ → ℕ) (μ : Measure (Configuration (ContinuumTestFunction d))),
       StrictMono φ ∧
       IsProbabilityMeasure μ ∧
+      Tendsto (fun n => a (φ n)) atTop (nhds 0) ∧
       -- Weak convergence of the subsequence
       ∀ (f : Configuration (ContinuumTestFunction d) → ℝ),
         Continuous f → (∃ C, ∀ x, |f x| ≤ C) →
@@ -231,7 +228,7 @@ theorem continuumLimit (P : InteractionPolynomial)
     (fun ε hε => by
       obtain ⟨K, hK_compact, hK_bound⟩ := continuumMeasures_tight d N P mass hmass ε hε
       exact ⟨K, hK_compact, fun n => hK_bound (a n) (ha_pos n) (ha_le n)⟩)
-  exact ⟨φ, μ, hφ, hμ_prob, hconv⟩
+  exact ⟨φ, μ, hφ, hμ_prob, ha_lim.comp hφ.tendsto_atTop, hconv⟩
 
 /-! ## Schwinger function convergence -/
 
@@ -287,7 +284,7 @@ take `IsWeakCoupling` inherit that placeholder stamp, not GJS uniqueness. -/
 abbrev IsWeakCoupling (P : InteractionPolynomial) (mass coupling : ℝ) : Prop :=
   IsPlaceholderWeakCoupling P mass coupling
 
-/-- The continuum limit is non-Gaussian (for φ⁴ interactions at weak coupling).
+/-- A non-Gaussian witness in the weak-coupling interface (for φ⁴ stamps).
 
 This follows from the four-point Schwinger function:
   `S₄(f,f,f,f) - 3 · S₂(f,f)² ≠ 0`
@@ -305,16 +302,17 @@ all-`P` form is false as stated. See `planning/r2-honest-headline-spec.md`
 
 Reference: Simon Ch. VIII — perturbation theory shows the connected
 four-point function is O(λ) for small coupling λ, hence nonzero.
-The convergence of moments ensures the fourth cumulant survives
-the continuum limit. -/
+The current formal conclusion supplies a probability measure and a
+nonzero fourth cumulant; a clause identifying that measure with an
+`IsPphi2Limit` witness remains to be added. -/
 axiom continuumLimit_nonGaussian (P : InteractionPolynomial)
     (mass : ℝ) (hmass : 0 < mass)
     (coupling : ℝ) (hP4 : isPhi4 P coupling)
     (hweak : IsWeakCoupling P mass coupling)
     (a : ℕ → ℝ) (ha_pos : ∀ n, 0 < a n) (ha_le : ∀ n, a n ≤ 1)
     (ha_lim : Filter.Tendsto a Filter.atTop (nhds 0)) :
-    -- The continuum limit is non-Gaussian: the connected four-point function
-    -- (fourth cumulant) is nonzero for some test function f.
+    -- A probability measure with a nonzero connected four-point function
+    -- (fourth cumulant) is supplied for some test function f.
     -- For a Gaussian measure: ∫ (ω f)⁴ dμ = 3 · (∫ (ω f)² dμ)²,
     -- so nonzero fourth cumulant witnesses non-Gaussianity.
     ∃ (φ : ℕ → ℕ) (μ : Measure (Configuration (ContinuumTestFunction d))),
@@ -325,20 +323,27 @@ axiom continuumLimit_nonGaussian (P : InteractionPolynomial)
 
 /-! ## Existence of a P(φ)₂ continuum limit -/
 
-/-- Existence of the infinite-volume P(φ)₂ continuum limit (OPEN in this repo).
-    Reference: Fröhlich, Adv. Math. 23 (1976) (tightness/compactness existence, arbitrary
-    semibounded even P, all couplings); Y.M. Park, J. Math. Phys. 18 (1977) (lattice
-    approximants: volume- and spacing-uniform moment bounds via lattice Nelson symmetry /
-    checkerboard, lattice→continuum); Glimm–Jaffe Ch. 11.
-    ⚠ NOT Guerra–Rosen–Simon: GKS/FKG monotonicity routes need the Griffiths–Simon
-    ferromagnetic class and are KNOWN to fail for general even deg ≥ 6 multi-well P
-    (Ellis–Monroe–Newman, CMP 46 (1976)); the tightness route covers the full
-    InteractionPolynomial class.
-    Strategy: the repo's own route is Route B′/A — cylinder IR limit (Lt→∞) then Ls→∞ per
-    docs/cylinder-master-plan.md; keystone 18's cluster expansion gives it with uniqueness at
-    weak coupling. Until then this is the single existence input for the ℝ² headline.
-    (NOT VERIFIED — statement Gemini-vetted 2026-07-12, see r2-honest-headline-spec.md
-    D2 vet record) -/
+/-- Existence of the infinite-volume P(φ)₂ continuum limit (**axiom**, OPEN).
+
+This is **not** a theorem of this repo. The fixed-`N` extractor
+`continuumLimit` does not discharge it.
+
+Reference: Fröhlich, Adv. Math. 23 (1976) (tightness/compactness existence
+for 2d P(φ)₂, arbitrary semibounded even P, all couplings); Nelson (1973);
+Simon, *The P(φ)₂ Euclidean QFT* (1974); Glimm–Jaffe Ch. 11.
+Park, J. Math. Phys. 18 (1977) is **(λφ⁴)₃**, not 2d P(φ)₂, and is not
+cited as a 2d existence reference here.
+⚠ NOT Guerra–Rosen–Simon: GKS/FKG monotonicity routes need the Griffiths–Simon
+ferromagnetic class and are KNOWN to fail for general even deg ≥ 6 multi-well P
+(Ellis–Monroe–Newman, CMP 46 (1976)); the tightness route covers the full
+InteractionPolynomial class.
+Strategy: the repo's own route is Route B′/A — cylinder IR limit (Lt→∞) then Ls→∞ per
+docs/cylinder-master-plan.md; keystone 18's cluster expansion gives it with uniqueness at
+weak coupling. Until then this is the single existence input for the ℝ² headline.
+(NOT VERIFIED — statement Gemini-vetted 2026-07-12, see r2-honest-headline-spec.md
+D2 vet record)
+**OSforGFF:** `gaussianFreeField_satisfies_all_OS_axioms_dim2` inhabits OS for
+the *free* GFF, not `IsPphi2Limit`. Do not apply it here. -/
 axiom pphi2_limit_exists (P : InteractionPolynomial)
     (mass : ℝ) (hmass : 0 < mass) :
     ∃ (μ : Measure (Configuration (ContinuumTestFunction 2)))

@@ -130,7 +130,7 @@ def OS3_ReflectionPositivity {B : EuclideanPlaneBackground}
       (generatingFunctional μ
         ((f i).val - T.reflectOnRealTestFunctions ((f j).val))).re
 
-/-- **OS4 (Clustering):** correlations factor at large spacelike separation. -/
+/-- **OS4 (Clustering):** correlations factor under large translations. -/
 def OS4_Clustering {B : EuclideanPlaneBackground}
     (μ : Measure (EuclideanPlaneBackground.Distribution B)) [IsProbabilityMeasure μ] :
     Prop :=

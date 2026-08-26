@@ -92,11 +92,16 @@ def InteractionPolynomial.evalWick (P : InteractionPolynomial) (τ _c : ℝ) : �
   -- The actual Wick ordering is implemented in WickPolynomial.lean as `wickPolynomial`.
   -- This definition exists for the DDJ reference; downstream code uses `wickPolynomial`.
 
-/-- Derivative P'(τ, c) = ∂_τ P(τ, c). Finite-difference approximation. -/
+/-!
+`evalWick'` keeps the DDJ-facing name for the derivative placeholder. Until
+the Wick-ordered derivative is moved into this file, its value is the
+derivative of the un-ordered polynomial `P.eval`; callers that need Wick
+ordering should use the definitions in `WickPolynomial.lean`.
+-/
 def InteractionPolynomial.evalWick' (P : InteractionPolynomial) (τ _c : ℝ) : ℝ :=
-  P.n * τ ^ (P.n - 1) + ∑ m : Fin P.n, (m : ℝ) * P.coeff m * τ ^ ((m : ℕ) - 1)
-  -- Placeholder derivative of P.eval. The actual Wick-ordered derivative
-  -- would use wickMonomial derivatives; not currently needed downstream.
+  (1 / P.n : ℝ) * (P.n : ℝ) * τ ^ (P.n - 1) +
+    ∑ m : Fin P.n, (m : ℝ) * P.coeff m * τ ^ ((m : ℕ) - 1)
+  -- The actual Wick-ordered derivative would use wickMonomial derivatives.
 
 
 end

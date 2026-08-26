@@ -16,6 +16,10 @@ import Pphi2.AsymTorus.AsymTransferInstantiation
 * `asymTransferKernel_kPow_apply` — `(Tᵐ⁺¹ f)(x) =ᵐ ∫ y, kPow m x y · f y dy`, i.e. the
   iterated kernels `TransferSystem.kPow` are the kernels of the operator powers. Proved by
   induction on `m` from theorem 1 and Fubini (`integral_integral_swap`).
+* `inner_asymTransferOperatorCLM_pow_eq_kPow` — L² inner product identification
+  `⟪f, Tᵐ⁺¹ g⟫ = ∫ f(x)·(∫ kPow m x y · g(y) dy) dx`.
+* `inner_asymTransferOperatorCLM_pow_eq_kPow_iterated` — the same identity with the
+  outer scalar pulled into the inner integral.
 
 The single change-of-variables in theorem 1 is `integral_sub_left_eq_self`
 (`∫ t, F (x − t) = ∫ t, F t`, valid for the add-left-invariant Lebesgue `volume` on
@@ -363,5 +367,37 @@ theorem asymTransferKernel_kPow_apply (P : InteractionPolynomial) (a mass : ℝ)
               * asymTransferKernel Nt Ns P a mass y z ∂volume from by
         rw [TransferSystem.kPow_succ]; rfl]
       rw [← integral_mul_const]
+
+/-- **Kernel → L² inner product.** The transfer-operator inner product is the
+integral against the iterated kernel supplied by `asymTransferKernel_kPow_apply`.
+This is the operator half of the Feynman–Kac two-point dictionary; it does not
+identify the periodic two-arc trace with a single `T`-power. -/
+theorem inner_asymTransferOperatorCLM_pow_eq_kPow (P : InteractionPolynomial)
+    (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (m : ℕ) (f g : L2SpatialField Ns) :
+    @inner ℝ _ _ f
+        (((asymTransferOperatorCLM Nt Ns P a mass ha hmass) ^ (m + 1)) g) =
+      ∫ x, (f x) *
+          (∫ y, (asymTransferSystem Nt Ns P a mass ha hmass).kPow m x y * g y
+            ∂volume) ∂volume := by
+  rw [MeasureTheory.L2.inner_def]
+  refine integral_congr_ae ?_
+  filter_upwards [asymTransferKernel_kPow_apply Nt Ns P a mass ha hmass m g] with x hx
+  simp only [inner, Inner.inner, starRingEnd_apply, star_trivial, RCLike.re_to_real, hx]
+
+/-- The same identification with the outer factor pulled into the inner integral. -/
+theorem inner_asymTransferOperatorCLM_pow_eq_kPow_iterated
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (m : ℕ) (f g : L2SpatialField Ns) :
+    @inner ℝ _ _ f
+        (((asymTransferOperatorCLM Nt Ns P a mass ha hmass) ^ (m + 1)) g) =
+      ∫ x, ∫ y, (f x) *
+          ((asymTransferSystem Nt Ns P a mass ha hmass).kPow m x y * g y)
+        ∂volume ∂volume := by
+  rw [inner_asymTransferOperatorCLM_pow_eq_kPow]
+  refine integral_congr_ae (.of_forall fun x => ?_)
+  rw [← integral_const_mul]
+  refine integral_congr_ae (.of_forall fun y => ?_)
+  ring
 
 end Pphi2

@@ -1317,7 +1317,15 @@ theorem nelson_exponential_estimate_master
 
 /-- Compatibility wrapper preserving the pre-refactor `a ≤ 1` interface used by
 `Hypercontractivity.lean`. This remains axiomatic until the non-fixed-volume
-consumer is reworked onto the bounded-volume bridge. -/
+consumer is reworked onto the bounded-volume bridge.
+
+**gaussian-hilbert mismatch.** `bonami_nelson_chaos` /
+`ouSemigroupAct_eLpNorm_hypercontractive` (pin `56ee09f`) are Bonami–Nelson
+`L^p` bounds on *Gaussian Wiener chaos* for the standard Gaussian on
+`Fin n → ℝ`. They do not imply this interacting estimate
+`∫ exp(-V_a)² dμ_GFF` uniform in `N` at `a ≤ 1`. Already-imported chaos
+concentration is used on the *free* polynomial-chaos side of the fixed-volume
+bridge above; it is not a discharge of this axiom. -/
 axiom nelson_exponential_estimate_master_bounded
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ (K : ℝ), 0 < K ∧

@@ -17,9 +17,9 @@ in the ℂ-variable for each fixed `Fin m → ℂ` and jointly analytic in
 proof expands the 1D Cauchy series in `w`, shows the coefficients are
 analytic in `v` (via the inductive hypothesis), and builds the joint
 power series on `ℂ × (Fin m → ℂ)` via antidiagonal sums of multilinear
-maps. The joint power series construction is axiomatized here;
-the infrastructure (`jointTerm`, `prependFst`, etc.) is in place for
-the eventual proof.
+maps. The joint power series is constructed in `block_osgood_series` using
+the antidiagonal multilinear infrastructure (`jointTerm`, `prependFst`,
+etc.).
 -/
 
 import Mathlib.Analysis.Analytic.Basic

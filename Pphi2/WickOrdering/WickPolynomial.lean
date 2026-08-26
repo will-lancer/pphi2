@@ -155,6 +155,30 @@ theorem wickPolynomial_zero_variance (P : InteractionPolynomial) (x : ℝ) :
     intro m _
     rw [wickMonomial_zero_variance]
 
+/-- Wick monomials have the parity of their degree:
+`:(-x)^n:_c = (-1)^n · :x^n:_c`. -/
+theorem wickMonomial_neg : ∀ (n : ℕ) (c x : ℝ),
+    wickMonomial n c (-x) = (-1) ^ n * wickMonomial n c x
+  | 0, _, _ => by simp
+  | 1, _, _ => by simp
+  | n + 2, c, x => by
+      rw [wickMonomial_succ_succ, wickMonomial_succ_succ,
+        wickMonomial_neg (n + 1), wickMonomial_neg n, pow_succ, pow_succ]
+      ring
+
+/-- The Wick-ordered interaction polynomial of an even `P` is even:
+`:P(-x):_c = :P(x):_c`. -/
+theorem wickPolynomial_neg (P : InteractionPolynomial) (c x : ℝ) :
+    wickPolynomial P c (-x) = wickPolynomial P c x := by
+  unfold wickPolynomial
+  congr 1
+  · rw [wickMonomial_neg, P.hn_even.neg_one_pow, one_mul]
+  · refine Finset.sum_congr rfl fun m _ => ?_
+    by_cases hm : Odd (m : ℕ)
+    · simp [P.coeff_odd_eq_zero m hm]
+    · rw [Nat.not_odd_iff_even] at hm
+      rw [wickMonomial_neg, hm.neg_one_pow, one_mul]
+
 /-! ## Wick monomial as a formal polynomial
 
 To prove bounded below, we represent the Wick monomial as a `Polynomial ℝ`

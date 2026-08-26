@@ -5,8 +5,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # Spectral Gap of the Lattice Hamiltonian
 
 The transfer matrix T = e^{-aH} defines a lattice Hamiltonian H with
-discrete spectrum. The spectral gap `E₁ - E₀ > 0` controls the
-exponential decay of correlations (mass gap / clustering).
+discrete spectrum. The selected spectral separation `E₁ - E₀ > 0` is
+available from the packaged transfer-operator data. A lowest-excitation gap
+needs an additional ordering statement.
 
 ## Main results
 
@@ -65,8 +66,9 @@ variable (Ns : ℕ) [NeZero Ns]
 
 /-! ## Spectral gap
 
-The spectral gap `m_phys = E₁ - E₀` is the physical mass of the theory.
-It controls the exponential decay of connected correlation functions. -/
+The selected separation `E₁ - E₀` is positive. This theorem does not identify
+the selected index with the lowest excited level or establish a physical
+clustering rate. -/
 
 /-- **The spectral gap is strictly positive**: `E₁ - E₀ > 0`.
 
@@ -74,8 +76,7 @@ This follows from strict Perron-Frobenius separation on the spectral data
 (`transferOperator_ground_simple`) and positivity of eigenvalues, since
 `E = -(1/a) log λ`.
 
-Physical interpretation: the theory has a nonzero mass gap. There is
-a gap between the vacuum and the first excited state. -/
+The conclusion is a gap between the vacuum and the selected non-ground state. -/
 theorem spectral_gap_pos (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :
     0 < massGap Ns P a mass ha hmass :=

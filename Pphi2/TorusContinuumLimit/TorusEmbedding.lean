@@ -22,8 +22,9 @@ space of the torus T²_L = (ℝ/Lℤ)² via sampling at lattice points:
 
   `(ι_N φ)(f) = Σ_{x ∈ (ℤ/Nℤ)²} φ(x) · eval_x(f)`
 
-where `eval_x(f)` evaluates the torus test function at lattice site x using
-the circle restriction with √(L/N) normalization.
+where `eval_x(f)` is the Glimm–Jaffe evaluation at lattice site x. In the
+current embedding this is `evalTorusAtSiteGJ`, which contributes a factor
+`L/N` per coordinate and cancels the GJ covariance normalization.
 
 The continuum Green's function on the torus has discrete Fourier modes:
 

@@ -1,13 +1,13 @@
 /-!
 # Sobolev Prokhorov Replacement Plan
 
-This file records the implementation plan for replacing
-`prokhorov_configuration_sequential` with a proof pipeline through a Polish
-weighted Sobolev space.
+This file records an alternative weighted-Sobolev proof pipeline for
+`prokhorov_configuration_sequential`.
 
 Current status:
-- `continuumLimit` uses `prokhorov_configuration_sequential` (axiom).
-- We keep that axiom for now so the main development can continue.
+- `prokhorov_configuration_sequential` is a theorem built from
+  `GaussianField.prokhorov_configuration`.
+- The weighted-Sobolev route remains useful as an independent construction.
 - The items below define the intended theorem-level API for later work, with the
   unweighted pieces expected to align with Mathlib's Fourier/distributional
   Sobolev API once that lands upstream.

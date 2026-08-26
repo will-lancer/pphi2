@@ -10,7 +10,7 @@ Shows that the family of continuum-embedded Gaussian measures
 ## Main results
 
 - `torus_second_moment_uniform` — `∫ (ω f)² dν_{GFF,N} ≤ C` uniformly in N
-- `configuration_tight_of_uniform_second_moments` — (axiom) Mitoma-Chebyshev criterion
+- `configuration_tight_of_uniform_second_moments` — proved Mitoma-Chebyshev criterion
 - `torusContinuumMeasures_tight` — (proved) tightness from uniform second moments
 
 ## Mathematical background
@@ -66,8 +66,8 @@ theorem torus_second_moment_uniform (mass : ℝ) (hmass : 0 < mass)
 /-! ## Mitoma-Chebyshev tightness criterion
 
 Imported from `GaussianField.Tightness` (gaussian-field repo).
-The theorem `configuration_tight_of_uniform_second_moments` is now proved
-(modulo 2 sorry's: BaireSpace instance + lower semicontinuity via Fatou). -/
+The theorem `configuration_tight_of_uniform_second_moments` is supplied as a
+proved result by `GaussianField.Tightness`. -/
 
 /-! ## Tightness of torus Gaussian measures -/
 

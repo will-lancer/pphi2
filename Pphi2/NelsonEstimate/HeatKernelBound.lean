@@ -1000,9 +1000,8 @@ private lemma integrableOn_inv_mul_exp_Ioi (μ T : ℝ) (hμ : 0 < μ) (hT : 0 <
 This is the discharge of `smoothWickConstant_le_log_uniform_in_aN`
 (currently axiomatised in `CovarianceBoundsGJ.lean`).
 
-Status: the structural skeleton is in place; the integral bookkeeping
-(Schwinger identity + Fubini on a finite sum + bounds on
-`∫_T^∞ exp(-s m²)/s ds`) is the remaining ~150 lines. -/
+Status: the Schwinger/Fubini bookkeeping and the exponential-integral bound are discharged in the
+proof below. -/
 theorem smoothWickConstant_le_log_uniform_in_aN_proved
     {d : ℕ} (hd : d = 2) (mass L : ℝ) (hL : 0 < L) (hmass : 0 < mass) :
     ∃ A B : ℝ, 0 ≤ A ∧ 0 ≤ B ∧

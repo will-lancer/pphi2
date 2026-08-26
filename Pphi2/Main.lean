@@ -177,13 +177,15 @@ theorem pphi2_nontrivial (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < m
   obtain ⟨μ, hμ, h_limit⟩ := pphi2_limit_exists P mass hmass
   exact ⟨μ, hμ, pphi2_nontriviality P mass hmass μ hμ h_limit⟩
 
-/-- **Non-Gaussianity of the P(Φ)₂ continuum limit.**
+/-- **Non-Gaussian witness in the P(Φ)₂ interface.**
 
 The connected four-point function (fourth cumulant) is nonzero:
 S₄(f,f,f,f) - 3·S₂(f,f)² ≠ 0 for some test function f.
 
-Proved from `continuumLimit_nonGaussian` by providing a fixed sequence
-of lattice spacings aₙ = 1/(n+1) → 0 and extracting the limit measure.
+The current axiom `continuumLimit_nonGaussian` returns a probability measure
+with the stated cumulant witness. Its formal result carries the spacing
+sequence and probability property, with the `IsPphi2Limit` identification
+available as a pending strengthening.
 
 The coupling hypotheses (`isPhi4`, `IsWeakCoupling`) restrict the claim to
 the regime where it is literature-true (spec D3): at the φ⁴₂ critical point
@@ -210,14 +212,15 @@ theorem pphi2_nonGaussianity (P : InteractionPolynomial) (mass : ℝ) (hmass : 0
     tendsto_one_div_add_atTop_nhds_zero_nat
   exact ⟨μ, hμ, f, hf⟩
 
-/-- **The P(Φ)₂ measure is non-Gaussian.**
+/-- **Non-Gaussian witness packaged under the P(Φ)₂ name.**
 
 For nontrivial P, the four-point connected correlation function
 (fourth cumulant) is nonzero:
   `S₄^c(f,f,f,f) = S₄(f,f,f,f) - 3·S₂(f,f)² ≠ 0`
 
-This proves the interacting theory is genuinely different from the
-free field. Stated in the weak-coupling φ⁴ regime (spec D3). -/
+This records the same existential witness in the weak-coupling φ⁴ regime
+(spec D3). The coupled-limit identification belongs to the pending axiom
+strengthening described above. -/
 theorem pphi2_nonGaussian (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
     (coupling : ℝ) (hP4 : isPhi4 P coupling)
     (hweak : IsWeakCoupling P mass coupling) :

@@ -196,12 +196,14 @@ In particular, $\lambda_0 > \lambda_1$: there is a **spectral gap**.
 
 ### The mass gap
 
-The physical mass gap is defined as
+For the packaged selected non-ground index, the code defines
 
 $$m_{\mathrm{phys}} = -\frac{1}{a} \log(\lambda_1 / \lambda_0).$$
 
-The spectral gap $\lambda_0 > \lambda_1$ immediately gives
-$m_{\mathrm{phys}} > 0$. For the continuum limit, one needs the
+The separation $\lambda_0 > \lambda_1$ gives a positive selected-level gap.
+The current structure does not identify $\lambda_1$ with the largest
+non-ground eigenvalue, so this quantity is not yet the physical lowest mass
+gap. For the continuum limit, one needs the
 spectral gap to be **uniform** in the lattice spacing $a$ along the
 coupled sequence ($N \cdot a$ fixed or growing). This is currently an
 **open target** (17a/17b in `planning/cyl-2a-volume-scaling-addendum.md`):
@@ -495,18 +497,16 @@ Preserved in `future/` and not part of the active build.
 
 ## 9. What Remains
 
-The project builds successfully (`lake build`) and the main theorems
-(`pphi2_main`, `pphi2_exists`, `pphi2_wightman`) all type-check.
+The active working tree awaits a clean remote build. Earlier committed versions
+type-checked the listed structural theorems; this review does not extend that
+certificate to the current edits.
 The proof architecture uses **axioms** for unproved analytic and
 probabilistic results, with the logical structure connecting them fully
 formalized.
 
-As of 2026-07-12: **pphi2 has 24 real axiom declarations (26 raw per
-`count_axioms.sh`) and 0 sorries**; the pinned Lake `GaussianField`
-dependency has **3 axioms and 0 sorries**. (Historical counts in this
-paragraph predated the cylinder-era axiom cohorts and the 2026-07-12
-removal of the false spectral-gap pair; see `AXIOM_AUDIT.md` for the
-authoritative inventory.)
+The 2026-08-18 filtered source scan finds **25 axiom declarations and
+0 sorries** in pphi2. The dependency and kernel certificates require a remote
+refresh. See `formalization.yaml` for the named source inventory.
 
 The axioms cluster into several thematic groups:
 

@@ -4,34 +4,34 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # OS2: Euclidean Invariance via Ward Identity
 
-Proves that the continuum limit measure μ is E(2)-invariant (OS2 axiom).
+Provides the OS2 wrapper and the lattice-side interfaces used by the
+continuum argument. The coupled characteristic-functional bridge and the
+uniform rotation estimate are explicit kernel inputs.
 
 The lattice breaks E(2) = ISO(2) = ℝ² ⋊ SO(2) to the discrete symmetry
 group of the lattice. Full invariance is restored in the continuum limit:
 
-- **Translations:** Lattice translations by multiples of a are exact symmetries.
-  As a → 0, these approximate all translations, giving full translation
-  invariance in the limit.
+- **Translations:** the coupled limit certificate carries an asymptotic
+  characteristic-functional translation-defect estimate. The continuum proof
+  transfers that estimate to exact invariance of the limit.
 
-- **Rotations:** Via a Ward identity argument. The SO(2) generator J acts on
-  lattice observables, producing an anomaly term O_break from the
-  nearest-neighbor action breaking rotation symmetry. The key observation:
-  dim(O_break) = 4 > d = 2, so the anomaly is RG-irrelevant. In the
-  super-renormalizable `P(Φ)₂` setting the formalized bound is
-  `O(a² |log a|^p)`, which still vanishes as `a → 0`.
+- **Rotations:** the formal wrapper consumes the explicit axiom
+  `rotation_cf_defect_polylog_bound`. Deriving that estimate from a genuine
+  lattice Ward identity remains open. The intended route uses the SO(2)
+  generator and the nearest-neighbor rotation-breaking operator.
 
-  **Key simplification for P(Φ)₂:** The theory is super-renormalizable, so
-  logarithmic corrections are at most polynomial in |log a| (Glimm-Jaffe
-  Theorem 19.3.1). The bound is O(a² |log a|^p), which still vanishes.
+  The axiom has the form `O(a² |log a|^p)`, which vanishes in the continuum
+  limit. Its source-level derivation and precise logarithmic power remain part
+  of the open analytic obligation.
 
 ## Main results
 
 - `translation_invariance_lattice` — lattice measure is translation-invariant
 - `translation_invariance_continuum` — continuum limit is translation-invariant
-- `ward_identity_lattice` — current formal Ward-identity slot on the lattice side
+- `ward_identity_lattice` — bounded identical-integral placeholder on the lattice side
 - `anomaly_scaling_dimension` — dim(O_break) = 4
 - `anomaly_vanishes` — one-point rotation anomaly is `O(a² |log a|^p)` and hence vanishes
-- `rotation_invariance_continuum` — continuum SO(2) invariance from anomaly decay
+- `rotation_invariance_continuum` — continuum O(2) invariance from the anomaly input
 - `os2_for_continuum_limit` — full E(2) invariance of the continuum limit
 
 ## References
@@ -378,24 +378,20 @@ For any translation vector `v ∈ ℝ²` and test function `f ∈ S(ℝ²)`,
 the generating functional satisfies `Z[τ_v f] = Z[f]`.
 
 Proof outline:
-1. For rational v = (p/q) · a₀, choose lattice spacing a_n = a₀/n.
-   Then v = (np/q) · a_n is a lattice vector for n divisible by q.
-   The lattice measure ν_{a_n} is exactly τ_v-invariant
-   (`latticeMeasure_translation_invariant`), so Z_{a_n}[τ_v f] = Z_{a_n}[f].
-2. Taking the weak limit: Z[τ_v f] = lim Z_{a_n}[τ_v f] = lim Z_{a_n}[f] = Z[f].
-3. Rational vectors are dense in ℝ², and v ↦ Z[τ_v f] is continuous
-   (since τ_v acts continuously on S(ℝ²) and Z is continuous on S(ℝ²)).
-4. A continuous function equal to a constant on a dense set equals that constant
-   everywhere (topology: closed set containing a dense set is the whole space).
+1. The limit certificate records that the characteristic-functional defect
+   between f and τ_v f tends to zero along the coupled approximants.
+2. The two characteristic-functional sequences converge by the CF clause.
+3. Their difference therefore converges both to the continuum difference and to 0.
 
 Reference: Glimm-Jaffe §8.6 (translation invariance of the continuum limit).
 
 **Proof:** From `IsPphi2Limit` we extract:
 - `cf_tendsto`: Z_{ν_k}[g] → Z_μ[g] for all g
-- `lattice_inv`: Z_{ν_k}[f] = Z_{ν_k}[τ_v f] eventually, for all v, f
+- `translation_defect`: ‖Z_{ν_k}[f] - Z_{ν_k}[τ_v f]‖ → 0, for all v, f
 
-For any v, f: both Z_{ν_k}[f] and Z_{ν_k}[τ_v f] converge to Z_μ[f] and Z_μ[τ_v f]
-respectively. Since Z_{ν_k}[f] = Z_{ν_k}[τ_v f] eventually, the limits are equal. -/
+For any v, f, subtracting the two CF limits gives convergence to the
+continuum difference. The translation defect gives convergence of that same
+difference to zero, so the continuum characteristic functionals agree. -/
 theorem translation_invariance_continuum (P : InteractionPolynomial)
     (mass : ℝ) (_hmass : 0 < mass)
     (μ : Measure (Configuration (ContinuumTestFunction 2)))
@@ -413,13 +409,39 @@ theorem translation_invariance_continuum (P : InteractionPolynomial)
   have lim_f := hcf f
   -- Z_{ν_k}[τ_v f] → Z_μ[τ_v f]
   have lim_tv := hcf (schwartzTranslate 2 v f)
-  -- Z_{ν_k}[f] = Z_{ν_k}[τ_v f] eventually
-  have h_ev := hlat v f
+  -- The characteristic-functional translation defect tends to zero.
+  have h_defect := hlat v f
   -- Generating functional = integral of exp(i·ω(·))
   change ∫ ω : FieldConfig2, Complex.exp (Complex.I * ↑(ω f)) ∂μ =
        ∫ ω : FieldConfig2, Complex.exp (Complex.I * ↑(ω (schwartzTranslate 2 v f))) ∂μ
-  -- Both sequences have the same limit, since they're eventually equal
-  exact tendsto_nhds_unique_of_eventuallyEq lim_f lim_tv h_ev
+  have h_diff_zero : Filter.Tendsto
+      (fun k =>
+        (∫ ω : FieldConfig2,
+          Complex.exp (Complex.I * ↑(ω f)) ∂(ν k)) -
+        (∫ ω : FieldConfig2,
+          Complex.exp (Complex.I * ↑(ω (schwartzTranslate 2 v f))) ∂(ν k)))
+      Filter.atTop (nhds (0 : ℂ)) := by
+    rw [tendsto_zero_iff_norm_tendsto_zero]
+    simpa using h_defect
+  have h_diff_limit : Filter.Tendsto
+      (fun k =>
+        (∫ ω : FieldConfig2,
+          Complex.exp (Complex.I * ↑(ω f)) ∂(ν k)) -
+        (∫ ω : FieldConfig2,
+          Complex.exp (Complex.I * ↑(ω (schwartzTranslate 2 v f))) ∂(ν k)))
+      Filter.atTop
+      (nhds ((∫ ω : FieldConfig2,
+          Complex.exp (Complex.I * ↑(ω f)) ∂μ) -
+        (∫ ω : FieldConfig2,
+          Complex.exp (Complex.I * ↑(ω (schwartzTranslate 2 v f))) ∂μ))) := by
+    exact lim_f.sub lim_tv
+  have h_continuum_diff_zero :
+      (∫ ω : FieldConfig2,
+        Complex.exp (Complex.I * ↑(ω f)) ∂μ) -
+      (∫ ω : FieldConfig2,
+        Complex.exp (Complex.I * ↑(ω (schwartzTranslate 2 v f))) ∂μ) = 0 :=
+    tendsto_nhds_unique h_diff_limit h_diff_zero
+  exact sub_eq_zero.mp h_continuum_diff_zero
 
 /-! ## Ward identity for rotations
 
@@ -458,26 +480,15 @@ the breaking comes from the difference between `Δ_a` and the continuum `Δ`:
 In Fourier space, `Δ_a(k) - k² = O(a² k⁴)`, giving O_break scaling
 dimension 4. The full proof is axiomatized in `os2_continuum`. -/
 
-/-- **Ward identity on the lattice.**
+/-- **Placeholder bound, not a lattice Ward identity.**
 
-For any observable F and the SO(2) generator J:
-
-  `⟨δ_J F⟩_a = ⟨F · O_break⟩_a`
-
-where `δ_J F` is the infinitesimal rotation of F, and `O_break` is the
-rotation-breaking operator.
-
-This follows from integration by parts in the path integral, using the
-fact that the Gaussian measure is rotation-invariant (the continuum
-Laplacian Δ is SO(2)-invariant), and the breaking comes entirely from
-the lattice discretization of Δ. -/
+The left side subtracts an integral from itself, so this theorem proves only
+`0 ≤ C |θ| a²`. It contains no rotated observable, infinitesimal generator, or
+breaking operator. A real Ward identity remains an open theorem and must not
+use this declaration as evidence. -/
 theorem ward_identity_lattice (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :
-    -- Ward identity: the deviation of ⟨F⟩_a under infinitesimal rotation is bounded by C·a²
-    -- for any bounded measurable observable F.
-    -- Full statement: ∃ C, ∀ F (bounded measurable) θ : ℝ,
-    --   |⟨F ∘ R_θ*⟩_a - ⟨F⟩_a| ≤ C · |θ| · a²
-    -- where R_θ* is the pullback of rotation by θ on configurations.
+    -- Identical-integral bound retained for API compatibility.
     ∀ (F : Configuration (FinLatticeField d N) → ℝ)
       (_hFm : Measurable F) (_hFb : ∃ B, ∀ ω, |F ω| ≤ B),
     ∃ C : ℝ, 0 < C ∧ ∀ θ : ℝ,
@@ -610,7 +621,10 @@ fixed test function `f`, the one-point characteristic-functional defect is
 bounded by `C · a² · (1 + |log a|)^p`, uniformly in the finite lattice size
 `N`.
 
-Reference: Glimm-Jaffe §19.3, Theorem 19.3.1; Symanzik (1983); Duch (2024). -/
+Reference: Glimm-Jaffe §19.3, Theorem 19.3.1; Symanzik (1983); Duch (2024).
+OSforGFF `gaussian_satisfies_OS2` is *free* Euclidean invariance of a
+translation-invariant Gaussian; it does not bound the interacting lattice
+rotation defect. -/
 axiom rotation_cf_defect_polylog_bound (P : InteractionPolynomial)
     (mass : ℝ) (hmass : 0 < mass)
     (f : TestFunction2) :
@@ -814,7 +828,7 @@ theorem os3_for_continuum_limit (P : InteractionPolynomial)
 
 /-! ## Full OS axioms for the continuum limit
 
-Each axiom is proved from the lattice construction via a specific mechanism:
+Each wrapper consumes a specific construction or kernel input:
 
 - **OS0 (Analyticity):** The generating functional `Z[J] = ∫ exp(i⟨ω,J⟩) dμ` is
   entire analytic because: (1) for each ω, `z ↦ exp(iz·ω(f))` is entire, (2) the
@@ -828,12 +842,11 @@ Each axiom is proved from the lattice construction via a specific mechanism:
   gives uniform moment bounds on the lattice. These transfer to the continuum limit.
   For P(Φ)₂ the relevant bound is `‖Z[f]‖ ≤ exp(c‖f‖²_{H⁻¹})` with p = 2.
 
-- **OS2 (Euclidean invariance):** Translation invariance follows from lattice
-  translation invariance (exact symmetry) + density of rational translations +
-  continuity of the translation action on S'(ℝ²). Rotation invariance follows from
-  the Ward identity: the rotation anomaly O_break has scaling dimension 4 > d = 2,
-  making it RG-irrelevant with coefficient `O(a² |log a|^p)` in the
-  super-renormalizable `P(Φ)₂` setting, hence still vanishing in the continuum limit.
+- **OS2 (Euclidean invariance):** Translation invariance consumes the
+  asymptotic characteristic-functional translation-defect clause in
+  `IsPphi2Limit`. Rotation invariance consumes
+  the coupled characteristic-functional bridge and the uniform rotation-defect
+  axiom; the analytic Ward estimate remains a kernel input.
 
 - **OS4 (Clustering):** A spectral gap `m_phys ≥ m₀ > 0` uniform along the
   coupled continuum-limit sequence (open target; the former fixed-`Ns` axiom

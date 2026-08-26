@@ -10,7 +10,7 @@ of a subsequential weak limit via the Cauchy-Schwarz density transfer.
 ## Main results
 
 - `torusInteractingMeasure` — pushforward of lattice interacting measure to torus
-- `nelson_exponential_estimate` — (axiom) uniform-in-N L² bound on Boltzmann weight
+- `nelson_exponential_estimate` — uniform-in-N L² bound on Boltzmann weight
 - `torus_interacting_second_moment_uniform` — uniform second moment bound (from Nelson)
 - `torus_interacting_tightness` — (proved!) tightness via Mitoma-Chebyshev
 - `torusInteractingLimit_exists` — existence of subsequential limit (proved!)
@@ -105,9 +105,9 @@ has no log singularity) and the *rough* part is controlled in `L²`/tail via the
 polynomial-chaos layer-cake bound.
 
 References: Nelson (1966), Simon *P(φ)₂* Ch. V, Glimm-Jaffe §19.1-19.2. -/
--- PROVED (axiom-clean): delegates to `nelson_exponential_estimate_lattice` →
--- `nelson_exponential_estimate_master` → `polynomial_chaos_exp_moment_bridge`
--- (smooth lower bound + rough cutoff-tail layer-cake). NOT a pointwise `V ≥ -L²A`.
+-- Delegates to `nelson_exponential_estimate_lattice` →
+-- `nelson_exponential_estimate_master` → `polynomial_chaos_exp_moment_bridge`.
+-- This is not a pointwise `V ≥ -L²A` estimate.
 theorem nelson_exponential_estimate
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ (K : ℝ), 0 < K ∧
@@ -453,10 +453,9 @@ For N → ∞, the torus-embedded interacting measures have a weakly
 convergent subsequence. The limit is a probability measure on
 Configuration(TorusTestFunction L).
 
-**This theorem is PROVED**, not axiomatized. The proof uses:
-1. Interacting tightness (`torus_interacting_tightness` — proved from Nelson's estimate)
-2. Polish space (`configuration_torus_polish`)
-3. Prokhorov's theorem (`prokhorov_sequential` — already proved) -/
+**This theorem is PROVED**, not axiomatized. The proof uses interacting
+tightness (`torus_interacting_tightness`) and the configuration-space
+Prokhorov theorem (`prokhorov_configuration`). -/
 theorem torusInteractingLimit_exists
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass) :
     ∃ (φ : ℕ → ℕ) (μ : Measure (Configuration (TorusTestFunction L))),

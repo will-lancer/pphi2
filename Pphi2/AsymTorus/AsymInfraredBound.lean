@@ -113,7 +113,11 @@ all-`InteractionPolynomial` type.
     factor and never enter the denominator). See planning/b2-route-a-statements.md §S1.
     Strategy: Gaussian domination `Z[h] ≤ Z[0]·exp(½⟨h,(−Δ)⁻¹h⟩)` via lattice RP over the
     kinetic bonds, then the `t²`-expansion at the Z₂-even measure. (NOT VERIFIED — vetted
-    statement; discharge shares the Griffiths–Simon machinery with Layer A.) -/
+    statement; discharge shares the Griffiths–Simon machinery with Layer A.)
+    **reflection-positivity 2026-08 audit:** `Chessboard/Chessboard.lean` is still a
+    stub (`infraredBound` / `chessboardSusceptibility` planned). `susceptibility_le`
+    is a gapped-transfer geometric series, not FSS infrared on Wick φ⁴. Keep this
+    axiom. -/
 axiom fss_infrared_quadratic
     (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
     (P : InteractionPolynomial) (hP : P.n = 4) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)

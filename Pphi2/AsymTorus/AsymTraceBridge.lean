@@ -42,8 +42,10 @@ express the lattice connected two-point via `twoPoint_dictionary` as the operato
 `⟪Ω, M_A Tᵈ M_B Ω⟫ − ⟪Ω,M_AΩ⟫⟪Ω,M_BΩ⟫` and bound it directly by
 `ReflectionPositivity.GappedTransfer.connected_two_point_le` (**proved**) — which internally is
 exactly bricks 0–2 on the *normalised* `T̂`. Bricks 0–2 here are the un-normalised (λ₀-explicit)
-analogues the `kPow` integrals produce; next step is the dictionary↔operator identification feeding
-`connected_two_point_le` + `geom_wrap_sum_le`, NOT the kernel-HS Cauchy–Schwarz.
+analogues the `kPow` integrals produce. The one-sided kernel inner-product identification
+`⟪f, Tᵐ⁺¹ g⟫ = ∫ f·(kPow_m * g)` is now `inner_asymTransferOperatorCLM_pow_eq_kPow`; the
+remaining gap is the periodic two-arc (`kPow_a` and `kPow_b`) versus a single `T`-power
+(rank-one wrap / remainder axioms), not the L² pairing itself.
 -/
 
 open MeasureTheory

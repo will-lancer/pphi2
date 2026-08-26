@@ -750,7 +750,7 @@ theorem spectral_gap {n : ℕ}
 
 /-- The Rayleigh quotient ⟨f, Tf⟩ equals the sum Σ eigenval(i) * ⟨b(i), f⟩².
 This follows by applying the inner product CLM to the eigenbasis expansion. -/
-private theorem rayleigh_hasSum {n : ℕ} {ι : Type}
+theorem rayleigh_hasSum {n : ℕ} {ι : Type}
     (T : Lp ℝ 2 (volume : Measure (Fin n → ℝ)) →L[ℝ]
       Lp ℝ 2 (volume : Measure (Fin n → ℝ)))
     (b : HilbertBasis ι ℝ (Lp ℝ 2 (volume : Measure (Fin n → ℝ))))
@@ -766,6 +766,36 @@ private theorem rayleigh_hasSum {n : ℕ} {ι : Type}
   ext i
   simp only [inner_smul_right]
   rw [sq, real_inner_comm f (b i), mul_assoc]
+
+/-- The Rayleigh bound attached to a maximal eigenvalue: if `eigenval i₀` dominates
+every eigenvalue of the diagonalised operator, then `⟪f, T f⟫ ≤ eigenval i₀ · ‖f‖²`.
+
+This is the `hlam₀_top` hypothesis of `abs_eigenvector_of_top_eigenvector`,
+`eigenvector_constant_sign` and `top_eigenvalue_simple`, extracted from the
+assembly of `jentzsch_theorem_proved` so that callers holding their own
+eigenbasis (e.g. the asym cylinder transfer operator) can discharge it. -/
+theorem rayleigh_le_of_le_max {n : ℕ} {ι : Type}
+    (T : Lp ℝ 2 (volume : Measure (Fin n → ℝ)) →L[ℝ]
+      Lp ℝ 2 (volume : Measure (Fin n → ℝ)))
+    (b : HilbertBasis ι ℝ (Lp ℝ 2 (volume : Measure (Fin n → ℝ))))
+    (eigenval : ι → ℝ)
+    (h_sum : ∀ x, HasSum
+      (fun i => (eigenval i * @inner ℝ _ _ (b i) x) • b i) (T x))
+    {i₀ : ι} (hmax : ∀ i, eigenval i ≤ eigenval i₀)
+    (f : Lp ℝ 2 (volume : Measure (Fin n → ℝ))) :
+    @inner ℝ _ _ f (T f) ≤ eigenval i₀ * ‖f‖ ^ 2 := by
+  have hs := rayleigh_hasSum T b eigenval h_sum f
+  have h_le : ∀ i, eigenval i * (@inner ℝ _ _ (b i) f) ^ 2 ≤
+      eigenval i₀ * (@inner ℝ _ _ (b i) f) ^ 2 :=
+    fun i => mul_le_mul_of_nonneg_right (hmax i) (sq_nonneg _)
+  have h_parseval : HasSum (fun i => (@inner ℝ _ _ (b i) f) ^ 2) (‖f‖ ^ 2) := by
+    have h_imii := b.hasSum_inner_mul_inner f f
+    simp only [inner_self_eq_norm_sq_to_K, RCLike.ofReal_real_eq_id, id_eq] at h_imii
+    convert h_imii using 1
+    ext i; rw [sq, real_inner_comm f (b i)]
+  have hs2 : HasSum (fun i => eigenval i₀ * (@inner ℝ _ _ (b i) f) ^ 2)
+      (eigenval i₀ * ‖f‖ ^ 2) := h_parseval.const_smul (eigenval i₀)
+  exact hasSum_le h_le hs hs2
 
 /-! ## Assembly: Jentzsch's theorem
 

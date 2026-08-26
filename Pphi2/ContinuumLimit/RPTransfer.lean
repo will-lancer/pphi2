@@ -4,14 +4,19 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Reflection Positivity Transfer: Lattice → Continuum
 
-Proves that the continuum-embedded lattice measures satisfy reflection
-positivity, transferring the proved lattice RP through the embedding.
+Provides the lattice-to-continuum reflection intertwining needed for a
+measure-level reflection-positivity transfer. The latter transfer remains
+unfinished in this file.
 
-## Main results
+## Current result
 
-- `latticeEmbedLift_intertwines_reflection` — the embedding commutes with
-  time reflection: `Θ* ∘ ι = ι ∘ Θ_latt`
-- `continuum_embedded_measure_rp` — each continuum-embedded measure has RP
+- `latticeEmbedLift_intertwines_reflection` — for odd `N`, the embedding
+  commutes with time reflection: `Θ* ∘ ι = ι ∘ Θ_latt`
+
+The measure-level RP transfer described below is not yet defined here. Its
+intertwining input also needs an odd lattice size because the centered
+representative used by `latticeEmbed` does not commute with `x ↦ -x` at the
+Nyquist site when `N` is even.
 
 ## Proof strategy
 
@@ -23,8 +28,9 @@ The embedding `ι : Configuration(lattice) → Configuration(S'(ℝ²))` satisfi
 
 where `(Θ_latt ω)(e_x) = ω(e_{Θx})`. This is a pure reindexing of a finite sum.
 
-Then RP transfers: `∫ F·(F∘Θ*) d(ι_* μ) = ∫ (F∘ι)·((F∘ι)∘Θ_latt) dμ ≥ 0`
-by lattice RP (`lattice_rp`).
+The intended next step is the measure-level identity
+`∫ F·(F∘Θ*) d(ι_* μ) = ∫ (F∘ι)·((F∘ι)∘Θ_latt) dμ`,
+followed by lattice RP (`lattice_rp`).
 
 ## References
 
@@ -149,11 +155,13 @@ theorem latticeEmbedLift_intertwines_reflection (a : ℝ) (ha : 0 < a)
   congr 1; ext y; congr 1
   exact evalAtSite_reflection N hN_odd a f y
 
-/-! ## Application to OS3
+/-! ## Intended application to OS3
 
 The proved intertwining identity `latticeEmbedLift_intertwines_reflection`
-is the key ingredient for proving `os3_for_continuum_limit` (axiom in
-`OS2_WardIdentity.lean`). The proof would proceed:
+supplies the geometric step for a future measure-level transfer. The current
+`os3_for_continuum_limit` theorem in `OS2_WardIdentity.lean` instead consumes
+the approximating RP matrices directly from `IsPphi2Limit`. A complete
+construction would proceed:
 
 1. Change of variables: `∫ G d(ι_* μ) = ∫ G∘ι dμ` via `integral_map`
 2. Intertwining: `F(Θ*(ι φ)) = F(ι(Θ_latt φ))` (proved above)

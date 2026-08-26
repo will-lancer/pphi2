@@ -1,9 +1,10 @@
 # pphi2 — remaining-axiom discharge plan (master index)
 
-> **⚠ Status banner (2026-07-14).** Current counts: **pphi2 29 raw / 27 real axioms, 0 sorries**
-> (the "17" below is the pre-cylinder architectural cohort; cylinder-era axioms and the
-> Phase-4.1 `pphi2_limit_exists` have since been added, and the false `spectral_gap_*` pair
-> removed). Major changes since this machine was written, all on `t2-conjoined-os`:
+> **⚠ Status banner (2026-08-18).** The current filtered source scan finds
+> **25 axiom declarations and 0 sorries**. The active working tree awaits a clean
+> remote build and refreshed kernel certificate. The rows below retain dated
+> campaign snapshots and should be checked against live declarations. Major
+> changes since this machine was written include:
 > **Layer B2 is DISCHARGED** — the interacting≤free variance bound and the `|f|`-form
 > exp-moment are theorems on 5–6 vetted axioms (S1 FSS, S2 fixed-`Ls` gap, τ-form bridge pair,
 > B5b); **asym exponential clustering** is a theorem (2 axioms); **Layer A** is sign-restricted
@@ -13,8 +14,8 @@
 > for the full rollup and [`keystone-18-campaign.md`](keystone-18-campaign.md) for the
 > uniqueness keystone design. Per-row statuses below are being brought current incrementally.
 
-**Plan-loop status machine for the (originally 17) project-introduced axioms** standing between
-the current state and "φ⁴₂ is a Wightman QFT, in Lean." Single source of truth: this file. Each
+**Plan-loop roadmap for the originally 17 project-introduced axioms** standing between
+the current state and "φ⁴₂ is a Wightman QFT, in Lean." Each
 row points to the canonical detailed discharge plan (in `docs/`); where the detailed plan is
 stale or missing, that is flagged. Re-read this index every cycle; pick the next
 `todo`/`in_progress` item whose `deps` are `done`.
@@ -330,19 +331,16 @@ Remaining ★★★ mountains / human-gated items (unchanged from the 2026-06-04
 - **Nelson/Lee–Yang** (12), **rotation defect** (13), **IR-limit** (10), **cluster-expansion
   keystone** (4/18).
 
-Net: the architecture is complete; non-Gaussianity on T² is now a theorem. The incremental surface is
-the cylinder Layer-B2 wiring (item 3); everything else is a standalone research-grade subproject.
+Net: the dependency architecture is mapped, while the mathematical program is
+incomplete. The cylinder Layer-A/B2 producers, plane existence and inheritance,
+and weak-coupling uniqueness remain research-grade subprojects.
 
 ## Axioms beyond the 17 (sanity check vs `count_axioms.sh`)
 
-`count_axioms.sh` reports **26 raw axioms** (rechecked 2026-07-12, after the removal of the
-false `spectral_gap_uniform`/`spectral_gap_lower_bound` — see the AXIOM_AUDIT 2026-07-12
-entry); 2 are docstring matches of the word "axiom" inside text continuations
-(`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
-`Pphi2/NelsonEstimate/LayerCake.lean:85`), leaving **24 real axioms**.
+The 2026-08-18 filtered scan reports **25 axiom declarations**. The inventory
+in `formalization.yaml` names the same 25 declarations.
 
-The 24 architectural axioms account for the current proof debt, including the
-six Layer-B2 Route-A GNS bridge obligations in
+The historical 24-axiom snapshot included six Layer-B2 Route-A GNS bridge obligations in
 `Pphi2/AsymTorus/AsymBridgeInstance.lean`:
 `asymGroundStateRep_pos_ae`, `asymTransferNormalized_contract`,
 `asymGroundStateRep_eq_groundIsometry_one`, `asymGroundSemigroup_intertwines`,

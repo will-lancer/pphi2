@@ -5,27 +5,28 @@ Released under Apache 2.0 license as described in the file LICENSE.
 # Transfer Matrix: Hamiltonian and Energy Levels
 
 Defines the lattice Hamiltonian H = -(1/a) log T and its spectral properties
-(ground/first-excited energies, mass gap) from spectral decomposition data.
+(ground/selected-excited energies, spectral separation) from spectral data.
 
 ## Main results
 
 - `groundEnergyLevel` — E₀ = -(1/a) log λ₀
-- `firstExcitedEnergyLevel` — E₁ = -(1/a) log λ₁
-- `energyLevel_gap` — E₀ < E₁ (strict gap, from Perron-Frobenius)
-- `massGap` — Physical mass gap m = E₁ - E₀
-- `massGap_pos` — The mass gap is strictly positive
+- `firstExcitedEnergyLevel` — energy of the selected non-ground eigenvalue
+- `energyLevel_gap` — the selected excited energy lies above the ground energy
+- `massGap` — separation between the selected excited and ground energies
+- `massGap_pos` — this separation is strictly positive
 
 ## Mathematical background
 
 The transfer matrix T = e^{-aH} is a compact self-adjoint operator on L²(ℝ^Ns)
 with strictly positive eigenvalues, and Perron-Frobenius gives a simple largest
-eigenvalue λ₀ and a first excited level λ₁ < λ₀ (see `L2Operator.lean`).
+eigenvalue λ₀ and some non-ground level λ₁ < λ₀ (see `L2Operator.lean`). The
+packaged data does not assert that λ₁ is maximal among the eigenvalues below λ₀.
 
 The lattice Hamiltonian H = -(1/a) log T has discrete spectrum with
 E₀ = -(1/a) log λ₀ and E₁ = -(1/a) log λ₁ satisfying E₀ < E₁.
 
-The mass gap m = E₁ - E₀ > 0 is the fundamental physical quantity controlling
-exponential decay of correlations.
+The selected separation E₁ - E₀ is positive. A physical lowest excitation gap
+would require an additional minimization or ordering hypothesis.
 
 ## References
 
@@ -51,7 +52,8 @@ The eigenvalues of H are Eₙ = -(1/a) log λₙ. -/
 
 /-! ## Chosen spectral data -/
 
-/-- A packaged spectral decomposition with distinguished ground and first-excited indices. -/
+/-- A packaged spectral decomposition with a ground index and a selected
+non-ground index. The selected index is not marked as the lowest excitation. -/
 structure TransferGroundExcitedData (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) where
   ι : Type*
@@ -66,7 +68,8 @@ structure TransferGroundExcitedData (P : InteractionPolynomial) (a mass : ℝ)
   hi_ne : i₁ ≠ i₀
   hlt : eigenval i₁ < eigenval i₀
 
-/-- A noncomputable choice of spectral data with distinguished ground/first-excited indices. -/
+/-- A noncomputable choice of spectral data with distinguished ground and
+selected-excited indices. -/
 noncomputable def transferGroundExcitedData (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :
     TransferGroundExcitedData Ns P a mass ha hmass := by
@@ -92,7 +95,7 @@ noncomputable def transferGroundEigenvalue (P : InteractionPolynomial) (a mass :
   let d := transferGroundExcitedData Ns P a mass ha hmass
   d.eigenval d.i₀
 
-/-- First excited eigenvalue λ₁ from spectral data. -/
+/-- Selected non-ground eigenvalue λ₁ from spectral data. -/
 noncomputable def transferFirstExcitedEigenvalue (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) : ℝ :=
   let d := transferGroundExcitedData Ns P a mass ha hmass
@@ -103,12 +106,12 @@ def groundEnergyLevel (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) : ℝ :=
   -(1 / a) * Real.log (transferGroundEigenvalue Ns P a mass ha hmass)
 
-/-- First excited energy level `E₁ = -(1/a) log λ₁`. -/
+/-- Selected non-ground energy level `E₁ = -(1/a) log λ₁`. -/
 def firstExcitedEnergyLevel (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) : ℝ :=
   -(1 / a) * Real.log (transferFirstExcitedEigenvalue Ns P a mass ha hmass)
 
-/-- The ground state energy E₀ < E₁ (strict gap).
+/-- The selected non-ground energy lies above the ground energy.
 
 This is equivalent to `λ₀ > λ₁`, from Perron-Frobenius on spectral data. -/
 theorem energyLevel_gap (P : InteractionPolynomial) (a mass : ℝ)
@@ -128,12 +131,12 @@ theorem energyLevel_gap (P : InteractionPolynomial) (a mass : ℝ)
   change -(1 / a) * Real.log (d.eigenval d.i₀) < -(1 / a) * Real.log (d.eigenval d.i₁)
   exact mul_lt_mul_of_neg_left hlog ha_neg
 
-/-- The mass gap: `m_phys = E₁ - E₀ > 0`. -/
+/-- The selected non-ground separation `E₁ - E₀`. -/
 def massGap (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) : ℝ :=
   firstExcitedEnergyLevel Ns P a mass ha hmass - groundEnergyLevel Ns P a mass ha hmass
 
-/-- The mass gap is strictly positive. -/
+/-- The selected non-ground separation is strictly positive. -/
 theorem massGap_pos (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :
     0 < massGap Ns P a mass ha hmass := by

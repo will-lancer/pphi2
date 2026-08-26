@@ -3,16 +3,18 @@
 Formal construction of the P(Φ)₂ Euclidean quantum field theory in Lean 4,
 following the Glimm-Jaffe/Nelson lattice approach.
 
-> **Status at a glance** (2026-07-21; cylinder OS3/OS2 milestone on branch `t2-conjoined-os`).
-> Builds green (`lake build`), **0 sorries** — the remaining debt is a set of documented,
+> **Status at a glance** (working-tree audit 2026-08-18; remote rebuild pending).
+> The last recorded build was green with **0 sorries**. The current edits have not been
+> compiled on this machine — the remaining debt is a set of documented,
 > mostly-vetted project axioms. Most-developed line: the **T²_L torus** (OS0–OS2, axiom-free). On the
 > **cylinder** (Route B′) the OS0/OS1/OS2/OS3 theorem `cylinderIso_OS_of_RP_OS2` is now
 > quartic-only (`P.n = 4`; takes `P, hP, mass, hmass`): **reflection positivity (OS3) was fully
 > discharged** — the `hRP` gate was dropped via a link-reflection instantiation of the generic
 > GJ 6.2.2 theorem (Phase 1 lattice RP → A′ transport → B′ `θ_a→θ` weak-limit closure → assembly),
 > and `hOS2` was likewise dropped by threading OS2 of the constructed measure through the
-> existential. `#print axioms cylinderIso_OS_of_RP_OS2` = Mathlib trio + `embed_l2_uniform_bound` +
-> `asymInteracting_expMoment_volume_uniform` (both the headline and that axiom are `P.n = 4`; the
+> existential. The checked-in `#print axioms cylinderIso_OS_of_RP_OS2` trace is from before the
+> current thresholded-form rewire. The refreshed trace should account for `embed_l2_uniform_bound`
+> and the named Layer A/B2 inputs (both the headline and those inputs are `P.n = 4`; the
 > all-`P` Newman type is false). Supporting analytic layers: the interacting≤free
 > **variance bound** (Layer B2) and the **\|f\|-form exponential-moment bound** (CYL-1a) are
 > *theorems* resting on vetted axioms, and **asym exponential clustering** in physical distance
@@ -187,10 +189,12 @@ and the `|f|`-form exp-moment (`asymInteracting_expMoment_volume_uniform_absForm
 both hold on 5–6 vetted axioms (S1 FSS + S2 fixed-`Ls` gap + the τ-form bridge pair + B5b), and
 asym exponential clustering (`asymSliceObsTrunc_exponential_clustering_fixedLs`, the OS4 lattice
 input) is proved on 2 axioms. **OS3 reflection positivity + OS2 symmetry are now fully discharged**
-(2026-07-21): `cylinderIso_OS_of_RP_OS2` is quartic-only (`P.n = 4`) and `#print axioms` = Mathlib trio +
-`embed_l2_uniform_bound` + `asymInteracting_expMoment_volume_uniform`. Remaining: the CYL-1a
-exp-moment axiom, the quartic Layer-A Lee–Yang axiom (the all-`P` Newman type is false; the
-`lee-yang` producer chain does not discharge the live axiom), OS4 (mass gap), and the Layer-C rewiring onto the thresholded forms. Design + kernel footprints:
+(2026-07-21): `cylinderIso_OS_of_RP_OS2` is quartic-only (`P.n = 4`). The checked-in
+`#print axioms` trace still shows the pre-rewire monolithic input; refresh it remotely before
+using that footprint. The source now routes through the thresholded `|f|` form, whose remaining
+inputs include the quartic Layer-A Lee–Yang axiom (the all-`P` Newman type is false; the
+`lee-yang` producer chain does not discharge the live axiom), B2 axioms, OS4 (mass gap), and
+`embed_l2_uniform_bound`. Design + kernel footprints:
 [`planning/b2-route-a-statements.md`](planning/b2-route-a-statements.md),
 [`AXIOM_AUDIT.md`](AXIOM_AUDIT.md). Discharge detail: [`docs/STATUS_HISTORY.md`](docs/STATUS_HISTORY.md).
 
@@ -278,29 +282,26 @@ consistency checks:
 
 ## Current status
 
-All six phases are structurally complete and the full project builds
-(`lake build`).
+The repository contains source for all six planned phases. Several headline
+layers remain conditional on the named analytic axioms below. The current
+working tree requires a remote `lake build` before its type-check status is
+known.
 
-Current counter (`./scripts/count_axioms.sh`, 2026-07-14): pphi2 **29 raw /
-27 real axioms**, 0 sorries; gaussian-field **3 axioms**, 0 sorries. Net history: the
-post-B-I-cleanup base was 30 raw / 28 real; Phase 4.1 added `pphi2_limit_exists`
-(→ 31/29), and on 2026-07-13/14 two dormant GNS-bridge axioms were proved (`asymTransferNormalized_contract`,
-`asymGroundStateRep_eq_groundIsometry_one`; axiom → theorem, Codex), bringing it to 29/27. `pphi2_limit_exists`
-(`Pphi2/ContinuumLimit/Convergence.lean`) is the single clearly-labeled OPEN existence input
+Current source scan (2026-08-18): pphi2 **25 axiom declarations**, 0 real
+sorries. The count is 23 public plus 2 private declarations. Four former ground-state
+bridge axioms are now theorems. `pphi2_limit_exists`
+(`Pphi2/ContinuumLimit/Convergence.lean`) remains the single clearly-labeled OPEN existence input
 of the ℝ² headline: the 2026-07-13 Phase-4.1 strengthening of `IsPphi2Limit` (coupled
 lattice conjunct `ν k = continuumMeasure 2 (N k) P (a k) mass`, `N k → ∞`, `N k·a k → ∞`)
 closed the δ₀ vacuity, so the former Dirac-measure "proof" was replaced by a Gemini-vetted
 textbook axiom (Fröhlich 1976 + Park 1977 tightness route; see `AXIOM_AUDIT.md` 2026-07-13
 and `planning/r2-honest-headline-spec.md`). `#print axioms Pphi2.pphi2_existence` = Mathlib
-trio + 5 project axioms (the 4 OS-inheritance axioms + `pphi2_limit_exists`) — the honest
-count. Earlier deltas: +2 = the K-uniform finite-periodic bridge pair (IUC-vetted); +2 = the
-vetted B2 route-(a) axioms `fss_infrared_quadratic` (S1) and `asymTransferGap_uniform_fixedLs`
-(S2, γ-form fixed-`Ls` a-uniform transfer gap,
-`Pphi2/AsymTorus/AsymSliceFamilySusceptibility.lean`). The eight
-real Layer-B2 Route-A axioms are the six GNS bridge obligations isolated in
-`Pphi2/AsymTorus/AsymBridgeInstance.lean`, B5b single-slice stability in
-`Pphi2/AsymTorus/AsymB5bSingleSlice.lean`, and the final lattice Route-A
-assembly input `asymInteractingVariance_le_freeVariance_lattice_Lt_uniform`.
+trio + 5 project axioms in the historical certificate (the 4 OS-inheritance
+axioms + `pphi2_limit_exists`). Regenerate the certificate remotely after the
+current cylinder rewire. The active B2 inputs include the K-uniform finite-periodic
+bridge pair, `fss_infrared_quadratic`, `asymTransferGap_uniform_fixedLs`, and
+`groundVariance_le_freeCovariance`; the former GNS bridge axioms are no longer
+part of the axiom inventory.
 (2026-07-12: `spectral_gap_uniform` and `spectral_gap_lower_bound` were
 **removed as false as stated** — fixed-`Ns` shrinking-volume regime; see
 `AXIOM_AUDIT.md`. They had no proof-term consumers; the corrected coupled-limit
@@ -326,7 +327,7 @@ Dated discharge narrative is archived in [`docs/STATUS_HISTORY.md`](docs/STATUS_
 | Route (spacetime) | OS axioms | State |
 |---|---|---|
 | **B — T²_L** symmetric torus | OS0–OS2 | **Complete**, 0 local axioms (`TorusInteractingOS.lean`). The most developed route; UV-only limit (N→∞ at fixed volume `L`). |
-| **B′ — cylinder** (asym torus → S¹_{Ls}×ℝ) | OS0–OS3 (+OS4 in progress) | UV limit **done**, 0 local axioms. **Layer B2 discharged (2026-07-13):** interacting≤free variance and the \|f\|-form exp-moment are theorems on 5–6 vetted axioms (FSS S1 + fixed-`Ls` gap S2 + the τ-form bridge pair + B5b), and asym exponential clustering (OS4 input) is a theorem on 2 axioms. Remaining: the Layer-A Lee–Yang axiom + continuum-inheritance bridges + Layer-C rewiring to the thresholded form. |
+| **B′ — cylinder** (asym torus → S¹_{Ls}×ℝ) | OS0–OS3 (+OS4 in progress) | The thresholded absolute-value consumer rewire is present in source. Its transitive footprint still contains the Layer-A, FSS, fixed-`Ls` gap, finite-periodic bridge, B5b, and ground-variance assumptions. Remote compilation and a refreshed axiom certificate are pending. |
 | **A — ℝ²** Euclidean plane | OS0–OS4 | Full target (UV **and** IR limits). **Headline made honest (Phase 4.1):** δ₀ loophole closed; `pphi2_existence` rests on 5 named axioms with existence via a vetted tightness axiom (Fröhlich 1976 / Park 1977). The conjoined "interacting φ⁴₂ QFT exists" statement additionally needs the (now-designed) keystone-18 weak-coupling uniqueness. |
 | **C — cylinder, direct** | OS0–OS3 | Preserved in `future/` (21 axioms), **not** in the active build. |
 
@@ -334,8 +335,8 @@ The torus continuum limit (`TorusContinuumLimit/`) is the cleanest backbone: fix
 `L` and taking only `N→∞` isolates the UV limit from IR issues. Prokhorov extraction on the
 configuration space is **proved** (not axiomatized) via gaussian-field's DM-basis
 `prokhorov_configuration`; the same pipeline handles both Gaussian and interacting (P(φ)₂) measures
-via Cauchy–Schwarz density transfer. The torus Gaussian limit satisfies OS0–OS3 (`TorusOSAxioms.lean`,
-all proved).
+via Cauchy–Schwarz density transfer. The active torus Gaussian bundle proves
+OS0–OS2. Reflection positivity remains outside `TorusOSAxioms.lean`.
 
 ### Non-triviality (is the theory genuinely interacting?)
 

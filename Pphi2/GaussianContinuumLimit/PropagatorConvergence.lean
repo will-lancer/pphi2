@@ -90,13 +90,29 @@ private noncomputable instance continuumTestFunction_dyninMityagin [Fact (0 < d)
 This is the remaining analytic input after all algebraic rewrites:
 for each pair of Dynin-Mityagin basis vectors and lattice parameters
 `a → 0` with `Na → ∞`, the lattice spectral Green form converges to the
-continuum Green form.
+current `continuumGreenBilinear` body. That body uses raw Schwartz values in
+its integration variable; the Fourier-space formula in the surrounding
+documentation requires an explicit transform convention before this axiom
+can serve as the physical propagator statement.
 
 The full Schwartz-space convergence theorem `latticeGreenBilinear_tendsto_continuum`
 is proved later in this file by two DM-expansion steps plus polynomial bounds
 on the lattice bilinear form applied to basis vectors.
 
-Reference: Glimm-Jaffe §6.1, Simon Ch. I. -/
+Reference: Glimm-Jaffe §6.1, Simon Ch. I.
+
+**OSforGFF (proof pattern only, free field).** The sibling
+`OSforGFF/Covariance/Propagator.lean` proves the *continuum free* momentum
+propagator `1/((2π)²‖k‖² + m²)` as the Fourier transform of the proper-time
+covariance, and `gaussianFreeField_satisfies_all_OS_axioms_*` is OS for
+`μ_GFF`, not for `IsPphi2Limit`. The lattice→continuum *sum* in this axiom
+(`Ĉ_a(k) = 1 / ((4/a²) Σ_i sin²(π k_i a/L) + m²) → 1/(|k|²+m²)` at
+`a → 0`, `Na → ∞`) is the same analytic idea, but it is a different
+object (periodic lattice Green on `(ℤ/Nℤ)^d`, interacting consumers
+downstream). Do **not** apply `gaussianFreeField_satisfies_all_OS_axioms`
+to `IsPphi2Limit`, and do not treat the free GFF Green as a proof of
+this lattice bilinear tendsto. This axiom is **free** Green only; it does
+not prove `pphi2_limit_exists` and does not inhabit `IsPphi2Limit`. -/
 section ConvergenceAxiom
 
 variable [Fact (0 < d)]

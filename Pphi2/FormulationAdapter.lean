@@ -51,18 +51,22 @@ abbrev pphi2PairingMeasureModel
 
 This remains an explicit theory-level construction rather than a generic
 definition from `PairingMeasureModel`: moment finiteness is genuine content and
-should stay visible in concrete adapters. -/
+is therefore an explicit input to this adapter. -/
 def pphi2TensorSchwingerModel
-    (μ : Measure FieldConfig2) [IsProbabilityMeasure μ] :
+    (μ : Measure FieldConfig2) [IsProbabilityMeasure μ]
+    (_hMoment : ∀ (n : ℕ) (f : Fin n → TestFunction2),
+      Integrable (fun ω : FieldConfig2 => ∏ i, (ω (f i) : ℂ)) μ) :
     TensorSchwingerModel pphi2Formulation where
   schwinger _n f := ∫ ω : FieldConfig2, ∏ i, (ω (f i) : ℂ) ∂μ
 
 /-- The canonical bridge from a concrete `Pphi2` measure to its simple-tensor
 Schwinger moments. -/
 def pphi2MeasureToTensorBridge
-    (μ : Measure FieldConfig2) [IsProbabilityMeasure μ] :
+    (μ : Measure FieldConfig2) [IsProbabilityMeasure μ]
+    (hMoment : ∀ (n : ℕ) (f : Fin n → TestFunction2),
+      Integrable (fun ω : FieldConfig2 => ∏ i, (ω (f i) : ℂ)) μ) :
     MeasureToTensorBridge pphi2Formulation (pphi2PairingMeasureModel μ) where
-  tensorSchwinger := pphi2TensorSchwingerModel μ
+  tensorSchwinger := pphi2TensorSchwingerModel μ hMoment
   compatible := by
     intro _n f
     rfl

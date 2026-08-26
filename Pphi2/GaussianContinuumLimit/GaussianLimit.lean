@@ -71,10 +71,11 @@ free (Gaussian) case, where the proof is simpler. -/
 theorem gaussianContinuumLimit_exists
     (mass : ℝ) (hmass : 0 < mass)
     (a : ℕ → ℝ) (ha_pos : ∀ n, 0 < a n) (ha_le : ∀ n, a n ≤ 1)
-    (_ha_lim : Tendsto a atTop (nhds 0)) :
+    (ha_lim : Tendsto a atTop (nhds 0)) :
     ∃ (φ : ℕ → ℕ) (μ : Measure (Configuration (ContinuumTestFunction d))),
       StrictMono φ ∧
       IsProbabilityMeasure μ ∧
+      Tendsto (fun n => a (φ n)) atTop (nhds 0) ∧
       ∀ (f : Configuration (ContinuumTestFunction d) → ℝ),
         Continuous f → (∃ C, ∀ x, |f x| ≤ C) →
         Tendsto (fun n => ∫ ω, f ω ∂(gaussianContinuumMeasure d N (a (φ n)) mass
@@ -83,12 +84,13 @@ theorem gaussianContinuumLimit_exists
   -- Apply Prokhorov extraction to the Gaussian measures
   let ν : ℕ → Measure (Configuration (ContinuumTestFunction d)) :=
     fun n => gaussianContinuumMeasure d N (a n) mass (ha_pos n) hmass
-  exact prokhorov_configuration_sequential (d := d) ν
+  obtain ⟨φ, μ, hφ, hμ, hconv⟩ := prokhorov_configuration_sequential (d := d) ν
     (fun n => gaussianContinuumMeasure_isProbability d N (a n) mass (ha_pos n) hmass)
     (fun ε hε => by
       obtain ⟨K, hK_compact, hK_bound⟩ :=
         gaussianContinuumMeasures_tight d N mass hmass ε hε
       exact ⟨K, hK_compact, fun n => hK_bound (a n) (ha_pos n) (ha_le n)⟩)
+  exact ⟨φ, μ, hφ, hμ, ha_lim.comp hφ.tendsto_atTop, hconv⟩
 
 /-- **Nontriviality of the Gaussian continuum limit.**
 

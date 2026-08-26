@@ -21,12 +21,13 @@ The ladder, from weakest to strongest:
 
 ## Current rung — and the gap
 
-**Current rung: 2 (sorry-free + axiom-pinned).** The headline
-`Pphi2.pphi2_existence` is `0 sorries` and rests on a kernel-certified
-axiom basis: 4 project axioms plus the 3 Lean kernel axioms (see
-[`audit/axiom-report.txt`](axiom-report.txt)). The other 13 architectural
-axioms are dormant for this headline, load-bearing only for stronger or
-sibling results — see [`audit/FAITHFULNESS.md`](FAITHFULNESS.md).
+**Historical rung: 2; current working-tree certificate pending.** The checked-in
+`audit/axiom-report.txt` records the earlier headline trace, where
+`Pphi2.pphi2_existence` rests on 5 project axioms plus the 3 Lean kernel axioms.
+The active tree has since rewired the cylinder theorem and changed several
+axiom declarations to theorems. A fresh remote build and `#print axioms` run
+are required before the current tree can claim rung 2. A source scan finds no
+real `sorry` in `Pphi2/` or `Common/`, but that is not a kernel certificate.
 
 **Gap to rung 3 (named-property pinning).** The OS bundle
 (`Pphi2.SatisfiesFullOS`) is the right informal target *if* one accepts
@@ -59,8 +60,8 @@ becomes the natural rung-5 capstone.
 
 ## Validation evidence
 
-- **Kernel certificate** for the six headline targets:
-  [`audit/axiom-report.txt`](axiom-report.txt). Regenerate with:
+- **Historical kernel certificate** for the headline targets:
+  [`audit/axiom-report.txt`](axiom-report.txt). Regenerate remotely with:
   ```bash
   lake env lean audit/axiom_report.lean > audit/axiom-report.txt
   ```
@@ -70,7 +71,7 @@ becomes the natural rung-5 capstone.
   [`audit/FAITHFULNESS.md`](FAITHFULNESS.md).
 - **Comparator pass** (external kernel-replay + axiom-whitelist check):
   not yet run. Pre-requisite is the headline becoming axiom-clean for a
-  released, sorry-free, public version of the theorem (currently 4
+  released, sorry-free, public version of the theorem (currently 5
   project axioms remain — not axiom-clean). See the user-global
   [`COMPARATOR.md`](https://github.com/math-commons/formalization-assurance/blob/main/COMPARATOR.md)
   hub doc for the protocol.
@@ -81,13 +82,10 @@ becomes the natural rung-5 capstone.
   (item 3 in [`planning/INDEX.md`](../planning/INDEX.md)). This is the
   nearest concrete formalization win and tightens the cylinder side of
   the kernel certificate.
-- **Medium term.** Vetting coverage is at **19/19** as of 2026-06-21
-  (see [`vetting/README.md`](vetting/README.md)). Next step is to
-  raise `vetting_strictness` from L1 to L2 in
-  [`vetting/policy.yml`](vetting/policy.yml) once the per-record
-  metadata stabilizes (e.g. the `NEEDS_REVISION`-flagged records 7 and 11
-  are resolved). Subsequently raise to L3 by populating `statement_hash`
-  in each record.
+- **Medium term.** Reconcile the historical vetting records with the current
+  25-real-axiom source inventory before raising `vetting_strictness` from L1 to
+  L2 in [`vetting/policy.yml`](vetting/policy.yml). Subsequently raise to L3 by
+  populating `statement_hash` in each current record.
 - **Long term.** The four ★★★ mountains in
   [`planning/INDEX.md`](../planning/INDEX.md): Lee–Yang/Newman MGF
   (Layer A); spectral-gap uniformity (CYL-2a); non-Gaussianity on ℝ²;

@@ -366,7 +366,8 @@ in the continuum limit by a Ward identity argument.
 
 Key results (axiomatize with detailed proof sketches):
 - `translation_invariance`: lattice translations → continuum translations
-- `ward_identity_lattice`: Ward identity with anomaly term
+- `ward_identity_lattice`: current declaration is an identical-integral
+  placeholder; replace it with the rotated-observable identity and anomaly term
 - `anomaly_dimension`: dim(O_break) = 4
 - `anomaly_vanishes`: coefficient of O_break is O(a²)
 - `rotation_invariance_continuum`: full SO(2) invariance in the limit
@@ -484,7 +485,7 @@ theorem pphi2_full_OS (P : InteractionPolynomial) :
 | `prokhorov` | Medium | Standard but not fully in Mathlib |
 | `schwinger_convergence` | Hard | Lattice propagator → continuum propagator |
 | `translation_invariance` | Medium | Lattice translations approximate continuum |
-| `ward_identity_lattice` | Hard | Lattice Ward identity computation |
+| `ward_identity_lattice` replacement | Hard | Rotated-observable lattice Ward identity; current declaration is a placeholder |
 | `anomaly_vanishes` | Hard | Power counting / RG irrelevance |
 | `os4_inheritance` | Medium | Uniform spectral gap → exponential decay in limit |
 

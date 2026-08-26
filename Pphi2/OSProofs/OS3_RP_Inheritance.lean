@@ -31,8 +31,9 @@ distribution space S'(ℝ²). Therefore:
 3. A finite sum of convergent terms converges: if each partial sum ≥ 0,
    the limit is ≥ 0.
 
-This is one of the few OS axioms that is **provable** (not just axiomatized)
-from general principles, without any specifics of P(Φ)₂.
+This scalar single-function interface is provable from general principles.
+The standard finite-matrix OS3 interface is handled separately in the
+P(Φ)₂-specific transfer theorem.
 
 ## References
 

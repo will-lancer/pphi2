@@ -1,9 +1,13 @@
 /.lake
 .claude/
+/.cursor/
 .env
 .mcp.json
 .venv-transcribe/
 dev-scripts
+
+# Local Codex workstream scratchpads; keep these out of the project card.
+goal_stream_*.md
 
 # Codex/auxiliary log files
 error.log

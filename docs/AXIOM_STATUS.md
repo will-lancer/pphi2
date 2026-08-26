@@ -8,11 +8,11 @@
 > This file used to be a consolidated snapshot. It accumulated drift faster
 > than it could be refreshed and now serves only as a pointer.
 
-## At a glance (refreshed 2026-07-13)
+## At a glance (source scan 2026-08-18; still superseded)
 
 | Count | Value | Source |
 |---|---|---|
-| pphi2 axioms (real) | **27** | `count_axioms.sh` reports 29 raw; 2 are docstring matches |
+| pphi2 axioms | **25** | filtered source scan |
 | pphi2 sorries | **0** | `count_axioms.sh` |
 | gaussian-field axioms | **3** | `count_axioms.sh` |
 | gaussian-field sorries | **0** | `count_axioms.sh` |
@@ -28,10 +28,11 @@ its sole consumer `torus_pphi2_isInteracting_weakCoupling` (carrier file
 after Route A's `torus_pphi2_isInteractingStrict_weakCoupling` (PR #48, 2026-06-07)
 subsumed them.
 
-**Docstring-match false positives** (`count_axioms.sh` regex catches the word
-"axiom" at start of line, including inside docstrings):
-- `Pphi2/NelsonEstimate/LatticeBridge.lean:21`
-- `Pphi2/NelsonEstimate/LayerCake.lean:85`
+`count_axioms.sh` filters prose and docstring mentions before counting declarations.
+
+The source-level count is not a release certificate. The current working tree
+needs a remote build and a fresh `#print axioms` trace; this superseded snapshot
+does not claim that verification.
 
 ## Where to look
 

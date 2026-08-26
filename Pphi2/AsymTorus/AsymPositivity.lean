@@ -18,8 +18,8 @@ Direct port of the square — same proofs, with `transferOperatorCLM` ⟶
 
 * `AsymTransferGroundExcitedData` — bundled spectral data with
   distinguished ground/first-excited indices.
-* `asymTransferGroundExcitedData` — noncomputable choice (via
-  `asymTransferOperator_ground_simple_spectral`).
+* `asymTransferGroundExcitedData` — noncomputable choice (via the
+  sign-normalized `asymTransferOperator_ground_simple_spectral_pos`).
 * `asymTransferGroundEigenvalue`, `asymTransferFirstExcitedEigenvalue`.
 * `asymGroundEnergyLevel`, `asymFirstExcitedEnergyLevel`.
 * `asymEnergyLevel_gap` — `E₀ < E₁`.
@@ -61,6 +61,15 @@ structure AsymTransferGroundExcitedData (P : InteractionPolynomial) (a mass : �
   eigenvalue in absolute value, so the ground vector/eigenvalue are genuinely
   the spectral top (not merely above one excited level). -/
   htop : ∀ i, i ≠ i₀ → |eigenval i| < eigenval i₀
+  /-- **Sign normalization.**  The distinguished ground basis vector is a.e.
+  strictly positive.  A Hilbert basis is only determined up to a sign on each
+  vector, and Perron-Frobenius fixes that sign up to a global flip
+  (`asymTransferOperator_ground_constant_sign`), so this can be *chosen*: see
+  `asymTransferOperator_ground_simple_spectral_pos`.  Downstream this is what
+  lets the ground state define a probability measure through the upstream
+  `groundMeasure` package. -/
+  hground_pos : ∀ᵐ ψ ∂(volume : Measure (SpatialField Ns)),
+      0 < (b i₀ : SpatialField Ns → ℝ) ψ
 
 /-- A noncomputable choice of asym spectral data with distinguished
 ground/first-excited indices. -/
@@ -69,8 +78,8 @@ noncomputable def asymTransferGroundExcitedData (P : InteractionPolynomial) (a m
     AsymTransferGroundExcitedData Nt Ns P a mass ha hmass := by
   classical
   exact Classical.choice <| by
-    rcases asymTransferOperator_ground_simple_spectral Nt Ns P a mass ha hmass with
-      ⟨ι, b, eigenval, i₀, i₁, h_eigen, h_sum, hi_ne, hlt, htop⟩
+    rcases asymTransferOperator_ground_simple_spectral_pos Nt Ns P a mass ha hmass with
+      ⟨ι, b, eigenval, i₀, i₁, h_eigen, h_sum, hi_ne, hlt, htop, hground_pos⟩
     exact ⟨{
         ι := ι
         b := b
@@ -82,6 +91,7 @@ noncomputable def asymTransferGroundExcitedData (P : InteractionPolynomial) (a m
         hi_ne := hi_ne
         hlt := hlt
         htop := htop
+        hground_pos := hground_pos
       }⟩
 
 /-- Ground-state eigenvalue `λ₀` of the asym cylinder transfer operator. -/

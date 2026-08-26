@@ -28,6 +28,7 @@ import Pphi2.AsymTorus.AsymDDJTiltedIntegrability
 import Pphi2.AsymTorus.AsymDDJWeightedDecay
 import Pphi2.AsymTorus.AsymIsoOS
 import Pphi2.AsymTorus.AsymLinkReflectionRPLimit
+import Pphi2.AsymTorus.AsymCovariancePositivity
 import Pphi2.AsymTorus.AsymTiltedIBP
 import Pphi2.AsymTorus.MomentBoundOS1
 import Pphi2.IRLimit.IRTightness
@@ -994,12 +995,15 @@ theorem asymTorusIso_raw_sampling_tendsto_of_siteEval
   simpa using hsite
 
 /-- A raw finite-grid sampling limit turns the sitewise massive variance estimate
-into a cylinder exponential-moment bound after the UV weak limit.  The cutoff
-estimate is supplied on the selected sequence; the physical mesh identities
-and `a → 0` now discharge the sampling limit internally. -/
-theorem asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling
+into a cylinder exponential-moment bound after the UV weak limit, relative to a
+fixed cylinder seminorm that dominates the embedded ℓ² product at this `Lt`. -/
+theorem asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling_of_seminorm
     (mass : ℝ) (hmass : 0 < mass)
     (K C : ℝ) (hK : 0 ≤ K) (hC : 0 ≤ C)
+    (q : Seminorm ℝ (CylinderTestFunction Ls))
+    (hq_l2 : ∀ f : CylinderTestFunction Ls,
+      l2InnerProduct (cylinderToTorusEmbed Lt Ls f)
+        (cylinderToTorusEmbed Lt Ls f) ≤ q f ^ 2)
     (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
     (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k))
     (ha : ∀ k, 0 < a k)
@@ -1026,15 +1030,10 @@ theorem asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling
             ∫ ω : Configuration (AsymLatticeField (Nt k) (Ns k)),
               (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k) F x|)) ^ 2
               ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k)
-                mass (ha k) hmass)))
-    (hLt1 : 1 ≤ Lt) :
-    ∃ q : Seminorm ℝ (CylinderTestFunction Ls), Continuous q ∧
-      MeasureHasCylinderExpMomentBound Ls K (C * mass⁻¹ ^ 2) q μ := by
+                mass (ha k) hmass))) :
+    MeasureHasCylinderExpMomentBound Ls K (C * mass⁻¹ ^ 2) q μ := by
   have hraw := asymTorusIso_raw_sampling_tendsto_of_siteEval
     Lt Ls Nt Ns a hNt hNs ha hLt_phys hLs_phys ha0
-  obtain ⟨q, hq_cont, hq_bound⟩ :=
-    GaussianField.embed_l2_uniform_bound (Ls := Ls)
-  refine ⟨q, hq_cont, ?_⟩
   intro f
   let F : AsymTorusTestFunction Lt Ls := cylinderToTorusEmbed Lt Ls f
   let R : ℕ → ℝ := fun k ⇒
@@ -1121,8 +1120,7 @@ theorem asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling
     cylinderPullbackMeasure_exponential_moment_of_tendsto_bc
       Lt Ls ν μ hν_prob hμ_prob hbc f B Binf hB h_unif
   have hL2 : l2InnerProduct F F ≤ q f ^ 2 := by
-    simpa [F, Pphi2.cylinderToTorusEmbed,
-      GaussianField.cylinderToTorusEmbed] using hq_bound Lt hLt1 f
+    simpa [F] using hq_l2 f
   refine ⟨hint_cyl, ?_⟩
   calc
     ∫ ω : Configuration (CylinderTestFunction Ls),
@@ -1135,6 +1133,55 @@ theorem asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling
       exact Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left hL2 hD)
     _ = K * Real.exp ((C * mass⁻¹ ^ 2) * q f ^ 2) := by
       simp [D]
+
+/-- A raw finite-grid sampling limit turns the sitewise massive variance estimate
+into a cylinder exponential-moment bound after the UV weak limit.  The cutoff
+estimate is supplied on the selected sequence; the physical mesh identities
+and `a → 0` now discharge the sampling limit internally. -/
+theorem asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling
+    (mass : ℝ) (hmass : 0 < mass)
+    (K C : ℝ) (hK : 0 ≤ K) (hC : 0 ≤ C)
+    (Nt Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hNt : ∀ k, NeZero (Nt k)) (hNs : ∀ k, NeZero (Ns k))
+    (ha : ∀ k, 0 < a k)
+    (hLt_phys : ∀ k, (Nt k : ℝ) * a k = Lt)
+    (hLs_phys : ∀ k, (Ns k : ℝ) * a k = Ls)
+    (ha0 : Filter.Tendsto a Filter.atTop (nhds 0))
+    (ν : ℕ → Measure (Configuration (AsymTorusTestFunction Lt Ls)))
+    (μ : Measure (Configuration (AsymTorusTestFunction Lt Ls)))
+    (hν_prob : ∀ k, IsProbabilityMeasure (ν k))
+    (hμ_prob : IsProbabilityMeasure μ)
+    (hbc : ∀ (g : Configuration (AsymTorusTestFunction Lt Ls) → ℝ),
+      Continuous g → (∃ B, ∀ x, |g x| ≤ B) →
+      Filter.Tendsto (fun k ⇒ ∫ ω, g ω ∂(ν k)) Filter.atTop
+        (nhds (∫ ω, g ω ∂μ)))
+    (hcutoff : ∀ k,
+      letI : NeZero (Nt k) := hNt k
+      letI : NeZero (Ns k) := hNs k
+      ∀ F : AsymTorusTestFunction Lt Ls,
+        Integrable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) ⇒
+          Real.exp (|ω F|)) (ν k) ∧
+        ∫ ω : Configuration (AsymTorusTestFunction Lt Ls),
+          Real.exp (|ω F|) ∂(ν k) ≤
+          K * Real.exp (C *
+            ∫ ω : Configuration (AsymLatticeField (Nt k) (Ns k)),
+              (ω (fun x ⇒ |asymLatticeTestFnIso Lt Ls (Nt k) (Ns k) (a k) F x|)) ^ 2
+              ∂(latticeGaussianMeasureAsym (Nt k) (Ns k) (a k)
+                mass (ha k) hmass)))
+    (hLt1 : 1 ≤ Lt) :
+    ∃ q : Seminorm ℝ (CylinderTestFunction Ls), Continuous q ∧
+      MeasureHasCylinderExpMomentBound Ls K (C * mass⁻¹ ^ 2) q μ := by
+  obtain ⟨q, hq_cont, hq_bound⟩ :=
+    -- Still an `axiom` in gaussian-field `Cylinder/MethodOfImages.lean:326`
+    -- (pin `d63a285` and clone HEAD `1283a27`). Not a theorem.
+    GaussianField.embed_l2_uniform_bound (Ls := Ls)
+  refine ⟨q, hq_cont, ?_⟩
+  refine asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling_of_seminorm
+    Lt Ls mass hmass K C hK hC q ?_ Nt Ns a hNt hNs ha
+    hLt_phys hLs_phys ha0 ν μ hν_prob hμ_prob hbc hcutoff
+  intro f
+  simpa [Pphi2.cylinderToTorusEmbed, GaussianField.cylinderToTorusEmbed]
+    using hq_bound Lt hLt1 f
 
 /-- A sequence-level cylinder exponential-moment estimate passes through the
 isotropic UV weak limit with the same constants and seminorm.
@@ -2293,6 +2340,341 @@ theorem routeBPrimeIso_cylinder_OS
         ν hcf (fun k => hμ_noWrap (φ k)) K' C' hK' hC' q hq hExp)
     hμ_os2
 
+/-- Even isotropic grids beyond Stage-C thresholds `L₀`, `a₀` and the
+method-of-images constraint `1 ≤ Lt`.  The identities `Nt·a = Lt` and
+`Ns·a = Ls` are preserved, `Nt` is even, and `a → 0`. -/
+theorem exists_absForm_thresholded_cylinder_grids
+    (L₀ a₀ : ℝ) (hL₀ : 0 < L₀) (ha₀ : 0 < a₀) :
+    ∃ (N₀ S : ℕ) (LtFam : ℕ → ℝ)
+      (M Ns : ℕ → ℕ → ℕ) (a : ℕ → ℕ → ℝ),
+      (∀ n, Fact (0 < LtFam n)) ∧
+      Filter.Tendsto LtFam Filter.atTop Filter.atTop ∧
+      (∀ n, 1 ≤ LtFam n) ∧
+      (∀ n, L₀ ≤ LtFam n) ∧
+      (∀ n k, NeZero (M n k)) ∧
+      (∀ n k, NeZero (Ns n k)) ∧
+      (∀ n k, 0 < a n k) ∧
+      (∀ n k, ((2 * M n k : ℕ) : ℝ) * a n k = LtFam n) ∧
+      (∀ n k, (Ns n k : ℝ) * a n k = Ls) ∧
+      (∀ n k, a n k ≤ a₀) ∧
+      (∀ n, Filter.Tendsto (a n) Filter.atTop (nhds 0)) := by
+  have hLs_pos : 0 < Ls := hLs.out
+  obtain ⟨N₀, hN₀⟩ := exists_nat_ge (max L₀ (1 : ℝ) / Ls)
+  obtain ⟨S, hS⟩ := exists_nat_ge (Ls / (2 * a₀))
+  let LtFam : ℕ → ℝ := fun n => ((N₀ + n + 1 : ℕ) : ℝ) * Ls
+  let M : ℕ → ℕ → ℕ := fun n k => (N₀ + n + 1) * (S + k + 1)
+  let Ns : ℕ → ℕ → ℕ := fun _ k => 2 * (S + k + 1)
+  let a : ℕ → ℕ → ℝ := fun _ k => Ls / (2 * ((S + k + 1 : ℕ) : ℝ))
+  have hLt_pos : ∀ n, 0 < LtFam n := fun n => by
+    dsimp [LtFam]
+    positivity
+  have hLtfact : ∀ n, Fact (0 < LtFam n) := fun n => ⟨hLt_pos n⟩
+  have hmax : max L₀ (1 : ℝ) ≤ (N₀ : ℝ) * Ls :=
+    (div_le_iff₀ hLs_pos).mp hN₀
+  refine ⟨N₀, S, LtFam, M, Ns, a, hLtfact, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · -- LtFam n = (N₀+n+1)·Ls → ∞. Do not reuse the (n:ℝ)+1 tendsto proof:
+    -- the first factor is ↑(N₀+n+1), not ↑n+1.
+    have hmono : StrictMono (fun n : ℕ => N₀ + n + 1) := by
+      intro i j hij
+      omega
+    have hcast : Filter.Tendsto (fun n : ℕ => ((N₀ + n + 1 : ℕ) : ℝ))
+        Filter.atTop Filter.atTop :=
+      (tendsto_natCast_atTop_atTop (R := ℝ)).comp hmono.tendsto_atTop
+    simpa [LtFam] using Filter.Tendsto.atTop_mul_const hLs_pos hcast
+  · intro n
+    dsimp [LtFam]
+    have h1 : (1 : ℝ) ≤ max L₀ (1 : ℝ) := le_max_right _ _
+    have hN : (N₀ : ℝ) * Ls ≤ ((N₀ + n + 1 : ℕ) : ℝ) * Ls :=
+      mul_le_mul_of_nonneg_right (Nat.cast_le.mpr (by omega)) hLs_pos.le
+    exact h1.trans (hmax.trans hN)
+  · intro n
+    dsimp [LtFam]
+    have hL : L₀ ≤ max L₀ (1 : ℝ) := le_max_left _ _
+    have hN : (N₀ : ℝ) * Ls ≤ ((N₀ + n + 1 : ℕ) : ℝ) * Ls :=
+      mul_le_mul_of_nonneg_right (Nat.cast_le.mpr (by omega)) hLs_pos.le
+    exact hL.trans (hmax.trans hN)
+  · intro n k
+    dsimp [M]
+    exact ⟨by positivity⟩
+  · intro n k
+    dsimp [Ns]
+    exact ⟨by positivity⟩
+  · intro n k
+    dsimp [a]
+    positivity
+  · intro n k
+    dsimp [LtFam, M, a]
+    push_cast
+    field_simp
+  · intro n k
+    dsimp [Ns, a]
+    push_cast
+    field_simp
+  · intro n k
+    dsimp [a]
+    have hden : (Ls / (2 * a₀) : ℝ) ≤ ((S + k + 1 : ℕ) : ℝ) :=
+      hS.trans (Nat.cast_le.mpr (by omega))
+    have ha₀' : 0 < 2 * a₀ := mul_pos (by norm_num) ha₀
+    have hLs_le : Ls ≤ (2 * a₀) * (S + k + 1 : ℕ) :=
+      (div_le_iff₀ ha₀').mp hden
+    have hpos : 0 < (2 * ((S + k + 1 : ℕ) : ℝ)) := by positivity
+    rw [div_le_iff₀ hpos]
+    convert hLs_le using 1
+    ring
+  · -- a n k = Ls / (2(S+k+1)) → 0, same algebra as the even-grid
+    -- `tendsto_one_div_add_atTop_nhds_zero_nat` family in this file, with offset S.
+    intro n
+    dsimp [a]
+    have hmono : StrictMono (fun k : ℕ => S + k + 1) := by
+      intro i j hij
+      omega
+    have hcast : Filter.Tendsto (fun k : ℕ => ((S + k + 1 : ℕ) : ℝ))
+        Filter.atTop Filter.atTop :=
+      (tendsto_natCast_atTop_atTop (R := ℝ)).comp hmono.tendsto_atTop
+    have hinv : Filter.Tendsto
+        (fun k : ℕ => (1 : ℝ) / ((S + k + 1 : ℕ) : ℝ))
+        Filter.atTop (nhds 0) := by
+      simpa [one_div] using tendsto_inv_atTop_zero.comp hcast
+    have h2 : Filter.Tendsto
+        (fun k : ℕ => (Ls / 2) * (1 / ((S + k + 1 : ℕ) : ℝ)))
+        Filter.atTop (nhds 0) := by
+      simpa using hinv.const_mul (Ls / 2)
+    have heq : (fun k : ℕ => Ls / (2 * ((S + k + 1 : ℕ) : ℝ))) =
+        fun k : ℕ => (Ls / 2) * (1 / ((S + k + 1 : ℕ) : ℝ)) := by
+      ext k
+      rw [mul_one_div, div_div]
+    rw [heq]
+    exact h2
+
+/-- The even-time UV construction transfers a thresholded `|f|`-form
+exponential-moment estimate to the torus weak limit, together with OS2 and
+no-wrap cylinder reflection positivity.
+
+The cutoff premise is required only on the selected sequence (already
+beyond `(L₀, a₀)` when the caller uses
+`exists_absForm_thresholded_cylinder_grids`).  The cylinder seminorm is an
+input so one `embed_l2_uniform_bound` witness can be shared across infrared
+periods. -/
+theorem asymTorusIso_measureHasCylinderExpMomentBound_of_absForm_withNoWrapRP
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (K C : ℝ) (hK_pos : 0 < K) (hC_pos : 0 < C)
+    (q : Seminorm ℝ (CylinderTestFunction Ls))
+    (hq_l2 : ∀ f : CylinderTestFunction Ls,
+      l2InnerProduct (cylinderToTorusEmbed Lt Ls f)
+        (cylinderToTorusEmbed Lt Ls f) ≤ q f ^ 2)
+    (M Ns : ℕ → ℕ) (a : ℕ → ℝ)
+    (hM : ∀ k, NeZero (M k)) (hNs : ∀ k, NeZero (Ns k))
+    (ha : ∀ k, 0 < a k)
+    (hvolt : ∀ k, ((2 * M k : ℕ) : ℝ) * a k = Lt)
+    (hvols : ∀ k, (Ns k : ℝ) * a k = Ls)
+    (ha0 : Filter.Tendsto a Filter.atTop (nhds 0))
+    (hcutoff : ∀ k,
+      letI : NeZero (M k) := hM k
+      letI : NeZero (Ns k) := hNs k
+      ∀ F : AsymTorusTestFunction Lt Ls,
+        Integrable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) =>
+          Real.exp (|ω F|))
+          (asymTorusInteractingMeasureIso Lt Ls (2 * M k) (Ns k) (a k)
+            P mass (ha k) hmass) ∧
+        ∫ ω : Configuration (AsymTorusTestFunction Lt Ls),
+          Real.exp (|ω F|)
+            ∂(asymTorusInteractingMeasureIso Lt Ls (2 * M k) (Ns k) (a k)
+              P mass (ha k) hmass) ≤
+          K * Real.exp (C *
+            ∫ ω : Configuration (AsymLatticeField (2 * M k) (Ns k)),
+              (ω (fun x => |asymLatticeTestFnIso Lt Ls (2 * M k) (Ns k) (a k)
+                F x|)) ^ 2
+              ∂(latticeGaussianMeasureAsym (2 * M k) (Ns k) (a k)
+                mass (ha k) hmass))) :
+    ∃ μ : Measure (Configuration (AsymTorusTestFunction Lt Ls)),
+      IsProbabilityMeasure μ ∧
+      MeasureHasCylinderExpMomentBound Ls K (C * mass⁻¹ ^ 2) q μ ∧
+      (∀ hμ_prob : IsProbabilityMeasure μ,
+        @AsymTorusOS2_TranslationInvariance Lt Ls hLt hLs μ hμ_prob ∧
+        @AsymTorusOS2_TimeReflectionInvariance Lt Ls hLt hLs μ hμ_prob) ∧
+      CylinderMeasureNoWrapReflectionPositive Lt Ls
+        (cylinderPullbackMeasure Lt Ls μ) := by
+  have hNt : ∀ k, NeZero (2 * M k) := fun k => by
+    letI := hM k
+    infer_instance
+  obtain ⟨μ, hμ_prob, φ, hφ_mono, hconv⟩ :=
+    asymTorusIso_interacting_limit_exists Lt Ls P mass hmass
+      (fun k => 2 * M k) Ns a hNt hNs ha hvolt hvols ha0
+  haveI : IsProbabilityMeasure μ := hμ_prob
+  set ν : ℕ → Measure (Configuration (AsymTorusTestFunction Lt Ls)) := fun n =>
+    haveI := hM (φ n)
+    haveI := hNs (φ n)
+    asymTorusInteractingMeasureIso Lt Ls (2 * M (φ n)) (Ns (φ n)) (a (φ n))
+      P mass (ha (φ n)) hmass with hν_def
+  have hν_prob : ∀ n, IsProbabilityMeasure (ν n) := fun n => by
+    haveI := hM (φ n)
+    haveI := hNs (φ n)
+    exact asymTorusInteractingMeasureIso_isProbability Lt Ls
+      (2 * M (φ n)) (Ns (φ n)) (a (φ n)) P mass (ha (φ n)) hmass
+  have hφ_atTop : Filter.Tendsto φ Filter.atTop Filter.atTop :=
+    hφ_mono.tendsto_atTop
+  have hbc : ∀ (g : Configuration (AsymTorusTestFunction Lt Ls) → ℝ),
+      Continuous g → (∃ D, ∀ x, |g x| ≤ D) →
+      Filter.Tendsto (fun n => ∫ ω, g ω ∂(ν n)) Filter.atTop
+        (nhds (∫ ω, g ω ∂μ)) := by
+    intro g hg hg_bound
+    simpa [ν] using hconv g hg hg_bound
+  have hcutoff_sub : ∀ n,
+      letI : NeZero (2 * M (φ n)) := hNt (φ n)
+      letI : NeZero (Ns (φ n)) := hNs (φ n)
+      ∀ F : AsymTorusTestFunction Lt Ls,
+        Integrable (fun ω : Configuration (AsymTorusTestFunction Lt Ls) =>
+          Real.exp (|ω F|)) (ν n) ∧
+        ∫ ω : Configuration (AsymTorusTestFunction Lt Ls),
+          Real.exp (|ω F|) ∂(ν n) ≤
+          K * Real.exp (C *
+            ∫ ω : Configuration (AsymLatticeField (2 * M (φ n)) (Ns (φ n))),
+              (ω (fun x => |asymLatticeTestFnIso Lt Ls (2 * M (φ n)) (Ns (φ n))
+                (a (φ n)) F x|)) ^ 2
+              ∂(latticeGaussianMeasureAsym (2 * M (φ n)) (Ns (φ n)) (a (φ n))
+                mass (ha (φ n)) hmass)) := by
+    intro n
+    haveI := hM (φ n)
+    haveI := hNs (φ n)
+    intro F
+    simpa [ν] using hcutoff (φ n) F
+  have hμ_exp :
+      MeasureHasCylinderExpMomentBound Ls K (C * mass⁻¹ ^ 2) q μ :=
+    asymTorusIso_measureHasCylinderExpMomentBound_of_raw_sampling_of_seminorm
+      Lt Ls mass hmass K C hK_pos.le hC_pos.le q hq_l2
+      (fun n => 2 * M (φ n)) (fun n => Ns (φ n)) (fun n => a (φ n))
+      (fun n => hNt (φ n)) (fun n => hNs (φ n)) (fun n => ha (φ n))
+      (fun n => hvolt (φ n)) (fun n => hvols (φ n)) (ha0.comp hφ_atTop)
+      ν μ hν_prob hμ_prob hbc hcutoff_sub
+  have hμ_os2 := asymTorusIso_limit_satisfies_OS2 Lt Ls P mass hmass
+    (fun k => 2 * M k) Ns a hNt hNs ha hvolt hvols ha0 μ φ hφ_mono hconv
+  refine ⟨μ, hμ_prob, hμ_exp, (fun _ => hμ_os2), ?_⟩
+  intro R hR hLtR n f c hf
+  let sigmaSq : ℕ → CylinderTestFunction Ls → ℝ := fun k h =>
+    haveI := hM (φ k)
+    haveI := hNs (φ k)
+    ∫ ω : Configuration (AsymLatticeField (2 * M (φ k)) (Ns (φ k))),
+      (ω (fun x => |asymLatticeTestFnIso Lt Ls (2 * M (φ k)) (Ns (φ k))
+        (a (φ k)) (cylinderToTorusEmbed Lt Ls h) x|)) ^ 2
+      ∂(latticeGaussianMeasureAsym (2 * M (φ k)) (Ns (φ k)) (a (φ k))
+        mass (ha (φ k)) hmass)
+  apply cylinderRPMatrixNonnegative_of_link_limit Lt Ls ν μ hν_prob hμ_prob hbc
+    (fun k => a (φ k)) (ha0.comp hφ_atTop) sigmaSq K C hK_pos hC_pos
+  · intro k h
+    dsimp [sigmaSq]
+    exact integral_nonneg fun _ => sq_nonneg _
+  · intro k t h
+    dsimp [sigmaSq]
+    exact asymCylinderLatticeAbsSecondMoment_smul Lt Ls
+      (2 * M (φ k)) (Ns (φ k)) (a (φ k)) mass (ha (φ k)) hmass t h
+  · intro hseq hseq0
+    simpa [sigmaSq] using
+      (asymCylinderLatticeAbsSecondMoment_tendsto_zero_of_tendsto Lt Ls mass hmass
+        (fun k => 2 * M (φ k)) (fun k => Ns (φ k)) (fun k => a (φ k))
+        (fun k => by letI := hM (φ k); infer_instance)
+        (fun k => hNs (φ k)) (fun k => ha (φ k)) hseq hseq0)
+  · intro k h
+    haveI := hM (φ k)
+    haveI := hNs (φ k)
+    obtain ⟨hint_torus, hle_torus⟩ := hcutoff_sub k (cylinderToTorusEmbed Lt Ls h)
+    obtain ⟨hint_cyl, heq⟩ := cylinderPullback_expMoment_eq Ls Lt (ν k) h hint_torus
+    exact ⟨hint_cyl, heq.le.trans hle_torus⟩
+  · intro k
+    haveI := hM (φ k)
+    haveI := hNs (φ k)
+    exact asymTorusInteractingMeasureIso_cylinderLinkRPMatrix_span_noWrap
+      Lt Ls P (a (φ k)) mass (ha (φ k)) hmass (M (φ k)) (Ns (φ k))
+      (hvolt (φ k)) (hvols (φ k)) R hR hLtR n f c hf
+
+/-- Apply the thresholded `|f|`-form UV construction at every infrared period
+of an explicit grid family already past `(L₀, a₀)` and `Lt ≥ 1`. -/
+theorem asymTorusIso_cylinderUniformCylinderExpMomentBound_of_absForm_grids
+    (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
+    (K C : ℝ) (hK_pos : 0 < K) (hC_pos : 0 < C)
+    (q : Seminorm ℝ (CylinderTestFunction Ls)) (_hq : Continuous q)
+    (hq_l2 : ∀ (L : ℝ) [Fact (0 < L)], 1 ≤ L →
+      ∀ f : CylinderTestFunction Ls,
+        l2InnerProduct (cylinderToTorusEmbed L Ls f)
+          (cylinderToTorusEmbed L Ls f) ≤ q f ^ 2)
+    (LtFam : ℕ → ℝ) (hLtFam : ∀ n, Fact (0 < LtFam n))
+    (hLt1 : ∀ n, 1 ≤ LtFam n)
+    (M Ns : ℕ → ℕ → ℕ) (a : ℕ → ℕ → ℝ)
+    (hM : ∀ n k, NeZero (M n k)) (hNs : ∀ n k, NeZero (Ns n k))
+    (ha : ∀ n k, 0 < a n k)
+    (hvolt : ∀ n k, ((2 * M n k : ℕ) : ℝ) * a n k = LtFam n)
+    (hvols : ∀ n k, (Ns n k : ℝ) * a n k = Ls)
+    (ha0 : ∀ n, Filter.Tendsto (a n) Filter.atTop (nhds 0))
+    (hcutoff : ∀ n k,
+      letI : NeZero (M n k) := hM n k
+      letI : NeZero (Ns n k) := hNs n k
+      letI : Fact (0 < LtFam n) := hLtFam n
+      ∀ F : AsymTorusTestFunction (LtFam n) Ls,
+        Integrable (fun ω : Configuration (AsymTorusTestFunction (LtFam n) Ls) =>
+          Real.exp (|ω F|))
+          (asymTorusInteractingMeasureIso (LtFam n) Ls
+            (2 * M n k) (Ns n k) (a n k) P mass (ha n k) hmass) ∧
+        ∫ ω : Configuration (AsymTorusTestFunction (LtFam n) Ls),
+          Real.exp (|ω F|)
+            ∂(asymTorusInteractingMeasureIso (LtFam n) Ls
+              (2 * M n k) (Ns n k) (a n k) P mass (ha n k) hmass) ≤
+          K * Real.exp (C *
+            ∫ ω : Configuration (AsymLatticeField (2 * M n k) (Ns n k)),
+              (ω (fun x => |asymLatticeTestFnIso (LtFam n) Ls (2 * M n k) (Ns n k)
+                (a n k) F x|)) ^ 2
+              ∂(latticeGaussianMeasureAsym (2 * M n k) (Ns n k) (a n k)
+                mass (ha n k) hmass))) :
+    ∃ μ : ∀ n, Measure (Configuration (AsymTorusTestFunction (LtFam n) Ls)),
+      (∀ n, IsProbabilityMeasure (μ n)) ∧
+      AsymTorusSequenceHasUniformCylinderExpMomentBound
+        Ls K (C * mass⁻¹ ^ 2) q LtFam hLtFam μ ∧
+      AsymTorusSequenceHasCylinderOS2Symmetry Ls LtFam hLtFam μ ∧
+      (∀ n,
+        CylinderMeasureNoWrapReflectionPositive (LtFam n) Ls
+          (@cylinderPullbackMeasure (LtFam n) Ls (hLtFam n) hLs (μ n))) := by
+  have hbound : ∀ n,
+      letI : Fact (0 < LtFam n) := hLtFam n
+      ∃ μ : Measure (Configuration (AsymTorusTestFunction (LtFam n) Ls)),
+        IsProbabilityMeasure μ ∧
+        MeasureHasCylinderExpMomentBound Ls K (C * mass⁻¹ ^ 2) q μ ∧
+        (∀ hμ_prob : IsProbabilityMeasure μ,
+          @AsymTorusOS2_TranslationInvariance (LtFam n) Ls (hLtFam n) hLs μ hμ_prob ∧
+          @AsymTorusOS2_TimeReflectionInvariance (LtFam n) Ls (hLtFam n) hLs μ hμ_prob) ∧
+        CylinderMeasureNoWrapReflectionPositive (LtFam n) Ls
+          (@cylinderPullbackMeasure (LtFam n) Ls (hLtFam n) hLs μ) := by
+    intro n
+    letI : Fact (0 < LtFam n) := hLtFam n
+    exact asymTorusIso_measureHasCylinderExpMomentBound_of_absForm_withNoWrapRP
+      (LtFam n) Ls P mass hmass K C hK_pos hC_pos q
+      (fun f => hq_l2 (LtFam n) (hLt1 n) f)
+      (M n) (Ns n) (a n) (hM n) (hNs n) (ha n)
+      (hvolt n) (hvols n) (ha0 n)
+      (fun k => by
+        letI : NeZero (M n k) := hM n k
+        letI : NeZero (Ns n k) := hNs n k
+        intro F
+        exact hcutoff n k F)
+  choose μ hμ_prob hμ_exp hμ_os2 hμ_rp using hbound
+  have hμ_exp_seq : AsymTorusSequenceHasUniformCylinderExpMomentBound
+      Ls K (C * mass⁻¹ ^ 2) q LtFam hLtFam μ := by
+    exact Filter.Eventually.of_forall fun n => by
+      letI : Fact (0 < LtFam n) := hLtFam n
+      simpa [MeasureHasCylinderExpMomentBound] using hμ_exp n
+  have hμ_os2_seq : AsymTorusSequenceHasCylinderOS2Symmetry Ls LtFam hLtFam μ := by
+    constructor
+    · intro n
+      letI : Fact (0 < LtFam n) := hLtFam n
+      haveI : IsProbabilityMeasure (μ n) := hμ_prob n
+      intro v f
+      simpa [AsymTorusOS2_TranslationInvariance, asymTorusGeneratingFunctional] using
+        (hμ_os2 n (hμ_prob n)).1 v f
+    · intro n
+      letI : Fact (0 < LtFam n) := hLtFam n
+      haveI : IsProbabilityMeasure (μ n) := hμ_prob n
+      intro f
+      simpa [AsymTorusOS2_TimeReflectionInvariance, asymTorusGeneratingFunctional] using
+        (hμ_os2 n (hμ_prob n)).2 f
+  exact ⟨μ, hμ_prob, hμ_exp_seq, hμ_os2_seq, hμ_rp⟩
+
 /-- **Volume-uniform interacting exponential moment — quartic only.**
 
 Restricted to `P.n = 4`. The all-`InteractionPolynomial` type is **false**:
@@ -2307,22 +2689,18 @@ There exist constants `K, C > 0` (depending on `P`, `mass`, `Ls`, but **uniform 
 
   `∫ exp(|ω f|) dμ_int ≤ K · exp(C · σ²(f))`,    `σ²(f) = ∫ (ω·asymLatticeTestFnIso f)² dμ_{GFF}`.
 
-This is retained as the `hUnif` input of `asymTorusIso_cylinderUniformGreenBound` /
-`routeBPrimeIso_cylinder_OS`. It is not a textbook Newman instance on general even `P`.
+This axiom is **not** consumed by `cylinderIso_OS_of_RP_OS2`.  The headline uses
+the proved thresholded `|f|`-form
+`asymInteracting_expMoment_volume_uniform_absForm_thresholded` instead, so its
+footprint is the named Layer A/B2 inputs of that theorem together with
+`GaussianField.embed_l2_uniform_bound`.  The exact `C · Var_free(f)` form for
+signed `f` remains unrecovered (cross-term cancellation). Do not treat this
+axiom, or the headline, as a Newman discharge.
 
 Layer A (`asymInteracting_mgf_gaussianDominated`) is quartic-only; Layer B2
 (`asymInteractingVariance_le_freeVariance_Lt_uniform`) is a torus wrapper of a
 lattice axiom, not a discharge. The Layer C assembly in `AsymSignedSplit.lean`
-inherits both and does not make this axiom a theorem.
-
-    UPDATE 2026-07-13: the entrywise nonnegativity is now PROVED
-    (`latticeCovarianceAsymGJ_pairing_nonneg`) and the thresholded
-    `|f|`-form is a THEOREM
-    (`asymInteracting_expMoment_volume_uniform_absForm_thresholded`, both in
-    `AsymCovariancePositivity.lean`). That theorem still inherits the quartic
-    Layer A axiom. This axiom's exact `C · Var_free(f)` form for signed `f`
-    remains unrecovered; consumers should not treat either as a Newman
-    discharge. -/
+inherits both and does not make this axiom a theorem. -/
 axiom asymInteracting_expMoment_volume_uniform
     (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass) :
     ∃ K C : ℝ, 0 < K ∧ 0 < C ∧
@@ -2338,12 +2716,19 @@ axiom asymInteracting_expMoment_volume_uniform
 
 /-- **Cylinder OS0/OS1/OS2/OS3 for the isotropic quartic P(φ)₂ construction.**
 
-Quartic-only (`P.n = 4`). Consumes `asymInteracting_expMoment_volume_uniform`
-at that restriction. This is not a Newman or DDJ producer; the historical
-theorem name is retained for downstream compatibility. The all-`P` form would
-call an inapplicable axiom (sextic counterexample). OS2 is
-proved from the heterogeneous lattice construction, and reflection positivity
-is carried through the no-wrap limit. -/
+Quartic-only (`P.n = 4`). Consumes the proved thresholded `|f|`-form
+`asymInteracting_expMoment_volume_uniform_absForm_thresholded`, not the
+monolithic axiom `asymInteracting_expMoment_volume_uniform`. The public
+conclusion type is unchanged. Newman / FSS / transfer-gap / bridge axioms
+remain as named inputs of the thresholded theorem; this is not a discharge
+of those inputs, and it is not a Newman or DDJ producer. OS2 is proved from
+the heterogeneous lattice construction, and reflection positivity is carried
+through the no-wrap limit. `GaussianField.embed_l2_uniform_bound` remains in
+the footprint.
+
+Not compiled on this MacBook. `#print axioms` is Colab / remote CI only
+(`LOCAL_COLAB_LAKE_BUILD.md`). Do not treat this rewire as certified until
+that certificate exists. -/
 theorem cylinderIso_OS_of_RP_OS2
     (P : InteractionPolynomial) (hP : P.n = 4) (mass : ℝ) (hmass : 0 < mass) :
     ∃ (ν : Measure (Configuration (CylinderTestFunction Ls))),
@@ -2365,9 +2750,63 @@ theorem cylinderIso_OS_of_RP_OS2
         ∫ ω, Complex.exp (Complex.I *
           ↑(ω ((f i : CylinderTestFunction Ls) -
             cylinderTimeReflection Ls (f j : CylinderTestFunction Ls)))) ∂ν).re) := by
-  obtain ⟨K, C, hK_pos, hC_pos, hUnif⟩ :=
-    asymInteracting_expMoment_volume_uniform Ls P hP mass hmass
-  exact routeBPrimeIso_cylinder_OS Ls P mass hmass K C hK_pos hC_pos hUnif
+  obtain ⟨K, C, L₀, a₀, hK_pos, hC_pos, hL₀, ha₀, hThresh⟩ :=
+    asymInteracting_expMoment_volume_uniform_absForm_thresholded P hP mass hmass Ls
+  obtain ⟨q, hq_cont, hq_bound⟩ :=
+    GaussianField.embed_l2_uniform_bound (Ls := Ls)
+  obtain ⟨_N₀, _S, LtFam, M, Ns, a, hLtFam, hLt_tend, hLt1, hLtL0,
+      hM, hNs, ha, hvolt, hvols, ha_le, ha0⟩ :=
+    exists_absForm_thresholded_cylinder_grids Ls L₀ a₀ hL₀ ha₀
+  have hC_cyl_pos : 0 < C * mass⁻¹ ^ 2 :=
+    mul_pos hC_pos (sq_pos_of_pos (inv_pos.mpr hmass))
+  have hq_l2 : ∀ (L : ℝ) [Fact (0 < L)], 1 ≤ L →
+      ∀ f : CylinderTestFunction Ls,
+        l2InnerProduct (cylinderToTorusEmbed L Ls f)
+          (cylinderToTorusEmbed L Ls f) ≤ q f ^ 2 := by
+    intro L _ hL1 f
+    simpa [Pphi2.cylinderToTorusEmbed, GaussianField.cylinderToTorusEmbed]
+      using hq_bound L hL1 f
+  have hcutoff : ∀ n k,
+      letI : NeZero (M n k) := hM n k
+      letI : NeZero (Ns n k) := hNs n k
+      letI : Fact (0 < LtFam n) := hLtFam n
+      ∀ F : AsymTorusTestFunction (LtFam n) Ls,
+        Integrable (fun ω : Configuration (AsymTorusTestFunction (LtFam n) Ls) =>
+          Real.exp (|ω F|))
+          (asymTorusInteractingMeasureIso (LtFam n) Ls
+            (2 * M n k) (Ns n k) (a n k) P mass (ha n k) hmass) ∧
+        ∫ ω : Configuration (AsymTorusTestFunction (LtFam n) Ls),
+          Real.exp (|ω F|)
+            ∂(asymTorusInteractingMeasureIso (LtFam n) Ls
+              (2 * M n k) (Ns n k) (a n k) P mass (ha n k) hmass) ≤
+          K * Real.exp (C *
+            ∫ ω : Configuration (AsymLatticeField (2 * M n k) (Ns n k)),
+              (ω (fun x => |asymLatticeTestFnIso (LtFam n) Ls (2 * M n k) (Ns n k)
+                (a n k) F x|)) ^ 2
+              ∂(latticeGaussianMeasureAsym (2 * M n k) (Ns n k) (a n k)
+                mass (ha n k) hmass)) := by
+    intro n k
+    letI : NeZero (M n k) := hM n k
+    letI : NeZero (Ns n k) := hNs n k
+    letI : Fact (0 < LtFam n) := hLtFam n
+    intro F
+    exact hThresh (LtFam n) (2 * M n k) (Ns n k) (a n k) (ha n k)
+      (hvolt n k) (hvols n k) (ha_le n k) (hLtL0 n) F
+  obtain ⟨μ, hμ_prob, hμ_exp, hμ_os2, hμ_noWrap⟩ :=
+    asymTorusIso_cylinderUniformCylinderExpMomentBound_of_absForm_grids
+      Ls P mass hmass K C hK_pos hC_pos q hq_cont hq_l2
+      LtFam hLtFam hLt1 M Ns a hM hNs ha hvolt hvols ha0 hcutoff
+  exact routeBPrime_cylinder_OS_of_uniform_cylinderExpMoment Ls
+    K (C * mass⁻¹ ^ 2) hK_pos hC_cyl_pos q hq_cont LtFam hLtFam hLt_tend
+    μ hμ_prob hμ_exp
+    (fun φ ν hν_prob hφ hcf K' C' q' hK' hC' hq' hExp => by
+      letI : IsProbabilityMeasure ν := hν_prob
+      exact cylinderMeasureReflectionPositive_of_noWrap_limit Ls
+        (fun k => LtFam (φ k)) (hLt_tend.comp hφ.tendsto_atTop)
+        (fun k => @cylinderPullbackMeasure (LtFam (φ k)) Ls
+          (hLtFam (φ k)) hLs (μ (φ k)))
+        ν hcf (fun k => hμ_noWrap (φ k)) K' C' hK' hC' q' hq' hExp)
+    hμ_os2
 
 end Pphi2
 

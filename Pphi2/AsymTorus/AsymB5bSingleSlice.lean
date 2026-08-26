@@ -142,6 +142,44 @@ theorem freeSingleSliceCovariance_smul
   rw [map_smul, inner_smul_left, inner_smul_right]
   simp [sq, mul_assoc]
 
+/-- A one-slice lattice test vector pairs on paths as the linear slice observable
+at that time. -/
+theorem slicePairing_singleSliceLatticeField
+    (t : ZMod Nt) (g : SpatialField Ns) (ψ : ZMod Nt → SpatialField Ns) :
+    slicePairing Nt Ns (singleSliceLatticeField (Nt := Nt) (Ns := Ns) t g) ψ =
+      asymSliceObsLinear g (ψ t) := by
+  unfold slicePairing singleSliceLatticeField
+  simp only [LinearEquiv.apply_symm_apply]
+  unfold singleSliceFamily
+  have hite : ∀ t' i,
+      (if t' = t then g else 0) i * ψ t' i =
+        if t' = t then g i * ψ t' i else 0 := by
+    intro t' i
+    split_ifs <;> simp
+  simp_rw [hite]
+  have hsum : ∀ t',
+      ∑ i, (if t' = t then g i * ψ t' i else 0) =
+        if t' = t then ∑ i, g i * ψ t' i else 0 := by
+    intro t'
+    split_ifs <;> simp
+  simp_rw [hsum]
+  rw [Finset.sum_ite_eq, if_pos (Finset.mem_univ t)]
+  rfl
+
+/-- Gibbs two-point of two one-slice lattice test vectors equals the path-measure
+pairing of the corresponding linear slice observables. -/
+theorem interacting_singleSlice_cross_moment_eq_pathMeasure
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (t t' : ZMod Nt) (g g' : SpatialField Ns) :
+    ∫ ω, (ω (singleSliceLatticeField (Nt := Nt) (Ns := Ns) t g)) *
+          (ω (singleSliceLatticeField (Nt := Nt) (Ns := Ns) t' g'))
+        ∂(interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) =
+      ∫ ψ, asymSliceObsLinear g (ψ t) * asymSliceObsLinear g' (ψ t')
+        ∂((asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt) := by
+  rw [interacting_cross_moment_eq_pathMeasure]
+  refine integral_congr_ae (Filter.Eventually.of_forall fun ψ => ?_)
+  rw [slicePairing_singleSliceLatticeField, slicePairing_singleSliceLatticeField]
+
 /-! ## B5b analytic input -/
 
 /-- **B5b single-slice stability** (analytic axiom, narrow form).

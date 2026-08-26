@@ -316,7 +316,8 @@ analytic work so effort accrues to a non-vacuous target.
 - **B2 DISCHARGED (thresholded)**: `asymInteractingVariance_le_freeVariance_lattice_thresholded`
   AND its torus-level Piece-5 migration `…_torus_thresholded` — theorems on exactly the
   5 vetted axioms (S1 FSS, S2 gap, τ-bridge pair, B5b). Legacy all-`(Lt,a)` axiom carries a
-  migration note; Layer-C rewiring to the eventual form is the remaining wiring.
+  migration note. The thresholded consumer rewire is now present in source;
+  remote compilation and a refreshed kernel certificate remain pending.
 - **Asym exponential clustering** in physical distance (2-axiom footprint) — the OS4 lattice
   input, replacing the removed `clustering_uniform` route.
 - **Phase 4.1 DONE**: honest ℝ² headline (δ₀ closed, vetted existence axiom, 31 raw/29 real).

@@ -11,7 +11,7 @@ Green's function on T²_L converges to the continuum Green's function as N → �
 
 - `torusEmbeddedTwoPoint_eq_spectral_sum` — spectral decomposition of lattice two-point
 - `torus_propagator_convergence` — lattice → continuum convergence (DCT on spectral modes)
-- `torusEmbeddedTwoPoint_uniform_bound` — (axiom) `E[Φ_N(f)²] ≤ C/m²·‖f‖²` uniformly in N
+- `torusEmbeddedTwoPoint_uniform_bound` — `E[Φ_N(f)²] ≤ C/m²·‖f‖²` uniformly in N
 - `torusContinuumGreen_pos` — `G_L(f,f) > 0` for f ≠ 0
 
 ## Mathematical background
@@ -659,7 +659,7 @@ The chain through the GJ-aligned embedding:
 5. Bare bound: `Σ_x (evalTorusAtSite x f)² ≤ L² · C₀⁴ · p₀f²` (Riemann sum).
 6. Cancellation `(a^d)⁻¹ · a² = 1` (for `d = 2`, `a = L/N`).
 
-Phase 2 partial discharge (2026-05-08). -/
+The Phase 2 bound is discharged by the GJ-to-bare covariance cancellation. -/
 theorem torusEmbeddedTwoPoint_le_seminorm_tight (mass : ℝ) (hmass : 0 < mass) :
     ∃ C₀ : ℝ, 0 < C₀ ∧ ∀ (f : TorusTestFunction L) (N : ℕ) [NeZero N],
     torusEmbeddedTwoPoint L N mass hmass f f ≤

@@ -32,6 +32,14 @@ scope = "mrdouglasny"
 git = "https://github.com/mrdouglasny/gaussian-hilbert.git"
 rev = "56ee09f"
 
+# Newman polynomial / Griffiths–Simon MGF limit passage. Does **not**
+# construct Wick φ⁴ as a GS limit; see Pphi2/AsymTorus/AsymInteractingLeeYang.lean.
+[[require]]
+name = "lee-yang"
+scope = "mrdouglasny"
+git = "https://github.com/mrdouglasny/lee-yang.git"
+rev = "d48ee59"
+
 [[require]]
 name = "GibbsVariational"
 scope = "mrdouglasny"

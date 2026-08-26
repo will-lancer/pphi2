@@ -369,16 +369,15 @@ theorem fkg_interacting (P : InteractionPolynomial) (a mass : ℝ)
   rw [eq1, eq2, eq3, eq4]
   exact hfkg
 
-/-! ## Exponential integrability
+/-! ## Bounded characteristic-function component
 
-The generating functional `Z_a[J] = ∫ exp(i⟨ω,J⟩) dμ_a` is well-defined
-and bounded. -/
+The cosine component of the characteristic functional is bounded by one. -/
 
-/-- The generating functional of the interacting measure is bounded by 1.
+/-- The cosine component of the interacting characteristic functional is bounded by one.
 
-  `|Z_a[f]| = |∫ exp(i·ω(f)) dμ_a(ω)| ≤ 1`
+  `|∫ cos(ω(f)) dμ_a(ω)| ≤ 1`.
 
-This follows trivially from `|exp(i·t)| = 1` and μ_a being a probability measure. -/
+This follows from `|cos t| ≤ 1` and μ_a being a probability measure. -/
 theorem generating_functional_bounded (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass)
     (f : FinLatticeField d N) :

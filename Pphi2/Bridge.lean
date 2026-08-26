@@ -2,11 +2,12 @@
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-# Bridge: `Pphi2` ↔ `Phi4` scalar equivalence at the measure level
+# Bridge: conditional `Pphi2` ↔ `Phi4` scalar interface
 
-Proves that the `Pphi2` lattice construction and the `Phi4` continuum
-construction produce the same probability measure on `S'(ℝ²)`, and uses this to
-transfer OS axioms between the two frameworks.
+Provides the predicates and axiom-backed wrappers needed to compare the
+`Pphi2` lattice construction with the `Phi4` continuum construction at the
+measure level. The measure equality and OS transfers remain conditional on
+the hypotheses displayed by the theorems below.
 
 This file studies a very strong notion of equivalence specialized to scalar
 positive-measure theories: literal equality of probability measures on
@@ -95,8 +96,9 @@ names below still resolve (namespace ascent `Pphi2.Bridge` → `Pphi2`). -/
 /-! ## Measure predicates
 
 These predicates record whether a measure arises from a specific construction.
-The bodies are placeholders (`True`); the full definitions would reference the
-weak limit of the respective regularized measure sequences. -/
+The pphi2 predicate below carries the current coupled approximant certificate;
+the Phi4 predicate remains a moment-convergence placeholder until the Phi4
+regularized measures are formalized. -/
 
 /-- A probability measure μ on S'(ℝ²) that arises as the continuum limit
 of pphi2's lattice construction: μ = weak-lim_{a→0} (ι_a)_* μ_a
@@ -132,10 +134,18 @@ def IsPphi2ContinuumLimit
         (fun k => ∫ ω : FieldConfig, Complex.exp (Complex.I * ↑(ω f)) ∂(ν k))
         Filter.atTop
         (nhds (∫ ω : FieldConfig, Complex.exp (Complex.I * ↑(ω f)) ∂μ))) ∧
+    -- Translation interface: the characteristic-functional defect of each
+    -- continuum-embedded approximant tends to zero. This records the
+    -- asymptotic translation input while allowing lattice rounding and
+    -- finite-volume boundary effects.
     (∀ (v : EuclideanSpace ℝ (Fin 2)) (f : TestFun),
-      ∀ᶠ k in Filter.atTop,
-        ∫ ω : FieldConfig, Complex.exp (Complex.I * ↑(ω f)) ∂(ν k) =
-        ∫ ω : FieldConfig, Complex.exp (Complex.I * ↑(ω (schwartzTranslate 2 v f))) ∂(ν k)) ∧
+      Filter.Tendsto
+        (fun k => ‖
+          (∫ ω : FieldConfig,
+            Complex.exp (Complex.I * ↑(ω f)) ∂(ν k)) -
+          (∫ ω : FieldConfig,
+            Complex.exp (Complex.I * ↑(ω (schwartzTranslate 2 v f))) ∂(ν k))‖)
+        Filter.atTop (nhds 0)) ∧
     -- Weak convergence for bounded continuous functions
     (∀ (g : FieldConfig → ℝ),
       Continuous g → (∃ C, ∀ x, |g x| ≤ C) →
@@ -161,7 +171,10 @@ def IsPphi2ContinuumLimit
 of the Phi4 continuum construction: μ = weak-lim_{Λ→∞} μ^{Phi4}_{Λ}
 where μ^{Phi4}_{Λ} is the finite-volume Phi4 measure with UV cutoff removed.
 
-Placeholder body. Full definition requires the Phi4 project's formalization. -/
+Placeholder body. Full definition requires the Phi4 project's formalization.
+The current proposition uses only the probability and moment-convergence
+clauses shown below; `P`, `mass`, and `coupling` have no occurrence in its
+body. -/
 def IsPhi4ContinuumLimit
     (μ : @Measure FieldConfig instMeasurableSpaceConfiguration)
     [IsProbabilityMeasure μ]
@@ -412,8 +425,8 @@ theorem os3_for_phi4_via_pphi2
 
 /-! ## Combined: full OS axioms using the best of both worlds
 
-With measure equality established, we can assemble the full OS axiom
-bundle using the easiest proof of each axiom from either project. -/
+Given measure equality, we can assemble the full OS axiom bundle using the
+available proof source for each axiom from either project. -/
 
 /-- **Full OS axioms via the bridge.**
 
@@ -421,8 +434,8 @@ Assembles all five OS axioms using the optimal proof source for each:
 - OS0 (Analyticity): from pphi2 (uniform moment bounds transfer)
 - OS1 (Regularity): from pphi2 (|Z[f]| ≤ 1 transfers trivially)
 - OS2 (Euclidean invariance): **from Phi4** (manifest in continuum)
-- OS3 (Reflection positivity): **from pphi2** (transfer matrix, easy)
-- OS4 (Clustering): from pphi2 (uniform spectral gap transfers)
+- OS3 (Reflection positivity): **from pphi2** (conditional lattice-RP wrapper)
+- OS4 (Clustering): from pphi2's continuum clustering input
 
 This eliminates:
 - pphi2's Ward identity argument for OS2 (the hardest part of Phase 5)
@@ -439,7 +452,7 @@ theorem full_os_via_bridge
     (hμ_cont_limit : @IsPhi4ContinuumLimit μ_cont hμ_cont P mass coupling)
     (h_eq : μ_latt = μ_cont) :
     @SatisfiesFullOS μ_latt hμ_latt := by
-  -- Get full OS bundle from the main construction (has sorries for os0/os1/os2/os4)
+  -- Get the full bundle assembled from the main construction's kernel inputs.
   have h_full := @continuumLimit_satisfies_fullOS P mass hmass μ_latt hμ_latt
     (IsPphi2ContinuumLimit.toIsPphi2Limit hμ_latt_limit)
   -- Get OS3 from pphi2's transfer matrix argument

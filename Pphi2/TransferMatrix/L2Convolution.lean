@@ -362,7 +362,7 @@ noncomputable def convCLM {μ : Measure G} [μ.IsAddHaarMeasure]
         -- Step 1: ↑↑(f1+f2) =ᵐ ↑↑f1 + ↑↑f2, so by convolution_congr:
         have hcongr : realConv μ g (↑↑f1 + ↑↑f2) = realConv μ g ↑↑(f1 + f2) :=
           convolution_congr (lsmul ℝ ℝ) (ae_eq_refl g) (Lp.coeFn_add f1 f2).symm
-        -- Step 2: linearity of convolution in second argument (axiom)
+      -- Step 2: linearity of convolution in second argument
         have hlin := young_convolution_ae_add g (⇑f1) (⇑f2) hg (Lp.memLp f1) (Lp.memLp f2)
         -- Combine: realConv μ g ↑↑(f1+f2) = realConv μ g (↑↑f1+↑↑f2) =ᵐ ...
         calc realConv μ g ↑↑(f1 + f2)

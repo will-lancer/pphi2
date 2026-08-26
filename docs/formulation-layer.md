@@ -290,14 +290,18 @@ def pphi2MeasureModel
 
 ```lean
 def pphi2TensorSchwingerModel
-    (μ : Measure FieldConfig2) [IsProbabilityMeasure μ] :
+    (μ : Measure FieldConfig2) [IsProbabilityMeasure μ]
+    (hMoment : ∀ (n : ℕ) (f : Fin n → TestFunction2),
+      Integrable (fun ω : FieldConfig2 => ∏ i, (ω (f i) : ℂ)) μ) :
     TensorSchwingerModel pphi2Formulation where
   schwinger _n f := ∫ ω : FieldConfig2, ∏ i, (ω (f i) : ℂ) ∂μ
 
 def pphi2MeasureToTensorBridge
-    (μ : Measure FieldConfig2) [IsProbabilityMeasure μ] :
+    (μ : Measure FieldConfig2) [IsProbabilityMeasure μ]
+    (hMoment : ∀ (n : ℕ) (f : Fin n → TestFunction2),
+      Integrable (fun ω : FieldConfig2 => ∏ i, (ω (f i) : ℂ)) μ) :
     MeasureToTensorBridge pphi2Formulation (pphi2PairingMeasureModel μ) where
-  tensorSchwinger := pphi2TensorSchwingerModel μ
+  tensorSchwinger := pphi2TensorSchwingerModel μ hMoment
   compatible := by intro _n f; rfl
 ```
 

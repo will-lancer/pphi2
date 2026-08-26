@@ -6,6 +6,7 @@ Authors: Michael R. Douglas
 import Pphi2.AsymTorus.AsymObsTrunc
 import Pphi2.AsymTorus.AsymSpectralGap
 import Pphi2.AsymTorus.AsymVarianceDischarge
+import Pphi2.AsymTorus.AsymGroundUnitary
 import ReflectionPositivity.GroundMeasure
 import ReflectionPositivity.GroundSemigroup
 import ReflectionPositivity.GroundGap
@@ -26,11 +27,14 @@ the asymmetric torus transfer system.  The algebraic part is now concrete:
 * the resulting path-measure second-moment expression is connected back to the
   pphi2 interacting torus moment via `interacting_second_moment_eq_pathMeasure`.
 
-The remaining analytic inputs are isolated as axioms with audit records:
+The remaining model-specific analytic inputs are isolated as axioms with audit
+records:
 
-* sign/representative normalization for the chosen Jentzsch basis vector;
-* ground-isometry intertwining;
 * the finite-periodic denominator and scalar remainder estimates.
+
+The sign/representative normalization and ground-isometry intertwining are now
+formal theorems in this file, using the Jentzsch sign choice and the upstream
+ground-isometry unitarity lemma.
 
 These are exactly the model-specific GNS discharge obligations described in the
 Route-A plan: they are not hidden in theorem hypotheses downstream.
@@ -71,16 +75,32 @@ theorem asymGroundVector_coeFn_eq_groundStateRep
   (Lp.aestronglyMeasurable
     (asymGroundVector Nt Ns P a mass ha hmass)).ae_eq_mk
 
-/-- **Axiom (representative sign normalization).** The chosen measurable
-representative of the Jentzsch ground vector is strictly positive a.e.
+/-- **Representative sign normalization (proved 2026-08-18).** The chosen
+measurable representative of the Jentzsch ground vector is strictly positive
+a.e.
 
-Discharge plan: refine `asymTransferGroundExcitedData` so its distinguished
-Hilbert-basis vector is sign-normalized.  The generic Jentzsch proof already
-establishes constant sign for top eigenvectors; the missing pphi2-side step is
-transporting that sign choice through the stored spectral-data package. -/
-axiom asymGroundStateRep_pos_ae
+This was the "sign normalization" B2 axiom.  It is now discharged exactly along
+the plan recorded in its former docstring: `asymTransferGroundExcitedData` was
+refined to carry the field `hground_pos`, and that field is supplied by
+`asymTransferOperator_ground_simple_spectral_pos`, which uses the generic
+Jentzsch constant-sign theorem (`eigenvector_constant_sign`, Phase 5 of
+`Pphi2/TransferMatrix/JentzschProof.lean`) together with the observation that
+negating *every* vector of a Hilbert basis again gives a Hilbert basis with the
+same eigenvalues (`hilbertBasisNeg`).  So the sign choice is transported
+through the stored spectral-data package, and no analytic input is added. -/
+theorem asymGroundStateRep_pos_ae
     (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass) :
-    ∀ᵐ ψ ∂ν, 0 < asymGroundStateRep (Nt := Nt) (Ns := Ns) P a mass ha hmass ψ
+    ∀ᵐ ψ ∂ν, 0 < asymGroundStateRep (Nt := Nt) (Ns := Ns) P a mass ha hmass ψ := by
+  have hdef : ∀ ψ : SpatialField Ns,
+      (⇑(asymGroundVector Nt Ns P a mass ha hmass) : SpatialField Ns → ℝ) ψ
+        = ((asymTransferGroundExcitedData Nt Ns P a mass ha hmass).b
+            (asymTransferGroundExcitedData Nt Ns P a mass ha hmass).i₀ :
+              SpatialField Ns → ℝ) ψ := fun _ => rfl
+  filter_upwards [(asymTransferGroundExcitedData Nt Ns P a mass ha hmass).hground_pos,
+    asymGroundVector_coeFn_eq_groundStateRep (Nt := Nt) (Ns := Ns) P a mass ha hmass]
+    with ψ hpos hrep
+  rw [← hrep, hdef ψ]
+  exact hpos
 
 /-- The measurable ground representative has total `L²(volume)` mass one. -/
 theorem asymGroundStateRep_norm_integral_eq_one
@@ -307,15 +327,20 @@ noncomputable def asymGroundSemigroupData
   omegaL2_eq_W_one :=
     asymGroundStateRep_eq_groundIsometry_one (Nt := Nt) (Ns := Ns) P a mass ha hmass
 
-/-- **Axiom (ground-state semigroup intertwining).** The adjoint-transport
-ground semigroup associated to `asymGroundSemigroupData` intertwines with the
-normalized transfer through `groundIsometry`.
+/-- **Ground-state semigroup intertwining (proved 2026-08-18).** The
+adjoint-transport ground semigroup associated to `asymGroundSemigroupData`
+intertwines with the normalized transfer through `groundIsometry`.
 
-Discharge plan: upgrade the upstream ground isometry to the usual unitary
-ground-state transform using `Ω > 0` a.e.; then the adjoint in
-`GroundSemigroupData.groundSemigroup` is the inverse of `W`, and the
-intertwining equation is definitional. -/
-axiom asymGroundSemigroup_intertwines
+This was the second sign-normalization-dependent B2 axiom, and it is discharged
+exactly along the plan recorded in its former docstring.  Now that
+`asymGroundStateRep_pos_ae` is a theorem, the upstream ground isometry `W` is
+unitary (`ReflectionPositivity.groundIsometry_surjective` in
+`AsymGroundUnitary.lean`), so `W W† = 1`
+(`GroundSemigroupData.W_apply_WAdjoint`) and the intertwining
+`W ∘ U_t = T̂ᵗ ∘ W` is formal
+(`GroundSemigroupData.groundIsometry_groundSemigroup`).  The only pphi2-side
+step left is `(1 / λ₀) • T = λ₀⁻¹ • T`. -/
+theorem asymGroundSemigroup_intertwines
     (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
     (γ : ℝ) (hγ0 : 0 ≤ γ) (hγ1 : γ < 1)
     (hnorm : ∀ v : L2SpatialField Ns,
@@ -330,7 +355,29 @@ axiom asymGroundSemigroup_intertwines
       =
       (((asymGappedTransfer Nt Ns P a mass ha hmass γ hγ0 hγ1 hnorm).T) ^ t)
         (groundIsometry
-          (asymGroundStateRep_measurable (Nt := Nt) (Ns := Ns) P a mass ha hmass) f)
+          (asymGroundStateRep_measurable (Nt := Nt) (Ns := Ns) P a mass ha hmass) f) := by
+  have hnt :
+      (asymGroundSemigroupData (Nt := Nt) (Ns := Ns) P a mass ha hmass).normalizedTransfer
+        = (asymGappedTransfer Nt Ns P a mass ha hmass γ hγ0 hγ1 hnorm).T := by
+    show (1 / asymTransferGroundEigenvalue Nt Ns P a mass ha hmass) •
+          asymTransferOperatorCLM Nt Ns P a mass ha hmass
+        = (asymTransferGroundEigenvalue Nt Ns P a mass ha hmass)⁻¹ •
+          asymTransferOperatorCLM Nt Ns P a mass ha hmass
+    rw [one_div]
+  calc
+    groundIsometry
+          (asymGroundStateRep_measurable (Nt := Nt) (Ns := Ns) P a mass ha hmass)
+          ((asymGroundSemigroupData (Nt := Nt) (Ns := Ns) P a mass ha hmass).groundSemigroup t f)
+        = ((asymGroundSemigroupData (Nt := Nt) (Ns := Ns)
+              P a mass ha hmass).normalizedTransfer ^ t)
+            (groundIsometry
+              (asymGroundStateRep_measurable (Nt := Nt) (Ns := Ns) P a mass ha hmass) f) :=
+        (asymGroundSemigroupData (Nt := Nt) (Ns := Ns) P a mass ha
+          hmass).groundIsometry_groundSemigroup t f
+    _ = (((asymGappedTransfer Nt Ns P a mass ha hmass γ hγ0 hγ1 hnorm).T) ^ t)
+            (groundIsometry
+              (asymGroundStateRep_measurable (Nt := Nt) (Ns := Ns) P a mass ha hmass) f) := by
+        rw [hnt]
 
 /-- Gap data for the ground-state transformed asym transfer. -/
 noncomputable def asymGroundGapData

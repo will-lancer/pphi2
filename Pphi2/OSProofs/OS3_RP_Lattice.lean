@@ -4,8 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Reflection Positivity on the Lattice (OS3)
 
-Proves reflection positivity for the interacting lattice measure via the
-transfer matrix decomposition.
+Packages the interacting-lattice reflection-positivity argument through the
+transfer-matrix decomposition. Its central Gaussian perfect-square step is
+currently supplied by a private axiom.
 
 ## Main definitions
 
@@ -119,7 +120,18 @@ def fieldReflection2D (φ : ZMod N × ZMod N → ℝ) :
 /-! ## Positive time support
 
 A function is supported at "positive time" if it depends only on
-field values at times t = 1, ..., N/2 - 1. -/
+field values at times t = 1, ..., N/2 - 1.
+
+**Odd-N vs continuum `{t > 0}`.** The lattice half `t.val ≥ N/2` (and the
+strict positive window `0 < t.val ∧ t.val < N/2` below) is the correct
+finite-torus reflection cut. Do **not** flip `≥` to match continuum
+`{t > 0}`. The already-pinned `reflection-positivity` library
+(`isReflectionPositive_of_evenNearestNeighbour`,
+`LatticeInstance.lean:543`; transfer gap `susceptibility_le`,
+`VarianceBound.lean:84`) is abstract RP / gapped transfer. It does not
+supply compact-support density that would identify the odd-N site cut
+with continuum positive time. Chessboard / FSS infrared is still a stub
+(`Chessboard/Chessboard.lean`). -/
 
 /-- A function on the 2D field is supported at positive time if it depends
 only on field values φ(t, x) with 0 < t < N/2. -/

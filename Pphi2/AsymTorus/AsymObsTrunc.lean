@@ -165,6 +165,25 @@ noncomputable def asymSliceObsTruncContract (g : SpatialField Ns) {K : ℝ} (hK 
   spec := asymSliceObsTruncMulCLM_coeFn g hK
   selfAdjoint := asymSliceObsTruncMulCLM_isSelfAdjoint g hK
 
+/-- Truncated multiplication against a transfer power, as a kernel inner product.
+The left leg is replaced by the pointwise spec `A·f`; the right leg remains the
+L² class of `M_B h`, which `kPow_apply` already integrates. -/
+theorem inner_obsTruncMul_transferPow_eq_kPow
+    (Nt : ℕ) [NeZero Nt] [NeZero Ns]
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (g g' : SpatialField Ns) {K K' : ℝ} (hK : 0 < K) (hK' : 0 < K')
+    (m : ℕ) (f h : L2SpatialField Ns) :
+    @inner ℝ _ _ (asymSliceObsTruncMulCLM g hK f)
+        (((asymTransferOperatorCLM Nt Ns P a mass ha hmass) ^ (m + 1))
+          (asymSliceObsTruncMulCLM g' hK' h)) =
+      ∫ x, (asymSliceObsTrunc g K x * f x) *
+          (∫ y, (asymTransferSystem Nt Ns P a mass ha hmass).kPow m x y *
+            (asymSliceObsTruncMulCLM g' hK' h) y ∂volume) ∂volume := by
+  rw [inner_asymTransferOperatorCLM_pow_eq_kPow]
+  refine integral_congr_ae ?_
+  filter_upwards [asymSliceObsTruncMulCLM_coeFn g hK f] with x hx
+  rw [hx]
+
 /-! ## The a-cancellation lemma
 
 The headline of this file: bound the truncated projection L²-norm by the

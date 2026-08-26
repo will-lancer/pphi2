@@ -68,7 +68,7 @@ noncomputable section
 -- `show` is used as an in-proof claim for clarity at several points in this
 -- long proof; the readability cost of switching to `change` outweighs the
 -- linter's preference here.
--- Heartbeat bumps are needed for the larger OS3 RP unification goals.
+-- Heartbeat bumps are needed for the larger OS proof goals.
 -- The unscoped form is intentional.
 set_option linter.style.setOption false
 set_option linter.style.show false
@@ -652,7 +652,7 @@ such that the embedded two-point function is bounded by `p f ^ 2` uniformly
 in N. Discharged via `torusEmbeddedTwoPoint_le_seminorm_tight` (which gives
 the explicit witness `mass⁻¹ · L · C₀² · rapidDecaySeminorm 0 f`).
 
-Phase 2 partial discharge (2026-05-08): same cancellation pattern as
+The bound is discharged by the same cancellation pattern as
 `torusEmbeddedTwoPoint_uniform_bound`. -/
 theorem torusEmbeddedTwoPoint_le_seminorm
     (mass : ℝ) (hmass : 0 < mass) :
@@ -2585,8 +2585,8 @@ analytic in `z ∈ ℂⁿ`.
 3. By Vitali's convergence theorem (locally bounded analytic functions
    converging pointwise have analytic limits), the limit is analytic.
 
-Steps 1 and 3 use `analyticOnNhd_integral` (axiomatized in
-`GeneralResults/ComplexAnalysis.lean`). -/
+Steps 1 and 3 use the proved `analyticOnNhd_integral` theorem from
+`GeneralResults/ComplexAnalysis.lean`. -/
 theorem torusInteracting_os0
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
     (μ : Measure (Configuration (TorusTestFunction L)))
@@ -2797,7 +2797,8 @@ The interacting measure is invariant under translations on T²_L.
   `Z(f) = Z(T_v f)` for all `v ∈ ℝ²`.
 
 This follows directly from `torusInteractingLimit_translation_invariant`,
-which axiomatizes the continuum limit's translation invariance. -/
+which proves the continuum limit's translation invariance from the cutoff
+translation identity and weak convergence. -/
 theorem torusInteracting_os2_translation
     (P : InteractionPolynomial) (mass : ℝ) (hmass : 0 < mass)
     (μ : Measure (Configuration (TorusTestFunction L)))

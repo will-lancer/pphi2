@@ -27,6 +27,7 @@ kernel as the square — they are **reused as-is**, no port needed.
 * `asymTransferOperator_eigenvalues_pos`
 * `asymTransferOperator_ground_simple`
 * `asymTransferOperator_ground_simple_spectral`
+* `asymTransferOperator_ground_simple_spectral_pos`
 
 ## References
 
@@ -290,6 +291,148 @@ theorem asymTransferOperator_ground_simple_spectral
   rcases asymTransferOperator_ground_simple Nt Ns P a mass ha hmass b eigenval h_eigen h_sum
     with ⟨i₀, i₁, hi_ne, hlt, htop⟩
   exact ⟨ι, b, eigenval, i₀, i₁, h_eigen, h_sum, hi_ne, hlt, htop⟩
+
+/-! ## Perron-Frobenius sign normalization of the ground vector
+
+The Jentzsch package above pins the ground *index* `i₀` but says nothing about
+the *sign* of the distinguished basis vector `b i₀`: a Hilbert basis is only
+determined up to a sign on each vector.  Perron-Frobenius does determine the
+sign up to a global flip (`eigenvector_constant_sign`, proved in
+`Pphi2/TransferMatrix/JentzschProof.lean` Phase 5), and flipping every basis
+vector produces another Hilbert basis with the same eigenvalues.  So the
+spectral data can be *chosen* with `b i₀ > 0` a.e., which is what the upstream
+GNS ground-measure construction needs. -/
+
+/-- Negating every vector of a Hilbert basis again gives a Hilbert basis:
+orthonormality is invariant under `x ↦ -x`, and the two families span the same
+subspace. -/
+noncomputable def hilbertBasisNeg {ι : Type} (b : HilbertBasis ι ℝ (L2SpatialField Ns)) :
+    HilbertBasis ι ℝ (L2SpatialField Ns) :=
+  HilbertBasis.mk (v := fun i => -(b i))
+    (by
+      constructor
+      · intro i
+        simpa using b.orthonormal.norm_eq_one i
+      · intro i j hij
+        simpa using b.orthonormal.inner_eq_zero hij)
+    (by
+      have hspan : Submodule.span ℝ (Set.range (fun i => -(b i)))
+          = Submodule.span ℝ (Set.range (⇑b)) := by
+        refine le_antisymm ?_ ?_
+        · rw [Submodule.span_le]
+          rintro x ⟨i, rfl⟩
+          have hmem : b i ∈ Submodule.span ℝ (Set.range (⇑b)) :=
+            Submodule.subset_span (Set.mem_range_self i)
+          exact neg_mem hmem
+        · rw [Submodule.span_le]
+          rintro x ⟨i, rfl⟩
+          have hmem : (fun i => -(b i)) i ∈
+              Submodule.span ℝ (Set.range (fun i => -(b i))) :=
+            Submodule.subset_span (Set.mem_range_self i)
+          simpa using neg_mem hmem
+      rw [hspan]
+      exact le_of_eq b.dense_span.symm)
+
+@[simp] theorem hilbertBasisNeg_apply {ι : Type}
+    (b : HilbertBasis ι ℝ (L2SpatialField Ns)) (i : ι) :
+    hilbertBasisNeg Ns b i = -(b i) :=
+  congrFun (HilbertBasis.coe_mk _ _) i
+
+/-- The Perron-Frobenius top eigenvalue dominates every eigenvalue (not merely
+in absolute value away from `i₀`). -/
+theorem eigenval_le_ground {ι : Type} (eigenval : ι → ℝ) {i₀ : ι}
+    (htop : ∀ i, i ≠ i₀ → |eigenval i| < eigenval i₀) (i : ι) :
+    eigenval i ≤ eigenval i₀ := by
+  by_cases hi : i = i₀
+  · exact le_of_eq (by rw [hi])
+  · exact le_of_lt (lt_of_le_of_lt (le_abs_self _) (htop i hi))
+
+/-- Rayleigh bound at the Perron-Frobenius top: `⟪f, T f⟫ ≤ λ₀ ‖f‖²`.  This is
+the `hlam₀_top` input of the Jentzsch sign lemmas. -/
+theorem asymTransferOperator_rayleigh_le (P : InteractionPolynomial) (a mass : ℝ)
+    (ha : 0 < a) (hmass : 0 < mass)
+    {ι : Type} (b : HilbertBasis ι ℝ (L2SpatialField Ns)) (eigenval : ι → ℝ)
+    (h_sum : ∀ x, HasSum (fun i => (eigenval i * @inner ℝ _ _ (b i) x) • b i)
+      (asymTransferOperatorCLM Nt Ns P a mass ha hmass x))
+    {i₀ : ι} (htop : ∀ i, i ≠ i₀ → |eigenval i| < eigenval i₀)
+    (f : L2SpatialField Ns) :
+    @inner ℝ _ _ f (asymTransferOperatorCLM Nt Ns P a mass ha hmass f)
+      ≤ eigenval i₀ * ‖f‖ ^ 2 :=
+  rayleigh_le_of_le_max (asymTransferOperatorCLM Nt Ns P a mass ha hmass) b eigenval
+    h_sum (eigenval_le_ground eigenval htop) f
+
+/-- **Perron-Frobenius sign dichotomy.** The Jentzsch ground eigenvector is
+either a.e. strictly positive or a.e. strictly negative. -/
+theorem asymTransferOperator_ground_constant_sign (P : InteractionPolynomial) (a mass : ℝ)
+    (ha : 0 < a) (hmass : 0 < mass)
+    {ι : Type} (b : HilbertBasis ι ℝ (L2SpatialField Ns)) (eigenval : ι → ℝ)
+    (h_eigen : ∀ i, (asymTransferOperatorCLM Nt Ns P a mass ha hmass :
+        L2SpatialField Ns →ₗ[ℝ] L2SpatialField Ns) (b i) = eigenval i • b i)
+    (h_sum : ∀ x, HasSum (fun i => (eigenval i * @inner ℝ _ _ (b i) x) • b i)
+      (asymTransferOperatorCLM Nt Ns P a mass ha hmass x))
+    {i₀ : ι} (htop : ∀ i, i ≠ i₀ → |eigenval i| < eigenval i₀) :
+    (∀ᵐ ψ ∂(volume : Measure (SpatialField Ns)),
+        0 < (b i₀ : SpatialField Ns → ℝ) ψ) ∨
+      (∀ᵐ ψ ∂(volume : Measure (SpatialField Ns)),
+        (b i₀ : SpatialField Ns → ℝ) ψ < 0) := by
+  have hne : (b i₀ : L2SpatialField Ns) ≠ 0 := by
+    intro h
+    have hone := b.orthonormal.norm_eq_one i₀
+    rw [h, norm_zero] at hone
+    exact one_ne_zero hone.symm
+  exact eigenvector_constant_sign
+    (asymTransferOperatorCLM Nt Ns P a mass ha hmass)
+    (asymTransferOperator_isCompact Nt Ns P a mass ha hmass)
+    (asymTransferOperator_isSelfAdjoint Nt Ns P a mass ha hmass)
+    (asymTransferOperator_positivityImproving Nt Ns P a mass ha hmass).toPI'
+    (b i₀) hne (eigenval i₀)
+    (asymTransferOperator_eigenvalues_pos Nt Ns P a mass ha hmass b eigenval h_eigen i₀)
+    (h_eigen i₀)
+    (asymTransferOperator_rayleigh_le Nt Ns P a mass ha hmass b eigenval h_sum htop)
+
+/-- **Sign-normalized spectral data.**  Same statement as
+`asymTransferOperator_ground_simple_spectral`, with the extra guarantee that the
+distinguished ground basis vector is a.e. strictly positive.  This discharges
+the sign-normalization obligation of the upstream GNS ground-measure package
+(`groundMeasure` needs a positive representative). -/
+theorem asymTransferOperator_ground_simple_spectral_pos
+    (P : InteractionPolynomial) (a mass : ℝ)
+    (ha : 0 < a) (hmass : 0 < mass) :
+    ∃ (ι : Type) (b : HilbertBasis ι ℝ (L2SpatialField Ns)) (eigenval : ι → ℝ)
+      (i₀ i₁ : ι),
+      (∀ i, (asymTransferOperatorCLM Nt Ns P a mass ha hmass :
+          L2SpatialField Ns →ₗ[ℝ] L2SpatialField Ns) (b i) = eigenval i • b i) ∧
+      (∀ x, HasSum (fun i => (eigenval i * @inner ℝ _ _ (b i) x) • b i)
+          (asymTransferOperatorCLM Nt Ns P a mass ha hmass x)) ∧
+      i₁ ≠ i₀ ∧ eigenval i₁ < eigenval i₀ ∧
+      (∀ i, i ≠ i₀ → |eigenval i| < eigenval i₀) ∧
+      (∀ᵐ ψ ∂(volume : Measure (SpatialField Ns)),
+          0 < (b i₀ : SpatialField Ns → ℝ) ψ) := by
+  obtain ⟨ι, b, eigenval, i₀, i₁, h_eigen, h_sum, hi_ne, hlt, htop⟩ :=
+    asymTransferOperator_ground_simple_spectral Nt Ns P a mass ha hmass
+  rcases asymTransferOperator_ground_constant_sign Nt Ns P a mass ha hmass
+      b eigenval h_eigen h_sum htop with hpos | hneg
+  · exact ⟨ι, b, eigenval, i₀, i₁, h_eigen, h_sum, hi_ne, hlt, htop, hpos⟩
+  -- the ground vector is a.e. negative: flip the whole basis
+  refine ⟨ι, hilbertBasisNeg Ns b, eigenval, i₀, i₁, ?_, ?_, hi_ne, hlt, htop, ?_⟩
+  · intro i
+    rw [hilbertBasisNeg_apply, map_neg, h_eigen i, smul_neg]
+  · intro x
+    have hfun : (fun i => (eigenval i * @inner ℝ _ _ (hilbertBasisNeg Ns b i) x) •
+          hilbertBasisNeg Ns b i)
+        = fun i => (eigenval i * @inner ℝ _ _ (b i) x) • b i := by
+      funext i
+      rw [hilbertBasisNeg_apply, inner_neg_left, mul_neg, neg_smul, smul_neg, neg_neg]
+    rw [hfun]
+    exact h_sum x
+  · have hcoe : (⇑(hilbertBasisNeg Ns b i₀) : SpatialField Ns → ℝ)
+        =ᵐ[(volume : Measure (SpatialField Ns))]
+        fun ψ => -((b i₀ : SpatialField Ns → ℝ) ψ) := by
+      rw [hilbertBasisNeg_apply]
+      exact Lp.coeFn_neg (b i₀)
+    filter_upwards [hneg, hcoe] with ψ hψ hcoeψ
+    rw [hcoeψ]
+    exact neg_pos.mpr hψ
 
 end Pphi2
 

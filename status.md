@@ -1,10 +1,14 @@
 # P(Φ)₂ Project Status
 
+> This file contains dated construction snapshots. The current 2026-08-18
+> source scan finds 25 axiom declarations and 0 sorries. The active working tree
+> has not received a clean remote build or refreshed kernel certificate.
+
 ## Overview
 
 The project formalizes the construction of P(Φ)₂ Euclidean quantum field theory
-in Lean 4 via the Glimm-Jaffe/Nelson lattice approach. All six phases are
-structurally complete and the full project builds successfully (`lake build`).
+in Lean 4 via the Glimm-Jaffe/Nelson lattice approach. The current working tree
+contains conditional construction layers and awaits remote compilation.
 
 The proof architecture is: axiomatize key analytic/probabilistic results with
 detailed proof sketches, prove the logical structure connecting them, and
@@ -16,11 +20,10 @@ and backend-independent reconstruction rules. This keeps the current scalar
 positive-measure construction explicit while opening a path to broader
 Euclidean/Minkowski interfaces.
 
-**Current counter (`./scripts/count_axioms.sh`, 2026-07-14): pphi2 29 raw / 27 real axioms,
-0 sorries; gaussian-field 3 axioms, 0 sorries** (both verified via `count_axioms.sh`,
-GaussianField pinned at `5bb35e8`). The 29 raw → 27 real reconciliation: 2 lines are docstring
-matches of the word "axiom" (`Pphi2/NelsonEstimate/LatticeBridge.lean:21`,
-`Pphi2/NelsonEstimate/LayerCake.lean:85`).
+**Current pphi2 source counter (`./scripts/count_axioms.sh`, 2026-08-18):
+25 axiom declarations and 0 sorries.** The GaussianField dependency was not
+available to the bounded local counter in this review. Its pinned revision is
+recorded in `lake-manifest.json`.
 **2026-07-13 (Phase 4.1, honest ℝ² headline — spec `planning/r2-honest-headline-spec.md`):**
 `IsPphi2Limit` strengthened with the coupled-lattice conjunct (`ν k = continuumMeasure 2 (N k)
 P (a k) mass`, `N k → ∞`, `N k·a k → ∞`) — the δ₀ vacuity is CLOSED; the former δ₀ "proof" of
@@ -51,7 +54,7 @@ two-point decays as `C·√gSV·√gSV'·(e^{−m₀·d·a} + e^{−m₀·(Nt·a
 a-uniformly; kernel footprint = trio + {`asymTransferGap_uniform_fixedLs`,
 `asymFinitePeriodicBridge_remainder_bound_uniform`} only (the definitional
 envelope/residual split avoids the packaged GNS-bridge axioms); no new axioms, counts
-unchanged (30 raw, 0 sorries). The 24 real break down as **22 architectural** (enumerated by OS-program cluster in
+unchanged (30 raw, 0 sorries). At that dated snapshot, the 24 real axioms broke down as **22 architectural** (enumerated by OS-program cluster in
 [`planning/INDEX.md`](planning/INDEX.md), the master status machine) and **2 private
 scaffolding** (`asymTorusInteracting_exponentialMomentBound` in `AsymTorusOS.lean`,
 `gaussian_rp_cov_perfect_square` in `OS3_RP_Lattice.lean`). The seven new architectural axioms
@@ -584,7 +587,7 @@ refactoring (functionality consolidated into L2Operator axioms).
 | ~~`interacting_moment_bound`~~ | Hypercontractivity | **Proved** | Bounds interacting L^{pn} moments in terms of FREE Gaussian L^{2n} moments via Cauchy-Schwarz density transfer. Proved from `exponential_moment_bound`, `partitionFunction_ge_one`, `pairing_memLp`, and Hölder/Cauchy-Schwarz. |
 | ~~`partitionFunction_ge_one`~~ | Hypercontractivity | **Proved** | Z_a ≥ 1 by Jensen's inequality (`ConvexOn.map_integral_le`) + `interactionFunctional_mean_nonpos`. |
 | ~~`interactionFunctional_mean_nonpos`~~ | Hypercontractivity | **Proved** | ∫ V dμ_GFF ≤ 0. Proved from `wickMonomial_latticeGaussian` (Hermite orthogonality) + linearity + `P.coeff_zero_nonpos`. |
-| `prokhorov_configuration_sequential` | Convergence | Infrastructure | Sequential extraction axiom directly on `Configuration (ContinuumTestFunction d)`; avoids global Polish/Borel assumptions on full weak-* dual. |
+| ~~`prokhorov_configuration_sequential`~~ | Convergence | **Proved** from `GaussianField.prokhorov_configuration` on `Configuration (ContinuumTestFunction d)`. |
 | ~~`prokhorov_sequential`~~ | Convergence | ~~Infrastructure~~ | **Proved** — generic Polish-space sequential Prokhorov theorem (kept as theorem, not used by `continuumLimit`). |
 | ~~`schwinger2_convergence`~~ | Convergence | **PROVED** | 2-point Schwinger functions converge. Proved from `schwinger_n_convergence`. |
 | `schwinger_n_convergence` | Convergence | Hard | n-point Schwinger functions converge along subsequence. Diagonal subsequence extraction. |
@@ -653,7 +656,7 @@ Note: `os1_inheritance` is a theorem (not axiom) — OS1 transfers trivially sin
 - `torusEmbedLift_measurable`: Measurability of torus embedding lift.
 - `torusContinuumMeasure_isProbability`: Pushforward of probability measure is probability.
 - `torus_second_moment_uniform`: Uniform second moment bound from `torusEmbeddedTwoPoint_uniform_bound`.
-- `torusGaussianLimit_exists`: **PROVED** — Prokhorov extraction on Polish torus (no `prokhorov_configuration_sequential` axiom needed).
+- `torusGaussianLimit_exists`: **PROVED** by the configuration-space Prokhorov pipeline.
 - `torusGaussianLimit_converges`: **PROVED** — Full sequence convergence (not just subsequential). From Gaussianity + covariance uniqueness.
 - `torusGaussianLimit_nontrivial`: `∫ (ω f)² dμ > 0` from `torusContinuumGreen_pos`.
 - `torusInteractingMeasure_isProbability`: Interacting pushforward is probability.
@@ -700,7 +703,7 @@ Note: `os1_inheritance` is a theorem (not axiom) — OS1 transfers trivially sin
 | `continuum_exponential_clustering` | AxiomInheritance | Hard | `‖Z[f+τ_a g] - Z[f]Z[g]‖ ≤ C·exp(-m₀·‖a‖)`. Spectral gap → exp clustering. Feeds OS4. |
 
 **Proof chain theorems** (all fully proved, no sorries):
-- `ward_identity_lattice`: Ward identity bound (**proved**)
+- `ward_identity_lattice`: identical-integral placeholder; the real lattice Ward identity remains open
 - `anomaly_scaling_dimension`: lattice dispersion Taylor error bound (**proved**, cos_bound + crude bound)
 - `configuration_cexp_eval_sub_integrand` / `configuration_cexp_eval_dist`: generic characteristic-functional defect observables (**proved** definitions, in `FunctionalAnalysis`)
 - `norm_configuration_expIntegral_sub_le_integral_cexp_eval_dist`: generic CF defect control theorem (**proved**, in `FunctionalAnalysis`)
@@ -774,7 +777,7 @@ Note: `os1_inheritance` is a theorem (not axiom) — OS1 transfers trivially sin
 | ~~`energyLevel_gap`~~ | Positivity | **Proved** — E₁ > E₀ from transfer eigenvalue gap. |
 | ~~`rp_closed_under_weak_limit`~~ | OS3_RP_Inheritance | **Proved** — RP closed under weak limits. |
 | ~~`reflection_positivity_lattice`~~ | OS3_RP_Lattice | **Converted** to `lattice_rp` axiom. |
-| ~~`continuumLimit`~~ | Convergence | **Proved** — Apply configuration-space sequential Prokhorov axiom to the tight family (`prokhorov_configuration_sequential` + `continuumMeasures_tight`). |
+| ~~`continuumLimit`~~ | Convergence | **Proved** — Apply the configuration-space sequential Prokhorov theorem to the tight family (`prokhorov_configuration_sequential` + `continuumMeasures_tight`). |
 | ~~`continuumTimeReflection`~~ | TimeReflection | **Proved** — defined via `compCLMOfContinuousLinearEquiv`. |
 | ~~`so2Generator`~~ | OS2_WardIdentity | **Proved** — SO(2) generator J f = x₁·∂f/∂x₂ - x₂·∂f/∂x₁ via `smulLeftCLM` + `lineDerivOpCLM`. |
 | ~~`pphi2_exists`~~ | OS2_WardIdentity | **Proved** — Main existence theorem. Uses `continuumLimit_satisfies_fullOS`. |
@@ -795,7 +798,9 @@ Note: `os1_inheritance` is a theorem (not axiom) — OS1 transfers trivially sin
 5. **Hypercontractivity** — `wickMonomial_latticeGaussian`, `wickConstant_eq_variance`, and `gaussian_hermite_zero_mean` are now **theorems**. The remaining work in this area is downstream analytic strengthening, not the Wick/GFF variance bridge. `wickConstant_eq_variance` is now proved generically via `GeneralResults/LatticeProductDFT.lean`. `wickPolynomial_uniform_bounded_below` proved. `exponential_moment_bound` proved from bounded-below + probability measure. `interactionFunctional_mean_nonpos` proved from `wickMonomial_latticeGaussian` + linearity + `P.coeff_zero_nonpos`. `partitionFunction_ge_one` / `interacting_moment_bound` as before.
 6. **`second_moment_uniform` + `continuumMeasures_tight`** — Tightness argument. Depends on Nelson.
 7. ~~**`spectral_gap_uniform`**~~ — REMOVED 2026-07-12 (false as stated; coupled-limit replacement = `planning/cyl-2a-volume-scaling-addendum.md` 17a).
-8. **`ward_identity_lattice` + `anomaly_vanishes`** — Ward identity + power counting for rotation invariance.
+8. **Lattice Ward identity + `anomaly_vanishes`** — the current
+   `ward_identity_lattice` declaration is a vacuous identical-integral bound;
+   the rotated-observable theorem remains open.
 
 ### Tier 3: Medium-difficulty proofs
 
@@ -847,7 +852,7 @@ The following theorems have complete proofs (no sorry):
 | `continuumMeasure_isProbability` | Embedding | Pushforward of probability measure is probability measure |
 | `connectedTwoPoint_symm` | OS4_MassGap | Symmetry of connected 2-point function |
 | `energyLevel_gap` | Positivity | E₁ > E₀ from spectral-data ground/excited separation |
-| `prokhorov_configuration_sequential` | Convergence | Sequential extraction on configuration space (axiom) |
+| `prokhorov_configuration_sequential` | Convergence | Sequential extraction on configuration space (proved theorem) |
 | `prokhorov_sequential` | Convergence | Generic Polish-space sequential Prokhorov theorem (proved) |
 | `wickPolynomial_bounded_below` | WickPolynomial | Wick polynomial bounded below — from leading term domination via `poly_even_degree_bounded_below` |
 | `poly_even_degree_bounded_below` | WickPolynomial | Even-degree polynomial with positive leading coeff is bounded below — `eval_eq_sum_range` + coefficient bound + `Continuous.exists_forall_le` |
@@ -861,7 +866,7 @@ The following theorems have complete proofs (no sorry):
 | `compTimeReflection2` | OSAxioms | Time reflection on Schwartz space — `compCLMOfContinuousLinearEquiv` with time reflection CLE |
 | `SchwartzMap.translate` | OSAxioms | Translation on Schwartz space — `compCLMOfAntilipschitz` with translation |
 | `so2Generator` | OS2_WardIdentity | SO(2) generator J f = x₁·∂f/∂x₂ - x₂·∂f/∂x₁ — `smulLeftCLM` + `lineDerivOpCLM` |
-| `continuumLimit` | Convergence | Continuum limit via configuration extraction axiom — `prokhorov_configuration_sequential` + `continuumMeasures_tight` |
+| `continuumLimit` | Convergence | Fixed-`N` UV subsequence via the proved configuration extractor and `continuumMeasures_tight` |
 | `latticeEmbed` | Embedding | Lattice→S'(ℝ^d) embedding — `SchwartzMap.mkCLMtoNormedSpace` with `|ι(φ)(f)| ≤ (a^d·Σ|φ(x)|)·seminorm(0,0)(f)` |
 | `latticeEmbed_eval` | Embedding | Evaluation formula — `rfl` from construction |
 | `transferOperator_spectral` | L2Operator | Spectral decomposition — `compact_selfAdjoint_spectral` from gaussian-field |
@@ -953,7 +958,7 @@ infrastructure. Assessment date: 2026-03-04.
 |-------|------|----------|
 | ~~`spectral_gap_uniform`~~ | SpectralGap | REMOVED 2026-07-12 (false as stated; see AXIOM_AUDIT.md). |
 | ~~`spectral_gap_lower_bound`~~ | SpectralGap | REMOVED 2026-07-12 (same). |
-| `prokhorov_configuration_sequential` | Convergence | Sequential extraction on S'(ℝ²). Blocked by Mathlib nuclear space gap. (Not needed for torus path.) |
+| ~~`prokhorov_configuration_sequential`~~ | Convergence | **Proved** via `GaussianField.prokhorov_configuration`; the weighted-Sobolev route remains an alternative. |
 | `continuumLimit_nonGaussian` | Convergence | Nonzero 4th cumulant via perturbation theory. |
 | `continuumLimit_nontrivial` | Convergence | Two-point function > 0. Correlation inequalities (Griffiths, FKG). |
 | `schwinger_n_convergence` | Convergence | n-point Schwinger functions converge. Diagonal subsequence extraction. |

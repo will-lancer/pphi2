@@ -25,13 +25,11 @@ review history. Five-step structure (S1–S5: pointwise binomial decomposition,
 reindexing by smooth/rough degree pair, cross-term orthogonality on the
 joint measure, per-term L² bound, final assembly).
 
-## Upstream prerequisites (sorry'd, Phase 2 textbook discharge)
+## Upstream estimates
 
-Two `(a, N)`-uniform Glimm–Jaffe Ch. 8 (Thm 8.5.2) Fourier estimates:
-- `canonicalSmoothCovariance_le_log` — smooth covariance L^∞ uniform
-- `canonicalRoughCovariance_pow_sum_le` — rough covariance L^m sum uniform
-
-Quarantined to `CovarianceSplit.lean` once Codex hits the exact API needed.
+The `(a, N)`-uniform estimates used below are
+`smoothWickConstant_le_log_uniform_in_aN` and
+`canonicalRoughCovariance_pow_sum_le_uniform_in_aN`.
 
 ## References
 
@@ -2549,7 +2547,7 @@ lemma integral_sq_real_sum_of_pairwise_orthogonal
 Distinct `(k, j) ≠ (k', j')` give zero cross-expectation:
 `∫ canonicalCrossTerm k j · canonicalCrossTerm k' j' ∂canonicalJointMeasure = 0`.
 
-**Proof path** (deferred): the joint measure is `Measure.prod μ_S μ_R`
+**Proof path:** the joint measure is `Measure.prod μ_S μ_R`
 (see `FieldDecomposition.lean:47`), and the cross-term factorises as
 `(smooth Wick monomial in η.1) · (rough Wick monomial in η.2)`. Apply
 `MeasureTheory.integral_prod_mul` to split into a smooth integral
@@ -2565,11 +2563,11 @@ centered Gaussian field with covariance `C`. On the canonical side
 this reduces (via `wickMonomial_pow_sum_expansion_of_totalDegree`
 from gaussian-field) to multivariate Hermite orthogonality on the
 standard product Gaussian (`hermiteMulti_orthogonality` from
-gaussian-hilbert). Either provable in-repo or addable upstream.
+gaussian-hilbert), as implemented in the proof below.
 
-S3 is the gating sorry for the L²-sq decomposition that S4 needs. -/
+The proof below supplies the L²-squared decomposition that S4 needs. -/
 
-/-- **S3 (sorry'd): cross-term orthogonality.** Distinct `(k, j)` and
+/-- **S3: cross-term orthogonality.** Distinct `(k, j)` and
 `(k', j')` give zero cross-expectation under the canonical joint
 measure. Together with `MeasureTheory.integral_prod_mul`, this is the
 one analytical input S4 needs from the Wick-orthogonality side.
@@ -3386,25 +3384,26 @@ at least one rough-field factor) and `k ≤ P.n`, the L² norm squared
 of `canonicalCrossTerm η k j` is bounded by `K · T · (1 + |log T|)^j`
 uniformly in `(a, N)` at fixed `(L, mass)`.
 
-**Proof path** (deferred): apply the diagonal 2-site Wick formulas
+**Proof path:** apply the diagonal 2-site Wick formulas
 (smooth and rough) inside `MeasureTheory.integral_prod_mul` to get
   `‖cross(k, j)‖²_L² = (a^d)² · Σ_{x,y} (j! · C_S(x,y)^j) · ((k-j)! · C_R(x,y)^{k-j})`
 then apply the upstream `(a, N)`-uniform Glimm-Jaffe bounds:
-* `canonicalSmoothCovariance_le_log` on `‖C_S‖_∞ ≤ A + B|log T|`
-* `canonicalRoughCovariance_pow_sum_le` on `a^d Σ_y C_R(x,y)^m ≤ C_m · T`
+* `smoothWickConstant_le_log_uniform_in_aN` on the smooth covariance bound
+* `canonicalRoughCovariance_pow_sum_le_uniform_in_aN` on the rough covariance sum
 and finite (size-`L^d`) volume sums on x.
 
 Net bound `O(T · (1+|log T|)^j)` uniformly in `(a, N)`. -/
 
-/-- **S4 (sorry'd): per-cross-term L² bound.** For `(k, j)` with
+/-- **S4: per-cross-term L² bound.** For `(k, j)` with
 `1 ≤ k - j` (rough degree at least one) and `k ≤ P.n`, there exists
 a constant `K` (uniform in `(a, N)` at fixed `(L, mass)`) bounding
 `∫ canonicalCrossTerm² dμ_joint ≤ K · T · (1 + |log T|)^j`.
 
 Depends on:
 * the canonical-side diagonal 2-site Wick power formula, and
-* the upstream `(a, N)`-uniform Glimm-Jaffe Fourier estimates
-  (`canonicalSmoothCovariance_le_log`, `canonicalRoughCovariance_pow_sum_le`).
+* the upstream `(a, N)`-uniform Glimm-Jaffe estimates
+  (`smoothWickConstant_le_log_uniform_in_aN`,
+   `canonicalRoughCovariance_pow_sum_le_uniform_in_aN`).
 
 See module docstring above for the full proof sketch. -/
 theorem canonicalCrossTerm_l2_sq_le

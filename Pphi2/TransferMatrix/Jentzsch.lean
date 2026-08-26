@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Jentzsch's Theorem and Kernel Positivity
 
-This file states Jentzsch's theorem (proved in JentzschProof.lean), axiomatizes
+This file states Jentzsch's theorem (proved in JentzschProof.lean), proves the
 kernel positivity facts about the transfer operator, and derives the
 Perron-Frobenius properties needed for the P(Φ)₂ construction.
 
@@ -20,22 +20,22 @@ Proved in `JentzschProof.lean` via the variational absolute value trick.
 **Important**: Jentzsch does NOT imply all eigenvalues are positive.
 Counterexample: [[1,2],[2,1]] is positivity-improving with eigenvalues 3,-1.
 
-## Axiom 2: Transfer operator positivity-improving
+## Transfer operator positivity-improving
 
 The kernel T(ψ,ψ') = w(ψ)·G(ψ-ψ')·w(ψ') > 0 is strictly positive.
 
-## Axiom 3: Gaussian kernel is strictly positive definite
+## Gaussian kernel strictly positive definite
 
 ⟨f, Tf⟩ > 0 for nonzero f, since the Gaussian kernel exp(-½‖·‖²) has
 strictly positive Fourier transform (Bochner), and w > 0 preserves this.
 
-## Axiom 4: L²(ℝ^Ns) Hilbert basis nontriviality
+## L²(ℝ^Ns) Hilbert basis nontriviality
 
 Any Hilbert basis of L²(ℝ^Ns) has at least 2 elements.
 
 ## Derived theorems
 
-From Jentzsch + axioms 2-4 we derive:
+From Jentzsch and the positivity and nontriviality theorems we derive:
 - `transferOperator_inner_nonneg`: ⟨f, Tf⟩ ≥ 0
 - `transferOperator_eigenvalues_pos`: all λᵢ > 0
 - `transferOperator_ground_simple`: unique leading eigenvalue with strict gap
@@ -96,7 +96,7 @@ namespace Pphi2
 
 variable (Ns : ℕ) [NeZero Ns]
 
-/-! ## Axiom 2: Transfer operator is positivity-improving -/
+/-! ## Transfer operator is positivity-improving -/
 
 /-- The transfer operator is positivity-improving.
 
@@ -222,7 +222,7 @@ theorem transferOperator_positivityImproving (P : InteractionPolynomial) (a mass
   filter_upwards [hresult_spec, hh_pos] with x hx hhx
   rw [hx]; exact mul_pos (hw_pos x) hhx
 
-/-! ## Axiom 3: Gaussian convolution is strictly positive definite
+/-! ## Gaussian convolution is strictly positive definite
 
 The Gaussian kernel G(x) = exp(-½‖x‖²) has Fourier transform
 Ĝ(k) = (2π)^{n/2} exp(-½‖k‖²) > 0 everywhere. By Bochner's theorem and
@@ -230,8 +230,8 @@ Plancherel, convolution by G is strictly positive definite on L²:
 
   ⟨f, Conv_G f⟩ = ∫ |f̂(k)|² Ĝ(k) dk > 0  for f ≠ 0.
 
-This is the bridge axiom from the [bochner](https://github.com/mrdouglasny/bochner)
-formalization project. -/
+This is proved in `GaussianFourier.lean` from the Fourier representation of the
+Gaussian convolution operator. -/
 
 /-- Convolution with the Gaussian kernel is strictly positive definite on L².
 
@@ -249,7 +249,7 @@ theorem convolution_gaussian_strictly_positive_definite :
 From the factorization T = M_w ∘ Conv_G ∘ M_w with M_w self-adjoint:
   ⟨f, Tf⟩ = ⟨M_w f, Conv_G(M_w f)⟩ > 0
 since w > 0 makes M_w injective (f ≠ 0 → M_w f ≠ 0) and Conv_G is
-strictly PD by the axiom above. -/
+strictly PD by the theorem above. -/
 
 /-- The transfer operator is strictly positive definite: ⟨f, Tf⟩ > 0 for
 all nonzero f ∈ L².
@@ -257,7 +257,7 @@ all nonzero f ∈ L².
 **Proof**: Uses self-adjointness of M_w to rewrite
 ⟨f, M_w(Conv_G(M_w f))⟩ = ⟨M_w f, Conv_G(M_w f)⟩,
 injectivity of M_w (from w > 0) to show M_w f ≠ 0,
-and the Gaussian convolution strict PD axiom. -/
+and the Gaussian convolution strict PD theorem. -/
 theorem transferOperator_strictly_positive_definite (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :
     ∀ (f : L2SpatialField Ns), f ≠ 0 →
@@ -414,8 +414,8 @@ theorem l2SpatialField_hilbertBasis_nontrivial
 /-! ## Derived theorems
 
 We now derive the Perron-Frobenius properties of the transfer
-operator from the axioms above. These have the same signatures as the
-former axioms in L2Operator.lean, ensuring downstream compatibility. -/
+operator from the theorems above. These have the same signatures as the
+former declarations in L2Operator.lean, ensuring downstream compatibility. -/
 
 /-- ⟨f, Tf⟩ ≥ 0 for all f. Immediate from strict PD (which gives > 0 for f ≠ 0,
 and ⟨0, T0⟩ = 0 for f = 0). -/
@@ -457,7 +457,7 @@ theorem transferOperator_eigenvalues_pos (P : InteractionPolynomial) (a mass : �
   rw [hnorm, one_pow, mul_one] at hpd
   exact hpd
 
-/-- Ground-state simplicity and existence of first excited level.
+/-- Ground-state simplicity and existence of a selected non-ground level.
 
 Derived from Jentzsch (which gives i₀ with spectral gap) combined with
 nontriviality (to pick some i₁ ≠ i₀) and eigenvalue positivity
@@ -495,7 +495,7 @@ theorem transferOperator_ground_simple (P : InteractionPolynomial) (a mass : ℝ
     rwa [abs_of_pos (hall_pos i₁)] at this
   exact ⟨i₀, i₁, hi₁_ne, hlt⟩
 
-/-- Spectral data with distinguished ground and first excited levels. -/
+/-- Spectral data with distinguished ground and selected non-ground levels. -/
 theorem transferOperator_ground_simple_spectral (P : InteractionPolynomial) (a mass : ℝ)
     (ha : 0 < a) (hmass : 0 < mass) :
     ∃ (ι : Type) (b : HilbertBasis ι ℝ (L2SpatialField Ns)) (eigenval : ι → ℝ)

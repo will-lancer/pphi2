@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 # Existence of the Torus Gaussian Continuum Limit
 
-Applies the **proved** Prokhorov theorem on Polish spaces to extract a weakly
-convergent subsequence from the tight family of torus Gaussian measures.
+Applies the **proved** configuration-space Prokhorov theorem to extract a
+weakly convergent subsequence from the tight family of torus Gaussian measures.
 
 ## Main results
 
@@ -16,12 +16,11 @@ convergent subsequence from the tight family of torus Gaussian measures.
 This is the key payoff of the torus approach:
 
 1. `torusContinuumMeasures_tight` gives tightness of {ν_{GFF,N}}.
-2. `configuration_torus_polish` gives that Configuration(TorusTestFunction L) is Polish.
-3. `prokhorov_sequential` (already proved in `Convergence.lean`) extracts a
-   weakly convergent subsequence.
+2. `prokhorov_configuration` applies the proved configuration-space extraction
+   theorem to the tight family.
 
-Unlike the S'(ℝ^d) case, where we needed the axiom `prokhorov_configuration_sequential`
-because S'(ℝ^d) is not obviously Polish, here we use the **proved** theorem directly.
+Unlike the S'(ℝ^d) route, this file uses the configuration-space theorem
+`prokhorov_configuration` directly.
 
 ## References
 
@@ -44,9 +43,9 @@ variable (L : ℝ) [hL : Fact (0 < L)]
 
 The key theorem: existence of a subsequential weak limit.
 
-This uses `prokhorov_sequential` (proved!) rather than the axiomatized
-`prokhorov_configuration_sequential`. The crucial ingredient is that
-`Configuration(TorusTestFunction L)` is Polish (from `configuration_torus_polish`). -/
+This uses the proved configuration-space theorem
+`prokhorov_configuration`, which is stated directly for the cylindrical
+configuration space and does not require a `PolishSpace` hypothesis. -/
 
 /-- **Existence of the torus Gaussian free field continuum limit.**
 
@@ -54,10 +53,9 @@ For N → ∞, the torus-embedded Gaussian measures `ν_{GFF,N}` have a
 weakly convergent subsequence. The limit is a probability measure on
 Configuration(TorusTestFunction L).
 
-**This theorem is PROVED**, not axiomatized. The proof uses:
-1. Tightness (`torusContinuumMeasures_tight`)
-2. Polish space (`configuration_torus_polish`)
-3. Prokhorov's theorem (`prokhorov_sequential` — already proved) -/
+**This theorem is PROVED**, not axiomatized. The proof uses tightness
+(`torusContinuumMeasures_tight`) and the configuration-space Prokhorov
+theorem (`prokhorov_configuration`). -/
 theorem torusGaussianLimit_exists
     (mass : ℝ) (hmass : 0 < mass) :
     ∃ (φ : ℕ → ℕ) (μ : Measure (Configuration (TorusTestFunction L))),

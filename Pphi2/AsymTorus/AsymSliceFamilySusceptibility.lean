@@ -112,82 +112,16 @@ private theorem map_withDensity_eq_of_invariant {α : Type*} [MeasurableSpace α
   rw [Measure.map_apply hT hs, withDensity_apply _ (hT hs), withDensity_apply _ hs]
   calc
     ∫⁻ x in T ⁻¹' s, f x ∂μ
-        = ∫⁻ x in T ⁻¹' s, f (T x) ∂μ := lintegral_congr fun x => (hfT x).symm
+        = ∫⁻ x in T ⁻¹' s, f (T x) ∂μ :=
+          setLIntegral_congr_fun (hT hs) fun x _ => (hfT x).symm
     _ = ∫⁻ y in s, f y ∂(μ.map T) := (setLIntegral_map hs hf hT).symm
     _ = ∫⁻ y in s, f y ∂μ := by rw [hμ]
 
 /-! ## Parity (`Z₂` field symmetry) of the interacting asym measure
 
-`P` is even (`InteractionPolynomial.coeff_odd_eq_zero`), so the Wick-ordered
-interaction is even in the field, the Boltzmann weight is parity-invariant,
-and — since the centered lattice Gaussian is parity-invariant
-(`GaussianField.measure_neg_invariant`) — so is the interacting measure and
-its path-measure pushforward. -/
-
-/-- Wick monomials have the parity of their degree:
-`:(-x)^n:_c = (-1)^n · :x^n:_c`. -/
-theorem wickMonomial_neg : ∀ (n : ℕ) (c x : ℝ),
-    wickMonomial n c (-x) = (-1) ^ n * wickMonomial n c x
-  | 0, _, _ => by simp
-  | 1, _, _ => by simp
-  | n + 2, c, x => by
-      rw [wickMonomial_succ_succ, wickMonomial_succ_succ,
-        wickMonomial_neg (n + 1), wickMonomial_neg n, pow_succ, pow_succ]
-      ring
-
-/-- The Wick-ordered interaction polynomial of an even `P` is even:
-`:P(-x):_c = :P(x):_c`. -/
-theorem wickPolynomial_neg (P : InteractionPolynomial) (c x : ℝ) :
-    wickPolynomial P c (-x) = wickPolynomial P c x := by
-  unfold wickPolynomial
-  congr 1
-  · rw [wickMonomial_neg, Even.neg_one_pow P.hn_even, one_mul]
-  · refine Finset.sum_congr rfl fun m _ => ?_
-    by_cases hm : Odd (m : ℕ)
-    · simp [P.coeff_odd_eq_zero m hm]
-    · rw [Nat.not_odd_iff_even] at hm
-      rw [wickMonomial_neg, Even.neg_one_pow hm, one_mul]
-
-/-- The asym interaction functional is invariant under the field flip
-`ω ↦ ω ∘ (-1)`. -/
-theorem interactionFunctionalAsym_comp_neg
-    (P : InteractionPolynomial) (a mass : ℝ)
-    (ω : Configuration (AsymLatticeField Nt Ns)) :
-    interactionFunctionalAsym Nt Ns P a mass
-        (configurationPullback negCLM ω) =
-      interactionFunctionalAsym Nt Ns P a mass ω := by
-  unfold interactionFunctionalAsym
-  congr 1
-  refine Finset.sum_congr rfl fun x _ => ?_
-  rw [configurationPullback_apply, negCLM_apply, map_neg, wickPolynomial_neg]
-
-/-- The asym lattice Gaussian measure is parity-invariant. -/
-theorem latticeGaussianMeasureAsym_map_neg
-    (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass) :
-    (latticeGaussianMeasureAsym Nt Ns a mass ha hmass).map
-        (configurationPullback (negCLM (E := AsymLatticeField Nt Ns))) =
-      latticeGaussianMeasureAsym Nt Ns a mass ha hmass := by
-  unfold latticeGaussianMeasureAsym
-  exact measure_neg_invariant (latticeCovarianceAsymGJ Nt Ns a mass ha hmass)
-
-/-- **Parity invariance of the interacting asym lattice measure.**  The
-Boltzmann weight of the even interaction is parity-invariant and the centered
-Gaussian is parity-invariant, hence so is the normalized interacting measure. -/
-theorem interactingLatticeMeasureAsym_map_neg
-    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass) :
-    (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass).map
-        (configurationPullback (negCLM (E := AsymLatticeField Nt Ns))) =
-      interactingLatticeMeasureAsym Nt Ns P a mass ha hmass := by
-  unfold interactingLatticeMeasureAsym
-  rw [Measure.map_smul]
-  congr 1
-  refine map_withDensity_eq_of_invariant (measurable_configurationPullback _)
-    (latticeGaussianMeasureAsym_map_neg (Nt := Nt) (Ns := Ns) a mass ha hmass)
-    (ENNReal.measurable_ofReal.comp
-      ((interactionFunctionalAsym_measurable Nt Ns P a mass).neg.exp))
-    fun ω => ?_
-  unfold boltzmannWeightAsym
-  rw [interactionFunctionalAsym_comp_neg]
+Lattice-level parity lives in `AsymLatticeMeasure`: `wickPolynomial_neg`,
+`interactingLatticeMeasureAsym_map_neg`. The path-measure pushforward of that
+invariance is recorded here. -/
 
 /-- **Parity invariance of the asym periodic path measure.**  Pushes the
 lattice parity through the slice/eval factorization. -/
@@ -402,6 +336,99 @@ theorem pathMeasure_pair_eq_pathTwoPoint (Ts : TransferSystem S) (n : ℕ) [NeZe
         rfl
 
 end CyclicShift
+
+/-- Truncated Gibbs two-point of two time slices, as a path-measure pairing.
+Pushforward of the interacting lattice measure along `slice ∘ eval`. -/
+theorem interacting_truncSlice_cross_moment_eq_pathMeasure
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (g g' : SpatialField Ns) (K : ℝ) (t t' : ZMod Nt) :
+    ∫ ω, asymSliceObsTrunc g K
+            (asymSliceEquiv Nt Ns (evalMapAsym Nt Ns ω) t) *
+          asymSliceObsTrunc g' K
+            (asymSliceEquiv Nt Ns (evalMapAsym Nt Ns ω) t')
+        ∂(interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) =
+      ∫ ψ, asymSliceObsTrunc g K (ψ t) * asymSliceObsTrunc g' K (ψ t')
+        ∂((asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt) := by
+  have hsl : Measurable (asymSliceEquiv Nt Ns) := by
+    rw [← asymSliceMeasurableEquiv_coe Nt Ns]
+    exact (asymSliceMeasurableEquiv Nt Ns).measurable
+  have hev : Measurable (evalMapAsym Nt Ns) := measurable_evalMapAsym Nt Ns
+  have hcomp : (interactingLatticeMeasureAsym Nt Ns P a mass ha hmass).map
+        (asymSliceEquiv Nt Ns ∘ evalMapAsym Nt Ns) =
+      (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt := by
+    rw [← Measure.map_map hsl hev]
+    exact interactingLatticeMeasureAsym_slice_pushforward_eq_pathMeasure Nt Ns P a mass ha hmass
+  rw [← hcomp, integral_map (hsl.comp hev).aemeasurable
+    (((asymSliceObsTrunc_measurable g K).comp (measurable_pi_apply t)).mul
+      ((asymSliceObsTrunc_measurable g' K).comp
+        (measurable_pi_apply t'))).aestronglyMeasurable]
+  rfl
+
+/-- Truncated Gibbs two-point equals the dictionary `pathTwoPoint` at separation
+`t' - t` (cyclic reduction). This is not the one-sided inner product
+`⟪M_A Ω, T^{|t'-t|} M_B Ω⟫`; that identification still needs the rank-one wrap. -/
+theorem interacting_truncSlice_cross_moment_eq_pathTwoPoint
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (g g' : SpatialField Ns) {K : ℝ} (hK : 0 < K) (t t' : ZMod Nt) :
+    ∫ ω, asymSliceObsTrunc g K
+            (asymSliceEquiv Nt Ns (evalMapAsym Nt Ns ω) t) *
+          asymSliceObsTrunc g' K
+            (asymSliceEquiv Nt Ns (evalMapAsym Nt Ns ω) t')
+        ∂(interactingLatticeMeasureAsym Nt Ns P a mass ha hmass) =
+      pathTwoPoint
+        (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
+        (asymSliceObsTruncContract (Ns := Ns) g hK)
+        (asymSliceObsTruncContract (Ns := Ns) g' hK) Nt (t' - t) := by
+  rw [interacting_truncSlice_cross_moment_eq_pathMeasure]
+  exact pathMeasure_pair_eq_pathTwoPoint
+    (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
+    Nt (asymSliceObsTruncContract (Ns := Ns) g hK)
+    (asymSliceObsTruncContract (Ns := Ns) g' hK) t t'
+
+/-- **Gibbs-to-transfer identification with the finite-periodic residual exposed.**
+
+The already-proved slice pushforward and cyclic reduction identify the Gibbs
+two-point with `pathTwoPoint`.  The hypothesis `hPeriodicGroundSplit` is the
+exact remaining finite-periodic trace theorem: it separates that two-arc trace
+ratio into the one-sided normalized-transfer matrix element
+
+`⟪Ω, M_A T̂^d M_B Ω⟫`
+
+and a scalar residual `R`.  At finite `Nt`, this residual carries the periodic
+wrap, the partition denominator correction, and the excited-state trace.  A
+later trace-ratio/IUC theorem should bound `R` uniformly and show its decay as
+`Nt * a → ∞`.
+
+Its theorem footprint is limited to the transfer bridge. -/
+theorem interacting_truncSlice_cross_moment_eq_normalizedTransfer_pow_add_remainder
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (g g' : SpatialField Ns) {K : ℝ} (hK : 0 < K) (t t' : ZMod Nt)
+    (R : ℝ)
+    (hPeriodicGroundSplit :
+      pathTwoPoint
+          (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass)
+          (asymSliceObsTruncContract (Ns := Ns) g hK)
+          (asymSliceObsTruncContract (Ns := Ns) g' hK) Nt (t' - t)
+        = @inner ℝ _ _
+            (asymGroundVector Nt Ns P a mass ha hmass)
+            ((asymSliceObsTruncContract (Ns := Ns) g hK).M
+              (((asymTransferNormalized Nt Ns P a mass ha hmass) ^ (t' - t).val)
+                ((asymSliceObsTruncContract (Ns := Ns) g' hK).M
+                  (asymGroundVector Nt Ns P a mass ha hmass)))) + R) :
+    ∫ ω, asymSliceObsTrunc g K
+            (asymSliceEquiv Nt Ns (evalMapAsym Nt Ns ω) t) *
+          asymSliceObsTrunc g' K
+            (asymSliceEquiv Nt Ns (evalMapAsym Nt Ns ω) t')
+        ∂(interactingLatticeMeasureAsym Nt Ns P a mass ha hmass)
+      = @inner ℝ _ _
+          (asymGroundVector Nt Ns P a mass ha hmass)
+          ((asymSliceObsTruncContract (Ns := Ns) g hK).M
+            (((asymTransferNormalized Nt Ns P a mass ha hmass) ^ (t' - t).val)
+              ((asymSliceObsTruncContract (Ns := Ns) g' hK).M
+                (asymGroundVector Nt Ns P a mass ha hmass)))) + R := by
+  exact (interacting_truncSlice_cross_moment_eq_pathTwoPoint
+    (Nt := Nt) (Ns := Ns) P a mass ha hmass g g' hK t t').trans
+      hPeriodicGroundSplit
 
 /-! ## ZMod summation helper -/
 
