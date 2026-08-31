@@ -543,7 +543,6 @@ theorem bkar_component_interval
         (x + s • forestComponentDirection T, edgeBasis e)) :=
       hpath.prodMk continuous_const
     convert (hF.continuous_fderiv_apply (by simp)).comp hp using 1
-    rfl
   simp_rw [fderiv_forestComponentDirection_eq_sum F _ T] at hftc
   rw [intervalIntegral.integral_finsetSum hint] at hftc
   exact hftc
@@ -687,7 +686,6 @@ theorem bkar_component_fundamental
         (x + s • forestComponentDirection T, edgeBasis e)) :=
       hpath.prodMk continuous_const
     convert (hF.continuous_fderiv_apply (by simp)).comp hp using 1
-    rfl
   simp_rw [fderiv_forestComponentDirection_eq_sum F _ T] at hftc
   rw [intervalIntegral.integral_finsetSum hint] at hftc
   exact hftc
