@@ -5,6 +5,7 @@ Authors: Michael R. Douglas
 -/
 import Pphi2.AsymTorus.AsymB5bSingleSlice
 import GaussianField.Symmetry
+import Mathlib.Algebra.Order.Chebyshev
 
 /-!
 # Layer-B2 Stage B, hole B-I: slice-family susceptibility bound
@@ -358,11 +359,13 @@ theorem interacting_truncSlice_cross_moment_eq_pathMeasure
       (asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt := by
     rw [← Measure.map_map hsl hev]
     exact interactingLatticeMeasureAsym_slice_pushforward_eq_pathMeasure Nt Ns P a mass ha hmass
-  rw [← hcomp, integral_map (hsl.comp hev).aemeasurable
-    (((asymSliceObsTrunc_measurable g K).comp (measurable_pi_apply t)).mul
-      ((asymSliceObsTrunc_measurable g' K).comp
-        (measurable_pi_apply t'))).aestronglyMeasurable]
-  rfl
+  rw [← hcomp]
+  symm
+  simpa only [Function.comp_apply] using
+    (integral_map (hsl.comp hev).aemeasurable
+      (((asymSliceObsTrunc_measurable g K).comp (measurable_pi_apply t)).mul
+        ((asymSliceObsTrunc_measurable g' K).comp
+          (measurable_pi_apply t'))).aestronglyMeasurable)
 
 /-- Truncated Gibbs two-point equals the dictionary `pathTwoPoint` at separation
 `t' - t` (cyclic reduction). This is not the one-sided inner product
