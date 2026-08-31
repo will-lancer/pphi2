@@ -102,6 +102,7 @@ import Pphi2.AsymTorus.AsymTiltPartitionDerivative
 import Pphi2.AsymTorus.AsymTiltedScoreIdentity
 import Pphi2.AsymTorus.AsymUniformTiltedMoment
 import Pphi2.AsymTorus.AsymReflectionPositivity
+import Pphi2.AsymTorus.AsymSpatialReflectionPositivity
 import Pphi2.AsymTorus.AsymLinkReflection
 import Pphi2.AsymTorus.AsymLinkReflectionRP
 import Pphi2.AsymTorus.AsymLinkReflectionRPLimit
