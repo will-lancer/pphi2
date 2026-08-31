@@ -758,7 +758,7 @@ theorem asymTorusSiteEval_sq_tendsto
           fun N => ∑ m ∈ Finset.range N,
             DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff m f := by
       ext N
-      refine Finset.sum_congr rfl fun m _ => (pow_two _).symm
+      refine Finset.sum_congr rfl fun m _ => pow_two _
     rw [hsq]
     -- `l2InnerProduct` is defeq to the bilinear tsum; do not unfold it
     -- (the expansion is a private name).
@@ -793,7 +793,8 @@ theorem asymTorusSiteEval_sq_tendsto
       dsimp [S, fN]
       simp only [Finset.sum_apply, map_sum, map_smul, Pi.smul_apply, smul_eq_mul,
         pow_two]
-      rw [Finset.sum_mul_sum]
+      simp_rw [map_smul, smul_eq_mul]
+      simp_rw [Finset.sum_mul_sum]
       rw [Finset.sum_comm]
       apply Finset.sum_congr rfl
       intro m hm
@@ -845,7 +846,7 @@ theorem asymTorusSiteEval_sq_tendsto
       rw [Finset.sum_eq_single m]
       · simp [pow_two]
       · intro b hb hbm
-        simp [hbm]
+        simp [Ne.symm hbm]
       · intro hmN
         exact (hmN hm).elim
     rw [hdiag] at hsum
@@ -853,7 +854,8 @@ theorem asymTorusSiteEval_sq_tendsto
   have hpdiff : Tendsto
       (fun N => RapidDecaySeq.rapidDecaySeminorm 0 (fN N - f)) atTop (nhds 0) := by
     have hdiff : Tendsto (fun N => fN N - f) atTop (nhds 0) := by
-      simpa using hfN.sub tendsto_const_nhds
+      simpa using hfN.sub
+        (tendsto_const_nhds : Tendsto (fun _ : ℕ => f) atTop (nhds f))
     have hp :=
       (RapidDecaySeq.rapidDecay_withSeminorms.continuous_seminorm 0).continuousAt.tendsto.comp
         hdiff
