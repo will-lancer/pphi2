@@ -14,6 +14,7 @@ import Pphi2.GeneralResults.TiltPartitionDerivative
 -- Keystone 18 foundation: rights-clean continuous-spin and covariance data
 import Pphi2.ClusterExpansion.ContinuousSpin
 import Pphi2.ClusterExpansion.CovarianceInterpolation
+import Pphi2.ClusterExpansion.KPClean.Core
 
 -- Phase 1: Wick ordering
 import Pphi2.WickOrdering.WickPolynomial
