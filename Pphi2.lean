@@ -98,6 +98,7 @@ import LeeYang.Measure.PositiveSourceApprox
 import Pphi2.AsymTorus.AsymInteractingLeeYang
 import Pphi2.AsymTorus.AsymSignedSplit
 import Pphi2.AsymTorus.AsymEnergyFactorization
+import Pphi2.AsymTorus.AsymSharedSpinFinite
 import Pphi2.AsymTorus.AsymMeasureFactorization
 import Pphi2.AsymTorus.AsymCoordinateDensity
 import Pphi2.AsymTorus.AsymTiltPartitionDerivative
