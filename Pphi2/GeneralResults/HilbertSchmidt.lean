@@ -51,6 +51,7 @@ import Mathlib.MeasureTheory.Function.L2Space
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.MeasureTheory.Integral.Bochner.Set
+import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.MeasureTheory.Integral.Prod
 import Mathlib.MeasureTheory.Group.Prod
 import Mathlib.MeasureTheory.Measure.Haar.Basic
@@ -134,7 +135,7 @@ private theorem hs_slice_norm_sq_eq_integral
         _ = K₀ (x, y) ^ 2 := by
               simp [pow_two]
 
-theorem hs_basis_norm_summable
+private theorem hs_basis_norm_summable_and_tsum_le
     {G : Type*} [MeasurableSpace G] {μ : Measure G} [SigmaFinite μ]
     (K : G → G → ℝ)
     (hK : MemLp (Function.uncurry K) 2 (μ.prod μ))
@@ -142,7 +143,12 @@ theorem hs_basis_norm_summable
     (hT : ∀ f : Lp ℝ 2 μ,
       (T f : G → ℝ) =ᵐ[μ] fun x => ∫ y, K x y * (f : G → ℝ) y ∂μ)
     {ι : Type*} (b : HilbertBasis ι ℝ (Lp ℝ 2 μ)) :
-    Summable (fun i : ι => ‖T (b i)‖ ^ 2) := by
+    Summable (fun i : ι => ‖T (b i)‖ ^ 2) ∧
+      (∑' i : ι, ‖T (b i)‖ ^ 2 ≤
+        ‖hK.toLp (Function.uncurry K)‖ ^ 2) ∧
+      (∀ [Countable ι],
+        ∑' i : ι, ‖T (b i)‖ ^ 2 =
+          ‖hK.toLp (Function.uncurry K)‖ ^ 2) := by
   classical
   let K₀ : G × G → ℝ := hK.aestronglyMeasurable.mk (Function.uncurry K)
   have hK₀_meas : StronglyMeasurable K₀ := hK.aestronglyMeasurable.stronglyMeasurable_mk
@@ -237,7 +243,291 @@ theorem hs_basis_norm_summable
       _ ≤ ∫ x, Gs x ∂μ := by
         simpa [Gs] using integral_mono_ae hF_int hGs_int hpointwise
       _ = ∫ x, ∫ y, K₀ (x, y) ^ 2 ∂μ ∂μ := rfl
-  exact summable_of_sum_le (fun i => by positivity) hsum_bound
+  have hsummable : Summable (fun i : ι => ‖T (b i)‖ ^ 2) :=
+    summable_of_sum_le (fun i => by positivity) hsum_bound
+  have htsum : ∑' i : ι, ‖T (b i)‖ ^ 2 ≤
+      ∫ x, ∫ y, K₀ (x, y) ^ 2 ∂μ ∂μ :=
+    hsummable.tsum_le_of_sum_le hsum_bound
+  have htoLp :
+      hK.toLp (Function.uncurry K) = hK₀_mem.toLp K₀ :=
+    MemLp.toLp_congr hK hK₀_mem hK₀_ae
+  have hkernel_norm :
+      (∫ x, ∫ y, K₀ (x, y) ^ 2 ∂μ ∂μ) =
+        ‖hK.toLp (Function.uncurry K)‖ ^ 2 := by
+    have hFubini :
+        (∫ x, ∫ y, K₀ (x, y) ^ 2 ∂μ ∂μ) =
+          ∫ z, K₀ z ^ 2 ∂μ.prod μ := by
+      simpa only [Function.uncurry] using
+        (integral_integral (f := fun x y => K₀ (x, y) ^ 2) hK₀_sq)
+    rw [hFubini, htoLp]
+    symm
+    calc
+      ‖hK₀_mem.toLp K₀‖ ^ 2 =
+          ∫ z, ((hK₀_mem.toLp K₀ : G × G → ℝ) z) ^ 2 ∂μ.prod μ :=
+        hs_basis_norm_sq_eq_integral (hK₀_mem.toLp K₀)
+      _ = ∫ z, K₀ z ^ 2 ∂μ.prod μ := by
+        refine integral_congr_ae ?_
+        filter_upwards [MemLp.coeFn_toLp hK₀_mem] with z hz
+        rw [hz]
+  have hEq : ∀ [Countable ι],
+      ∑' i : ι, ‖T (b i)‖ ^ 2 =
+        ‖hK.toLp (Function.uncurry K)‖ ^ 2 := by
+    intro _
+    let Gs : G → ℝ := fun x => ∫ y, K₀ (x, y) ^ 2 ∂μ
+    have hT₀_all : ∀ᵐ x ∂μ, ∀ i : ι,
+        (T (b i) : G → ℝ) x =
+          ∫ y, K₀ (x, y) * (b i : G → ℝ) y ∂μ := by
+      exact ae_all_iff.2 hT₀
+    have hpointwise_hasSum : ∀ᵐ x ∂μ, HasSum
+        (fun i : ι => ((T (b i) : G → ℝ) x) ^ 2)
+        (Gs x) := by
+      filter_upwards [hK₀_sq.prod_right_ae, hT₀_all] with x hx_sq hxT
+      have hslice_meas : AEStronglyMeasurable (fun y => K₀ (x, y)) μ :=
+        (hK₀_meas.comp_measurable measurable_prodMk_left).aestronglyMeasurable
+      have hslice_mem : MemLp (fun y => K₀ (x, y)) 2 μ :=
+        (memLp_two_iff_integrable_sq hslice_meas).2 hx_sq
+      let kx : Lp ℝ 2 μ := hslice_mem.toLp (fun y => K₀ (x, y))
+      have hk_inner : ∀ i : ι,
+          (T (b i) : G → ℝ) x = inner ℝ (b i) kx := by
+        intro i
+        calc
+          (T (b i) : G → ℝ) x =
+              ∫ y, K₀ (x, y) * (b i : G → ℝ) y ∂μ := hxT i
+          _ = ∫ y, (b i : G → ℝ) y * K₀ (x, y) ∂μ := by
+                simp_rw [mul_comm]
+          _ = inner ℝ (b i) kx := by
+                symm
+                simpa [kx] using
+                  hs_slice_inner_eq_integral (K₀ := K₀) hslice_mem b i
+      have hsum_inner : HasSum
+          (fun i : ι => ((T (b i) : G → ℝ) x) ^ 2)
+          (inner ℝ kx kx) := by
+        refine (b.hasSum_inner_mul_inner kx kx).congr ?_
+        intro i
+        calc
+          inner ℝ kx (b i) * inner ℝ (b i) kx =
+              inner ℝ (b i) kx * inner ℝ (b i) kx := by
+                rw [real_inner_comm kx (b i)]
+          _ = ((T (b i) : G → ℝ) x) ^ 2 := by
+                rw [hk_inner i]
+      have hk_norm : ‖kx‖ ^ 2 = Gs x := by
+        simpa [kx, Gs] using
+          hs_slice_norm_sq_eq_integral (K₀ := K₀) hslice_mem
+      have hk_self : inner ℝ kx kx = Gs x := by
+        rw [real_inner_self_eq_norm_sq, hk_norm]
+      rw [hk_self] at hsum_inner
+      exact hsum_inner
+    have hFi_int : ∀ i : ι, Integrable
+        (fun x => ((T (b i) : G → ℝ) x) ^ 2) μ := by
+      intro i
+      simpa using (Lp.memLp (T (b i))).integrable_sq
+    have hFi_sum_norm : Summable (fun i : ι =>
+        ∫ x, ‖((T (b i) : G → ℝ) x) ^ 2‖ ∂μ) := by
+      apply hsummable.congr
+      intro i
+      calc
+        ‖T (b i)‖ ^ 2 =
+            ∫ x, ((T (b i) : G → ℝ) x) ^ 2 ∂μ :=
+          hs_basis_norm_sq_eq_integral (T (b i))
+        _ = ∫ x, ‖((T (b i) : G → ℝ) x) ^ 2‖ ∂μ := by
+              refine integral_congr_ae (.of_forall fun x => ?_)
+              rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+    have hintegral_tsum :
+        ∑' i : ι, ∫ x, ((T (b i) : G → ℝ) x) ^ 2 ∂μ =
+          ∫ x, ∑' i : ι, ((T (b i) : G → ℝ) x) ^ 2 ∂μ :=
+      integral_tsum_of_summable_integral_norm hFi_int hFi_sum_norm
+    calc
+      ∑' i : ι, ‖T (b i)‖ ^ 2 =
+          ∑' i : ι, ∫ x, ((T (b i) : G → ℝ) x) ^ 2 ∂μ := by
+            apply tsum_congr
+            intro i
+            exact hs_basis_norm_sq_eq_integral (T (b i))
+      _ = ∫ x, ∑' i : ι, ((T (b i) : G → ℝ) x) ^ 2 ∂μ :=
+        hintegral_tsum
+      _ = ∫ x, Gs x ∂μ := by
+        refine integral_congr_ae ?_
+        filter_upwards [hpointwise_hasSum] with x hx
+        exact hx.tsum_eq
+      _ = ∫ x, ∫ y, K₀ (x, y) ^ 2 ∂μ ∂μ := rfl
+      _ = ‖hK.toLp (Function.uncurry K)‖ ^ 2 := hkernel_norm
+  exact ⟨hsummable, htsum.trans_eq hkernel_norm, hEq⟩
+
+/-- **Hilbert-Schmidt summability of basis norms.**
+
+For any standard-form integral operator with an `L2` kernel, the squared norms
+of its values on a Hilbert basis form a summable family. -/
+theorem hs_basis_norm_summable
+    {G : Type*} [MeasurableSpace G] {μ : Measure G} [SigmaFinite μ]
+    (K : G → G → ℝ)
+    (hK : MemLp (Function.uncurry K) 2 (μ.prod μ))
+    (T : (Lp ℝ 2 μ) →L[ℝ] (Lp ℝ 2 μ))
+    (hT : ∀ f : Lp ℝ 2 μ,
+      (T f : G → ℝ) =ᵐ[μ] fun x => ∫ y, K x y * (f : G → ℝ) y ∂μ)
+    {ι : Type*} (b : HilbertBasis ι ℝ (Lp ℝ 2 μ)) :
+    Summable (fun i : ι => ‖T (b i)‖ ^ 2) :=
+  (hs_basis_norm_summable_and_tsum_le K hK T hT b).1
+
+/-- One-sided Parseval comparison: the squared basis-norm sum is at most the
+squared `L²` kernel mass.  This rearranges the Hilbert--Schmidt pairing; it
+is not a model-specific envelope and does not prove the coupled weighted IUC
+bound `|R| ≤ C η |Ω||Ω|`. -/
+theorem hs_basis_norm_sq_tsum_le
+    {G : Type*} [MeasurableSpace G] {μ : Measure G} [SigmaFinite μ]
+    (K : G → G → ℝ)
+    (hK : MemLp (Function.uncurry K) 2 (μ.prod μ))
+    (T : (Lp ℝ 2 μ) →L[ℝ] (Lp ℝ 2 μ))
+    (hT : ∀ f : Lp ℝ 2 μ,
+      (T f : G → ℝ) =ᵐ[μ] fun x => ∫ y, K x y * (f : G → ℝ) y ∂μ)
+    {ι : Type*} (b : HilbertBasis ι ℝ (Lp ℝ 2 μ)) :
+    ∑' i : ι, ‖T (b i)‖ ^ 2 ≤
+      ‖hK.toLp (Function.uncurry K)‖ ^ 2 :=
+  (hs_basis_norm_summable_and_tsum_le K hK T hT b).2.1
+
+/-! The reverse Hilbert--Schmidt inequality is Parseval's equality.  The
+countability assumption is explicit because the Bochner integral/tsum
+interchange used in the proof is countable-indexed.  In the separable
+`L²` applications, an orthonormal-basis countability instance supplies it. -/
+
+/-- **Hilbert--Schmidt Parseval identity.**
+
+For a countably indexed Hilbert basis,
+`∑' i, ‖T (b i)‖² = ‖K‖²_{L²(μ⊗μ)}`.  This is an identity/rearrangement of
+the kernel's `L²` mass, not a quantitative Hilbert--Schmidt bound and not a
+Checkpoint 1 closer.  The finite-sum estimate gives only the forward
+inequality; the proof uses `HilbertBasis.hasSum_inner_mul_inner` on almost
+every kernel slice and `integral_tsum_of_summable_integral_norm` to exchange
+the series with the outer integral.  The weighted IUC estimate
+`|R| ≤ C η |Ω||Ω|` uniform under `(Ns : ℝ) * a = Ls` remains unproved. -/
+theorem hs_basis_norm_sq_tsum_eq
+    {G : Type*} [MeasurableSpace G] {μ : Measure G} [SigmaFinite μ]
+    (K : G → G → ℝ)
+    (hK : MemLp (Function.uncurry K) 2 (μ.prod μ))
+    (T : (Lp ℝ 2 μ) →L[ℝ] (Lp ℝ 2 μ))
+    (hT : ∀ f : Lp ℝ 2 μ,
+      (T f : G → ℝ) =ᵐ[μ] fun x => ∫ y, K x y * (f : G → ℝ) y ∂μ)
+    {ι : Type*} [Countable ι] (b : HilbertBasis ι ℝ (Lp ℝ 2 μ)) :
+    ∑' i : ι, ‖T (b i)‖ ^ 2 =
+      ‖hK.toLp (Function.uncurry K)‖ ^ 2 :=
+  (hs_basis_norm_summable_and_tsum_le K hK T hT b).2.2
+
+/-- Swapping the two variables of a product-space `L2` kernel preserves
+membership in `L2`. -/
+theorem memLp_two_prod_swap
+    {S E : Type*} [MeasurableSpace S] [NormedAddCommGroup E]
+    {μ : Measure S} [SFinite μ]
+    (K : S × S → E) (hK : MemLp K 2 (μ.prod μ)) :
+    MemLp (K ∘ (Prod.swap : S × S → S × S)) 2 (μ.prod μ) := by
+  exact hK.comp_measurePreserving
+    (Measure.measurePreserving_swap (μ := μ) (ν := μ))
+
+/-- The `L2` norm of a product-space kernel is unchanged by transposing its
+variables. -/
+theorem norm_toLp_two_prod_swap
+    {S E : Type*} [MeasurableSpace S] [NormedAddCommGroup E]
+    {μ : Measure S} [SFinite μ]
+    (K : S × S → E) (hK : MemLp K 2 (μ.prod μ)) :
+    ‖(hK.comp_measurePreserving
+        (Measure.measurePreserving_swap (μ := μ) (ν := μ))).toLp
+      (K ∘ (Prod.swap : S × S → S × S))‖ =
+      ‖hK.toLp K‖ := by
+  let hswap : MeasurePreserving (Prod.swap : S × S → S × S)
+      (μ.prod μ) (μ.prod μ) :=
+    Measure.measurePreserving_swap (μ := μ) (ν := μ)
+  rw [← Lp.toLp_compMeasurePreserving hK hswap]
+  exact Lp.norm_compMeasurePreserving (hK.toLp K) hswap
+
+/-- The square-root form of the real `L2` integral is the norm of the
+corresponding `Lp` element. -/
+theorem integral_norm_sq_rpow_half_eq_norm_toLp
+    {α : Type*} [MeasurableSpace α] {μ : Measure α}
+    (R : α → ℝ) (hR : MemLp R 2 μ) :
+    (∫ x, ‖R x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) = ‖hR.toLp R‖ := by
+  have hsq : ‖hR.toLp R‖ ^ 2 = ∫ x, ‖R x‖ ^ (2 : ℝ) ∂μ := by
+    calc
+      ‖hR.toLp R‖ ^ 2 =
+          ∫ x, ((hR.toLp R : α → ℝ) x) ^ 2 ∂μ :=
+        hs_basis_norm_sq_eq_integral (hR.toLp R)
+      _ = ∫ x, R x ^ 2 ∂μ := by
+        refine integral_congr_ae ?_
+        filter_upwards [MemLp.coeFn_toLp hR] with x hx
+        rw [hx]
+      _ = ∫ x, ‖R x‖ ^ (2 : ℝ) ∂μ := by
+        refine integral_congr_ae (.of_forall fun x => ?_)
+        simp only [Real.norm_eq_abs, Real.rpow_two, sq_abs]
+  rw [← hsq, ← Real.sqrt_eq_rpow, Real.sqrt_sq (norm_nonneg _)]
+
+/-- A concrete Hilbert--Schmidt Cauchy bound for a complex insertion between
+two real `L2` kernels. -/
+theorem norm_integral_complex_four_mul_le_L2
+    {α : Type*} [MeasurableSpace α] (μ : Measure α)
+    (F G : α → ℂ) (R S : α → ℝ) (BF BG : ℝ)
+    (hBF : 0 ≤ BF) (hBG : 0 ≤ BG)
+    (hF : ∀ x, ‖F x‖ ≤ BF) (hG : ∀ x, ‖G x‖ ≤ BG)
+    (hR : MemLp R 2 μ) (hS : MemLp S 2 μ) :
+    ‖∫ x, F x * (R x : ℂ) * G x * (S x : ℂ) ∂μ‖ ≤
+      BF * BG *
+        (∫ x, ‖R x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) *
+        (∫ x, ‖S x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) := by
+  letI : ENNReal.HolderTriple (2 : ℝ≥0∞) 2 1 := ⟨by norm_num⟩
+  have hRS : Integrable (fun x => ‖R x‖ * ‖S x‖) μ := by
+    have h := hR.norm.integrable_mul hS.norm
+    simpa only [Pi.mul_apply] using h
+  have hmajor : Integrable
+      (fun x => BF * BG * (‖R x‖ * ‖S x‖)) μ :=
+    hRS.const_mul (BF * BG)
+  have hpoint : ∀ x,
+      ‖F x * (R x : ℂ) * G x * (S x : ℂ)‖ ≤
+        BF * BG * (‖R x‖ * ‖S x‖) := by
+    intro x
+    calc
+      ‖F x * (R x : ℂ) * G x * (S x : ℂ)‖ =
+          (‖F x‖ * ‖G x‖) * (‖R x‖ * ‖S x‖) := by
+        simp only [norm_mul, Complex.norm_real]
+        ring
+      _ ≤ (BF * BG) * (‖R x‖ * ‖S x‖) := by
+        apply mul_le_mul_of_nonneg_right
+        · exact mul_le_mul (hF x) (hG x) (norm_nonneg _) hBF
+        · exact mul_nonneg (norm_nonneg _) (norm_nonneg _)
+  have hCS :
+      ∫ x, ‖R x‖ * ‖S x‖ ∂μ ≤
+        (∫ x, ‖R x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) *
+          (∫ x, ‖S x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) := by
+    refine integral_mul_norm_le_Lp_mul_Lq (μ := μ) (E := ℝ)
+      (p := (2 : ℝ)) (q := (2 : ℝ)) Real.HolderConjugate.two_two ?_ ?_
+    · rw [show ENNReal.ofReal (2 : ℝ) = 2 by norm_num]
+      exact hR
+    · rw [show ENNReal.ofReal (2 : ℝ) = 2 by norm_num]
+      exact hS
+  calc
+    ‖∫ x, F x * (R x : ℂ) * G x * (S x : ℂ) ∂μ‖ ≤
+        ∫ x, BF * BG * (‖R x‖ * ‖S x‖) ∂μ :=
+      norm_integral_le_of_norm_le hmajor (ae_of_all _ hpoint)
+    _ = BF * BG * (∫ x, ‖R x‖ * ‖S x‖ ∂μ) := by
+      rw [integral_const_mul]
+    _ ≤ BF * BG *
+        ((∫ x, ‖R x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) *
+          (∫ x, ‖S x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2)) :=
+      mul_le_mul_of_nonneg_left hCS (mul_nonneg hBF hBG)
+    _ = BF * BG *
+        (∫ x, ‖R x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) *
+        (∫ x, ‖S x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) := by
+      ring
+
+/-- The same four-factor estimate written with the `Lp` norms of the two
+kernel representatives. -/
+theorem norm_integral_complex_four_mul_le_toLp
+    {α : Type*} [MeasurableSpace α] (μ : Measure α)
+    (F G : α → ℂ) (R S : α → ℝ) (BF BG : ℝ)
+    (hBF : 0 ≤ BF) (hBG : 0 ≤ BG)
+    (hF : ∀ x, ‖F x‖ ≤ BF) (hG : ∀ x, ‖G x‖ ≤ BG)
+    (hR : MemLp R 2 μ) (hS : MemLp S 2 μ) :
+    ‖∫ x, F x * (R x : ℂ) * G x * (S x : ℂ) ∂μ‖ ≤
+      BF * BG * ‖hR.toLp R‖ * ‖hS.toLp S‖ := by
+  have h := norm_integral_complex_four_mul_le_L2
+    μ F G R S BF BG hBF hBG hF hG hR hS
+  rw [integral_norm_sq_rpow_half_eq_norm_toLp R hR,
+    integral_norm_sq_rpow_half_eq_norm_toLp S hS] at h
+  exact h
 
 /-! ### Scaffolding for the operator-theoretic Hilbert-Schmidt criterion
 
