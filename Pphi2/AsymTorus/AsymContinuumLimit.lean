@@ -2376,7 +2376,7 @@ theorem exists_absForm_thresholded_cylinder_grids
     -- the first factor is ↑(N₀+n+1), not ↑n+1.
     have hmono : StrictMono (fun n : ℕ => N₀ + n + 1) := by
       intro i j hij
-      omega
+      exact Nat.add_lt_add_right (Nat.add_lt_add_left hij N₀) 1
     have hcast : Filter.Tendsto (fun n : ℕ => ((N₀ + n + 1 : ℕ) : ℝ))
         Filter.atTop Filter.atTop :=
       (tendsto_natCast_atTop_atTop (R := ℝ)).comp hmono.tendsto_atTop
@@ -2415,7 +2415,7 @@ theorem exists_absForm_thresholded_cylinder_grids
     have hden : (Ls / (2 * a₀) : ℝ) ≤ ((S + k + 1 : ℕ) : ℝ) :=
       hS.trans (Nat.cast_le.mpr (by omega))
     have ha₀' : 0 < 2 * a₀ := mul_pos (by norm_num) ha₀
-    have hLs_le : Ls ≤ (2 * a₀) * (S + k + 1 : ℕ) :=
+    have hLs_le : Ls ≤ ((S + k + 1 : ℕ) : ℝ) * (2 * a₀) :=
       (div_le_iff₀ ha₀').mp hden
     have hpos : 0 < (2 * ((S + k + 1 : ℕ) : ℝ)) := by positivity
     rw [div_le_iff₀ hpos]
@@ -2427,7 +2427,7 @@ theorem exists_absForm_thresholded_cylinder_grids
     dsimp [a]
     have hmono : StrictMono (fun k : ℕ => S + k + 1) := by
       intro i j hij
-      omega
+      exact Nat.add_lt_add_right (Nat.add_lt_add_left hij S) 1
     have hcast : Filter.Tendsto (fun k : ℕ => ((S + k + 1 : ℕ) : ℝ))
         Filter.atTop Filter.atTop :=
       (tendsto_natCast_atTop_atTop (R := ℝ)).comp hmono.tendsto_atTop
