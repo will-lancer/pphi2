@@ -383,7 +383,7 @@ theorem inner_asymTransferOperatorCLM_pow_eq_kPow (P : InteractionPolynomial)
   rw [MeasureTheory.L2.inner_def]
   refine integral_congr_ae ?_
   filter_upwards [asymTransferKernel_kPow_apply Nt Ns P a mass ha hmass m g] with x hx
-  simp only [inner, Inner.inner, starRingEnd_apply, star_trivial, RCLike.re_to_real, hx]
+  simp only [inner, Inner.inner, star_trivial, RCLike.re_to_real, hx]
   ring
 
 /-- The same identification with the outer factor pulled into the inner integral. -/
@@ -399,7 +399,5 @@ theorem inner_asymTransferOperatorCLM_pow_eq_kPow_iterated
   refine integral_congr_ae (.of_forall fun x => ?_)
   simp only []
   rw [← integral_const_mul]
-  refine integral_congr_ae (.of_forall fun y => ?_)
-  ring
 
 end Pphi2
