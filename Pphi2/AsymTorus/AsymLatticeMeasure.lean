@@ -307,7 +307,7 @@ theorem interactingLatticeMeasureAsym_integrable_exp_of_sub_interaction_le
       intro ω
       simp only [Real.norm_eq_abs, bw, boltzmannWeightAsym]
       rw [abs_of_nonneg (mul_nonneg (Real.exp_pos _).le
-          (Real.exp_pos _).le), abs_of_nonneg (Real.exp_pos C).le]
+          (Real.exp_pos _).le)]
       rw [← Real.exp_add]
       apply Real.exp_le_exp.mpr
       simpa [sub_eq_add_neg] using hbound ω
@@ -372,7 +372,7 @@ theorem interactingLatticeMeasureAsym_integrable_exp_of_source_control
 preserves `μ.withDensity f`. -/
 private theorem map_withDensity_eq_of_invariant {α : Type*} [MeasurableSpace α]
     {μ : Measure α} {T : α → α} (hT : Measurable T) (hμ : μ.map T = μ)
-    {f : α → ℝ≥0∞} (hf : Measurable f) (hfT : ∀ x, f (T x) = f x) :
+    {f : α → ENNReal} (hf : Measurable f) (hfT : ∀ x, f (T x) = f x) :
     (μ.withDensity f).map T = μ.withDensity f := by
   ext s hs
   rw [Measure.map_apply hT hs, withDensity_apply _ (hT hs), withDensity_apply _ hs]
@@ -418,8 +418,9 @@ theorem interactingLatticeMeasureAsym_map_neg (Nt Ns : ℕ) [NeZero Nt] [NeZero 
     (ENNReal.measurable_ofReal.comp
       ((interactionFunctionalAsym_measurable Nt Ns P a mass).neg.exp))
     fun ω => ?_
-  unfold boltzmannWeightAsym
-  rw [interactionFunctionalAsym_comp_neg]
+  simpa only [boltzmannWeightAsym] using
+    congrArg (fun x : ℝ => ENNReal.ofReal (Real.exp (-x)))
+      (interactionFunctionalAsym_comp_neg Nt Ns P a mass ω)
 
 /-- An observable integrable under the free GFF remains integrable under the
 Wick interacting reweighting: `exp(-V)` is bounded because `V` is bounded
