@@ -72,6 +72,7 @@ compose (no `#print axioms` run).
 -/
 
 #print axioms Pphi2.pphi2_existence
+#print axioms Pphi2.interactingLatticeMeasureAsym_evalMapAsym_pushforward_eq_asymWickGibbsDensity
 #print axioms Pphi2.pphi2_nontriviality
 #print axioms Pphi2.continuumLimit_nonGaussian
 #print axioms Pphi2.schwinger_agreement

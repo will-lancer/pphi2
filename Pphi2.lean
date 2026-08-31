@@ -98,6 +98,7 @@ import Pphi2.AsymTorus.AsymSignedSplit
 import Pphi2.AsymTorus.AsymEnergyFactorization
 import Pphi2.AsymTorus.AsymMeasureFactorization
 import Pphi2.AsymTorus.AsymCoordinateDensity
+import Pphi2.AsymTorus.AsymWickGibbsDensity
 import Pphi2.AsymTorus.AsymTiltPartitionDerivative
 import Pphi2.AsymTorus.AsymTiltedScoreIdentity
 import Pphi2.AsymTorus.AsymUniformTiltedMoment
