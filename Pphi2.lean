@@ -93,6 +93,8 @@ import Pphi2.AsymTorus.AsymJentzsch
 import Pphi2.AsymTorus.AsymPositivity
 import Pphi2.AsymTorus.AsymVarianceBound
 import Pphi2.AsymTorus.AsymExpMomentDischarge
+-- Compile the forked shared-spin producer on this verification branch.
+import LeeYang.Measure.SharedSpinIsing
 import Pphi2.AsymTorus.AsymInteractingLeeYang
 import Pphi2.AsymTorus.AsymSignedSplit
 import Pphi2.AsymTorus.AsymEnergyFactorization
