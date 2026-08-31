@@ -38,7 +38,7 @@ rev = "56ee09f"
 name = "lee-yang"
 scope = "mrdouglasny"
 git = "https://github.com/will-lancer/lee-yang.git"
-rev = "5b870b412595c23f74a7946f6bd9232e18fad102"
+rev = "282eff6ab1077e2e7c3809b10ac8184323761204"
 
 [[require]]
 name = "GibbsVariational"
