@@ -84,6 +84,7 @@ compose (no `#print axioms` run).
 #print axioms Pphi2.asymInteracting_expMoment_volume_uniform_proof
 #print axioms Pphi2.asymInteracting_expMoment_of_signed
 #print axioms Pphi2.pathTwoPoint_eq_groundTransfer_add_remainder
+#print axioms Pphi2.interacting_truncSlice_cross_moment_eq_normalizedTransfer_pow_add_remainder_of_traceSplit
 #print axioms Pphi2.MeasureHasCylinderExpMomentBound
 #print axioms Pphi2.MeasureHasLocalCylinderNthExpMomentBound
 #print axioms Pphi2.measureHasCylinderExpMomentBound_of_localNth
