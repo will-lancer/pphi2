@@ -27,13 +27,18 @@ The lattice propagator in Fourier space is:
 
   `Ĉ_a(k) = 1 / ((4/a²) Σ_i sin²(πk_i a/L) + m²)`
 
-For k in any compact set, as a → 0 with L = Na → ∞, the Mathlib Fourier
-convention used by the live Green form `continuumGreenBilinear` gives the
-denominator `(2π)²‖ξ‖² + m²` (rather than a `(2π)^{-d}` Plancherel factor):
+For an integer mode `q`, set `ξ_i = q_i / (N a)`. As `a → 0` with
+`L = N a → ∞`, the Mathlib Fourier convention used by the live Green form
+`continuumGreenBilinear` gives the denominator `(2π)²‖ξ‖² + m²`:
 
   `Ĉ_a(ξ) → 1 / ((2π)²‖ξ‖² + m²)`
 
-since `(2/a) sin(π k_i a)` tracks the Mathlib frequency `ξ`.
+Indeed,
+
+`4 a⁻² sin²(π q_i / N) = 4 a⁻² sin²(π a ξ_i) → (2π ξ_i)²`.
+
+The external momentum-measure factor `dp / (2π)^d` is absorbed by the change
+of variables `p = 2π ξ`.
 
 The rapid decay of the Fourier transforms controls the contribution from
 large frequencies, giving the Mathlib-normalized limit
