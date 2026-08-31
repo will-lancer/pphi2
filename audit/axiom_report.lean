@@ -71,6 +71,9 @@ filename per the hub convention. Do not regenerate the golden in this
 compose (no `#print axioms` run).
 -/
 
+/-! Focused PF-080 convention target. -/
+#print axioms Pphi2.continuumGreenBilinear_eq_multiplier
+
 #print axioms Pphi2.pphi2_existence
 #print axioms Pphi2.pphi2_nontriviality
 #print axioms Pphi2.continuumLimit_nonGaussian

@@ -27,15 +27,19 @@ The lattice propagator in Fourier space is:
 
   `Ĉ_a(k) = 1 / ((4/a²) Σ_i sin²(πk_i a/L) + m²)`
 
-For k in any compact set, as a → 0 with L = Na → ∞:
+For k in any compact set, as a → 0 with L = Na → ∞, the Mathlib Fourier
+convention used by the live Green form `continuumGreenBilinear` gives the
+denominator `(2π)²‖ξ‖² + m²` (rather than a `(2π)^{-d}` Plancherel factor):
 
-  `Ĉ_a(k) → 1 / (|k|² + m²)`
+  `Ĉ_a(ξ) → 1 / ((2π)²‖ξ‖² + m²)`
 
-since `(2/a) sin(πk_i a/L) → 2πk_i/L → k_i` (with appropriate scaling).
+since `(2/a) sin(π k_i a)` tracks the Mathlib frequency `ξ`.
 
-The rapid decay of f̂, ĝ controls the contribution from large k, giving:
+The rapid decay of the Fourier transforms controls the contribution from
+large frequencies, giving the Mathlib-normalized limit
 
-  `a^{2d} Σ_{x,y} C_a(x,y) f(ax) g(ay) → ∫ f̂(k) ĝ(k) / (|k|²+m²) dk/(2π)^d`
+`a^{2d} Σ_{x,y} C_a(x,y) f(ax) g(ay) →
+  ∫ re ⟪f̂(ξ), ĝ(ξ)⟫ / ((2π)^2‖ξ‖²+m²) dξ`.
 
 ### Uniform bound
 
@@ -57,6 +61,7 @@ see the reference map in `docs/mathlib_prerequisite_layering.md` (text anchor �
 
 import Pphi2.GaussianContinuumLimit.EmbeddedCovariance
 import Pphi2.GeneralResults.DyninMityaginBilinear
+import Mathlib.Analysis.Distribution.SchwartzSpace.Fourier
 import Mathlib.Analysis.Distribution.TemperateGrowth
 import Mathlib.Data.ZMod.ValMinAbs
 import SchwartzNuclear.HermiteNuclear
@@ -90,10 +95,7 @@ private noncomputable instance continuumTestFunction_dyninMityagin [Fact (0 < d)
 This is the remaining analytic input after all algebraic rewrites:
 for each pair of Dynin-Mityagin basis vectors and lattice parameters
 `a → 0` with `Na → ∞`, the lattice spectral Green form converges to the
-current `continuumGreenBilinear` body. That body uses raw Schwartz values in
-its integration variable; the Fourier-space formula in the surrounding
-documentation requires an explicit transform convention before this axiom
-can serve as the physical propagator statement.
+continuum Green form.
 
 The full Schwartz-space convergence theorem `latticeGreenBilinear_tendsto_continuum`
 is proved later in this file by two DM-expansion steps plus polynomial bounds
@@ -105,14 +107,12 @@ Reference: Glimm-Jaffe §6.1, Simon Ch. I.
 `OSforGFF/Covariance/Propagator.lean` proves the *continuum free* momentum
 propagator `1/((2π)²‖k‖² + m²)` as the Fourier transform of the proper-time
 covariance, and `gaussianFreeField_satisfies_all_OS_axioms_*` is OS for
-`μ_GFF`, not for `IsPphi2Limit`. The lattice→continuum *sum* in this axiom
-(`Ĉ_a(k) = 1 / ((4/a²) Σ_i sin²(π k_i a/L) + m²) → 1/(|k|²+m²)` at
-`a → 0`, `Na → ∞`) is the same analytic idea, but it is a different
-object (periodic lattice Green on `(ℤ/Nℤ)^d`, interacting consumers
-downstream). Do **not** apply `gaussianFreeField_satisfies_all_OS_axioms`
-to `IsPphi2Limit`, and do not treat the free GFF Green as a proof of
-this lattice bilinear tendsto. This axiom is **free** Green only; it does
-not prove `pphi2_limit_exists` and does not inhabit `IsPphi2Limit`. -/
+`μ_GFF`, not for `IsPphi2Limit`. The lattice→continuum sum here is the same
+analytic idea, with a different periodic lattice object and interacting
+consumers downstream. Do **not** apply `gaussianFreeField_satisfies_all_OS_axioms_*`
+to `IsPphi2Limit`, and do not treat the free GFF Green as a proof of this
+lattice bilinear tendsto. This axiom is **free** Green only; it does not
+prove `pphi2_limit_exists` and does not inhabit `IsPphi2Limit`. -/
 section ConvergenceAxiom
 
 variable [Fact (0 < d)]
@@ -988,88 +988,136 @@ private theorem latticeGreenBilinear_symm
   intro k _
   ring
 
-private def continuumKernel (mass : ℝ) :
-    EuclideanSpace ℝ (Fin d) → ℝ :=
-  fun k =>
-    (2 * Real.pi) ^ (-(d : ℤ)) / (‖k‖ ^ 2 + mass ^ 2)
+/-! ### Fourier multiplier realization of the continuum form
 
-private theorem continuumKernel_eq_scaled (mass : ℝ) (hmass : 0 < mass) :
-    continuumKernel d mass =
-      fun k =>
-        (2 * Real.pi) ^ (-(d : ℤ)) * mass⁻¹ ^ 2 *
-          (1 + ‖(mass⁻¹ : ℝ) • k‖ ^ 2) ^ (-1 : ℝ) := by
-  funext k
+The denominator is a multiplier in Mathlib frequency. Its inverse has
+temperate growth, so multiplying a Fourier transform by the conjugate of one
+test function produces another Schwartz function. This packages the right
+argument of the Green form as a real continuous linear map.
+-/
+
+private def continuumFourierKernel (mass : ℝ) :
+    EuclideanSpace ℝ (Fin d) → ℝ :=
+  fun ξ => 1 / ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2)
+
+private theorem continuumFourierKernel_eq_scaled (mass : ℝ) (hmass : 0 < mass) :
+    continuumFourierKernel d mass =
+      fun ξ => mass⁻¹ ^ 2 *
+        (1 + ‖((2 * Real.pi * mass⁻¹ : ℝ) • ξ)‖ ^ 2) ^ (-1 : ℝ) := by
+  funext ξ
   have hmass_ne : mass ≠ 0 := ne_of_gt hmass
-  have hnorm : ‖(mass⁻¹ : ℝ) • k‖ ^ 2 = mass⁻¹ ^ 2 * ‖k‖ ^ 2 := by
-    rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hmass)]
+  have hscale_pos : 0 < 2 * Real.pi * mass⁻¹ := by positivity
+  have hnorm :
+      ‖((2 * Real.pi * mass⁻¹ : ℝ) • ξ)‖ ^ 2 =
+        (2 * Real.pi * mass⁻¹) ^ 2 * ‖ξ‖ ^ 2 := by
+    rw [norm_smul, Real.norm_eq_abs, abs_of_pos hscale_pos]
     ring
-  unfold continuumKernel
+  unfold continuumFourierKernel
   rw [hnorm]
-  have haux : 1 + mass⁻¹ ^ 2 * ‖k‖ ^ 2 = (mass ^ 2 + ‖k‖ ^ 2) / mass ^ 2 := by
+  have haux :
+      1 + (2 * Real.pi * mass⁻¹) ^ 2 * ‖ξ‖ ^ 2 =
+        ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2) / mass ^ 2 := by
     field_simp [hmass_ne]
+    ring
   rw [haux, Real.rpow_neg_one]
   field_simp [hmass_ne]
   ring
 
-private theorem continuumKernel_hasTemperateGrowth (mass : ℝ) (hmass : 0 < mass) :
-    (continuumKernel d mass).HasTemperateGrowth := by
-  rw [continuumKernel_eq_scaled (d := d) mass hmass]
+private theorem continuumFourierKernel_hasTemperateGrowth
+    (mass : ℝ) (hmass : 0 < mass) :
+    (continuumFourierKernel d mass).HasTemperateGrowth := by
+  rw [continuumFourierKernel_eq_scaled (d := d) mass hmass]
   have hconst :
-      (fun _ : EuclideanSpace ℝ (Fin d) =>
-        (2 * Real.pi) ^ (-(d : ℤ)) * mass⁻¹ ^ 2).HasTemperateGrowth := by
+      (fun _ : EuclideanSpace ℝ (Fin d) => mass⁻¹ ^ 2).HasTemperateGrowth := by
     fun_prop
   have hbase :
       (fun x : EuclideanSpace ℝ (Fin d) => (1 + ‖x‖ ^ 2) ^ (-1 : ℝ)).HasTemperateGrowth := by
     fun_prop
   have hscale :
-      (fun k : EuclideanSpace ℝ (Fin d) => (mass⁻¹ : ℝ) • k).HasTemperateGrowth := by
+      (fun ξ : EuclideanSpace ℝ (Fin d) =>
+        ((2 * Real.pi * mass⁻¹ : ℝ) • ξ)).HasTemperateGrowth := by
     fun_prop
   exact hconst.mul (hbase.comp hscale)
 
-private def continuumGreenWeight (mass : ℝ) (f : ContinuumTestFunction d) :
-    EuclideanSpace ℝ (Fin d) → ℝ :=
-  fun k => continuumKernel d mass k * f k
+private def continuumFourierGreenWeight (mass : ℝ) (f : ContinuumTestFunction d) :
+    EuclideanSpace ℝ (Fin d) → ℂ :=
+  fun ξ => (continuumFourierKernel d mass ξ : ℂ) *
+    Complex.conj (FourierTransform.fourier (continuumSchwartzOfReal d f) ξ)
 
-private theorem continuumGreenWeight_hasTemperateGrowth
+private theorem continuumFourierGreenWeight_hasTemperateGrowth
     (mass : ℝ) (hmass : 0 < mass) (f : ContinuumTestFunction d) :
-    (continuumGreenWeight d mass f).HasTemperateGrowth := by
-  unfold continuumGreenWeight
-  exact (continuumKernel_hasTemperateGrowth (d := d) mass hmass).mul f.hasTemperateGrowth
+    (continuumFourierGreenWeight d mass f).HasTemperateGrowth := by
+  unfold continuumFourierGreenWeight
+  have hkernel :
+      (fun ξ : EuclideanSpace ℝ (Fin d) =>
+        (continuumFourierKernel d mass ξ : ℂ)).HasTemperateGrowth := by
+    simpa [Function.comp_def] using
+      Complex.hasTemperateGrowth_ofReal.comp
+        (continuumFourierKernel_hasTemperateGrowth (d := d) mass hmass)
+  have hfourier :
+      (fun ξ : EuclideanSpace ℝ (Fin d) =>
+        Complex.conj (FourierTransform.fourier
+          (continuumSchwartzOfReal d f) ξ)).HasTemperateGrowth := by
+    simpa [Function.comp_def] using
+      Complex.conjCLE.hasTemperateGrowth.comp
+        (FourierTransform.fourier (continuumSchwartzOfReal d f)).hasTemperateGrowth
+  exact hkernel.mul hfourier
+
+private noncomputable def continuumFourierCLM :
+    ContinuumTestFunction d →L[ℝ] ContinuumComplexTestFunction d :=
+  (ContinuousLinearMap.restrictScalars ℝ
+      (FourierTransform.fourierCLM ℂ (ContinuumComplexTestFunction d))).comp
+    (continuumSchwartzOfReal d)
 
 private noncomputable def continuumGreenBilinearRightCLM
     (mass : ℝ) (_hmass : 0 < mass) (f : ContinuumTestFunction d) :
     ContinuumTestFunction d →L[ℝ] ℝ :=
-  (SchwartzMap.integralCLM ℝ
-      (volume : Measure (EuclideanSpace ℝ (Fin d)))).comp
-    (SchwartzMap.smulLeftCLM ℝ (continuumGreenWeight d mass f))
+  Complex.reCLM.comp <|
+    (ContinuousLinearMap.restrictScalars ℝ
+      ((SchwartzMap.integralCLM ℂ
+          (volume : Measure (EuclideanSpace ℝ (Fin d)))).comp
+        (SchwartzMap.smulLeftCLM ℂ (continuumFourierGreenWeight d mass f)))).comp
+      (continuumFourierCLM d)
 
 @[simp] private theorem continuumGreenBilinearRightCLM_apply
     (mass : ℝ) (hmass : 0 < mass) (f g : ContinuumTestFunction d) :
     continuumGreenBilinearRightCLM (d := d) mass hmass f g =
       continuumGreenBilinear d mass f g := by
-  rw [continuumGreenBilinearRightCLM, ContinuousLinearMap.comp_apply, SchwartzMap.integralCLM_apply,
-    SchwartzMap.smulLeftCLM_apply (continuumGreenWeight_hasTemperateGrowth (d := d) mass hmass f)]
-  unfold continuumGreenWeight continuumGreenBilinear continuumKernel
-  have hpointwise :
-      (fun x : EuclideanSpace ℝ (Fin d) =>
-        ((2 * Real.pi) ^ (-(d : ℤ)) / (‖x‖ ^ 2 + mass ^ 2) * f x) • g x) =
-      fun x => (2 * Real.pi) ^ (-(d : ℤ)) * (f x * g x / (‖x‖ ^ 2 + mass ^ 2)) := by
-    funext x
-    have hden : ‖x‖ ^ 2 + mass ^ 2 ≠ 0 := by
-      nlinarith [sq_nonneg ‖x‖, sq_pos_of_pos hmass]
-    simp [smul_eq_mul]
-    field_simp [hden]
-  rw [hpointwise, integral_const_mul]
-  rfl
+  rw [continuumGreenBilinearRightCLM, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+    SchwartzMap.integralCLM_apply,
+    SchwartzMap.smulLeftCLM_apply
+      (continuumFourierGreenWeight_hasTemperateGrowth (d := d) mass hmass f)]
+  simp only [continuumFourierCLM, ContinuousLinearMap.comp_apply,
+    FourierTransform.fourierCLM_apply]
+  have hweight :=
+    continuumFourierGreenWeight_hasTemperateGrowth
+      (d := d) mass hmass f
+  have h_int :
+      Integrable
+        (fun ξ : EuclideanSpace ℝ (Fin d) =>
+          continuumFourierGreenWeight d mass f ξ •
+            FourierTransform.fourier (continuumSchwartzOfReal d g) ξ)
+        (volume : Measure (EuclideanSpace ℝ (Fin d))) := by
+    simpa only [SchwartzMap.smulLeftCLM_apply_apply hweight] using
+      ((SchwartzMap.smulLeftCLM ℂ (continuumFourierGreenWeight d mass f))
+        (FourierTransform.fourier (continuumSchwartzOfReal d g))).integrable
+  rw [← ContinuousLinearMap.integral_comp_comm Complex.reCLM h_int]
+  unfold continuumGreenBilinear continuumFourierGreenWeight continuumFourierKernel
+  apply integral_congr_ae
+  filter_upwards with ξ
+  simp [RCLike.inner_apply, smul_eq_mul, div_eq_mul_inv,
+    Complex.mul_re, Complex.conj_re, Complex.conj_im]
+  ring
 
 private theorem continuumGreenBilinear_symm
     (mass : ℝ) (f g : ContinuumTestFunction d) :
     continuumGreenBilinear d mass f g =
       continuumGreenBilinear d mass g f := by
   unfold continuumGreenBilinear
-  congr 1
   apply integral_congr_ae
-  filter_upwards with k
+  filter_upwards with ξ
+  simp [RCLike.inner_apply, Complex.mul_re, Complex.conj_re, Complex.conj_im]
   ring
 
 /-- Extend basis-pair convergence of the lattice Green form to arbitrary
@@ -1229,102 +1277,151 @@ theorem embeddedTwoPoint_uniform_bound (mass : ℝ) (hmass : 0 < mass)
 
   `G(f, f) > 0` for nonzero f ∈ S(ℝ^d)
 
-The Fourier-space integrand `|f̂(k)|² / (|k|² + m²)` is nonneg, and
-strictly positive on a set of positive measure (since f̂ ≠ 0 for f ≠ 0
-in Schwartz space — the Fourier transform is injective on S). -/
+The Fourier-space integrand `‖f̂(ξ)‖² /
+((2π)^2‖ξ‖² + m²)` is nonnegative. Fourier inversion supplies a nonzero
+Fourier transform when `f` is nonzero, and continuity then gives positivity
+on a set of positive measure. -/
 theorem continuumGreenBilinear_pos (mass : ℝ) (hmass : 0 < mass)
     (f : ContinuumTestFunction d) (hf : f ≠ 0) :
     0 < continuumGreenBilinear d mass f f := by
+  let F : ContinuumComplexTestFunction d :=
+    FourierTransform.fourier (continuumSchwartzOfReal d f)
   unfold continuumGreenBilinear
-  -- Factor as positive_constant * positive_integral
-  apply mul_pos
-  · -- (2π)^(-d) > 0
-    exact zpow_pos (by positivity) _
-  · -- ∫ f(k)² / (‖k‖² + m²) dk > 0
-    -- Abbreviate the integrand
-    set g := fun k : EuclideanSpace ℝ (Fin d) =>
-      f.toFun k * f.toFun k / (‖k‖ ^ 2 + mass ^ 2)
-    -- The denominator is positive everywhere
-    have hden_pos : ∀ k : EuclideanSpace ℝ (Fin d), 0 < ‖k‖ ^ 2 + mass ^ 2 :=
-      fun k => add_pos_of_nonneg_of_pos (sq_nonneg _) (sq_pos_of_pos hmass)
-    -- g is nonneg
-    have hg_nonneg : 0 ≤ g := fun k =>
-      div_nonneg (mul_self_nonneg (a := f.toFun k)) (le_of_lt (hden_pos k))
-    -- g is continuous
-    have hg_cont : Continuous g := by
-      apply Continuous.div (f.continuous.mul f.continuous)
-        ((continuous_norm.pow 2).add continuous_const)
-      intro k; exact ne_of_gt (hden_pos k)
-    -- g is integrable (bounded by f²/m², and f² is integrable since f ∈ L²)
-    have hf_sq_int : Integrable (fun k => (f k) ^ 2)
+  change 0 < ∫ ξ : EuclideanSpace ℝ (Fin d),
+    Complex.re (@inner ℂ ℂ _ (F ξ) (F ξ)) /
+      ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2)
+  simp only [inner_self_eq_norm_sq_to_K, RCLike.re_ofReal_pow]
+  have hF_ne : F ≠ 0 := by
+    intro hF
+    have hLift : continuumSchwartzOfReal d f = 0 := by
+      apply (FourierTransform.fourierCLE ℂ (ContinuumComplexTestFunction d)).injective
+      simpa [F] using hF
+    apply hf
+    ext x
+    have hx := congrArg (fun h : ContinuumComplexTestFunction d => h x) hLift
+    have hx' : (f x : ℂ) = 0 := by
+      simpa [continuumSchwartzOfReal] using hx
+    apply Complex.ofReal_injective
+    simpa using hx'
+  have hden_pos : ∀ ξ : EuclideanSpace ℝ (Fin d),
+      0 < (2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2 := by
+    intro ξ
+    positivity
+  set q : EuclideanSpace ℝ (Fin d) → ℝ := fun ξ =>
+    ‖F ξ‖ ^ 2 / ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2)
+  have hq_nonneg : ∀ ξ, 0 ≤ q ξ := by
+    intro ξ
+    dsimp [q]
+    exact div_nonneg (sq_nonneg _) (le_of_lt (hden_pos ξ))
+  have hq_cont : Continuous q := by
+    apply Continuous.div (F.continuous.norm.pow 2)
+      (by fun_prop)
+    intro ξ
+    exact ne_of_gt (hden_pos ξ)
+  have hF_sq_int :
+      Integrable (fun ξ : EuclideanSpace ℝ (Fin d) => ‖F ξ‖ ^ 2)
         (MeasureTheory.volume : Measure (EuclideanSpace ℝ (Fin d))) :=
-      (f.memLp 2).integrable_sq
-    have hg_int : Integrable g := by
-      apply (hf_sq_int.div_const (mass ^ 2)).mono hg_cont.aestronglyMeasurable
-      apply Filter.Eventually.of_forall; intro k
-      rw [Real.norm_eq_abs, abs_of_nonneg (hg_nonneg k)]
-      rw [Real.norm_eq_abs, abs_of_nonneg (div_nonneg (sq_nonneg _) (sq_nonneg _))]
-      -- g(k) = f(k)^2 / (||k||^2 + m^2) ≤ f(k)^2 / m^2 since ||k||^2 + m^2 ≥ m^2
-      change f.toFun k * f.toFun k / (‖k‖ ^ 2 + mass ^ 2) ≤ f k ^ 2 / mass ^ 2
-      have hfk : f.toFun k = f k := rfl
-      rw [hfk, ← sq]
-      apply div_le_div_of_nonneg_left (sq_nonneg (f k)) (by positivity)
-      linarith [sq_nonneg ‖k‖]
-    -- f ≠ 0 gives k₀ with f(k₀) ≠ 0
-    obtain ⟨k₀, hk₀⟩ := DFunLike.ne_iff.mp hf
-    -- g(k₀) ≠ 0
-    have hg_k₀ : g k₀ ≠ 0 := by
-      simp only [g]
-      exact ne_of_gt (div_pos (mul_self_pos.mpr hk₀) (hden_pos k₀))
-    -- Integral positive by `integral_pos_of_integrable_nonneg_nonzero`
-    exact integral_pos_of_integrable_nonneg_nonzero hg_cont hg_int hg_nonneg hg_k₀
+    (memLp_two_iff_integrable_sq_norm
+      (μ := (MeasureTheory.volume :
+        Measure (EuclideanSpace ℝ (Fin d))))
+      F.continuous.aestronglyMeasurable).mp (F.memLp 2)
+  have hq_int : Integrable q := by
+    apply (hF_sq_int.div_const (mass ^ 2)).mono hq_cont.aestronglyMeasurable
+    apply Filter.Eventually.of_forall
+    intro ξ
+    rw [Real.norm_eq_abs, abs_of_nonneg (hq_nonneg ξ)]
+    rw [Real.norm_eq_abs,
+      abs_of_nonneg (div_nonneg (sq_nonneg _) (sq_nonneg _))]
+    change ‖F ξ‖ ^ 2 /
+        ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2) ≤
+      ‖F ξ‖ ^ 2 / mass ^ 2
+    apply div_le_div_of_nonneg_left (sq_nonneg _) (by positivity)
+    have hterm : 0 ≤ (2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 :=
+      mul_nonneg (sq_nonneg _) (sq_nonneg _)
+    nlinarith
+  obtain ⟨ξ₀, hξ₀⟩ := DFunLike.ne_iff.mp hF_ne
+  have hq_ξ₀ : q ξ₀ ≠ 0 := by
+    dsimp [q]
+    exact ne_of_gt (div_pos
+      (sq_pos_of_pos (norm_pos_iff.mpr hξ₀)) (hden_pos ξ₀))
+  exact integral_pos_of_integrable_nonneg_nonzero hq_cont hq_int hq_nonneg hq_ξ₀
 
 /-- **Mass-gap upper bound on the continuum Green quadratic form.**
 
-Since `‖k‖² + m² ≥ m²`, the covariance kernel is pointwise bounded by `m⁻²`.
+Since `(2π)^2‖ξ‖² + m² ≥ m²`, the covariance multiplier is pointwise bounded by `m⁻²`.
 Therefore
-`G(f,f) ≤ (2π)^(-d) * m⁻² * ∫ f(x)^2 dx`.
+`G(f,f) ≤ m⁻² * ∫ f(x)^2 dx` by Plancherel for the Mathlib Fourier transform.
 
 This is the deterministic L²-side of the OS1 regularity estimate. -/
 theorem continuumGreenBilinear_le_mass_inv_sq (mass : ℝ) (_hmass : 0 < mass)
     (f : ContinuumTestFunction d) :
     continuumGreenBilinear d mass f f ≤
-      (2 * Real.pi) ^ (-(d : ℤ)) * (mass ^ 2)⁻¹ *
-        ∫ k : EuclideanSpace ℝ (Fin d), (f k) ^ 2 := by
+      (mass ^ 2)⁻¹ * ∫ k : EuclideanSpace ℝ (Fin d), (f k) ^ 2 := by
+  let F : ContinuumComplexTestFunction d :=
+    FourierTransform.fourier (continuumSchwartzOfReal d f)
   unfold continuumGreenBilinear
-  have hconst_nonneg : 0 ≤ (2 * Real.pi) ^ (-(d : ℤ)) := by positivity
-  have hf_sq_int : Integrable (fun k : EuclideanSpace ℝ (Fin d) => (f k) ^ 2)
-      (MeasureTheory.volume : Measure (EuclideanSpace ℝ (Fin d))) :=
-    (f.memLp 2).integrable_sq
+  change ∫ ξ : EuclideanSpace ℝ (Fin d),
+      Complex.re (@inner ℂ ℂ _ (F ξ) (F ξ)) /
+        ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2) ≤
+    (mass ^ 2)⁻¹ * ∫ k : EuclideanSpace ℝ (Fin d), (f k) ^ 2
+  simp only [inner_self_eq_norm_sq_to_K, RCLike.re_ofReal_pow]
+  have hden_pos : ∀ ξ : EuclideanSpace ℝ (Fin d),
+      0 < (2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2 := by
+    intro ξ
+    positivity
+  have hF_sq_int :
+      Integrable (fun ξ : EuclideanSpace ℝ (Fin d) => ‖F ξ‖ ^ 2)
+        (MeasureTheory.volume : Measure (EuclideanSpace ℝ (Fin d))) :=
+    (memLp_two_iff_integrable_sq_norm
+      (μ := (MeasureTheory.volume :
+        Measure (EuclideanSpace ℝ (Fin d))))
+      F.continuous.aestronglyMeasurable).mp (F.memLp 2)
   have hint_upper : Integrable
-      (fun k : EuclideanSpace ℝ (Fin d) => (mass ^ 2)⁻¹ * (f k) ^ 2) := by
-    exact hf_sq_int.const_mul _
+      (fun ξ : EuclideanSpace ℝ (Fin d) => (mass ^ 2)⁻¹ * ‖F ξ‖ ^ 2) := by
+    exact hF_sq_int.const_mul _
   have h_int_le :
-      ∫ k : EuclideanSpace ℝ (Fin d), f.toFun k * f.toFun k / (‖k‖ ^ 2 + mass ^ 2) ≤
-        ∫ k : EuclideanSpace ℝ (Fin d), (mass ^ 2)⁻¹ * (f k) ^ 2 := by
+      ∫ ξ : EuclideanSpace ℝ (Fin d),
+          ‖F ξ‖ ^ 2 / ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2) ≤
+        ∫ ξ : EuclideanSpace ℝ (Fin d), (mass ^ 2)⁻¹ * ‖F ξ‖ ^ 2 := by
     apply integral_mono_of_nonneg
     · exact ae_of_all _ (fun k =>
-        div_nonneg (mul_self_nonneg (a := f.toFun k))
-          (by positivity : 0 ≤ ‖k‖ ^ 2 + mass ^ 2))
+        div_nonneg (sq_nonneg _) (le_of_lt (hden_pos k)))
     · exact hint_upper
     · exact ae_of_all _ (fun k => by
-        change f k * f k / (‖k‖ ^ 2 + mass ^ 2) ≤ (mass ^ 2)⁻¹ * (f k) ^ 2
-        rw [← sq]
+        change ‖F k‖ ^ 2 /
+            ((2 * Real.pi) ^ 2 * ‖k‖ ^ 2 + mass ^ 2) ≤
+          (mass ^ 2)⁻¹ * ‖F k‖ ^ 2
         calc
-          f k ^ 2 / (‖k‖ ^ 2 + mass ^ 2) ≤ f k ^ 2 / mass ^ 2 := by
-            apply div_le_div_of_nonneg_left (sq_nonneg (f k)) (by positivity)
-            nlinarith [sq_nonneg ‖k‖]
-          _ = (mass ^ 2)⁻¹ * (f k) ^ 2 := by rw [div_eq_mul_inv, mul_comm])
+          ‖F k‖ ^ 2 /
+              ((2 * Real.pi) ^ 2 * ‖k‖ ^ 2 + mass ^ 2) ≤
+            ‖F k‖ ^ 2 / mass ^ 2 := by
+              apply div_le_div_of_nonneg_left (sq_nonneg _) (by positivity)
+              have hterm : 0 ≤ (2 * Real.pi) ^ 2 * ‖k‖ ^ 2 :=
+                mul_nonneg (sq_nonneg _) (sq_nonneg _)
+              nlinarith
+          _ = (mass ^ 2)⁻¹ * ‖F k‖ ^ 2 := by rw [div_eq_mul_inv, mul_comm])
+  have hplancherel :
+      (∫ ξ : EuclideanSpace ℝ (Fin d), ‖F ξ‖ ^ 2) =
+        ∫ k : EuclideanSpace ℝ (Fin d), (f k) ^ 2 := by
+    calc
+      (∫ ξ : EuclideanSpace ℝ (Fin d), ‖F ξ‖ ^ 2) =
+          ∫ k : EuclideanSpace ℝ (Fin d),
+            ‖continuumSchwartzOfReal d f k‖ ^ 2 :=
+        by
+          simpa [F] using
+            (SchwartzMap.integral_norm_sq_fourier (continuumSchwartzOfReal d f))
+      _ = ∫ k : EuclideanSpace ℝ (Fin d), (f k) ^ 2 := by
+        apply integral_congr_ae
+        filter_upwards with k
+        simp [continuumSchwartzOfReal, Complex.norm_real, Real.norm_eq_abs, sq_abs]
   calc
-    (2 * Real.pi) ^ (-(d : ℤ)) *
-        ∫ k : EuclideanSpace ℝ (Fin d), f.toFun k * f.toFun k / (‖k‖ ^ 2 + mass ^ 2)
-      ≤ (2 * Real.pi) ^ (-(d : ℤ)) *
-          ∫ k : EuclideanSpace ℝ (Fin d), (mass ^ 2)⁻¹ * (f k) ^ 2 :=
-        mul_le_mul_of_nonneg_left h_int_le hconst_nonneg
-    _ = (2 * Real.pi) ^ (-(d : ℤ)) * (mass ^ 2)⁻¹ *
-          ∫ k : EuclideanSpace ℝ (Fin d), (f k) ^ 2 := by
-        rw [integral_const_mul]
-        ring
+    ∫ ξ : EuclideanSpace ℝ (Fin d),
+        ‖F ξ‖ ^ 2 / ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2)
+      ≤ ∫ ξ : EuclideanSpace ℝ (Fin d), (mass ^ 2)⁻¹ * ‖F ξ‖ ^ 2 := h_int_le
+    _ = (mass ^ 2)⁻¹ * ∫ ξ : EuclideanSpace ℝ (Fin d), ‖F ξ‖ ^ 2 := by
+      rw [integral_const_mul]
+    _ = (mass ^ 2)⁻¹ * ∫ k : EuclideanSpace ℝ (Fin d), (f k) ^ 2 := by
+      rw [hplancherel]
 
 end Pphi2
 

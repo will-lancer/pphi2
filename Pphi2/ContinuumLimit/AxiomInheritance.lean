@@ -168,7 +168,7 @@ theorem exponential_moment_schwartz_bound
         Real.exp (c * (∫ x, ‖g x‖ ∂volume + ∫ x, ‖g x‖ ^ (2 : ℝ) ∂volume)) := by
   obtain ⟨c₁, c₂, hc₁, hc₂, hbound⟩ :=
     continuum_exponential_moment_bound P mass hmass μ h_limit
-  let Cmass : ℝ := (2 * Real.pi) ^ (-(2 : ℤ)) * (mass ^ 2)⁻¹
+  let Cmass : ℝ := (mass ^ 2)⁻¹
   have hCmass_nonneg : 0 ≤ Cmass := by
     dsimp [Cmass]
     positivity

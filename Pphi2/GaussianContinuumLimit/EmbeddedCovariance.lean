@@ -12,7 +12,8 @@ and continuum covariance structures.
 
 - `gaussianContinuumMeasure` — pushforward of `latticeGaussianMeasure` to S'(ℝ^d)
 - `embeddedTwoPoint` — two-point function `∫ ω(f)·ω(g) dν_{GFF,a}`
-- `continuumGreenBilinear` — current raw-Schwartz bilinear interface
+- `continuumGreenBilinear` — Mathlib-frequency Green form with multiplier
+  `((2π)^2 ‖ξ‖² + m²)⁻¹`
 
 ## Mathematical background
 
@@ -21,8 +22,10 @@ via the Riemann sum embedding `ι_a`, the two-point function becomes:
 
   `E[Φ_a(f) · Φ_a(g)] = a^{2d} Σ_{x,y} C_a(x,y) f(ax) g(ay)`
 
-This is a Riemann sum that converges to the continuum Green's function
-bilinear form `∫ f̂(k) ĝ(k) / (|k|² + m²) dk/(2π)^d`.
+Mathlib's Fourier transform uses the phase `exp(-2π i ⟪x, ξ⟫)`. Writing the
+physicist momentum as `p = 2π ξ`, the Riemann sum converges to the
+Mathlib-frequency form
+`∫ re ⟪f̂(ξ), ĝ(ξ)⟫ / ((2π)^2 ‖ξ‖² + m²) dξ`.
 
 ## References
 
@@ -76,19 +79,16 @@ def embeddedTwoPoint (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
   ∫ ω : Configuration (ContinuumTestFunction d),
     ω f * ω g ∂(gaussianContinuumMeasure d N a mass ha hmass)
 
-/-! ## Fourier-convention helpers -/
-
-/-- The real-to-complex lift on `S(ℝ^d)` used by the Fourier covariance.
-
-This is an interface helper only.  The public `continuumGreenBilinear` below
-still has the legacy raw-value body until its dependent convergence proofs are
-ported to the Mathlib Fourier convention. -/
+/-- The real-to-complex lift on `S(ℝ^d)` used by the Fourier covariance. -/
 def continuumSchwartzOfReal (d : ℕ) :
     ContinuumTestFunction d →L[ℝ] ContinuumComplexTestFunction d :=
   SchwartzMap.postcompCLM Complex.ofRealCLM
 
-/-- The Mathlib-frequency massive resolvent used by the continuum free Green
-form.  This is a free-field multiplier and carries no interacting-limit claim. -/
+/-- The Mathlib-frequency massive resolvent.
+
+This is the *free* Green multiplier: the same rational function as
+`OSforGFF.freePropagatorMom`. It is not an interacting Schwinger function
+and does not inhabit `IsPphi2Limit`. -/
 def continuumGreenMultiplier (mass : ℝ)
     (ξ : EuclideanSpace ℝ (Fin d)) : ℝ :=
   ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2)⁻¹
@@ -110,20 +110,33 @@ theorem continuumGreenMultiplier_den_pos
 
 /-- The continuum Green's function bilinear form.
 
-  `G(f, g) = ∫ f̂(k) · ĝ(k) / (|k|² + m²) dk / (2π)^d`
+  `G(f, g) = ∫ re ⟪f̂(ξ), ĝ(ξ)⟫ / ((2π)^2 ‖ξ‖² + m²) dξ`
 
-The intended two-point form uses Fourier transforms and represents the
-continuum massive free field. The current body below integrates the raw
-values `f.toFun k * g.toFun k`; it therefore serves as a convention placeholder
-until the Fourier transform and normalization are made explicit.
+This is the two-point function of the continuum massive **free** field
+(the H⁻¹ pairing of `(-Δ + m²)⁻¹`). It is not the interacting two-point
+function of an `IsPphi2Limit` measure.
 
-The raw-value body still makes positivity manifest, while its physical-space
-meaning requires that convention to be resolved. -/
+The transform is Mathlib's `2π`-normalized transform. The real part of the
+complex inner product gives the real covariance pairing, and on the diagonal
+the integrand is the squared Fourier norm divided by the positive multiplier. -/
 def continuumGreenBilinear (mass : ℝ)
     (f g : ContinuumTestFunction d) : ℝ :=
-  (2 * Real.pi) ^ (-(d : ℤ)) *
-  ∫ k : EuclideanSpace ℝ (Fin d),
-    f.toFun k * g.toFun k / (‖k‖ ^ 2 + mass ^ 2)
+  ∫ ξ : EuclideanSpace ℝ (Fin d),
+    Complex.re (@inner ℂ ℂ _
+      (FourierTransform.fourier (continuumSchwartzOfReal d f) ξ)
+      (FourierTransform.fourier (continuumSchwartzOfReal d g) ξ)) /
+      ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2)
+
+theorem continuumGreenBilinear_eq_multiplier
+    (mass : ℝ) (f g : ContinuumTestFunction d) :
+    continuumGreenBilinear d mass f g =
+      ∫ ξ : EuclideanSpace ℝ (Fin d),
+        Complex.re (@inner ℂ ℂ _
+          (FourierTransform.fourier (continuumSchwartzOfReal d f) ξ)
+          (FourierTransform.fourier (continuumSchwartzOfReal d g) ξ)) *
+          continuumGreenMultiplier d mass ξ := by
+  unfold continuumGreenBilinear continuumGreenMultiplier
+  simp_rw [div_eq_mul_inv]
 
 /-- The lattice Green bilinear form evaluated on the discretizations of
 continuum test functions, in the **Glimm–Jaffe-aligned** normalisation
