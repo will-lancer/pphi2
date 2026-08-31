@@ -101,6 +101,15 @@ theorem asymTransferKernelRemainder_apply
   have hground : Integrable
       (fun y => λ ^ (m + 1) * Ω x * (Ω y * f y)) volume :=
     hΩf.const_mul (λ ^ (m + 1) * Ω x)
+  have hRf : Integrable
+      (fun y => kernelRemainder Ts Ω λ m x y * f y) volume := by
+    rw [show (fun y => kernelRemainder Ts Ω λ m x y * f y) =
+        (fun y => Ts.kPow m x y * f y -
+          λ ^ (m + 1) * Ω x * (Ω y * f y)) by
+      funext y
+      simp only [kernelRemainder, rankOneKernel]
+      ring]
+    exact hKf.sub hground
   calc
     (Tpow f - P0 f : L2SpatialField Ns) x = (Tpow f) x - (P0 f) x := hsubx
     _ = (∫ y, Ts.kPow m x y * f y ∂volume) -
@@ -117,7 +126,7 @@ theorem asymTransferKernelRemainder_apply
     _ = ((∫ y, kernelRemainder Ts Ω λ m x y * f y ∂volume) +
           ∫ y, λ ^ (m + 1) * Ω x * (Ω y * f y) ∂volume) -
           λ ^ (m + 1) * (@inner ℝ _ _ Ω f) * Ω x := by
-      rw [integral_add hKf hground]
+      rw [integral_add hRf hground]
     _ = ∫ y, kernelRemainder Ts Ω λ m x y * f y ∂volume := by
       rw [integral_const_mul, ← hinner]
       ring
