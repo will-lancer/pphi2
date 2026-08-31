@@ -74,6 +74,8 @@ compose (no `#print axioms` run).
 #print axioms Pphi2.pphi2_existence
 #print axioms Pphi2.finsetOrderIsoSubtype
 #print axioms Pphi2.finsetSubtypeOrderIso
+#print axioms Pphi2.finsetOrderEmbedding
+#print axioms Pphi2.finsetSubtypeOrderIso_coe
 #print axioms Pphi2.pphi2_nontriviality
 #print axioms Pphi2.continuumLimit_nonGaussian
 #print axioms Pphi2.schwinger_agreement
