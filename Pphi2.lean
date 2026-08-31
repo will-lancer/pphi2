@@ -11,6 +11,10 @@ import Pphi2.GeneralResults.GaussianHermiteMean
 import Pphi2.GeneralResults.FiniteIBP
 import Pphi2.GeneralResults.TiltPartitionDerivative
 
+-- Keystone 18 foundation: rights-clean continuous-spin and covariance data
+import Pphi2.ClusterExpansion.ContinuousSpin
+import Pphi2.ClusterExpansion.CovarianceInterpolation
+
 -- Phase 1: Wick ordering
 import Pphi2.WickOrdering.WickPolynomial
 import Pphi2.WickOrdering.Counterterm
