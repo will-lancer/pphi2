@@ -163,8 +163,7 @@ theorem slicePairing_singleSliceLatticeField
     intro t'
     split_ifs <;> simp
   simp_rw [hsum]
-  rw [Finset.sum_ite_eq, if_pos (Finset.mem_univ t)]
-  rfl
+  simpa only [Fintype.sum_ite_eq', asymSliceObsLinear]
 
 /-- Gibbs two-point of two one-slice lattice test vectors equals the path-measure
 pairing of the corresponding linear slice observables. -/
@@ -178,6 +177,11 @@ theorem interacting_singleSlice_cross_moment_eq_pathMeasure
         ∂((asymTransferSystem (Nt := Nt) (Ns := Ns) P a mass ha hmass).pathMeasure Nt) := by
   rw [interacting_cross_moment_eq_pathMeasure]
   refine integral_congr_ae (Filter.Eventually.of_forall fun ψ => ?_)
+  change slicePairing Nt Ns
+        (singleSliceLatticeField (Nt := Nt) (Ns := Ns) t g) ψ *
+      slicePairing Nt Ns
+        (singleSliceLatticeField (Nt := Nt) (Ns := Ns) t' g') ψ =
+    asymSliceObsLinear g (ψ t) * asymSliceObsLinear g' (ψ t')
   rw [slicePairing_singleSliceLatticeField, slicePairing_singleSliceLatticeField]
 
 /-! ## B5b analytic input -/
