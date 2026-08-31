@@ -469,14 +469,14 @@ private theorem asym_circleRestriction_inner_tendsto
       _ = ∑ n ∈ Finset.range (N k),
           (L / (N k : ℝ)) *
             hfg ((n : ℝ) * L / (N k : ℝ)) := by
-        rw [asym_zmod_sum_eq_range]
-        apply Finset.sum_congr rfl
-        intro n hn
-        simp [hfg, circlePoint]
+        let q : ℕ → ℝ := fun n =>
+          (L / (N k : ℝ)) * hfg ((n : ℝ) * L / (N k : ℝ))
+        have hq := asym_zmod_sum_eq_range (N := N k) q
+        simpa [q, hfg, circlePoint] using hq
       _ = ∑ n ∈ Finset.range (N k - 1 + 1),
           (L / (↑(N k - 1 + 1) : ℝ)) *
             hfg ((n : ℝ) * L / (↑(N k - 1 + 1) : ℝ)) := by
-        rw [hNsucc k]
+        simpa only [hNsucc k]
   rw [hrewrite]
   simpa only [Function.comp_def] using hcomp
 
@@ -595,15 +595,26 @@ private theorem asym_basis_pair_tendsto
         (if m = n then 1 else 0) := by
     by_cases hmn : m = n
     · subst n
-      simp
+      simp [mt, ms, nt, ns]
     by_cases hmt : mt = nt
     · by_cases hms : ms = ns
-      · have hmn' : m = n := by
-          rw [← Nat.pair_unpair m, ← Nat.pair_unpair n, hmt, hms]
-        simp [hmn']
+      · have hmt' : (Nat.unpair m).1 = (Nat.unpair n).1 := by
+          simpa only [mt, nt] using hmt
+        have hms' : (Nat.unpair m).2 = (Nat.unpair n).2 := by
+          simpa only [ms, ns] using hms
+        have hmn' : m = n := by
+          calc
+            m = Nat.pair (Nat.unpair m).1 (Nat.unpair m).2 :=
+              (Nat.pair_unpair m).symm
+            _ = Nat.pair (Nat.unpair n).1 (Nat.unpair n).2 := by
+              rw [hmt', hms']
+            _ = n := Nat.pair_unpair n
+        exact (hmn hmn').elim
       · simp [hmt, hms, hmn]
     · simp [hmt, hmn]
-  convert htime'.mul hspace' using 1 <;> simp [hdelta]
+  have hlim := htime'.mul hspace'
+  rw [hdelta] at hlim
+  exact hlim
 
 theorem asymTorusSiteEval_sq_tendsto
     (Lt Ls : ℝ) [Fact (0 < Lt)] [Fact (0 < Ls)]
