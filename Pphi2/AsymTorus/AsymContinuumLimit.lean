@@ -41,7 +41,7 @@ import GaussianField.ConfigurationEmbedding
 
 noncomputable section
 
-open MeasureTheory GaussianField
+open MeasureTheory GaussianField Filter
 
 namespace Pphi2
 
@@ -645,9 +645,79 @@ theorem asymTorusSiteEval_sq_tendsto
   have hcoeff_fN : ∀ (N r : ℕ),
       DyninMityaginSpace.coeff r (fN N) =
         if r ∈ Finset.range N then DyninMityaginSpace.coeff r f else 0 := by
+    classical
     intro N r
-    simp [fN, map_sum, map_smul,
-      DyninMityaginSpace.HasBiorthogonalBasis.coeff_basis]
+    dsimp [fN]
+    have hcoeff_smul (x : ℕ) :
+        DyninMityaginSpace.coeff r
+              (DyninMityaginSpace.coeff x f • RapidDecaySeq.basisVec x) =
+            DyninMityaginSpace.coeff x f *
+              DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) := by
+      simpa only [smul_eq_mul] using
+        (DyninMityaginSpace.coeff
+          (E := AsymTorusTestFunction Lt Ls) r).map_smul
+            (DyninMityaginSpace.coeff x f) (RapidDecaySeq.basisVec x)
+    have hcoeff_basis (u v : ℕ) :
+        DyninMityaginSpace.coeff u (RapidDecaySeq.basisVec v) =
+          if u = v then 1 else 0 := by
+      change (RapidDecaySeq.basisVec v).val u =
+        if u = v then 1 else 0
+      simp [RapidDecaySeq.basisVec]
+    rw [map_sum]
+    by_cases hr : r ∈ Finset.range N
+    · rw [if_pos hr, Finset.sum_eq_single r]
+      · calc
+          DyninMityaginSpace.coeff r
+                (DyninMityaginSpace.coeff r f • RapidDecaySeq.basisVec r) =
+              DyninMityaginSpace.coeff r f *
+                DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec r) :=
+            hcoeff_smul r
+          _ = DyninMityaginSpace.coeff r f := by
+            calc
+              DyninMityaginSpace.coeff r f *
+                    DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec r) =
+                  DyninMityaginSpace.coeff r f * (if r = r then 1 else 0) :=
+                congrArg (fun y : ℝ => DyninMityaginSpace.coeff r f * y)
+                  (hcoeff_basis r r)
+              _ = DyninMityaginSpace.coeff r f := by simp
+      · intro x hx hxr
+        calc
+          DyninMityaginSpace.coeff r
+                (DyninMityaginSpace.coeff x f • RapidDecaySeq.basisVec x) =
+              DyninMityaginSpace.coeff x f *
+                DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) :=
+            hcoeff_smul x
+          _ = 0 := by
+            calc
+              DyninMityaginSpace.coeff x f *
+                    DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) =
+                  DyninMityaginSpace.coeff x f * (if r = x then 1 else 0) :=
+                congrArg (fun y : ℝ => DyninMityaginSpace.coeff x f * y)
+                  (hcoeff_basis r x)
+              _ = 0 := by simp [Ne.symm hxr]
+      · intro hrN
+        exact (hrN hr).elim
+    · rw [if_neg hr]
+      apply Finset.sum_eq_zero
+      intro x hx
+      have hrx : r ≠ x := by
+        intro hrx
+        apply hr
+        simpa [hrx] using hx
+      calc
+        DyninMityaginSpace.coeff r
+              (DyninMityaginSpace.coeff x f • RapidDecaySeq.basisVec x) =
+            DyninMityaginSpace.coeff x f *
+              DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) :=
+          hcoeff_smul x
+        _ = 0 := by
+          calc
+            DyninMityaginSpace.coeff x f *
+                  DyninMityaginSpace.coeff r (RapidDecaySeq.basisVec x) =
+                DyninMityaginSpace.coeff x f * (if r = x then 1 else 0) :=
+              congrArg (fun y : ℝ => DyninMityaginSpace.coeff x f * y)
+                (hcoeff_basis r x)
+            _ = 0 := by simp [hrx]
   have hl2_fN : ∀ N,
       l2InnerProduct (fN N) (fN N) =
         ∑ m ∈ Finset.range N, (DyninMityaginSpace.coeff m f) ^ 2 := by
@@ -663,7 +733,7 @@ theorem asymTorusSiteEval_sq_tendsto
     rw [tsum_eq_sum (s := Finset.range N) houtside]
     apply Finset.sum_congr rfl
     intro r hr
-    simp [hcoeff_fN, hr]
+    simp [hcoeff_fN, hr, pow_two]
   have hl2_tendsto : Tendsto
       (fun N => l2InnerProduct (fN N) (fN N)) atTop
       (nhds (l2InnerProduct f f)) := by
