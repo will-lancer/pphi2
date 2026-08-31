@@ -10,6 +10,7 @@ import Pphi2.EuclideanComplex
 import Pphi2.GeneralResults.GaussianHermiteMean
 import Pphi2.GeneralResults.FiniteIBP
 import Pphi2.GeneralResults.TiltPartitionDerivative
+import Pphi2.GeneralResults.PositiveKernelTrace
 
 -- Phase 1: Wick ordering
 import Pphi2.WickOrdering.WickPolynomial
