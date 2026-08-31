@@ -591,7 +591,7 @@ private theorem asym_basis_pair_tendsto
             rw [Finset.sum_mul_sum]
   rw [hprod]
   have hdelta :
-      (if mt = nt then 1 else 0) * (if ms = ns then 1 else 0) =
+      (if mt = nt then (1 : ℝ) else 0) * (if ms = ns then 1 else 0) =
         (if m = n then 1 else 0) := by
     by_cases hmn : m = n
     · subst n
