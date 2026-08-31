@@ -869,7 +869,11 @@ theorem asymTorusSiteEval_sq_tendsto
   let C₀ := Lt * Ls * C₀t ^ 2 * C₀s ^ 2
   have hC₀_pos : 0 < C₀ := by
     dsimp [C₀]
-    positivity
+    exact mul_pos
+      (mul_pos
+        (mul_pos (Fact.out : 0 < Lt) (Fact.out : 0 < Ls))
+        (sq_pos_of_pos hC₀t_pos))
+      (sq_pos_of_pos hC₀s_pos)
   have hsample_bound : ∀ k (h : AsymTorusTestFunction Lt Ls),
       ‖WithLp.toLp 2 (fun x : AsymLatticeSites (Nt k) (Ns k) =>
           evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h)‖ ≤
@@ -890,9 +894,13 @@ theorem asymTorusSiteEval_sq_tendsto
       simpa [C₀, Real.norm_eq_abs, sq_abs] using hsquare
     have hp : 0 ≤ RapidDecaySeq.rapidDecaySeminorm 0 h := apply_nonneg _ _
     have hsqrt : 0 ≤ Real.sqrt C₀ := Real.sqrt_nonneg _
-    nlinarith [Real.sq_sqrt hC₀_pos.le, norm_nonneg
-      (WithLp.toLp 2 (fun x : AsymLatticeSites (Nt k) (Ns k) =>
-        evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h))]
+    apply le_of_sq_le_sq ?_ (mul_nonneg hsqrt hp)
+    calc
+      ‖WithLp.toLp 2 (fun x : AsymLatticeSites (Nt k) (Ns k) =>
+          evalAsymTorusAtSite Lt Ls (Nt k) (Ns k) x h)‖ ^ 2 ≤
+        C₀ * (RapidDecaySeq.rapidDecaySeminorm 0 h) ^ 2 := hsquare'
+      _ = (Real.sqrt C₀ * RapidDecaySeq.rapidDecaySeminorm 0 h) ^ 2 := by
+        rw [mul_pow, Real.sq_sqrt hC₀_pos.le]
   rw [Metric.tendsto_atTop]
   intro ε hε
   let p : AsymTorusTestFunction Lt Ls → ℝ :=
@@ -963,16 +971,26 @@ theorem asymTorusSiteEval_sq_tendsto
   have hnorm_diff : ‖vf - vn‖ ≤ A * p (fN N₀ - f) := by
     rw [← hvd]
     have := hsample_bound k (f - fN N₀)
-    have heq : p (f - fN N₀) = p (fN N₀ - f) := by
-      rw [show f - fN N₀ = -(fN N₀ - f) by abel,
-        map_neg_eq_map]
+    have heq :
+        RapidDecaySeq.rapidDecaySeminorm 0 (f - fN N₀) =
+          RapidDecaySeq.rapidDecaySeminorm 0 (fN N₀ - f) := by
+      calc
+        RapidDecaySeq.rapidDecaySeminorm 0 (f - fN N₀) =
+            RapidDecaySeq.rapidDecaySeminorm 0 (-(fN N₀ - f)) := by
+          congr 1
+          abel
+        _ = RapidDecaySeq.rapidDecaySeminorm 0 (fN N₀ - f) := by
+          exact map_neg_eq_map (RapidDecaySeq.rapidDecaySeminorm 0) _
     rw [heq] at this
-    exact this
+    simpa [vd, A, p] using this
   have hsqdiff :
       |S k f - S k (fN N₀)| ≤
         (‖vf‖ + ‖vn‖) * ‖vf - vn‖ := by
-    dsimp [S, vf, vn]
-    rw [← EuclideanSpace.real_norm_sq_eq, ← EuclideanSpace.real_norm_sq_eq]
+    have hvf_sq : S k f = ‖vf‖ ^ 2 := by
+      simpa [S, vf] using (EuclideanSpace.real_norm_sq_eq vf).symm
+    have hvn_sq : S k (fN N₀) = ‖vn‖ ^ 2 := by
+      simpa [S, vn] using (EuclideanSpace.real_norm_sq_eq vn).symm
+    rw [hvf_sq, hvn_sq]
     rw [show ‖vf‖ ^ 2 - ‖vn‖ ^ 2 =
         (‖vf‖ - ‖vn‖) * (‖vf‖ + ‖vn‖) by ring, abs_mul]
     simpa [mul_comm] using
@@ -1009,7 +1027,16 @@ theorem asymTorusSiteEval_sq_tendsto
               A ^ 2 * (2 * d + 1) *
                 (ε / (3 * A ^ 2 * (2 * d + 1))) := hmul
           _ = ε / 3 := by
-            field_simp [ne_of_gt hden, ne_of_gt hcoef]
+            have hA_pos : 0 < A := by
+              dsimp [A]
+              exact Real.sqrt_pos.2 hC₀_pos
+            have hd : 0 ≤ d := by
+              dsimp [d]
+              exact apply_nonneg _ _
+            have hden' : 0 < A * (2 * d + 1) :=
+              mul_pos hA_pos (by linarith)
+            field_simp [ne_of_gt hden, ne_of_gt hcoef] <;>
+              exact div_self (ne_of_gt hden')
   calc
     |S k f - l2InnerProduct f f| ≤
         |S k f - S k (fN N₀)| +
@@ -1022,7 +1049,11 @@ theorem asymTorusSiteEval_sq_tendsto
         _ ≤ |S k f - S k (fN N₀)| +
               (|S k (fN N₀) - l2InnerProduct (fN N₀) (fN N₀)| +
                 |l2InnerProduct (fN N₀) (fN N₀) - l2InnerProduct f f|) :=
-          add_le_add_left (abs_sub_le _ _ _) _
+          add_le_add_left
+            (abs_sub_le (S k (fN N₀))
+              (l2InnerProduct (fN N₀) (fN N₀))
+              (l2InnerProduct f f))
+            _
         _ = _ := by ring
     _ < ε / 3 + ε / 3 + ε / 3 := by
       gcongr
