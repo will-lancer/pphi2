@@ -400,4 +400,49 @@ theorem inner_asymTransferOperatorCLM_pow_eq_kPow_iterated
   simp only []
   rw [← integral_const_mul]
 
+/-! ## Public slice-integrability interface -/
+
+/-- The product of an iterated transfer-kernel row with an `L²` input is
+integrable on every spatial slice.  This is the one-slice wrapper needed by
+the rank-one kernel-remainder action theorem; the stronger product-space
+integrability fact used by the induction above remains private. -/
+theorem asymTransferKernel_kPow_slice_integrable
+    (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
+    (m : ℕ) (x : SpatialField Ns) (f : L2SpatialField Ns) :
+    Integrable
+      (fun y => (asymTransferSystem Nt Ns P a mass ha hmass).kPow m x y * f y)
+      volume := by
+  set Ts := asymTransferSystem Nt Ns P a mass ha hmass with hTs
+  set W := asymTransferWeight Nt Ns P a mass with hW
+  set C := (Wsq Nt Ns P a mass) ^ m with hC
+  have hW_nonneg : ∀ y, 0 ≤ W y := fun y =>
+    (asymTransferWeight_pos Nt Ns P a mass y).le
+  have hWf : Integrable (fun y => W y * |f y|) volume := by
+    have hWf' : Integrable (fun y => W y * f y) volume :=
+      (asymTransferWeight_memLp_two Nt Ns P a mass ha hmass).integrable_mul
+        (Lp.memLp f)
+    have hEq : (fun y => W y * |f y|) = (fun y => |W y * f y|) := by
+      funext y
+      rw [abs_mul, abs_of_nonneg (hW_nonneg y)]
+    rw [hEq]
+    exact hWf'.abs
+  have hdom : Integrable
+      (fun y => (C * W x) * (W y * |f y|)) volume :=
+    hWf.const_mul (C * W x)
+  have hk_meas : Measurable (fun y => Ts.kPow m x y) := by
+    simpa only [Ts] using
+      asymTransferKernel_kPow_measurable Nt Ns P a mass ha hmass m x
+  have hintegrand : AEStronglyMeasurable
+      (fun y => Ts.kPow m x y * f y) volume :=
+    hk_meas.aestronglyMeasurable.mul (Lp.aestronglyMeasurable f)
+  refine hdom.mono' hintegrand (.of_forall fun y => ?_)
+  rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (Ts.kPow_nonneg m x y)]
+  have hle : Ts.kPow m x y ≤ C * W x * W y := by
+    simpa only [Ts, W, C] using
+      asymTransferKernel_kPow_le Nt Ns P a mass ha hmass m x y
+  calc
+    Ts.kPow m x y * |f y| ≤ (C * W x * W y) * |f y| :=
+      mul_le_mul_of_nonneg_right hle (abs_nonneg _)
+    _ = (C * W x) * (W y * |f y|) := by ring
+
 end Pphi2
