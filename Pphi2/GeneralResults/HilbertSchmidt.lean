@@ -467,6 +467,7 @@ theorem norm_integral_complex_four_mul_le_L2
       BF * BG *
         (∫ x, ‖R x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) *
         (∫ x, ‖S x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) := by
+  letI : ENNReal.HolderTriple (2 : ENNReal) 2 1 := ⟨by norm_num⟩
   have hRS : Integrable (fun x => ‖R x‖ * ‖S x‖) μ := by
     have h := hR.norm.integrable_mul hS.norm
     simpa only [Pi.mul_apply] using h
