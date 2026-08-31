@@ -31,6 +31,7 @@ bilinear form `∫ f̂(k) ĝ(k) / (|k|² + m²) dk/(2π)^d`.
 -/
 
 import Pphi2.ContinuumLimit.Embedding
+import Mathlib.Analysis.Distribution.SchwartzSpace.Fourier
 
 noncomputable section
 
@@ -74,6 +75,38 @@ def embeddedTwoPoint (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
     (f g : ContinuumTestFunction d) : ℝ :=
   ∫ ω : Configuration (ContinuumTestFunction d),
     ω f * ω g ∂(gaussianContinuumMeasure d N a mass ha hmass)
+
+/-! ## Fourier-convention helpers -/
+
+/-- The real-to-complex lift on `S(ℝ^d)` used by the Fourier covariance.
+
+This is an interface helper only.  The public `continuumGreenBilinear` below
+still has the legacy raw-value body until its dependent convergence proofs are
+ported to the Mathlib Fourier convention. -/
+def continuumSchwartzOfReal (d : ℕ) :
+    ContinuumTestFunction d →L[ℝ] ContinuumComplexTestFunction d :=
+  SchwartzMap.postcompCLM Complex.ofRealCLM
+
+/-- The Mathlib-frequency massive resolvent used by the continuum free Green
+form.  This is a free-field multiplier and carries no interacting-limit claim. -/
+def continuumGreenMultiplier (mass : ℝ)
+    (ξ : EuclideanSpace ℝ (Fin d)) : ℝ :=
+  ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2)⁻¹
+
+@[simp] theorem continuumGreenMultiplier_eq_div
+    (mass : ℝ) (ξ : EuclideanSpace ℝ (Fin d)) :
+    continuumGreenMultiplier d mass ξ =
+      1 / ((2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2) :=
+  (one_div _).symm
+
+theorem continuumGreenMultiplier_den_pos
+    (mass : ℝ) (hmass : 0 < mass)
+    (ξ : EuclideanSpace ℝ (Fin d)) :
+    0 < (2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 + mass ^ 2 := by
+  have hmass_sq : 0 < mass ^ 2 := sq_pos_of_pos hmass
+  have hsym : 0 ≤ (2 * Real.pi) ^ 2 * ‖ξ‖ ^ 2 :=
+    mul_nonneg (sq_nonneg _) (sq_nonneg _)
+  linarith
 
 /-- The continuum Green's function bilinear form.
 
