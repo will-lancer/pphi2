@@ -993,6 +993,9 @@ theorem asymTorusSiteEval_sq_tendsto
     rw [hvf_sq, hvn_sq]
     rw [show ‖vf‖ ^ 2 - ‖vn‖ ^ 2 =
         (‖vf‖ - ‖vn‖) * (‖vf‖ + ‖vn‖) by ring, abs_mul]
+    have hsum_abs : |‖vf‖ + ‖vn‖| = ‖vf‖ + ‖vn‖ :=
+      abs_of_nonneg (add_nonneg (norm_nonneg _) (norm_nonneg _))
+    rw [hsum_abs]
     simpa [mul_comm] using
       mul_le_mul_of_nonneg_right (abs_norm_sub_norm_le vf vn)
         (add_nonneg (norm_nonneg _) (norm_nonneg _))
