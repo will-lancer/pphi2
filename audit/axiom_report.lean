@@ -83,6 +83,7 @@ compose (no `#print axioms` run).
 #print axioms Pphi2.asymInteractingVariance_le_freeVariance_Lt_uniform
 #print axioms Pphi2.asymInteracting_expMoment_volume_uniform_proof
 #print axioms Pphi2.asymInteracting_expMoment_of_signed
+#print axioms Pphi2.pathTwoPoint_eq_groundTransfer_add_remainder
 #print axioms Pphi2.MeasureHasCylinderExpMomentBound
 #print axioms Pphi2.MeasureHasLocalCylinderNthExpMomentBound
 #print axioms Pphi2.measureHasCylinderExpMomentBound_of_localNth
