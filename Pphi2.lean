@@ -110,6 +110,8 @@ import Pphi2.AsymTorus.AsymTransferKernelOperator
 import Pphi2.AsymTorus.AsymTraceKernelRemainder
 import Pphi2.AsymTorus.AsymNormalizedKernelSymmetry
 import Pphi2.AsymTorus.AsymNormalizedKernelSemigroup
+import Pphi2.AsymTorus.AsymNormalizedKernelRemainderOrthogonality
+import Pphi2.AsymTorus.AsymNormalizedKernelRemainderSemigroup
 import Pphi2.AsymTorus.AsymObsTrunc
 import Pphi2.AsymTorus.AsymGroundIntegrability
 import Pphi2.AsymTorus.AsymGroundUnitary
