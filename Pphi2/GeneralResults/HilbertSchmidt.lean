@@ -302,14 +302,13 @@ private theorem hs_basis_norm_summable_and_tsum_le
       have hsum_inner : HasSum
           (fun i : ι => ((T (b i) : G → ℝ) x) ^ 2)
           (inner ℝ kx kx) := by
-        refine (b.hasSum_inner_mul_inner kx kx).congr ?_
-        intro i
+        refine HasSum.congr_fun (b.hasSum_inner_mul_inner kx kx) (fun i => ?_)
         calc
-          inner ℝ kx (b i) * inner ℝ (b i) kx =
+          ((T (b i) : G → ℝ) x) ^ 2 =
               inner ℝ (b i) kx * inner ℝ (b i) kx := by
-                rw [real_inner_comm kx (b i)]
-          _ = ((T (b i) : G → ℝ) x) ^ 2 := by
                 rw [hk_inner i]
+          _ = inner ℝ kx (b i) * inner ℝ (b i) kx := by
+                rw [real_inner_comm kx (b i)]
       have hk_norm : ‖kx‖ ^ 2 = Gs x := by
         simpa [kx, Gs] using
           hs_slice_norm_sq_eq_integral (K₀ := K₀) hslice_mem
@@ -331,7 +330,7 @@ private theorem hs_basis_norm_summable_and_tsum_le
           hs_basis_norm_sq_eq_integral (T (b i))
         _ = ∫ x, ‖((T (b i) : G → ℝ) x) ^ 2‖ ∂μ := by
               refine integral_congr_ae (.of_forall fun x => ?_)
-              rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+              exact (Real.norm_of_nonneg (sq_nonneg _)).symm
     have hintegral_tsum :
         ∑' i : ι, ∫ x, ((T (b i) : G → ℝ) x) ^ 2 ∂μ =
           ∫ x, ∑' i : ι, ((T (b i) : G → ℝ) x) ^ 2 ∂μ :=
@@ -468,7 +467,7 @@ theorem norm_integral_complex_four_mul_le_L2
       BF * BG *
         (∫ x, ‖R x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) *
         (∫ x, ‖S x‖ ^ (2 : ℝ) ∂μ) ^ ((1 : ℝ) / 2) := by
-  letI : ENNReal.HolderTriple (2 : ℝ≥0∞) 2 1 := ⟨by norm_num⟩
+  letI : ENNReal.HolderTriple (2 : ENNReal) 2 1 := ⟨by norm_num⟩
   have hRS : Integrable (fun x => ‖R x‖ * ‖S x‖) μ := by
     have h := hR.norm.integrable_mul hS.norm
     simpa only [Pi.mul_apply] using h
