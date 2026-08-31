@@ -1,15 +1,18 @@
 /-
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-# Finite-dimensional score identities
-
-This file packages the whole-space Haar integration-by-parts theorem for a
-smooth density of the form `exp (-S)`.  The integrability hypotheses carry the
-boundary-at-infinity condition, so the wrapper does not impose compact support.
+Authors: Michael R. Douglas
 -/
 
 import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
+
+/-!
+# Finite-dimensional score identities
+
+This file packages the whole-space Haar integration-by-parts theorem for a
+smooth density of the form `exp (-S)`. The integrability hypotheses carry the
+boundary-at-infinity condition, so the wrapper does not impose compact support.
+-/
 
 noncomputable section
 
@@ -31,7 +34,7 @@ In particular, no compact-support assumption is introduced.
 theorem integral_fderiv_mul_exp_neg_eq_integral_mul_fderiv_exp_neg
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [MeasurableSpace E] [BorelSpace E] [FiniteDimensional ℝ E]
-    {μ : Measure E} [IsAddHaarMeasure μ]
+    {μ : Measure E} [μ.IsAddHaarMeasure]
     (H S : E → ℝ) (v : E)
     (hHrho : Integrable
       (fun x => fderiv ℝ H x v * Real.exp (-S x)) μ)

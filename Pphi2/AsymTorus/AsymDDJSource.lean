@@ -57,10 +57,12 @@ theorem asymWeightedLpPow_le_of_sup_of_weightedL1
     calc
       Real.rpow |h x| p =
           Real.rpow |h x| (p - 1) * Real.rpow |h x| 1 := by
-        rw [← Real.rpow_add' (abs_nonneg _) (by linarith)]
-        congr 1
-        ring
+        simpa using
+          (Real.rpow_add' (abs_nonneg (h x))
+            (by linarith : (p - 1) + 1 ≠ 0))
       _ = Real.rpow |h x| (p - 1) * |h x| := by
+        change |h x| ^ (p - 1) * |h x| ^ (1 : ℝ) =
+          |h x| ^ (p - 1) * |h x|
         rw [Real.rpow_one]
       _ ≤ Real.rpow M (p - 1) * |h x| := by
         exact mul_le_mul_of_nonneg_right
@@ -79,11 +81,11 @@ theorem asymWeightedLpPow_le_of_sup_of_weightedL1
         Real.rpow M (p - 1) * |h x| :=
       mul_le_mul_of_nonneg_left hsum ha2
     _ = Real.rpow M (p - 1) * asymWeightedLpPow 1 a h := by
-      simp only [asymWeightedLpPow, Real.rpow_one]
-      change a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
-          Real.rpow M (p - 1) * |h x| =
-        Real.rpow M (p - 1) *
-          (a ^ 2 * ∑ x : AsymLatticeSites Nt Ns, |h x|)
+      simp only [asymWeightedLpPow]
+      have hrpow_one : ∀ z : ℝ, Real.rpow z (1 : ℝ) = z := by
+        intro z
+        exact Real.rpow_one z
+      simp_rw [hrpow_one]
       calc
         a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
               Real.rpow M (p - 1) * |h x| =
@@ -162,7 +164,6 @@ theorem asymWeightedPairing_pow_le
         intro x hx
         dsimp [F]
         rw [Real.mul_rpow (Real.rpow_nonneg ha.le _) (abs_nonneg _)]
-        rfl
       _ = ∑ x : α, a ^ (r * p) * Real.rpow |u x| p := by
         apply Finset.sum_congr rfl
         intro x hx
@@ -181,15 +182,17 @@ theorem asymWeightedPairing_pow_le
         intro x hx
         dsimp [G]
         rw [Real.mul_rpow (Real.rpow_nonneg ha.le _) (abs_nonneg _)]
-        rfl
       _ = ∑ x : α, a ^ (s * (n : ℝ)) * Real.rpow |v x| (n : ℝ) := by
         apply Finset.sum_congr rfl
         intro x hx
         rw [← Real.rpow_mul ha.le]
       _ = ∑ x : α, a ^ (2 : ℝ) * Real.rpow |v x| (n : ℝ) := by rw [hsn]
       _ = a ^ 2 * ∑ x : α, |v x| ^ n := by
-        simp only [Real.rpow_two, Real.rpow_natCast]
         rw [Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro x hx
+        change a ^ 2 * (|v x| ^ (n : ℝ)) = a ^ 2 * |v x| ^ n
+        simpa only [Real.rpow_two, Real.rpow_natCast]
   have hpair :
       |a ^ 2 * ∑ x : α, u x * v x| ≤ ∑ x : α, F x * G x := by
     calc
@@ -197,7 +200,9 @@ theorem asymWeightedPairing_pow_le
           a ^ 2 * |∑ x : α, u x * v x| := by
             rw [abs_mul, abs_of_nonneg (sq_nonneg a)]
       _ ≤ a ^ 2 * ∑ x : α, |u x * v x| :=
-        mul_le_mul_of_nonneg_left Finset.abs_sum_le_sum_abs (sq_nonneg a)
+        mul_le_mul_of_nonneg_left
+          (Finset.abs_sum_le_sum_abs (fun x : α => u x * v x) Finset.univ)
+          (sq_nonneg a)
       _ = ∑ x : α, F x * G x := by
         calc
           a ^ 2 * ∑ x : α, |u x * v x| =
@@ -240,12 +245,16 @@ theorem asymWeightedPairing_pow_le
           (a ^ 2 * ∑ x : α, |v x| ^ n) ^ (1 / (n : ℝ))) ^ n =
         (a ^ 2 * ∑ x : α, Real.rpow |u x| p) ^ (n - 1) *
           (a ^ 2 * ∑ x : α, |v x| ^ n) := by
-    rw [mul_pow, ← Real.rpow_natCast, ← Real.rpow_mul hA_nonneg,
-      ← Real.rpow_natCast, ← Real.rpow_mul hB_nonneg]
+    rw [mul_pow]
+    conv_lhs =>
+      arg 1
+      rw [← Real.rpow_natCast, ← Real.rpow_mul hA_nonneg]
+    conv_lhs =>
+      arg 2
+      rw [← Real.rpow_natCast, ← Real.rpow_mul hB_nonneg]
     have hp_exp : (1 / p) * (n : ℝ) = (n : ℝ) - 1 := by
       dsimp [p]
       field_simp [hn_ne, hn_sub_ne]
-      ring
     have hn_exp : (1 / (n : ℝ)) * (n : ℝ) = 1 := by
       field_simp [hn_pos.ne']
     rw [hp_exp, hn_exp, Real.rpow_one]
@@ -312,8 +321,10 @@ theorem asymRawSource_pairing_eq
         ∑ x : AsymLatticeSites Nt Ns,
           (asymLatticeTestFnIso Lt Ls Nt Ns a f) x *
             ω (asymLatticeDelta Nt Ns x) := by
-      rw [asymLatticeTestFnIso_expand Lt Ls Nt Ns a f, map_sum]
-      simp only [map_smul, smul_eq_mul]
+      have hexpand := congrArg ω
+        (asymLatticeTestFnIso_expand Lt Ls Nt Ns a f)
+      rw [map_sum] at hexpand
+      simpa only [map_smul, smul_eq_mul] using hexpand
     _ = ∑ x : AsymLatticeSites Nt Ns,
         a ^ 2 * ((ω (asymLatticeDelta Nt Ns x)) *
           (asymRawSource a
@@ -431,7 +442,10 @@ theorem asymSourceControl_of_weightedLpPow
     _ = a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
           ((1 - η) / (P.n : ℝ)) * |v x| ^ P.n := by
       dsimp [η, y]
-      rw [Finset.mul_sum]
+      rw [div_eq_mul_inv]
+      simp_rw [Finset.mul_sum, Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro x hx
       ring
 
 /-- Finite-grid integrability obtained from the weighted source ball and the Wick

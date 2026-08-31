@@ -93,7 +93,7 @@ theorem interactingLatticeMeasureAsym_evalMapAsym_pushforward_eq_coordinateDensi
       (gaussianDensityAsym Nt Ns a mass φ *
         Real.exp (-(a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
           wickPolynomial P (wickConstantAsym Nt Ns a mass) (φ x))))
-  rw [g]
+  simp only [g]
   show ENNReal.ofReal (gaussianDensityAsym Nt Ns a mass φ) *
       ENNReal.ofReal (Real.exp (-(a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
         wickPolynomial P (wickConstantAsym Nt Ns a mass) (φ x)))) =

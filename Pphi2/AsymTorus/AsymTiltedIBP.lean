@@ -49,11 +49,17 @@ theorem wickMonomial_hasDerivAt_all (n : ℕ) (c : ℝ) :
               have h₂ := (hasDerivAt_const x (((n + 1 : ℕ) : ℝ) * c)).mul
                 (ih n (by omega) x)
               have h := h₁.sub h₂
-              convert h using 1 <;>
-                simp only [wickMonomial_succ_succ, Nat.succ_eq_add_one,
-                  Nat.add_sub_cancel, Nat.cast_add, Nat.cast_one]
-              · ring
-              · ring
+              convert h using 1
+              · ext y
+                simp [id, wickMonomial_succ_succ]
+              · simp only [wickMonomial_succ_succ, Nat.add_sub_cancel,
+                  Nat.cast_add, Nat.cast_one, id]
+                cases n with
+                | zero => simp [wickMonomial]; ring
+                | succ j =>
+                    rw [wickMonomial_succ_succ j c x]
+                    push_cast
+                    ring
 
 /-- The pointwise derivative appearing in the Wick-ordered interaction. -/
 def wickPolynomialDerivative (P : InteractionPolynomial) (c x : ℝ) : ℝ :=
@@ -76,8 +82,9 @@ theorem wickPolynomial_hasDerivAt (P : InteractionPolynomial) (c x : ℝ) :
         P.coeff m * (((m : ℕ) : ℝ) * wickMonomial ((m : ℕ) - 1) c x)) x := by
     have h := HasDerivAt.sum (fun m (_ : m ∈ (Finset.univ : Finset (Fin P.n))) =>
       (wickMonomial_hasDerivAt_all (m : ℕ) c x).const_mul (P.coeff m))
-    convert h using 1 <;>
-      simp only [Finset.sum_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+    convert h using 1
+    · ext y
+      simp [Finset.sum_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
   have h := htop.add hsum
   simpa [wickPolynomialDerivative, Finset.sum_apply, Pi.add_apply,
     Pi.smul_apply, smul_eq_mul, mul_assoc] using h
@@ -127,12 +134,6 @@ theorem configuration_pairing_hasDerivAt_coordinateShift
     have hterm := harg.const_mul (g x)
     convert hterm using 1 <;> ring
   convert hsum using 1
-  · funext s
-    rw [config_apply_eq_sum_evalMapAsym]
-    apply Finset.sum_congr rfl
-    intro x hx
-    simp [asymCoordinateShift, evalMap_evalMapInvAsym,
-      Pi.add_apply, Pi.smul_apply, smul_eq_mul]
 
 /-- Directional derivative of the interacting action along a finite coordinate
 shift.  This is an algebraic identity, independent of the interacting
@@ -164,16 +165,11 @@ theorem interactionFunctionalAsym_hasDerivAt_coordinateShift
   have hscaled := hsum.const_mul (a ^ 2)
   convert hscaled using 1
   · funext s
-    simp only [interactionFunctionalAsym]
+    unfold interactionFunctionalAsym
     apply congrArg (fun z : ℝ => a ^ 2 * z)
     apply Finset.sum_congr rfl
     intro x hx
     rw [asymCoordinateShift_eval_delta]
-  · simp only [interactionFunctionalAsym]
-    congr 1
-    apply Finset.sum_congr rfl
-    intro x hx
-    rfl
 
 /-! ## Source exponent and tilted-density chain rule -/
 
@@ -235,7 +231,9 @@ theorem asymTiltedDensityIntegrand_hasDerivAt_coordinateShift
     Nt Ns P a mass ω v t
   have hexp := (hsource.sub hinteraction).exp
   have hprod := hH.mul hexp
-  convert hprod using 1 <;> ring
+  convert hprod using 1 <;>
+    simp only [Pi.mul_apply, Pi.sub_apply] <;>
+    ring
 
 /-! ## Coordinate density and score calculus -/
 
@@ -372,15 +370,15 @@ theorem asymQuadraticForm_hasDerivAt_fieldShift
         (φ x + s * v x) *
           (Q φ x + s * (Q v) x))
       (∑ x : AsymLatticeSites Nt Ns,
-        v x * (Q φ x + t * (Q v) x) +
-          (φ x + t * v x) * (Q v) x) t := by
+        (v x * (Q φ x + t * (Q v) x) +
+          (φ x + t * v x) * (Q v) x)) t := by
     apply HasDerivAt.fun_sum
     intro x hx
     have hφ := (hasDerivAt_const t (φ x)).add
       ((hasDerivAt_id t).mul_const (v x))
     have hQ := (hasDerivAt_const t (Q φ x)).add
       ((hasDerivAt_id t).mul_const (Q v x))
-    convert hφ.mul hQ using 1 <;> ring
+    convert hφ.mul hQ using 1 <;> simp [id] <;> ring
   have hself :
       ∑ x : AsymLatticeSites Nt Ns,
         (φ + t • v) x * (Q v) x =
@@ -410,9 +408,12 @@ theorem asymQuadraticForm_hasDerivAt_fieldShift
           v x * (Q φ x + t * (Q v) x) := by
       simpa [Q, map_add, map_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
         using hself
-    rw [← hself', Finset.mul_sum]
-    apply Finset.sum_congr rfl
-    intro x hx
+    change 2 * ∑ x : AsymLatticeSites Nt Ns,
+        v x * (Q φ x + t * (Q v) x) =
+      ∑ x : AsymLatticeSites Nt Ns,
+        (v x * (Q φ x + t * (Q v) x) +
+          (φ x + t * v x) * (Q v) x)
+    rw [Finset.sum_add_distrib, hself']
     ring
 
 /-- Directional derivative of the source exponent with explicit strength `κ`. -/
@@ -436,8 +437,7 @@ theorem asymCoordinateSourceExponent_hasDerivAt_fieldShift
   unfold asymCoordinateSourceExponent
   convert hsource using 1
   · simp [asymCoordinateSourcePairing, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
-  · field_simp [hn_ne]
-    ring
+    field_simp [hn_ne] <;> ring
 
 /-- Directional derivative of the full Gaussian source-tilt exponent. -/
 def asymGaussianSourceTiltScore

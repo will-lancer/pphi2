@@ -71,9 +71,12 @@ theorem asymGaussianSourceTiltExponent_differentiableAt
         (fun ψ : AsymLatticeField Nt Ns =>
           wickPolynomial P (wickConstantAsym Nt Ns a mass) (ψ x)) φ := by
     intro x
+    have hpoly : DifferentiableAt ℝ
+        (wickPolynomial P (wickConstantAsym Nt Ns a mass)) (φ x) :=
+      (wickPolynomial_hasDerivAt P
+        (wickConstantAsym Nt Ns a mass) (φ x)).differentiableAt
     simpa only [Function.comp_apply] using
-      ((wickPolynomial_hasDerivAt P (wickConstantAsym Nt Ns a mass) (φ x)).
-        differentiableAt.comp φ (hcoord x))
+      hpoly.comp φ (hcoord x)
   have hwick_sum : DifferentiableAt ℝ
       (fun ψ : AsymLatticeField Nt Ns =>
         ∑ x : AsymLatticeSites Nt Ns,
@@ -99,11 +102,17 @@ theorem asymGaussianSourceTiltExponent_differentiableAt
       (asymCoordinateSourceExponent Nt Ns P κ g) φ := by
     have hpow := hsource_pair.pow P.n
     have hscaled := hpow.const_mul κ
-    have hdiv := hscaled.div_const (P.n : ℝ)
+    have hdiv : DifferentiableAt ℝ
+        (fun ψ : AsymLatticeField Nt Ns =>
+          κ * (asymCoordinateSourcePairing Nt Ns g ψ) ^ P.n / (P.n : ℝ)) φ :=
+      by
+        simpa only [div_eq_mul_inv] using
+          hscaled.mul_const ((P.n : ℝ)⁻¹)
     simpa [asymCoordinateSourceExponent] using hdiv
   have hfull := (hquad.const_mul (-(a ^ 2 / 2 : ℝ))).sub hwick
   have hfull := hfull.add hsource
-  simpa [asymGaussianSourceTiltExponent] using hfull
+  unfold asymGaussianSourceTiltExponent
+  simpa using hfull
 
 /--
 The Frechet derivative of the full Gaussian/Wick/source exponent is the
@@ -157,6 +166,7 @@ theorem asymGaussianSourceTiltDensity_fderiv_fieldShift
   rw [fderiv_exp hExpDiff]
   simp only [ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [hscore]
+  simp only [asymGaussianSourceTiltDensity]
 
 /-! ## Whole-space coordinate score identity -/
 
@@ -233,7 +243,8 @@ theorem asymGaussianSourceTilt_score_integral_identity
     simp only [Pi.neg_apply, neg_neg]
     rw [fderiv_exp (asymGaussianSourceTiltExponent_differentiableAt
       Nt Ns P a mass κ g φ), fderiv_fun_neg]
-    simp only [ContinuousLinearMap.smul_apply, smul_eq_mul]
+    simp only [ContinuousLinearMap.neg_apply, ContinuousLinearMap.smul_apply,
+      smul_eq_mul]
     ring
   have hibp := integral_fderiv_mul_exp_neg_eq_integral_mul_fderiv_exp_neg
     (μ := (volume : Measure (AsymLatticeField Nt Ns)))
@@ -248,7 +259,9 @@ theorem asymGaussianSourceTilt_score_integral_identity
       fderiv ℝ (fun y => -E y) φ v =
         -asymGaussianSourceTiltScore Nt Ns P a mass κ g φ v := by
     intro φ
-    rw [fderiv_fun_neg, hscore_E]
+    rw [fderiv_fun_neg]
+    simpa only [ContinuousLinearMap.neg_apply] using
+      congrArg (fun z : ℝ => -z) (hscore_E φ)
   have hrewrite :
       (fun φ => H φ * fderiv ℝ (fun y => -E y) φ v *
         Real.exp (-(fun z => -E z) φ)) =
@@ -258,7 +271,6 @@ theorem asymGaussianSourceTilt_score_integral_identity
     funext φ
     rw [hpotential_E]
     simp [E, asymGaussianSourceTiltDensity]
-    ring
   calc
     ∫ φ : AsymLatticeField Nt Ns,
         fderiv ℝ H φ v * asymGaussianSourceTiltDensity Nt Ns P a mass κ g φ

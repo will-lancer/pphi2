@@ -67,7 +67,13 @@ theorem asymRawSource_weightedLpPow_le_of_centered_decay
           3 * Ls * Real.rpow (A * q f) p := hweighted
       _ = C * Real.rpow (q f) p := by
         dsimp [C]
-        rw [Real.mul_rpow hA.le hq_nonneg]
+        have hmul :
+            Real.rpow (A * q f) p =
+              Real.rpow A p * Real.rpow (q f) p :=
+          Real.mul_rpow hA.le hq_nonneg
+        change 3 * Ls * Real.rpow (A * q f) p =
+          3 * Ls * Real.rpow A p * Real.rpow (q f) p
+        rw [hmul]
         ring
 
 end Pphi2

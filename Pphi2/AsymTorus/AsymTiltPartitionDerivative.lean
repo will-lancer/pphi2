@@ -18,7 +18,7 @@ noncomputable section
 
 namespace Pphi2
 
-open MeasureTheory
+open GaussianField MeasureTheory
 
 /-!
 ## Local source-strength derivative

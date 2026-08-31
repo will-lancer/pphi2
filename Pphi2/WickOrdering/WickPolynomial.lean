@@ -1,7 +1,18 @@
 /-
 Copyright (c) 2026 Michael R. Douglas. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Michael R. Douglas
+-/
 
+import Pphi2.Polynomial
+import Mathlib.RingTheory.Polynomial.Hermite.Basic
+import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import SchwartzNuclear.HermiteWick
+import Mathlib.Topology.Algebra.Polynomial
+import Mathlib.Topology.Order.Compact
+import Mathlib.Algebra.Polynomial.EraseLead
+
+/-!
 # Wick-Ordered Polynomials on the Lattice
 
 Defines Wick ordering of polynomials with respect to a Gaussian measure with
@@ -34,14 +45,6 @@ The key property: `E_μ[:x^n:] = 0` for n ≥ 1 when μ = N(0, c).
 - Simon, *The P(φ)₂ Euclidean QFT*, §I.3 (Wick ordering)
 - Glimm-Jaffe, *Quantum Physics*, §8.6
 -/
-
-import Pphi2.Polynomial
-import Mathlib.RingTheory.Polynomial.Hermite.Basic
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import SchwartzNuclear.HermiteWick
-import Mathlib.Topology.Algebra.Polynomial
-import Mathlib.Topology.Order.Compact
-import Mathlib.Algebra.Polynomial.EraseLead
 
 noncomputable section
 
@@ -440,7 +443,7 @@ is the coercive form used by finite-volume source estimates: for every
 `0 < η < 1`, the Wick polynomial dominates `(1 - η) · x^n / n` up to an
 additive constant.  The constant may depend on `P`, `c`, and `η`; `B` is
 not claimed uniform as the Wick constant `c` varies with the UV cutoff.
-*/
+-/
 theorem wickPolynomial_coercive (P : InteractionPolynomial) (c η : ℝ)
     (hη_pos : 0 < η) (hη_lt_one : η < 1) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ t : ℝ,
@@ -485,11 +488,11 @@ theorem wickPolynomial_coercive (P : InteractionPolynomial) (c η : ℝ)
     exact degree_C_mul_X_pow _ hηn_ne
   have herase_degree_lt : p.eraseLead.degree <
       (C (η / (P.n : ℝ)) * X ^ P.n).degree := by
+    rw [hterm_degree]
     calc
       p.eraseLead.degree < p.degree := degree_eraseLead_lt hp_ne
       _ = (P.n : WithBot ℕ) := by
         rw [degree_eq_natDegree hp_ne, hp_nat]
-      _ = (C (η / (P.n : ℝ)) * X ^ P.n).degree := hterm_degree.symm
   have hq_lc : q.leadingCoeff = η / (P.n : ℝ) := by
     dsimp [q]
     rw [leadingCoeff_add_of_degree_lt herase_degree_lt,
@@ -522,9 +525,8 @@ theorem wickPolynomial_coercive (P : InteractionPolynomial) (c η : ℝ)
   intro t
   have hbound := hq_bound t
   rw [hq_poly, eval_sub, eval_mul, eval_C, eval_pow] at hbound
-  change -B ≤ (wickPolynomialPoly P c).eval t -
-      ((1 - η) / (P.n : ℝ)) * t ^ P.n at hbound
-  rw [wickPolynomialPoly_eval] at hbound
+  dsimp [p] at hbound
+  rw [wickPolynomialPoly_eval, eval_X] at hbound
   rw [(P.hn_even.pow_abs t).symm] at hbound
   linarith
 

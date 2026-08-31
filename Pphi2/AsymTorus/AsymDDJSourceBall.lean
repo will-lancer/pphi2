@@ -62,7 +62,7 @@ theorem asymDDJSourceBall_of_centered_decay
 
   obtain ⟨C₀, hC₀, q₀, hq₀, hsource⟩ :=
     asymRawSource_weightedLpPow_le_of_centered_decay Ls p hp
-  obtain ⟨A, hA, q₁, hq₁, hlap⟩ :=
+  obtain ⟨A, q₁, hA, hq₁, hlap⟩ :=
     asymFiniteLaplacianRawSource_pointwise_centered_decay Ls
 
   let C₁ : ℝ := 3 * Ls * Real.rpow A p
@@ -81,9 +81,11 @@ theorem asymDDJSourceBall_of_centered_decay
   have hr : 0 < r := by
     dsimp [r]
     exact Real.rpow_pos_of_pos hTD _
+  have hp_ne : p ≠ 0 :=
+    ne_of_gt (lt_of_lt_of_le zero_lt_one hp)
   have hrpow : Real.rpow r p = T / D := by
     simpa [r, one_div] using
-      (Real.rpow_inv_rpow hTD.le hp.ne')
+      (Real.rpow_inv_rpow hTD.le hp_ne)
 
   let q : Seminorm ℝ (CylinderTestFunction Ls) := q₀ + q₁
   have hq : Continuous q := by
@@ -112,9 +114,9 @@ theorem asymDDJSourceBall_of_centered_decay
   have hq₀r : q₀ f ≤ r := hq₀_le.trans hqf
   have hq₁r : q₁ f ≤ r := hq₁_le.trans hqf
   have hq₀pow : Real.rpow (q₀ f) p ≤ Real.rpow r p :=
-    Real.rpow_le_rpow (apply_nonneg q₀ f) hq₀r hp.le
+    Real.rpow_le_rpow (apply_nonneg q₀ f) hq₀r hp_pos.le
   have hq₁pow : Real.rpow (q₁ f) p ≤ Real.rpow r p :=
-    Real.rpow_le_rpow (apply_nonneg q₁ f) hq₁r hp.le
+    Real.rpow_le_rpow (apply_nonneg q₁ f) hq₁r hp_pos.le
   have hC₀D : C₀ ≤ D := by
     dsimp [D]
     exact le_add_of_nonneg_right hC₁.le
@@ -168,7 +170,13 @@ theorem asymDDJSourceBall_of_centered_decay
           3 * Ls * Real.rpow (A * q₁ f) p := hlapLp
       _ = C₁ * Real.rpow (q₁ f) p := by
         dsimp [C₁]
-        rw [Real.mul_rpow hA.le (apply_nonneg q₁ f)]
+        have hmul :
+            Real.rpow (A * q₁ f) p =
+              Real.rpow A p * Real.rpow (q₁ f) p :=
+          Real.mul_rpow hA.le (apply_nonneg q₁ f)
+        change 3 * Ls * Real.rpow (A * q₁ f) p =
+          3 * Ls * Real.rpow A p * Real.rpow (q₁ f) p
+        rw [hmul]
         ring
   have hlap_quarter :
       asymWeightedLpPow p a

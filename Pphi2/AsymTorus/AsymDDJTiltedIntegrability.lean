@@ -35,8 +35,9 @@ theorem asymWeightedLpPow_smul
       apply congrArg (fun s : ℝ => a ^ 2 * s)
       apply Finset.sum_congr rfl
       intro x hx
-      rw [Pi.smul_apply, smul_eq_mul, abs_mul,
-        Real.mul_rpow (abs_nonneg c) (abs_nonneg (h x))]
+      rw [Pi.smul_apply, smul_eq_mul, abs_mul]
+      change (|c| * |h x|) ^ p = |c| ^ p * |h x| ^ p
+      exact Real.mul_rpow (abs_nonneg c) (abs_nonneg (h x))
     _ = Real.rpow |c| p *
         (a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
           Real.rpow |h x| p) := by
@@ -54,10 +55,11 @@ theorem asymWeightedLpPow_smul
         _ = Real.rpow |c| p *
             ∑ x : AsymLatticeSites Nt Ns,
               a ^ 2 * Real.rpow |h x| p := by
-          rw [Finset.mul_sum]
+          rw [← Finset.mul_sum]
         _ = Real.rpow |c| p *
             (a ^ 2 * ∑ x : AsymLatticeSites Nt Ns,
               Real.rpow |h x| p) := by
+          apply congrArg (fun s : ℝ => Real.rpow |c| p * s)
           rw [Finset.mul_sum]
 
 /-! ## The finite tilted-moment consumer -/
@@ -111,17 +113,17 @@ theorem interactingLatticeMeasureAsym_tilted_integrable_pow_of_weightedLpPow
             (asymLatticeTestFnIso Lt Ls Nt Ns a ((2 : ℝ) • f))) ≤
         (1 / 2 : ℝ) ^ p := by
     have hmap :
-        asymLatticeTestFnIso Lt Ls Nt Ns a ((2 : ℝ) • f) = 2 • g := by
+        asymLatticeTestFnIso Lt Ls Nt Ns a ((2 : ℝ) • f) = (2 : ℝ) • g := by
       funext x
       simp [g, asymLatticeTestFnIso, evalAsymTorusAtSiteGJ_apply,
         map_smul, Pi.smul_apply, smul_eq_mul] <;> ring
     have hraw :
         asymRawSource a
             (asymLatticeTestFnIso Lt Ls Nt Ns a ((2 : ℝ) • f)) =
-          2 • asymRawSource a g := by
+          (2 : ℝ) • asymRawSource a g := by
       rw [hmap]
       unfold asymRawSource
-      rw [smul_smul, smul_smul]
+      simp only [smul_smul]
       congr 1
       ring
     rw [hraw, asymWeightedLpPow_smul]
@@ -137,6 +139,7 @@ theorem interactingLatticeMeasureAsym_tilted_integrable_pow_of_weightedLpPow
           (asymRawSource a g) ≤
           Real.rpow (2 : ℝ) p * (1 / 4 : ℝ) ^ p := hbase
       _ = (1 / 2 : ℝ) ^ p := by
+        change (2 : ℝ) ^ p * ((1 / 4 : ℝ) ^ p) = (1 / 2 : ℝ) ^ p
         rw [← Real.mul_rpow (by norm_num : (0 : ℝ) ≤ 2)
           (by norm_num : (0 : ℝ) ≤ 1 / 4)]
         norm_num
@@ -168,7 +171,7 @@ theorem interactingLatticeMeasureAsym_tilted_integrable_pow_of_weightedLpPow
       funext ω
       congr 1
       have hmap :
-          asymLatticeTestFnIso Lt Ls Nt Ns a ((2 : ℝ) • f) = 2 • g := by
+          asymLatticeTestFnIso Lt Ls Nt Ns a ((2 : ℝ) • f) = (2 : ℝ) • g := by
         funext x
         simp [g, asymLatticeTestFnIso, evalAsymTorusAtSiteGJ_apply,
           map_smul, Pi.smul_apply, smul_eq_mul] <;> ring

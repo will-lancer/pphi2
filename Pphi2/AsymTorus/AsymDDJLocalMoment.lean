@@ -18,7 +18,7 @@ import Pphi2.AsymTorus.AsymDDJSource
 
 noncomputable section
 
-open MeasureTheory
+open GaussianField MeasureTheory
 
 namespace Pphi2
 
