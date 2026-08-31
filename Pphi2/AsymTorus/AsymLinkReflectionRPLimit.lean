@@ -539,7 +539,8 @@ theorem asymCylinderLatticeAbsSecondMoment_smul
         |t| • fun x => |asymLatticeTestFnIso Lt Ls Nt Ns a
           (cylinderToTorusEmbed Lt Ls h) x| := by
       funext x
-      simp [htest, Pi.smul_apply, smul_eq_mul, abs_mul]
+      rw [htest]
+      simp only [Pi.smul_apply, smul_eq_mul, abs_mul]
     rw [habs, map_smul]
     simp only [smul_eq_mul, mul_pow, sq_abs]
   rw [hpoint, integral_const_mul]

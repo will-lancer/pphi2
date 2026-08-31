@@ -224,7 +224,8 @@ structure AsymWickPhi4GriffithsSimonData
     (Nt Ns : ℕ) [NeZero Nt] [NeZero Ns]
     (P : InteractionPolynomial) (a mass : ℝ) (ha : 0 < a) (hmass : 0 < mass)
     (f : AsymLatticeField Nt Ns) where
-  mgf absMgf : ℝ → ℝ
+  mgf : ℝ → ℝ
+  absMgf : ℝ → ℝ
   variance : ℝ
   gs : GriffithsSimonMGFData mgf variance
   mgf_even : ∀ t, mgf (-t) = mgf t
