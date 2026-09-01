@@ -1,4 +1,6 @@
 /.lake
+*.olean
+*.ilean
 .claude/
 /.cursor/
 .env
